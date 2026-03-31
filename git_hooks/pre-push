@@ -1,2 +1,2 @@
 #!/bin/sh
-git describe > hobl_version.txt
+git describe --tags > hobl_version.txt
