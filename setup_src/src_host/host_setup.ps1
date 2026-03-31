@@ -22,6 +22,9 @@ if (Test-Path $dut_setup_cmd) {
     $dut_setup_version = "ERROR"
 }
 
+# Disable progress bars to speed up downloads
+$ProgressPreference = 'SilentlyContinue'
+
 function log {
     [CmdletBinding()] Param([Parameter(ValueFromPipeline)] $msg)
     process {
@@ -152,7 +155,13 @@ if ($framework) {
         pushd $PSScriptRoot\..\.. > $null
         git.exe config core.hooksPath git_hooks 2>&1 | log
         check($lastexitcode)
+
+        "-- Updating hobl version" | log
+        git.exe hook run post-checkout 2>&1 | log
         popd > $null
+    }
+    else {
+        "-- git not found, skipping git hook setup" | log
     }
 
     # Disable error reporting UI
