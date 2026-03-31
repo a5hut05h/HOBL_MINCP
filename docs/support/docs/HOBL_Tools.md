@@ -73,7 +73,7 @@ Periodically start ETL traces.
 
 <u>Parameters:</u>
 
-`providers` - ETL provider files to use **Default:** `power_light.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, GTP_CPI_BAM_Defender.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal.wprp, thermal_power_light.wprp, web_perf.wprp`
+`providers` - ETL provider files to use **Default:** `power_light.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, GTP_CPI_BAM_Defender.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
 
 `trace_duration` - The duration of the trace in seconds **Default:** `300` 
 
@@ -125,7 +125,7 @@ Collect ETL trace from specified [providers].
 
 <u>Parameters:</u>
 
-`providers` - ETL provider files to use **Default:** ``  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, GTP_CPI_BAM_Defender.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal.wprp, thermal_power_light.wprp, web_perf.wprp`
+`providers` - ETL provider files to use **Default:** ``  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, GTP_CPI_BAM_Defender.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
 
 ## frame_data
 
@@ -258,7 +258,7 @@ Collects and processes UTC Perftrack scenarios
 
 <u>Parameters:</u>
 
-`provider` - WPRP file to use for UTC Perftrack traces. **Default:** `perf_utc.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, GTP_CPI_BAM_Defender.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal.wprp, thermal_power_light.wprp, web_perf.wprp`
+`provider` - WPRP file to use for UTC Perftrack traces. **Default:** `perf_utc.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, GTP_CPI_BAM_Defender.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
 
 ## phm
 

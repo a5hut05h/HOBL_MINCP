@@ -22,7 +22,6 @@ SolidCompression=yes
 SetupLogging=yes
 WizardSmallImageFile="H.bmp"
 LicenseFile=eula.rtf
-WizardResizable=yes
 WizardSizePercent=120
 
 [Languages]
@@ -31,9 +30,6 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Components]
 Name: "Framework"; Description: "HOBL test framework"; Types: Full;
 Name: "UI"; Description: "User interface for executing, monitoring, and analyzing tests"; Types: Full;
-
-[Files]
-Source: "host_setup.ps1"; DestDir: "{tmp}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Run]
 Filename: "{win}\syswow64\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "set-executionpolicy unrestricted -Force"; Flags: shellexec waituntilterminated
@@ -73,8 +69,47 @@ begin
   if Result then Strings.Text := S;
 end;
 
-procedure ExecuteRealProgram();
+procedure ShowScrollableMessage(const ACaption, AText: String);
+var
+  Form: TForm;
+  Memo: TMemo;
+  OKButton: TButton;
+begin
+  // Create the form
+  Form := CreateCustomForm(ScaleX(500), ScaleY(400), False, False);
+  try
+    Form.Caption := ACaption;
+    Form.Position := poScreenCenter;
+    Form.BorderStyle := bsDialog;
 
+    // Create the memo (scrollable text area)
+    Memo := TMemo.Create(Form);
+    Memo.Parent := Form;
+    Memo.Left := ScaleX(10);
+    Memo.Top := ScaleY(10);
+    Memo.Width := Form.ClientWidth - ScaleX(20);
+    Memo.Height := Form.ClientHeight - ScaleY(60);
+    Memo.ScrollBars := ssVertical; // vertical scrollbar
+    Memo.ReadOnly := True;
+    Memo.WordWrap := True;
+    Memo.Text := AText;
+
+    // Create the OK button
+    OKButton := TButton.Create(Form);
+    OKButton.Parent := Form;
+    OKButton.Caption := 'OK';
+    OKButton.ModalResult := mrOk;
+    OKButton.Left := (Form.ClientWidth - OKButton.Width) div 2;
+    OKButton.Top := Form.ClientHeight - ScaleY(40);
+
+    // Show the form modally
+    Form.ShowModal;
+  finally
+    Form.Free;
+  end;
+end;
+
+procedure ExecuteRealProgram();
 var
   ResultCode: Integer;
   Args: String;
@@ -89,12 +124,12 @@ begin
     begin
       Args := Args + ' -ui';
     end;
-  if Exec(ExpandConstant('{cmd}'), ExpandConstant('/c powershell.exe {tmp}\host_setup.ps1 ') + Args, '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+  if Exec(ExpandConstant('{cmd}'), ExpandConstant('/c powershell.exe {src}\setup_src\src_host\host_setup.ps1 ') + Args, '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
     begin
       if not (ResultCode = 0) then begin
         MsgBox('Error! ResultCode is ' + IntToStr(ResultCode), mbCriticalError, MB_OK);
         if LoadStringFromFileInCP('c:\temp\host_setup.log', Line, CP_UTF8) then begin
-          MsgBox(Line, mbInformation, MB_OK);
+          ShowScrollableMessage('Log Output', Line);
         end;
       end;
     end

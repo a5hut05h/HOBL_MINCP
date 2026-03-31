@@ -8,8 +8,19 @@ param(
 )
 
 # HOBL UI and Dut Setup versions
-$hobl_ui_version = "0.94"
-$dut_setup_version = "2.0"
+$hobl_ui_version = "0.95"
+# Set $dut_setup_version to value at top of setup_src\src_dut_win\dut_setup.cmd
+$dut_setup_cmd = "$PSScriptRoot\..\src_dut_win\dut_setup.cmd"
+if (Test-Path $dut_setup_cmd) {
+    $firstLine = (Get-Content -Path $dut_setup_cmd -TotalCount 1).Trim()
+    if ($firstLine -match 'set\s+DUT_SETUP_VERSION=(.+)') {
+        $dut_setup_version = $matches[1]
+    } else {
+        $dut_setup_version = "ERROR"
+    }
+} else {
+    $dut_setup_version = "ERROR"
+}
 
 function log {
     [CmdletBinding()] Param([Parameter(ValueFromPipeline)] $msg)
@@ -64,6 +75,9 @@ if ($framework) {
     $runtimeX64DownloadUrl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/$runtimeVersion/windowsdesktop-runtime-$runtimeVersion-win-x86.exe"
     $vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.x86.exe"
 
+    # Create downloads directory structure if it doesn't exist
+    New-Item -ItemType Directory -Force -Path "$PSScriptRoot\..\..\downloads\setup\assets" > $null
+
     # Download .NET Windows Desktop Runtime installers
     $runtimeFilePath = "$PSScriptRoot\..\..\downloads\setup\assets\windowsdesktop-runtime-$runtimeVersion-win-x86.exe"
     if (-not (Test-Path $runtimeFilePath)) {
@@ -94,12 +108,16 @@ if ($framework) {
     "-- Downloading DUT setup" | log
     $dut_setupUrl = "https://github.com/microsoft/HOBL/releases/download/dut_setup/dut_setup_$dut_setup_version.exe"
     $dut_setupZip = "$PSScriptRoot\..\..\downloads\setup\dut_setup_$dut_setup_version.exe"
-    Invoke-WebRequest -Uri $dut_setupUrl -OutFile $dut_setupZip 2>&1 | log
-    checkCmd($?)
+    if (-not (Test-Path $dut_setupZip)) {
+        Invoke-WebRequest -Uri $dut_setupUrl -OutFile $dut_setupZip 2>&1 | log
+        checkCmd($?)
+    }
     $dut_setupUrl = "https://github.com/microsoft/HOBL/releases/download/dut_setup/dut_setup_$dut_setup_version.sh"
     $dut_setupZip = "$PSScriptRoot\..\..\downloads\setup\dut_setup_$dut_setup_version.sh"
-    Invoke-WebRequest -Uri $dut_setupUrl -OutFile $dut_setupZip 2>&1 | log
-    checkCmd($?)
+    if (-not (Test-Path $dut_setupZip)) {
+        Invoke-WebRequest -Uri $dut_setupUrl -OutFile $dut_setupZip 2>&1 | log
+        checkCmd($?)
+    }
 
     # Install embedded python
     "-- Installing embedded Python" | log
@@ -110,12 +128,14 @@ if ($framework) {
     "-- Downloading ffmpeg win64" | log
     $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-02-28-12-59/ffmpeg-N-123073-g743df5ded9-win64-gpl.zip"
     $ffmpegZip = "$PSScriptRoot\..\..\downloads\ffmpeg_win64.zip"
-    Invoke-WebRequest -Uri $ffmpegUrl -OutFile $ffmpegZip 2>&1 | log
-    checkCmd($?)
-    Expand-Archive -Path $ffmpegZip -DestinationPath "$PSScriptRoot\..\..\downloads" -Force 2>&1 | log
-    checkCmd($?)
-    Move-Item "$PSScriptRoot\..\..\downloads\ffmpeg-N-123073-g743df5ded9-win64-gpl" "$PSScriptRoot\..\..\downloads\ffmpeg_win64" -Force 2>&1 | log
-    Remove-Item $ffmpegZip 2>&1 | log        
+    if (-not (Test-Path "$PSScriptRoot\..\..\downloads\ffmpeg_win64")) {
+        Invoke-WebRequest -Uri $ffmpegUrl -OutFile $ffmpegZip 2>&1 | log
+        checkCmd($?)
+        Expand-Archive -Path $ffmpegZip -DestinationPath "$PSScriptRoot\..\..\downloads" -Force 2>&1 | log
+        checkCmd($?)
+        Move-Item "$PSScriptRoot\..\..\downloads\ffmpeg-N-123073-g743df5ded9-win64-gpl" "$PSScriptRoot\..\..\downloads\ffmpeg_win64" -Force 2>&1 | log
+        Remove-Item $ffmpegZip 2>&1 | log        
+    }
     # "-- Downloading ffmpeg arm64" | log
     # $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-02-28-12-59/ffmpeg-N-123073-g743df5ded9-winarm64-gpl.zip"
     # $ffmpegZip = "$PSScriptRoot\..\..\downloads\ffmpeg_arm64.zip"
@@ -129,8 +149,10 @@ if ($framework) {
     # Set git hooks if git exists
     if (Get-Command git.exe -ErrorAction SilentlyContinue) {
         "-- Setting git hooks path" | log
+        pushd $PSScriptRoot\..\.. > $null
         git.exe config core.hooksPath git_hooks 2>&1 | log
         check($lastexitcode)
+        popd > $null
     }
 
     # Disable error reporting UI
@@ -151,12 +173,13 @@ if ($ui) {
         Copy-Item c:\HOBLweb\appsettings.json c:\temp\appsettings.json 2>&1 | log
         "-- Deleting existing HOBLweb" | log
         Stop-Process -Name hoblweb -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 2
         remove-item c:\hoblweb -recurse -force 2>&1 | log
     }
 
     # Download hobl ui zip file
     "-- Downloading HOBLweb" | log
-    $uiUrl = "https://github.com/microsoft/HOBL/releases/download/hobl_ui/hobl_ui_$hobl_ui_version.exe"
+    $uiUrl = "https://github.com/microsoft/HOBL/releases/download/hobl_ui/hobl_ui_$hobl_ui_version.zip"
     $uiZip = "c:\hoblweb.zip"
     Invoke-WebRequest -Uri $uiUrl -OutFile $uiZip 2>&1 | log
     checkCmd($?)
@@ -198,11 +221,24 @@ if ($ui) {
 
     # Add desktop shortcut
     "-- Copying launch shortcut to desktop" | log
-    Copy-Item c:\HOBLweb\HOBLweb.lnk ~\Desktop\HOBLweb.lnk 2>&1 | log
+    $desktopPath = [Environment]::GetFolderPath('Desktop')
+    Copy-Item c:\HOBLweb\HOBLweb.lnk "$desktopPath\HOBLweb.lnk" 2>&1 | log
 
     # Launch HOBL UI
     "-- Launching HOBLweb" | log
     start-process -FilePath "c:\hoblweb\hoblweb.cmd" -ArgumentList "install" -WorkingDirectory "c:\hoblweb" -WindowStyle hidden
+    checkCmd($?)
+
+    # Register scheduled task to launch HOBLweb at login
+    "-- Registering scheduled task to launch HOBLweb at login" | log
+    # Delete task if it exists, but ignore errors if it doesn't exist
+    Unregister-ScheduledTask -TaskName "Launch HOBL UI" -Confirm:$false -ErrorAction SilentlyContinue
+    # Register new task
+    $taskName = "Launch HOBL UI"
+    $taskAction = New-ScheduledTaskAction -Execute "c:\hoblweb\hoblweb.cmd" -WorkingDirectory "c:\hoblweb"
+    $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
+    $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+    Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -RunLevel Highest -Force 2>&1 | log
     checkCmd($?)
 
     "-- Install complete" | log

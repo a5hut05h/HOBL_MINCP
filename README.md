@@ -9,14 +9,21 @@
 * **Make sure your DUT is a computer that is ONLY logged in with a dedicated test account.**  Files, emails, etc, may be deleted.  A work or personal computer may be used as a "Host", but not a "DUT".
 * For questions or issues, send mail to [HOBLsupport@microsoft.com](mailto:HOBLsupport@microsoft.com).  Attach the hobl.log file and relevant screen shots for any problematic test run.
 
+### Quick Start for experienced users
+* Clone repo (to c:\hobl, if you want to make life easy)
+* Run host_setup.exe from the root of the folder
+* Run dut_setup_\<ver\>.exe on the DUT
+* To get HOBL updates, do a "git pull"
+* To get HOBL UI updates, run host_setup.exe and only select the "User Interface" option.
+
 ### Further reading:
-* [Design Philosophy](docs/support/docs/HOBL_DesignPhilosophy.md)
 * [Setup](docs/support/docs/HOBL_Setup.md)
 * [Usage](docs/support/docs/HOBL_Usage.md)
 * [System Preparation](docs/support/docs/HOBL_Prep.md)
 * [Scenarios](docs/support/docs/HOBL_Scenarios.md)
 * [Tools](docs/support/docs/HOBL_Tools.md)
 * [Creating Scenarios](docs/support/docs/HOBL_ScenarioMaker.md)
+* [HOBL Design Philosophy](docs/support/docs/HOBL_DesignPhilosophy.md)
 
 # Security
 
