@@ -129,3 +129,5 @@ This repository does not modify the licensing terms of any included third‑part
 All third‑party components remain subject to their original license terms.
 
 ---
+
+<!-- Test commit to verify push access -->
