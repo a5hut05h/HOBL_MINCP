@@ -10,6 +10,7 @@ from . import default_params
 # Description:
 #   Automatically generated standard scenario.
 
+#library to start live captions in youtube and teams meetings, and validate captions are being generated and saved to disk.
 class LiveCaptions(scenarios.app_scenario.Scenario):
     # Set default parameters:
     default_params.run()
