@@ -1,0 +1,120 @@
+[
+    {
+        "author": "dasashutosh",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-03-19",
+        "description": "",
+        "enabled": true,
+        "id": "1HX80CA",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1J5MNNU",
+        "include_path": "scenarios\\windows\\_library\\misc\\capture_taskbar",
+        "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1JFR0UY",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+        "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1J5MVY9",
+        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
+        "params": [
+            {
+                "name": "[event_tag]",
+                "val_options": "",
+                "value": "StartLaunch"
+            }
+        ],
+        "type": "Include"
+    },
+    {
+        "capture_id": "TYH95X",
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1J5MP1Y.png"
+        ],
+        "id": "1J5MP1Y",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "3",
+        "description": "App Launch",
+        "enabled": true,
+        "id": "1JFR0WY",
+        "type": "Delay"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1JFY1UA",
+        "include_path": "scenarios\\windows\\_library\\misc\\capture_taskbar",
+        "type": "Include"
+    },
+    {
+        "capture_id": "TYH95X",
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1JFY1HW.png"
+        ],
+        "id": "1JFY1HW",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1JFR1CT",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
+        "params": [
+            {
+                "name": "[phase_category]",
+                "val_options": "",
+                "value": "invalid"
+            },
+            {
+                "name": "[phase_name]",
+                "val_options": "",
+                "value": "invalid"
+            }
+        ],
+        "type": "Include"
+    }
+]
