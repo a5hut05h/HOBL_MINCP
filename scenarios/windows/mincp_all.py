@@ -3,7 +3,7 @@
 
 from parameters import Params
 # Params.setParam("enterprise_collab", "mincp_workloads", "live_captions copilot_query semantic_search click_todo studioeffect_blur productivity")
-Params.setParam("mincp_base", "mincp_workloads", "live_captions copilot_query semantic_search click_todo productivity studioeffect_blur")
+Params.setParam("mincp_base", "mincp_workloads", "live_captions copilot_query semantic_search click_todo productivity  file_explorer start_launch")
 Params.setParam("mincp_base", "simple_office_launch", "0")
 import scenarios.windows.mincp_base
 class MinCP_Workload_All(scenarios.windows.mincp_base.MincpBase):

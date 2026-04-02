@@ -1,12 +1,8 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-from functools import partial
-import os
 from core.parameters import Params
-import utilities.open_source.modules
-
-import_run_user_only = partial(utilities.open_source.modules.import_run_user_only, here=__file__)
+from utilities.open_source.modules import import_run_user_only
 
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
@@ -21,27 +17,27 @@ def run():
     return
 
 def run_user_only():
-    import_run_user_only('..\\_library\\Teams\\teams_setup')
-    import_run_user_only('..\\_library\\Teams\\teams_teardown')
-    import_run_user_only('..\\_library\\enterprise_collab\\diagnostics_disable')
-    import_run_user_only('..\\_library\\enterprise_collab\\diagnostics_enable')
-    import_run_user_only('..\\_library\\enterprise_collab\\live_captions_setup')
-    import_run_user_only('..\\_library\\enterprise_collab\\semantic_search_setup')
-    import_run_user_only('..\\_library\\enterprise_collab\\semantic_search_teardown')
-    import_run_user_only('..\\_library\\enterprise_collab\\timers_setup')
-    import_run_user_only('..\\_library\\enterprise_collab\\timers_teardown')
-    import_run_user_only('..\\_library\\misc\\click_to_do_setup')
-    import_run_user_only('..\\_library\\misc\\click_to_do_teardown')
-    import_run_user_only('..\\_library\\misc\\studio_effect_blur')
-    import_run_user_only('..\\_library\\productivity\\prod_close')
-    import_run_user_only('..\\_library\\productivity\\prod_kill')
-    import_run_user_only('..\\_library\\productivity\\prod_open')
-    import_run_user_only('..\\_library\\productivity\\prod_setup')
-    import_run_user_only('..\\_library\\web\\web_check')
-    import_run_user_only('..\\_library\\web\\web_close_tabs')
-    import_run_user_only('..\\_library\\web\\web_kill')
-    import_run_user_only('..\\_library\\web\\web_run_mincp')
-    import_run_user_only('..\\_library\\web\\web_setup')
-    import_run_user_only('..\\_library\\web\\web_switchto')
-    Params.setUserDefault(None, 'mincp_workloads', '', desc='', valOptions=['live_captions', 'copilot_query', 'semantic_search', 'click_todo', 'studioeffect_blur', 'productivity'], multiple=True)
+    import_run_user_only('scenarios\\windows\\_library\\Teams\\teams_setup')
+    import_run_user_only('scenarios\\windows\\_library\\Teams\\teams_teardown')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\live_captions_setup')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\perf_setup')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\perf_teardown')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\semantic_search_setup')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\semantic_search_teardown')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\timers_setup')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\timers_teardown')
+    import_run_user_only('scenarios\\windows\\_library\\misc\\click_to_do_setup')
+    import_run_user_only('scenarios\\windows\\_library\\misc\\click_to_do_teardown')
+    import_run_user_only('scenarios\\windows\\_library\\misc\\studio_effect_blur')
+    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_close')
+    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_kill')
+    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_open')
+    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_setup')
+    import_run_user_only('scenarios\\windows\\_library\\web\\web_check')
+    import_run_user_only('scenarios\\windows\\_library\\web\\web_close_tabs')
+    import_run_user_only('scenarios\\windows\\_library\\web\\web_kill')
+    import_run_user_only('scenarios\\windows\\_library\\web\\web_run_mincp')
+    import_run_user_only('scenarios\\windows\\_library\\web\\web_setup')
+    import_run_user_only('scenarios\\windows\\_library\\web\\web_switchto')
+    Params.setUserDefault(None, 'mincp_workloads', '', desc='', valOptions=['live_captions', 'copilot_query', 'semantic_search', 'click_todo', 'studioeffect_blur', 'productivity', 'file_explorer', 'start_launch'], multiple=True)
     return
