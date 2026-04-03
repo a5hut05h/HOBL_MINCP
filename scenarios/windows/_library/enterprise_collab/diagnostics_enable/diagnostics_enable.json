@@ -15,7 +15,7 @@
         "description": "",
         "enabled": true,
         "id": "19LU40N",
-        "include_path": "..\\..\\productivity\\prod_powerpoint_switchto",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_switchto",
         "type": "Include"
     },
     {
@@ -201,7 +201,7 @@
         "description": "",
         "enabled": true,
         "id": "19LU89C",
-        "include_path": "..\\..\\productivity\\prod_powerpoint_close",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_close",
         "type": "Include"
     }
 ]

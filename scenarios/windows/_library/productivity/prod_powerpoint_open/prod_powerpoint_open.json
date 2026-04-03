@@ -15,7 +15,7 @@
         "description": "",
         "enabled": true,
         "id": "V2MRY5",
-        "include_path": "..\\..\\misc\\recording_phase_begin",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
         "type": "Include"
     },
     {
@@ -24,7 +24,7 @@
         "description": "",
         "enabled": true,
         "id": "UHA57R",
-        "include_path": "..\\prod_powerpoint_switchto",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_switchto",
         "type": "Include"
     },
     {
@@ -56,31 +56,27 @@
         "typing_delay": "1000"
     },
     {
-        "id": "113C5MV",
-        "type": "If",
-        "description": "",
-        "enabled": true,
-        "left_term": "[global:platform]",
-        "eval_method": "==",
-        "right_term": "W365",
         "children": [
             {
-                "id": "113C60L",
-                "type": "Type",
+                "children": [],
+                "delay": "14",
                 "description": "W365 sample.pptx",
                 "enabled": true,
-                "delay": "14",
+                "id": "113C60L",
                 "text": "[global:onedrive_path]\\abl_docs\\sample.pptx\ue007",
-                "typing_delay": "[typing_delay]",
-                "children": []
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
             }
-        ]
-    },
-    {
-        "id": "113C5NC",
-        "type": "Else",
+        ],
         "description": "",
         "enabled": true,
+        "eval_method": "==",
+        "id": "113C5MV",
+        "left_term": "[global:platform]",
+        "right_term": "W365",
+        "type": "If"
+    },
+    {
         "children": [
             {
                 "children": [],
@@ -92,14 +88,18 @@
                 "type": "Type",
                 "typing_delay": "[typing_delay]"
             }
-        ]
-    },
-    {
-        "id": "113C5MW",
-        "type": "End If",
+        ],
         "description": "",
         "enabled": true,
-        "children": []
+        "id": "113C5NC",
+        "type": "Else"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "113C5MW",
+        "type": "End If"
     },
     {
         "children": [],
@@ -107,7 +107,7 @@
         "description": "",
         "enabled": true,
         "id": "V2MT1Y",
-        "include_path": "..\\..\\misc\\recording_phase_end",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
         "params": [
             {
                 "name": "[phase_category]",

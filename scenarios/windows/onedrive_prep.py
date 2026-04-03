@@ -121,7 +121,8 @@ class oneDrivePrep(core.app_scenario.Scenario):
 
         ## Launch OneDrive by command
         logging.info("Launching OneDrive")
-        self._call(["cmd.exe", r'/C start shell:onedrive'])
+        # self._call(["cmd.exe", r'/C start shell:onedrive'])
+        self._call(["cmd.exe", r'/C explorer %UserProfile%\OneDrive'], expected_exit_code="") # Explorer doesn't set exit codes
         time.sleep(5)
 
         # Now close that window to reveal signin window

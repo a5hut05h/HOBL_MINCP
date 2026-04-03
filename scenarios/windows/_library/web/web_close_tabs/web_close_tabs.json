@@ -21,12 +21,12 @@
         "value": "1"
     },
     {
-        "id": "UT8HLM",
-        "type": "Delay",
+        "children": [],
+        "delay": "1",
         "description": "",
         "enabled": true,
-        "delay": "1",
-        "children": []
+        "id": "UT8HLM",
+        "type": "Delay"
     },
     {
         "children": [

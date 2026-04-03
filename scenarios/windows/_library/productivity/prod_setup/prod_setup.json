@@ -17,7 +17,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "114NFJK",
-                "include_path": "..\\..\\run_command",
+                "include_path": "scenarios\\windows\\_library\\run_command",
                 "params": [
                     {
                         "name": "[command]",

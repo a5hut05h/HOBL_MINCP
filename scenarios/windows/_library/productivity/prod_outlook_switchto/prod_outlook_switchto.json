@@ -23,7 +23,7 @@
         "description": "",
         "enabled": true,
         "id": "1A4TACJ",
-        "include_path": "..\\..\\misc\\etw_event_tag",
+        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
         "params": [
             {
                 "name": "[event_tag]",
@@ -39,7 +39,7 @@
         "description": "",
         "enabled": true,
         "id": "UH3H04",
-        "include_path": "..\\..\\misc\\capture_taskbar",
+        "include_path": "scenarios\\windows\\_library\\misc\\capture_taskbar",
         "type": "Include"
     },
     {

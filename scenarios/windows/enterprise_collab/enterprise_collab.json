@@ -148,7 +148,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1EN18UV",
-                        "include_path": "..\\_library\\enterprise_collab\\diagnostics_enable",
+                        "include_path": "scenarios\\windows\\_library\\enterprise_collab\\diagnostics_enable",
                         "type": "Include"
                     },
                     {
@@ -211,7 +211,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1A7H33K",
-                        "include_path": "..\\_library\\enterprise_collab\\timers_setup",
+                        "include_path": "scenarios\\windows\\_library\\enterprise_collab\\timers_setup",
                         "type": "Include"
                     }
                 ],
@@ -248,7 +248,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "19K4CEU",
-                        "include_path": "..\\_library\\Teams\\teams_setup",
+                        "include_path": "scenarios\\windows\\_library\\Teams\\teams_setup",
                         "type": "Include"
                     }
                 ],
@@ -304,7 +304,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "19K4E5H",
-                        "include_path": "..\\_library\\productivity\\prod_setup",
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_setup",
                         "type": "Include"
                     }
                 ],
@@ -385,7 +385,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1A4W5AL",
-                "include_path": "..\\_library\\web\\web_setup",
+                "include_path": "scenarios\\windows\\_library\\web\\web_setup",
                 "params": [
                     {
                         "name": "[disable_delay]",
@@ -401,7 +401,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "19K57MP",
-                "include_path": "..\\_library\\web\\web_run_12",
+                "include_path": "scenarios\\windows\\_library\\web\\web_run_12",
                 "params": [
                     {
                         "name": "[load_only]",
@@ -416,8 +416,15 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1A7H7A8",
-                "include_path": "..\\_library\\web\\web_check",
+                "id": "1JP44RV",
+                "include_path": "scenarios\\windows\\_library\\web\\web_check",
+                "params": [
+                    {
+                        "name": "[youtube_duration]",
+                        "val_options": "",
+                        "value": "90"
+                    }
+                ],
                 "type": "Include"
             },
             {
@@ -428,7 +435,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "19K5834",
-                        "include_path": "..\\_library\\productivity\\prod_open",
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_open",
                         "type": "Include"
                     },
                     {
@@ -437,7 +444,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "19K59V7",
-                        "include_path": "..\\_library\\productivity\\prod_close",
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_close",
                         "type": "Include"
                     },
                     {
@@ -446,7 +453,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1CFNENY",
-                        "include_path": "..\\_library\\web\\web_switchto",
+                        "include_path": "scenarios\\windows\\_library\\web\\web_switchto",
                         "type": "Include"
                     }
                 ],
@@ -473,7 +480,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D1000",
-                        "include_path": "..\\_library\\misc\\recording_phase_begin",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
                         "type": "Include"
                     },
                     {
@@ -482,7 +489,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D1001",
-                        "include_path": "..\\_library\\misc\\etw_event_tag",
+                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
                         "params": [
                             {
                                 "name": "[event_tag]",
@@ -498,7 +505,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D1002",
-                        "include_path": "..\\_library\\misc\\click_file_explorer",
+                        "include_path": "scenarios\\windows\\_library\\misc\\click_file_explorer",
                         "type": "Include"
                     },
                     {
@@ -515,7 +522,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D1004",
-                        "include_path": "..\\_library\\misc\\recording_phase_end",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
                         "params": [
                             {
                                 "name": "[phase_category]",
@@ -544,7 +551,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D2000",
-                        "include_path": "..\\_library\\misc\\recording_phase_begin",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
                         "type": "Include"
                     },
                     {
@@ -597,7 +604,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D2005",
-                        "include_path": "..\\_library\\misc\\etw_event_tag",
+                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
                         "params": [
                             {
                                 "name": "[event_tag]",
@@ -639,7 +646,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D2008",
-                        "include_path": "..\\_library\\misc\\recording_phase_end",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
                         "params": [
                             {
                                 "name": "[phase_category]",
@@ -706,7 +713,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D3000",
-                        "include_path": "..\\_library\\misc\\recording_phase_begin",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
                         "type": "Include"
                     },
                     {
@@ -715,7 +722,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D3001",
-                        "include_path": "..\\_library\\misc\\etw_event_tag",
+                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
                         "params": [
                             {
                                 "name": "[event_tag]",
@@ -749,7 +756,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D3004",
-                        "include_path": "..\\_library\\misc\\recording_phase_end",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
                         "params": [
                             {
                                 "name": "[phase_category]",
@@ -806,7 +813,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D4000",
-                        "include_path": "..\\_library\\misc\\recording_phase_begin",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
                         "type": "Include"
                     },
                     {
@@ -824,7 +831,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D4001",
-                        "include_path": "..\\_library\\misc\\click_settings",
+                        "include_path": "scenarios\\windows\\_library\\misc\\click_settings",
                         "type": "Include"
                     },
                     {
@@ -841,7 +848,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "2D4003",
-                        "include_path": "..\\_library\\misc\\recording_phase_end",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
                         "params": [
                             {
                                 "name": "[phase_category]",
@@ -896,7 +903,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "19K59KV",
-                "include_path": "..\\_library\\web\\web_close_tabs",
+                "include_path": "scenarios\\windows\\_library\\web\\web_close_tabs",
                 "params": [
                     {
                         "name": "[num_tabs_to_close]",
@@ -962,7 +969,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1A7H8T4",
-                        "include_path": "..\\_library\\enterprise_collab\\timers_teardown",
+                        "include_path": "scenarios\\windows\\_library\\enterprise_collab\\timers_teardown",
                         "type": "Include"
                     }
                 ],
@@ -987,7 +994,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "19K5ENF",
-                "include_path": "..\\_library\\web\\web_kill",
+                "include_path": "scenarios\\windows\\_library\\web\\web_kill",
                 "type": "Include"
             },
             {
@@ -998,7 +1005,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "19K5FCT",
-                        "include_path": "..\\_library\\productivity\\prod_kill",
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_kill",
                         "type": "Include"
                     }
                 ],
@@ -1025,7 +1032,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "19K8C22",
-                        "include_path": "..\\_library\\Teams\\teams_teardown",
+                        "include_path": "scenarios\\windows\\_library\\Teams\\teams_teardown",
                         "type": "Include"
                     }
                 ],
@@ -1071,7 +1078,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1EN1A1W",
-                        "include_path": "..\\_library\\enterprise_collab\\diagnostics_disable",
+                        "include_path": "scenarios\\windows\\_library\\enterprise_collab\\diagnostics_disable",
                         "type": "Include"
                     },
                     {

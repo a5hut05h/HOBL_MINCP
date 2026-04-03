@@ -10,13 +10,13 @@
         "type": "Information"
     },
     {
-        "id": "V2MYAA",
-        "type": "Include",
+        "children": [],
+        "delay": "0",
         "description": "",
         "enabled": true,
-        "delay": "0",
-        "include_path": "..\\..\\misc\\recording_phase_begin",
-        "children": []
+        "id": "V2MYAA",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+        "type": "Include"
     },
     {
         "children": [],
@@ -24,7 +24,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHME9",
-        "include_path": "..\\prod_outlook_switchto",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_switchto",
         "type": "Include"
     },
     {
@@ -33,7 +33,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHLNT",
-        "include_path": "..\\prod_outlook_close",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_close",
         "type": "Include"
     },
     {
@@ -42,7 +42,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHMHY",
-        "include_path": "..\\prod_excel_switchto",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_switchto",
         "type": "Include"
     },
     {
@@ -51,7 +51,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHLVY",
-        "include_path": "..\\prod_excel_close",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_close",
         "type": "Include"
     },
     {
@@ -60,7 +60,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHMMF",
-        "include_path": "..\\prod_word_switchto",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_switchto",
         "type": "Include"
     },
     {
@@ -69,7 +69,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHLYE",
-        "include_path": "..\\prod_word_close",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_close",
         "type": "Include"
     },
     {
@@ -78,7 +78,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHMPW",
-        "include_path": "..\\prod_powerpoint_switchto",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_switchto",
         "type": "Include"
     },
     {
@@ -87,7 +87,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHM1K",
-        "include_path": "..\\prod_powerpoint_close",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_close",
         "type": "Include"
     },
     {
@@ -96,7 +96,7 @@
         "description": "",
         "enabled": true,
         "id": "UTP2P3",
-        "include_path": "..\\prod_onenote_switchto",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_onenote_switchto",
         "type": "Include"
     },
     {
@@ -105,28 +105,28 @@
         "description": "",
         "enabled": true,
         "id": "UTHM4W",
-        "include_path": "..\\prod_onenote_close",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_onenote_close",
         "type": "Include"
     },
     {
-        "id": "V2MYFJ",
-        "type": "Include",
+        "children": [],
+        "delay": "0",
         "description": "",
         "enabled": true,
-        "delay": "0",
-        "include_path": "..\\..\\misc\\recording_phase_end",
+        "id": "V2MYFJ",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
         "params": [
             {
                 "name": "[phase_category]",
-                "value": "prod",
-                "val_options": ""
+                "val_options": "",
+                "value": "prod"
             },
             {
                 "name": "[phase_name]",
-                "value": "close",
-                "val_options": ""
+                "val_options": "",
+                "value": "close"
             }
         ],
-        "children": []
+        "type": "Include"
     }
 ]

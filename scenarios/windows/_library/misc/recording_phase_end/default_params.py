@@ -2,8 +2,14 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 from core.parameters import Params
+from utilities.open_source.modules import import_run_user_only
 
 def run():
-    Params.setDefault('global', '[phase_category]', 'invalid', desc='', valOptions=[])
-    Params.setDefault('global', '[phase_name]', 'invalid', desc='', valOptions=[])
+    Params.setCalculated('scenario_section', __package__.split('.')[-1])
+    run_user_only()
+    Params.setDefault('recording_phase_end', 'phase_category', 'invalid', desc='', valOptions=[])
+    Params.setDefault('recording_phase_end', 'phase_name', 'invalid', desc='', valOptions=[])
+    return
+
+def run_user_only():
     return

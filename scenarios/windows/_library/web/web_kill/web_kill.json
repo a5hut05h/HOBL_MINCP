@@ -23,29 +23,22 @@
     {
         "children": [
             {
-                "id": "10RA44J",
-                "type": "Include",
+                "children": [],
+                "delay": "0",
                 "description": "",
                 "enabled": true,
-                "delay": "0",
-                "include_path": "..\\..\\run_command",
+                "id": "10RA44J",
+                "include_path": "scenarios\\windows\\_library\\run_command",
                 "params": [
                     {
                         "name": "[command]",
-                        "value": "taskkill /IM msedge.exe /F",
-                        "val_options": ""
+                        "val_options": "",
+                        "value": "taskkill /IM msedge.exe /F"
                     }
                 ],
-                "children": []
+                "type": "Include"
             },
             {
-                "id": "10RENU7",
-                "type": "If",
-                "description": "",
-                "enabled": true,
-                "left_term": "[web_replay_run]",
-                "eval_method": "==",
-                "right_term": "1",
                 "children": [
                     {
                         "children": [],
@@ -53,7 +46,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "10HF7RX",
-                        "include_path": "..\\..\\run_command",
+                        "include_path": "scenarios\\windows\\_library\\run_command",
                         "params": [
                             {
                                 "name": "[command]",
@@ -63,14 +56,21 @@
                         ],
                         "type": "Include"
                     }
-                ]
-            },
-            {
-                "id": "10RENU8",
-                "type": "End If",
+                ],
                 "description": "",
                 "enabled": true,
-                "children": []
+                "eval_method": "==",
+                "id": "10RENU7",
+                "left_term": "[web_replay_run]",
+                "right_term": "1",
+                "type": "If"
+            },
+            {
+                "children": [],
+                "description": "",
+                "enabled": true,
+                "id": "10RENU8",
+                "type": "End If"
             }
         ],
         "description": "",

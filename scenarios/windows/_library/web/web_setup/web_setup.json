@@ -76,7 +76,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "10JLUEE",
-                "include_path": "..\\..\\run_command",
+                "include_path": "scenarios\\windows\\_library\\run_command",
                 "params": [
                     {
                         "name": "[command]",
@@ -94,7 +94,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "10H87V2",
-                        "include_path": "..\\..\\run_command",
+                        "include_path": "scenarios\\windows\\_library\\run_command",
                         "params": [
                             {
                                 "name": "[command]",
@@ -142,7 +142,7 @@
         "description": "",
         "enabled": true,
         "id": "TYHUPJ",
-        "include_path": "..\\..\\misc\\capture_taskbar",
+        "include_path": "scenarios\\windows\\_library\\misc\\capture_taskbar",
         "type": "Include"
     },
     {
@@ -151,7 +151,7 @@
         "description": "Tag browser launch",
         "enabled": true,
         "id": "17XU0KJ",
-        "include_path": "..\\..\\misc\\etw_event_tag",
+        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
         "params": [
             {
                 "name": "[event_tag]",

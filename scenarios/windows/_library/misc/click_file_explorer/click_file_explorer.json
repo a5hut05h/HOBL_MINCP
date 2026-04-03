@@ -15,7 +15,7 @@
         "description": "",
         "enabled": true,
         "id": "2B0002",
-        "include_path": "..\\capture_taskbar",
+        "include_path": "scenarios\\windows\\_library\\misc\\capture_taskbar",
         "type": "Include"
     },
     {

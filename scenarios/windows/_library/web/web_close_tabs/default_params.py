@@ -2,7 +2,13 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 from core.parameters import Params
+from utilities.open_source.modules import import_run_user_only
 
 def run():
-    Params.setDefault('global', '[num_tabs_to_close]', '1', desc='Number of tabs to close', valOptions=[])
+    Params.setCalculated('scenario_section', __package__.split('.')[-1])
+    run_user_only()
+    Params.setDefault('web_close_tabs', 'num_tabs_to_close', '1', desc='Number of tabs to close', valOptions=[])
+    return
+
+def run_user_only():
     return

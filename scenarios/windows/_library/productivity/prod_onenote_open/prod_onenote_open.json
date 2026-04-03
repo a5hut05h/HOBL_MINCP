@@ -10,13 +10,13 @@
         "type": "Information"
     },
     {
-        "id": "V2MPFA",
-        "type": "Include",
+        "children": [],
+        "delay": "0",
         "description": "",
         "enabled": true,
-        "delay": "0",
-        "include_path": "..\\..\\misc\\recording_phase_begin",
-        "children": []
+        "id": "V2MPFA",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+        "type": "Include"
     },
     {
         "children": [],
@@ -24,7 +24,7 @@
         "description": "",
         "enabled": true,
         "id": "UHA35R",
-        "include_path": "..\\prod_onenote_switchto",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_onenote_switchto",
         "type": "Include"
     },
     {
@@ -46,24 +46,24 @@
         "typing_delay": "[typing_delay]"
     },
     {
-        "id": "V2MPJY",
-        "type": "Include",
+        "children": [],
+        "delay": "0",
         "description": "",
         "enabled": true,
-        "delay": "0",
-        "include_path": "..\\..\\misc\\recording_phase_end",
+        "id": "V2MPJY",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
         "params": [
             {
                 "name": "[phase_category]",
-                "value": "prod",
-                "val_options": ""
+                "val_options": "",
+                "value": "prod"
             },
             {
                 "name": "[phase_name]",
-                "value": "open_onenote",
-                "val_options": ""
+                "val_options": "",
+                "value": "open_onenote"
             }
         ],
-        "children": []
+        "type": "Include"
     }
 ]

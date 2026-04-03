@@ -15,7 +15,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHJCA",
-        "include_path": "..\\prod_outlook_open",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_open",
         "type": "Include"
     },
     {
@@ -24,7 +24,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHJJ2",
-        "include_path": "..\\prod_excel_open",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_open",
         "type": "Include"
     },
     {
@@ -33,7 +33,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHJLM",
-        "include_path": "..\\prod_word_open",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_open",
         "type": "Include"
     },
     {
@@ -42,7 +42,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHJWC",
-        "include_path": "..\\prod_powerpoint_open",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_open",
         "type": "Include"
     },
     {
@@ -51,7 +51,7 @@
         "description": "",
         "enabled": true,
         "id": "UTHK0Y",
-        "include_path": "..\\prod_onenote_open",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_onenote_open",
         "type": "Include"
     }
 ]

@@ -10,13 +10,13 @@
         "type": "Information"
     },
     {
-        "id": "V2MREH",
-        "type": "Include",
+        "children": [],
+        "delay": "0",
         "description": "",
         "enabled": true,
-        "delay": "0",
-        "include_path": "..\\..\\misc\\recording_phase_begin",
-        "children": []
+        "id": "V2MREH",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+        "type": "Include"
     },
     {
         "children": [],
@@ -24,7 +24,7 @@
         "description": "",
         "enabled": true,
         "id": "UHA3YA",
-        "include_path": "..\\prod_outlook_switchto",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_switchto",
         "type": "Include"
     },
     {
@@ -36,24 +36,24 @@
         "type": "Delay"
     },
     {
-        "id": "V2MRHL",
-        "type": "Include",
+        "children": [],
+        "delay": "0",
         "description": "",
         "enabled": true,
-        "delay": "0",
-        "include_path": "..\\..\\misc\\recording_phase_end",
+        "id": "V2MRHL",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
         "params": [
             {
                 "name": "[phase_category]",
-                "value": "prod",
-                "val_options": ""
+                "val_options": "",
+                "value": "prod"
             },
             {
                 "name": "[phase_name]",
-                "value": "open_outlook",
-                "val_options": ""
+                "val_options": "",
+                "value": "open_outlook"
             }
         ],
-        "children": []
+        "type": "Include"
     }
 ]

@@ -56,7 +56,7 @@
         "description": "",
         "enabled": true,
         "id": "U7CM1J",
-        "include_path": "..\\web_clear_cache",
+        "include_path": "scenarios\\windows\\_library\\web\\web_clear_cache",
         "type": "Include"
     },
     {
@@ -75,7 +75,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1V7AJ",
-                "include_path": "..\\site\\web_site_reddit",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_reddit",
                 "params": [
                     {
                         "name": "new_tab",
@@ -137,7 +137,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1CAHEP5",
-                "include_path": "..\\web_new_tab",
+                "include_path": "scenarios\\windows\\_library\\web\\web_new_tab",
                 "type": "Include"
             },
             {
@@ -146,7 +146,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1V815",
-                "include_path": "..\\site\\web_site_instagram",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_instagram",
                 "params": [
                     {
                         "name": "[new_tab]",
@@ -208,7 +208,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1CAHF41",
-                "include_path": "..\\web_new_tab",
+                "include_path": "scenarios\\windows\\_library\\web\\web_new_tab",
                 "type": "Include"
             },
             {
@@ -217,7 +217,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1A93KF2",
-                "include_path": "..\\site\\web_site_amazon_got",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_amazon_got",
                 "params": [
                     {
                         "name": "new_tab",
@@ -269,7 +269,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1CAHFJ6",
-                "include_path": "..\\web_new_tab",
+                "include_path": "scenarios\\windows\\_library\\web\\web_new_tab",
                 "type": "Include"
             },
             {
@@ -278,7 +278,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1V90X",
-                "include_path": "..\\site\\web_site_amazon_vacuum",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_amazon_vacuum",
                 "params": [
                     {
                         "name": "new_tab",
@@ -335,7 +335,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1V9F0",
-                "include_path": "..\\site\\web_site_google_images_apollo",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_google_images_apollo",
                 "params": [
                     {
                         "name": "[new_tab]",
@@ -397,7 +397,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1CAHH74",
-                "include_path": "..\\web_new_tab",
+                "include_path": "scenarios\\windows\\_library\\web\\web_new_tab",
                 "type": "Include"
             },
             {
@@ -406,7 +406,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1V9J1",
-                "include_path": "..\\site\\web_site_google_images_london",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_google_images_london",
                 "params": [
                     {
                         "name": "[new_tab]",
@@ -463,7 +463,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1EREAEP",
-                "include_path": "..\\site\\web_site_youtube_tos",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_youtube_tos",
                 "params": [
                     {
                         "name": "[new_tab]",
@@ -483,7 +483,7 @@
                     {
                         "name": "[duration]",
                         "val_options": "",
-                        "value": "87"
+                        "value": "120"
                     }
                 ],
                 "type": "Include"
@@ -530,7 +530,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1CAHJ72",
-                "include_path": "..\\web_new_tab",
+                "include_path": "scenarios\\windows\\_library\\web\\web_new_tab",
                 "type": "Include"
             },
             {
@@ -539,7 +539,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1VA6C",
-                "include_path": "..\\site\\web_site_wikipedia",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_wikipedia",
                 "params": [
                     {
                         "name": "[new_tab]",
@@ -601,7 +601,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1VATC",
-                "include_path": "..\\site\\web_site_youtube_nasa",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_youtube_nasa",
                 "params": [
                     {
                         "name": "[new_tab]",
@@ -663,7 +663,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1CAHJP9",
-                "include_path": "..\\web_new_tab",
+                "include_path": "scenarios\\windows\\_library\\web\\web_new_tab",
                 "type": "Include"
             },
             {
@@ -672,7 +672,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1VAWC",
-                "include_path": "..\\site\\web_site_google_search_belgium",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_google_search_belgium",
                 "params": [
                     {
                         "name": "[new_tab]",
@@ -729,7 +729,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1CAHKA2",
-                "include_path": "..\\web_new_tab",
+                "include_path": "scenarios\\windows\\_library\\web\\web_new_tab",
                 "type": "Include"
             },
             {
@@ -738,7 +738,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1VCC1",
-                "include_path": "..\\site\\web_site_the_verge",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_the_verge",
                 "params": [
                     {
                         "name": "[new_tab]",
@@ -800,7 +800,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "W1VCPR",
-                "include_path": "..\\site\\web_site_google_search_super_bowl",
+                "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_google_search_super_bowl",
                 "params": [
                     {
                         "name": "[new_tab]",
