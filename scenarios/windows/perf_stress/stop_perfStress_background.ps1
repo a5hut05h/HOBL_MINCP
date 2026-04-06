@@ -1,9 +1,12 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 $ErrorActionPreference = "SilentlyContinue"
-Write-Host " INFO - Stop_PerfStress_Background starting"
+Write-Host " INFO - stop_perfStress_background starting"
 
 # Retry helper so cleanup remains robust when processes are still spinning up/down.
 function Stop-PerfStressProcesses {
-    $patterns = "Collect_5min_Traces\.ps1|70_percentile_stress\.py|Install_Python\.ps1"
+    $patterns = "collect_5min_traces\.ps1|percentile_stress\.py|install_python\.ps1"
     $attempt = 0
     while ($attempt -lt 5) {
         $found = $false
@@ -19,7 +22,7 @@ function Stop-PerfStressProcesses {
 
         # Extra guards for python launch variants.
         Get-CimInstance Win32_Process |
-            Where-Object { $_.Name -match "(?i)^(python|py|pythonw)\.exe$" -and $_.CommandLine -and ($_.CommandLine -match "70_percentile_stress\.py") } |
+            Where-Object { $_.Name -match "(?i)^(python|py|pythonw)\.exe$" -and $_.CommandLine -and ($_.CommandLine -match "percentile_stress\.py") } |
             ForEach-Object {
                 $found = $true
                 $killedThisAttempt++
@@ -57,20 +60,20 @@ function Close-ExplorerWindows {
         }
     }
     catch {
-        Write-Host " ERROR - Stop_PerfStress_Background fallback close failed."
+        Write-Host " ERROR - stop_perfStress_background fallback close failed."
     }
 
     $remainingExplorer = (Get-Process explorer | Where-Object { $_.MainWindowHandle -ne 0 } | Measure-Object).Count
     Write-Host (" INFO - Explorer windows after close={0}" -f $remainingExplorer)
 }
 
-# Stop background processes launched by perf_stress_ec setup.
+# Stop background processes launched by perf_stress setup.
 Stop-PerfStressProcesses
 
 $remainingStress = (Get-CimInstance Win32_Process |
     Where-Object {
-        ($_.CommandLine -and ($_.CommandLine -match "Collect_5min_Traces\.ps1|70_percentile_stress\.py|Install_Python\.ps1")) -or
-        ($_.Name -match "(?i)^(python|py|pythonw)\.exe$" -and $_.CommandLine -and ($_.CommandLine -match "70_percentile_stress\.py"))
+        ($_.CommandLine -and ($_.CommandLine -match "collect_5min_traces\.ps1|percentile_stress\.py|install_python\.ps1")) -or
+        ($_.Name -match "(?i)^(python|py|pythonw)\.exe$" -and $_.CommandLine -and ($_.CommandLine -match "percentile_stress\.py"))
     } |
     Measure-Object).Count
 
@@ -79,6 +82,8 @@ Write-Host (" INFO - Remaining stress candidates after stop={0}" -f $remainingSt
 # Close open File Explorer windows so reruns start clean.
 Close-ExplorerWindows
 
-Write-Host " INFO - Stop_PerfStress_Background completed"
+Write-Host " INFO - stop_perfStress_background completed"
 
 exit 0
+
+

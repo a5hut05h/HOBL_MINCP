@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 # Performs a true mouse right-click in the active File Explorer window.
 Add-Type -TypeDefinition @"
 using System;

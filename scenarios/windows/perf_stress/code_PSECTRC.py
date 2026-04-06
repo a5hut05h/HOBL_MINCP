@@ -8,7 +8,7 @@ from parameters import Params
 def run(scenario):
     logging.debug('Executing code block: code_PSECTRC.py (early trace start)')
 
-    if Params.get('perf_stress_ec', 'stress_run') != '1':
+    if Params.get('perf_stress', 'stress_run') != '1':
         logging.info('Skipping early trace start because stress_run is disabled')
         return
 
@@ -18,8 +18,8 @@ def run(scenario):
 
     # Upload only the files needed for trace collection.
     trace_files = [
-        os.path.join(src_dir, "Collect_5min_Traces.ps1"),
-        os.path.join(repo_root, "providers", "GTP_CPI_BAM_Defender.wprp"),
+        os.path.join(src_dir, "collect_5min_traces.ps1"),
+        os.path.join(repo_root, "providers", "general_cpi_collector.wprp"),
     ]
 
     scenario._remote_make_dir(dut_bin_dir)
@@ -29,12 +29,13 @@ def run(scenario):
         logging.info(f"Uploading to DUT {dut_bin_dir}: {src_file}")
         scenario._upload(src_file, dut_bin_dir)
 
-    # Start trace collection in background immediately.
-    collect_ps = rf"{dut_bin_dir}\Collect_5min_Traces.ps1"
-    logging.info("Starting Collect_5min_Traces.ps1 in minimized window (early).")
+    # Start trace collection in background immediately
+    collect_ps = rf"{dut_bin_dir}\collect_5min_traces.ps1"
+    run_name = scenario.testname  # e.g. perf_stress_142
+    logging.info(f"Starting collect_5min_traces.ps1 in minimized window (early), RunName={run_name}.")
     scenario._call([
         "cmd.exe",
-        f'/C start "" /min powershell.exe -NoProfile -ExecutionPolicy Bypass -File "{collect_ps}"',
+        f'/C start "" /min powershell.exe -NoProfile -ExecutionPolicy Bypass -File "{collect_ps}" -RunName "{run_name}"',
     ], expected_exit_code="", blocking=False)
 
     scenario._sleep_to_now()

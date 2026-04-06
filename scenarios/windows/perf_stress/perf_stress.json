@@ -134,10 +134,10 @@
                 "children": [
                     {
                         "children": [],
-                        "command": "cmd /c net stop DiagTrack && net start DiagTrack",
+                        "command": "cmd /c net stop DiagTrack & net start DiagTrack",
                         "delay": "2",
-                        "description": "Restart DiagTrack",
-                        "enabled": true,
+                        "description": "Restart DiagTrack (disabled - code_1EN194J restarts after sideload)",
+                        "enabled": false,
                         "id": "1EPL382",
                         "type": "Command"
                     },
@@ -397,33 +397,26 @@
                     },
                     {
                         "children": [],
-                        "delay": "0",
-                        "description": "",
+                        "command": "powershell -NoProfile -Command \"(New-Object -ComObject Shell.Application).Windows() | ForEach-Object { $_.Quit() }\"",
+                        "delay": "5",
+                        "description": "Close all File Explorer windows for fresh launch",
                         "enabled": true,
-                        "id": "PSECPTRF1",
-                        "include_path": "scenarios\\windows\\_library\\misc\\capture_taskbar",
+                        "id": "PSECPTRKILL",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "Launch File Explorer from taskbar (click_file_explorer library)",
+                        "enabled": true,
+                        "id": "PSECPTRK1",
+                        "include_path": "scenarios\\windows\\_library\\misc\\click_file_explorer",
                         "type": "Include"
                     },
                     {
-                        "capture_id": "TYH95X",
                         "children": [],
-                        "delay": "2",
-                        "description": "Launch File Explorer from taskbar",
-                        "enabled": true,
-                        "exception_on": "No match",
-                        "file_name": [
-                            "image_1H2N106.png"
-                        ],
-                        "id": "PSECPTRK1",
-                        "primary": true,
-                        "type": "Click",
-                        "x": "0.500",
-                        "y": "0.500"
-                    },
-                    {
-                        "children": [],
-                        "delay": "5",
-                        "description": "Wait for File Explorer to fully render",
+                        "delay": "10",
+                        "description": "Wait for File Explorer XAML Home to fully render",
                         "enabled": true,
                         "id": "PSECPTRD1",
                         "type": "Delay"
@@ -448,6 +441,16 @@
                             }
                         ],
                         "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "2",
+                        "description": "Close XAML Home FE",
+                        "enabled": true,
+                        "id": "PSECPTRCFE",
+                        "text": "\ue00a\ue034",
+                        "type": "Type",
+                        "typing_delay": "[typing_delay]"
                     },
                     {
                         "children": [],
@@ -477,7 +480,7 @@
                     {
                         "children": [],
                         "command": "cmd /c start \"\" explorer.exe /select,\"%USERPROFILE%\\Desktop\\test.txt\"",
-                        "delay": "0",
+                        "delay": "3",
                         "description": "Open File Explorer with test.txt selected",
                         "enabled": true,
                         "id": "PSECPTRC2",
@@ -485,124 +488,8 @@
                     },
                     {
                         "children": [],
-                        "delay": "3",
-                        "description": "Wait for selection to focus",
-                        "enabled": true,
-                        "id": "PSECPTRD2",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
                         "delay": "2",
-                        "description": "Maximize File Explorer (Win+Up)",
-                        "enabled": true,
-                        "id": "PSECPTRM0",
-                        "text": "\ue03d\ue013",
-                        "type": "Type",
-                        "typing_delay": "[typing_delay]"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRB2M",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRT2M",
-                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
-                        "params": [
-                            {
-                                "name": "[event_tag]",
-                                "val_options": "",
-                                "value": "ContextMenuOpen"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\hobl_bin\\Right_Click_Context_Menu.ps1\"",
-                        "delay": "0",
-                        "description": "Open context menu (mouse right-click)",
-                        "enabled": true,
-                        "id": "PSECPTRM1",
-                        "type": "Command"
-                    },
-                    {
-                        "children": [],
-                        "delay": "5",
-                        "description": "Wait for Context Menu to render (mouse)",
-                        "enabled": true,
-                        "id": "PSECPTRD2M",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRN2M",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
-                        "params": [
-                            {
-                                "name": "[phase_category]",
-                                "val_options": "",
-                                "value": "app_launch"
-                            },
-                            {
-                                "name": "[phase_name]",
-                                "val_options": "",
-                                "value": "context_menu_mouse"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "2",
-                        "description": "Dismiss context menu via Escape (mouse pass)",
-                        "enabled": true,
-                        "id": "PSECPTRK2M",
-                        "text": "\ue00c",
-                        "type": "Type",
-                        "typing_delay": "[typing_delay]"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRB2K",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRT2K",
-                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
-                        "params": [
-                            {
-                                "name": "[event_tag]",
-                                "val_options": "",
-                                "value": "ContextMenuOpen"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "Open context menu (Shift+F10)",
+                        "description": "Open context menu (Shift+F10) on selected file",
                         "enabled": true,
                         "id": "PSECPTRK2",
                         "text": "\ue008\ue03a",
@@ -633,7 +520,7 @@
                             {
                                 "name": "[phase_name]",
                                 "val_options": "",
-                                "value": "context_menu_shift_f10"
+                                "value": "context_menu"
                             }
                         ],
                         "type": "Include"
@@ -655,6 +542,16 @@
                         "enabled": true,
                         "id": "PSECPTRK4",
                         "text": "\ue00a\ue034",
+                        "type": "Type",
+                        "typing_delay": "[typing_delay]"
+                    },
+                    {
+                        "children": [],
+                        "delay": "1",
+                        "description": "Dismiss any shutdown dialog",
+                        "enabled": true,
+                        "id": "PSECPTRK4E",
+                        "text": "\ue00c",
                         "type": "Type",
                         "typing_delay": "[typing_delay]"
                     },
@@ -807,6 +704,16 @@
                     },
                     {
                         "children": [],
+                        "delay": "1",
+                        "description": "Dismiss any shutdown dialog",
+                        "enabled": true,
+                        "id": "PSECPTRK7E",
+                        "text": "\ue00c",
+                        "type": "Type",
+                        "typing_delay": "[typing_delay]"
+                    },
+                    {
+                        "children": [],
                         "command": "cmd /c del /f \"%USERPROFILE%\\Desktop\\test.txt\" > nul 2>&1 & exit /b 0",
                         "delay": "2",
                         "description": "Delete test.txt from Desktop",
@@ -829,6 +736,13 @@
                 "enabled": true,
                 "id": "PSECPTRIE",
                 "type": "End If"
+            },
+            {
+                "children": [],
+                "description": "Try wrapper for office launch (Outlook Discard dialog may not appear under stress)",
+                "enabled": true,
+                "id": "PSECTRYOL",
+                "type": "Try"
             },
             {
                 "children": [
@@ -896,6 +810,20 @@
             },
             {
                 "children": [],
+                "description": "",
+                "enabled": true,
+                "id": "PSECEXOL",
+                "type": "Except"
+            },
+            {
+                "children": [],
+                "description": "",
+                "enabled": true,
+                "id": "PSECETOL",
+                "type": "End Try"
+            },
+            {
+                "children": [],
                 "delay": "0",
                 "description": "",
                 "enabled": true,
@@ -909,6 +837,14 @@
                     }
                 ],
                 "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "10",
+                "description": "Extra delay for Edge startup under CPU stress",
+                "enabled": true,
+                "id": "PSECWDLY",
+                "type": "Delay"
             },
             {
                 "children": [],
@@ -1308,6 +1244,24 @@
                     },
                     {
                         "children": [],
+                        "delay": "2",
+                        "description": "Stabilize, then dismiss Start Menu",
+                        "enabled": true,
+                        "id": "PSECSM17D",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "1",
+                        "description": "Dismiss Start Menu before next section",
+                        "enabled": true,
+                        "id": "PSECSM17E",
+                        "text": "\ue00c",
+                        "type": "Type",
+                        "typing_delay": "[typing_delay]"
+                    },
+                    {
+                        "children": [],
                         "delay": "0",
                         "description": "Launch OneNote from Start Menu",
                         "enabled": false,
@@ -1375,6 +1329,22 @@
                     {
                         "children": [],
                         "delay": "0",
+                        "description": "Close existing Edge tabs before relaunch",
+                        "enabled": true,
+                        "id": "PSECEK00",
+                        "include_path": "scenarios\\windows\\_library\\web\\web_close_tabs",
+                        "params": [
+                            {
+                                "name": "[num_tabs_to_close]",
+                                "val_options": "",
+                                "value": "[web:tabs]"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
                         "description": "",
                         "enabled": true,
                         "id": "PSECPB10",
@@ -1383,56 +1353,18 @@
                     },
                     {
                         "children": [],
-                        "delay": "1",
-                        "description": "Open Start Menu",
+                        "delay": "0",
+                        "description": "Kill and relaunch Edge (same as enterprise_collab)",
                         "enabled": true,
                         "id": "PSECEK01",
-                        "text": "\ue03d",
-                        "type": "Type",
-                        "typing_delay": "[typing_delay]"
-                    },
-                    {
-                        "children": [],
-                        "delay": "1",
-                        "description": "Stabilize Start Menu",
-                        "enabled": true,
-                        "id": "PSECEK01D",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "Launch additional Edge instance",
-                        "enabled": true,
-                        "id": "PSECPB11",
-                        "text": "microsoft edge\ue007",
-                        "type": "Type",
-                        "typing_delay": "[typing_delay]"
-                    },
-                    {
-                        "children": [],
-                        "delay": "2",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECEK02",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPB12",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "Switch to Edge",
-                        "enabled": true,
-                        "id": "PSECEK03",
-                        "include_path": "scenarios\\windows\\_library\\web\\web_switchto",
+                        "include_path": "scenarios\\windows\\_library\\web\\web_setup",
+                        "params": [
+                            {
+                                "name": "[disable_delay]",
+                                "val_options": "0,1",
+                                "value": "1"
+                            }
+                        ],
                         "type": "Include"
                     },
                     {
@@ -1467,7 +1399,7 @@
                             {
                                 "name": "[phase_name]",
                                 "val_options": "",
-                                "value": "edge_launch_additional_instance"
+                                "value": "edge_close_relaunch"
                             }
                         ],
                         "type": "Include"
@@ -1495,6 +1427,13 @@
                 "enabled": true,
                 "id": "1A7H7A8",
                 "include_path": "scenarios\\windows\\_library\\web\\web_check",
+                "params": [
+                    {
+                        "name": "[youtube_duration]",
+                        "val_options": "",
+                        "value": "90"
+                    }
+                ],
                 "type": "Include"
             },
             {
@@ -1587,6 +1526,13 @@
                 "type": "End If"
             },
             {
+                "children": [],
+                "description": "Try wrapper for teams teardown (195LNFU call health may fail)",
+                "enabled": true,
+                "id": "PSECTRYTD",
+                "type": "Try"
+            },
+            {
                 "children": [
                     {
                         "children": [],
@@ -1614,6 +1560,20 @@
                 "type": "End If"
             },
             {
+                "children": [],
+                "description": "",
+                "enabled": true,
+                "id": "PSECEXTD",
+                "type": "Except"
+            },
+            {
+                "children": [],
+                "description": "",
+                "enabled": true,
+                "id": "PSECETTD",
+                "type": "End Try"
+            },
+            {
                 "children": [
                     {
                         "children": [],
@@ -1636,7 +1596,7 @@
                     },
                     {
                         "children": [],
-                        "command": "cmd /c net stop DiagTrack && net start DiagTrack",
+                        "command": "cmd /c net stop DiagTrack & net start DiagTrack",
                         "delay": "2",
                         "description": "Restart DiagTrack",
                         "enabled": true,
