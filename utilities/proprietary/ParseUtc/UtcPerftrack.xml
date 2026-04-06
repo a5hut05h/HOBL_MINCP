@@ -1674,5 +1674,565 @@
         <final id="_cancel" />
       </scxml>
     </scenario>
+    <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" schemaversion="2" scenarioid="{4d2294eb-435a-430a-9f60-6c86a57b9f3e}" scenarioname="PT_9459__TIP_ Search Activation _direct via Search entryp_4d2294" maxfailurereports="0" maxdurationms="60000" mintimebetweencompletionescalationsms="0" mintimebetweenfailureescalations="0" matchbehavior="newest" maxinflightinstances="1" ptscenarioname="_TIP_ Search Activation _direct via Search entrypoint on Taskbar or Win _ S_" ptdurationfield="durationMs" measureversionguid="{00000000-0000-0000-0000-000000000000}">
+      <triggers>
+        <trigger triggername="Microsoft.Windows.Health.TestInProduction.TestResult">
+          <etwtrigger>
+            <provider>{50109fbd-6d85-5815-731e-c907eca1607b}</provider>
+            <keywords>0x2</keywords>
+            <level>5</level>
+          </etwtrigger>
+        </trigger>
+      </triggers>
+      <filters>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_3">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\SQMClient</keyname>
+            <valuename>IsTest</valuename>
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_1">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>.*chk.*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_14">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SYSTEM\CurrentControlSet\Control\SystemInformation</keyname>
+            <valuename>SystemProductName</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>Virtual Machine</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_17">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\{1B32999B-05C4-4B52-8B48-F233639C774F}</keyname>
+            <valuename />
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="trigger" filtername="match13547testCaseIde_134903294">
+          <singletriggerpropertyfilter>
+            <triggername>Microsoft.Windows.Health.TestInProduction.TestResult</triggername>
+            <propertyselector>
+              <propertykey>
+                <name>testCaseId</name>
+              </propertykey>
+            </propertyselector>
+            <mathoperation>add</mathoperation>
+            <constant>0</constant>
+            <operation>equal</operation>
+            <value>34903294</value>
+          </singletriggerpropertyfilter>
+        </filter>
+        <filter appliesto="trigger" filtername="match13547completionKinde_11">
+          <singletriggerpropertyfilter>
+            <triggername>Microsoft.Windows.Health.TestInProduction.TestResult</triggername>
+            <propertyselector>
+              <propertykey>
+                <name>completionKind</name>
+              </propertykey>
+            </propertyselector>
+            <mathoperation>add</mathoperation>
+            <constant>0</constant>
+            <operation>equal</operation>
+            <value>1</value>
+          </singletriggerpropertyfilter>
+        </filter>
+      </filters>
+      <scxml version="1.0" datamodel="custom" initial="_start" xmlns="http://www.w3.org/2005/07/scxml">
+        <state id="_start">
+          <transition event="Microsoft.Windows.Health.TestInProduction.TestResult" target="_complete" name="T1">
+            <filter strict="false">match13547testCaseIde_134903294</filter>
+            <filter strict="false">match13547completionKinde_11</filter>
+          </transition>
+        </state>
+        <final id="_complete" />
+        <final id="_cancel" />
+      </scxml>
+    </scenario>
+    <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" schemaversion="2" scenarioid="{9a700fae-8b2d-4664-b951-ab65ba309b26}" scenarioname="PT_1809_Open Start Menu_9a700f" maxfailurereports="0" maxdurationms="60000" mintimebetweencompletionescalationsms="0" mintimebetweenfailureescalations="0" maxinflightinstances="1" ptscenarioname="Open Start Menu" measureversionguid="{00000000-0000-0000-0000-000000000000}">
+      <triggers>
+        <trigger triggername="Microsoft-Windows-Shell-Launcher.LauncherInvokeActivity">
+          <etwtrigger>
+            <provider>{3d6120a6-0986-51c4-213a-e2975903051d}</provider>
+            <keywords>0x400000000000</keywords>
+            <level>5</level>
+          </etwtrigger>
+        </trigger>
+        <trigger triggername="Microsoft-Windows-Shell-Launcher.LauncherOpened">
+          <etwtrigger>
+            <provider>{3d6120a6-0986-51c4-213a-e2975903051d}</provider>
+            <keywords>0x400000000000</keywords>
+            <level>5</level>
+          </etwtrigger>
+        </trigger>
+        <trigger triggername="Microsoft-Windows-Shell-Launcher.StartDidntOpenInSpecifiedTime">
+          <etwtrigger>
+            <provider>{3d6120a6-0986-51c4-213a-e2975903051d}</provider>
+            <keywords>0x400000000000</keywords>
+            <level>5</level>
+          </etwtrigger>
+        </trigger>
+      </triggers>
+      <filters>
+        <filter appliesto="trigger" filtername="match807_opcodee_11">
+          <singletriggerpropertyfilter>
+            <triggername>Microsoft-Windows-Shell-Launcher.LauncherInvokeActivity</triggername>
+            <propertyselector>
+              <propertykey>
+                <name>_opcode</name>
+              </propertykey>
+            </propertyselector>
+            <mathoperation>add</mathoperation>
+            <constant>0</constant>
+            <operation>equal</operation>
+            <value>1</value>
+          </singletriggerpropertyfilter>
+        </filter>
+      </filters>
+      <scxml version="1.0" datamodel="custom" initial="_start" xmlns="http://www.w3.org/2005/07/scxml">
+        <state id="_start">
+          <transition event="Microsoft-Windows-Shell-Launcher.LauncherInvokeActivity" target="1" name="T0" uploadtrigger="false">
+            <filter strict="false">match807_opcodee_11</filter>
+          </transition>
+        </state>
+        <state id="1">
+          <transition event="Microsoft-Windows-Shell-Launcher.LauncherOpened" target="_complete" name="T1" uploadtrigger="false" />
+          <transition event="Microsoft-Windows-Shell-Launcher.StartDidntOpenInSpecifiedTime" target="_cancel" name="T2" uploadtrigger="false" />
+        </state>
+        <final id="_complete" />
+        <final id="_cancel" />
+      </scxml>
+    </scenario>
+    <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" schemaversion="2" scenarioid="{d09dfb6e-045c-4fdd-ae52-750780fa06e6}" scenarioname="PT_10022_M365 Copilot Warm Launch_d09dfb" maxfailurereports="0" maxdurationms="600000" mintimebetweencompletionescalationsms="0" mintimebetweenfailureescalations="0" matchbehavior="newest" maxinflightinstances="1" ptscenarioname="M365 Copilot Warm Launch" measureversionguid="{00000000-0000-0000-0000-000000000000}">
+      <triggers>
+        <trigger triggername="Microsoft.OfficeHome.UWPApp.M365CopilotInfo">
+          <etwtrigger>
+            <provider>{01ce7c91-c7ea-5d9a-321f-63c6d4e29554}</provider>
+            <keywords>0x400000000000</keywords>
+            <level>4</level>
+          </etwtrigger>
+        </trigger>
+        <trigger triggername="Microsoft.Windows.AppLifeCycle.UI.AppLaunch_UserClick">
+          <etwtrigger>
+            <provider>{ee97cdc4-b095-5c70-6e37-a541eb74c2b5}</provider>
+            <keywords>0x400000000000</keywords>
+            <level>5</level>
+          </etwtrigger>
+        </trigger>
+      </triggers>
+      <filters>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_3">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\SQMClient</keyname>
+            <valuename>IsTest</valuename>
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_1">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>.*chk.*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_14">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SYSTEM\CurrentControlSet\Control\SystemInformation</keyname>
+            <valuename>SystemProductName</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>Virtual Machine</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_17">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\{1B32999B-05C4-4B52-8B48-F233639C774F}</keyname>
+            <valuename />
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="trigger" filtername="match14662PerformanceMarkerNamel_1EarlyReturnFromCurrentInstance">
+          <singletriggerpropertyfilter>
+            <triggername>Microsoft.OfficeHome.UWPApp.M365CopilotInfo</triggername>
+            <propertyselector>
+              <propertykey>
+                <name>PerformanceMarkerName</name>
+              </propertykey>
+            </propertyselector>
+            <mathoperation>add</mathoperation>
+            <constant>0</constant>
+            <operation>like</operation>
+            <value>EarlyReturnFromCurrentInstance</value>
+          </singletriggerpropertyfilter>
+        </filter>
+        <filter appliesto="trigger" filtername="match5487appIdr_1__Microsoft__MicrosoftOfficeHub__">
+          <singletriggerpropertyfilter>
+            <triggername>Microsoft.Windows.AppLifeCycle.UI.AppLaunch_UserClick</triggername>
+            <propertyselector>
+              <propertykey>
+                <name>appId</name>
+              </propertykey>
+            </propertyselector>
+            <mathoperation>add</mathoperation>
+            <constant>0</constant>
+            <operation>regex</operation>
+            <value>.*Microsoft\.MicrosoftOfficeHub.*</value>
+          </singletriggerpropertyfilter>
+        </filter>
+        <filter appliesto="trigger" filtername="match14662PerformanceMarkerNamel_1CreateFrameUIWindow">
+          <singletriggerpropertyfilter>
+            <triggername>Microsoft.OfficeHome.UWPApp.M365CopilotInfo</triggername>
+            <propertyselector>
+              <propertykey>
+                <name>PerformanceMarkerName</name>
+              </propertykey>
+            </propertyselector>
+            <mathoperation>add</mathoperation>
+            <constant>0</constant>
+            <operation>like</operation>
+            <value>CreateFrameUIWindow</value>
+          </singletriggerpropertyfilter>
+        </filter>
+      </filters>
+      <scxml version="1.0" datamodel="custom" initial="_start" xmlns="http://www.w3.org/2005/07/scxml">
+        <state id="_start">
+          <transition event="Microsoft.Windows.AppLifeCycle.UI.AppLaunch_UserClick" target="1" name="T3">
+            <filter>match5487appIdr_1__Microsoft__MicrosoftOfficeHub__</filter>
+          </transition>
+        </state>
+        <state id="1">
+          <transition event="Microsoft.OfficeHome.UWPApp.M365CopilotInfo" target="_complete" name="T2">
+            <filter>match14662PerformanceMarkerNamel_1EarlyReturnFromCurrentInstance</filter>
+          </transition>
+          <transition event="Microsoft.OfficeHome.UWPApp.M365CopilotInfo" target="_cancel" name="T4">
+            <filter>match14662PerformanceMarkerNamel_1CreateFrameUIWindow</filter>
+          </transition>
+        </state>
+        <final id="_complete" />
+        <final id="_cancel" />
+      </scxml>
+    </scenario>
+    <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" schemaversion="2" scenarioid="{db4ee049-1c6b-4344-8c5d-43c401bd6b9e}" scenarioname="PT_6352_InputProcessDelay_PC_db4ee0" maxfailurereports="0" maxdurationms="60000" mintimebetweencompletionescalationsms="0" mintimebetweenfailureescalations="0" matchbehavior="oldest" maxinflightinstances="1" ptscenarioname="InputProcessDelay_PC" ptdurationfield="TimeSinceOldestInputMs" measureversionguid="{00000000-0000-0000-0000-000000000000}">
+      <triggers>
+        <trigger triggername="8C416C79-D49B-4F01-A467-E56D3AA8234C.37_0">
+          <etwtrigger>
+            <provider>{8c416c79-d49b-4f01-a467-e56d3aa8234c}</provider>
+            <id>37</id>
+            <version>0</version>
+            <keywords>0x40000</keywords>
+            <level>4</level>
+          </etwtrigger>
+        </trigger>
+      </triggers>
+      <filters>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_3">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\SQMClient</keyname>
+            <valuename>IsTest</valuename>
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_1">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>.*chk.*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_14">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SYSTEM\CurrentControlSet\Control\SystemInformation</keyname>
+            <valuename>SystemProductName</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>Virtual Machine</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_17">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\{1B32999B-05C4-4B52-8B48-F233639C774F}</keyname>
+            <valuename />
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="No19400to19999-563ea831-8b1e-4a76-80aa-304384420874">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>19[456789][0-9][0-9]\..*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="NoMn_-4fd31645-ecc8-4f30-86e3-0158a6dde94e">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>.*\.mn_[a-z].*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="No20000to20399-e2955fc6-aeda-4cdd-abd8-3d754fcfb478">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>20[0123][0-9][0-9]\..*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="NoFe_-91f0647e-3172-4e77-8112-c5f277a16d7b">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>.*\.fe_[a-z].*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="trigger" filtername="match6741TimeSinceOldestInputMsg_150">
+          <singletriggerpropertyfilter>
+            <triggername>8C416C79-D49B-4F01-A467-E56D3AA8234C.37_0</triggername>
+            <propertyselector>
+              <propertykey>
+                <name>TimeSinceOldestInputMs</name>
+              </propertykey>
+            </propertyselector>
+            <mathoperation>add</mathoperation>
+            <constant>0</constant>
+            <operation>greaterthan</operation>
+            <value>50</value>
+          </singletriggerpropertyfilter>
+        </filter>
+      </filters>
+      <scxml version="1.0" datamodel="custom" initial="_start" xmlns="http://www.w3.org/2005/07/scxml">
+        <state id="_start">
+          <transition event="8C416C79-D49B-4F01-A467-E56D3AA8234C.37_0" target="_complete" name="T0">
+            <filter>match6741TimeSinceOldestInputMsg_150</filter>
+          </transition>
+        </state>
+        <final id="_complete" />
+        <final id="_cancel" />
+      </scxml>
+    </scenario>
+    <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" schemaversion="2" scenarioid="{7a77457b-edba-455e-bf21-7bdaebdf11d0}" scenarioname="PT_9159_MouseLatencyDelay_7a7745" maxfailurereports="0" maxdurationms="60000" mintimebetweencompletionescalationsms="0" mintimebetweenfailureescalations="0" matchbehavior="newest" maxinflightinstances="1" ptscenarioname="MouseLatencyDelay" ptdurationfield="TotalLatency" measureversionguid="{00000000-0000-0000-0000-000000000000}">
+      <triggers>
+        <trigger triggername="Microsoft.Windows.Win32kBase.Input.MouseLatencyDelay">
+          <etwtrigger>
+            <provider>{7e6b69b9-2aec-4fb3-9426-69a0f2b61a86}</provider>
+            <keywords>0x400000000000</keywords>
+            <level>5</level>
+          </etwtrigger>
+        </trigger>
+      </triggers>
+      <filters>
+        <filter appliesto="deployment" filtername="verbldgreaterthanequal21324">
+          <telemetryprotocolfilter>
+            <property>verbld</property>
+            <value>21324</value>
+            <operation>greaterthanequal</operation>
+            <type>Numeric</type>
+            <section>os</section>
+          </telemetryprotocolfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_3">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\SQMClient</keyname>
+            <valuename>IsTest</valuename>
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_1">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>.*chk.*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_14">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SYSTEM\CurrentControlSet\Control\SystemInformation</keyname>
+            <valuename>SystemProductName</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>Virtual Machine</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_17">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\{1B32999B-05C4-4B52-8B48-F233639C774F}</keyname>
+            <valuename />
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+      </filters>
+      <scxml version="1.0" datamodel="custom" initial="_start" xmlns="http://www.w3.org/2005/07/scxml">
+        <state id="_start">
+          <transition event="Microsoft.Windows.Win32kBase.Input.MouseLatencyDelay" target="_complete" name="T0" />
+        </state>
+        <final id="_complete" />
+        <final id="_cancel" />
+      </scxml>
+    </scenario>
+    <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" schemaversion="2" scenarioid="{3425f1c0-fc13-4671-ad7e-b62e25dfcf72}" scenarioname="PT_9169_KeyEventLatencyGreaterThan200ms_3425f1" maxfailurereports="0" maxdurationms="60000" mintimebetweencompletionescalationsms="0" mintimebetweenfailureescalations="0" matchbehavior="newest" maxinflightinstances="1" ptscenarioname="KeyEventLatencyGreaterThan200ms" ptdurationfield="Latency" measureversionguid="{00000000-0000-0000-0000-000000000000}">
+      <triggers>
+        <trigger triggername="Win32kTraceLogging.KeyEventLatencyGreaterThan200ms">
+          <etwtrigger>
+            <provider>{487d6e37-1b9d-46d3-a8fd-54ce8bdf8a53}</provider>
+            <keywords>0x400000000000</keywords>
+            <level>5</level>
+          </etwtrigger>
+        </trigger>
+      </triggers>
+      <filters>
+        <filter appliesto="deployment" filtername="verbldgreaterthanequal19611">
+          <telemetryprotocolfilter>
+            <property>verbld</property>
+            <value>19611</value>
+            <operation>greaterthanequal</operation>
+            <type>Numeric</type>
+            <section>os</section>
+          </telemetryprotocolfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_3">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\SQMClient</keyname>
+            <valuename>IsTest</valuename>
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_1">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>.*chk.*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_14">
+          <registryfilter treatnotexistsassuccess="1">
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SYSTEM\CurrentControlSet\Control\SystemInformation</keyname>
+            <valuename>SystemProductName</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>Virtual Machine</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="PerfTrack_FCCID_17">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\{1B32999B-05C4-4B52-8B48-F233639C774F}</keyname>
+            <valuename />
+            <valuetype>REG_NONE</valuetype>
+            <value />
+            <operation>notexists</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="No19400to19999-f62657e1-3380-4ec8-b7c7-26e3d8df2979">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>19[456789][0-9][0-9]\..*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="NoMn_-5b35c170-13d0-41e6-82af-c5dec3687a7f">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>.*\.mn_[a-z].*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="No20000to20399-75b3cc7f-a420-4d4e-97e8-d1ee3a7ab411">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>20[0123][0-9][0-9]\..*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+        <filter appliesto="scenario" filtername="NoFe_-d5095328-8fb4-44f3-988c-45b219370d81">
+          <registryfilter>
+            <hive>HKEY_LOCAL_MACHINE</hive>
+            <keyname>SOFTWARE\Microsoft\Windows NT\CurrentVersion</keyname>
+            <valuename>BuildLabEx</valuename>
+            <valuetype>REG_SZ</valuetype>
+            <value>.*\.fe_[a-z].*</value>
+            <operation>notregex</operation>
+          </registryfilter>
+        </filter>
+      </filters>
+      <scxml version="1.0" datamodel="custom" initial="_start" xmlns="http://www.w3.org/2005/07/scxml">
+        <state id="_start">
+          <transition event="Win32kTraceLogging.KeyEventLatencyGreaterThan200ms" target="_complete" name="T0" />
+        </state>
+        <final id="_complete" />
+        <final id="_cancel" />
+      </scxml>
+    </scenario>
   </scenarios>
 </diagrules>

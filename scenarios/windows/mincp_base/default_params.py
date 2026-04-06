@@ -28,6 +28,7 @@ def run_user_only():
     import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\timers_teardown')
     import_run_user_only('scenarios\\windows\\_library\\misc\\click_to_do_setup')
     import_run_user_only('scenarios\\windows\\_library\\misc\\click_to_do_teardown')
+    import_run_user_only('scenarios\\windows\\_library\\misc\\search_taskbar')
     import_run_user_only('scenarios\\windows\\_library\\misc\\studio_effect_blur')
     import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_close')
     import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_kill')
