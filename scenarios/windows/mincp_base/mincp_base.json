@@ -544,6 +544,15 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
+                "id": "W4ESYUL",
+                "include_path": "scenarios\\windows\\_library\\misc\\search_taskbar",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
                 "id": "19K59KV",
                 "include_path": "scenarios\\windows\\_library\\web\\web_close_tabs",
                 "params": [
