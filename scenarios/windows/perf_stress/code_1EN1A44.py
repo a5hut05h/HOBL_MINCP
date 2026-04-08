@@ -9,7 +9,7 @@ def run(scenario):
     # Stop background trace/stress processes and close File Explorer windows.
     scenario._call([
         "cmd.exe",
-        '/C powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\\hobl_bin\\Stop_PerfStress_Background.ps1"',
+        '/C powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\\hobl_bin\\stop_perfStress_background.ps1"',
     ], expected_exit_code="", fail_on_exception=False)
 
     scenario._call(["cmd.exe", '/C reg delete "HKLM\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting" /v DisableWerUpload /f > null 2>&1'])

@@ -1,13 +1,15 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+
  param(
     [int]$IntervalMinutes = 5,
     [int]$Iterations = 0,
     [string]$OutputDir = "C:\WPR_Traces",
+    [string]$RunName = "",
 
     # ✅ Default custom WPRP profile
-    [string]$WprpPath = "C:\hobl_bin\GTP_CPI_BAM_Defender.wprp",
+    [string]$WprpPath = "C:\hobl_bin\general_cpi_collector.wprp",
 
     # Optional fallback if WPRP not desired
     [string]$WprProfile
@@ -24,9 +26,12 @@ if (-not ([Security.Principal.WindowsPrincipal] `
     exit
 }
 
-# Ensure output directory
+# Build per-run subdirectory under OutputDir
+if ($RunName) {
+    $OutputDir = Join-Path $OutputDir $RunName
+}
 if (-not (Test-Path $OutputDir)) {
-    New-Item -ItemType Directory -Path $OutputDir | Out-Null
+    New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 }
 
 # Determine profile logic
