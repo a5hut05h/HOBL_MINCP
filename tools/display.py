@@ -39,6 +39,8 @@ class Tool(Scenario):
     Params.setDefault(module, 'hdr_auto', '', desc="Auto HDR (1=on, 0=off).", valOptions=["0", "1"])
     Params.setDefault(module, 'refresh_rate', '', desc="Refresh rate: 60, 120, or dynamic.", valOptions=["60", "120", "dynamic"])
     Params.setDefault(module, 'brightness', '', desc="Brightness (e.g. 65, 65%, 150nits).")
+    Params.setDefault(module, 'brightness_save', '', desc="Save current brightness to registry for later restore (1=save).", valOptions=["0", "1"])
+    Params.setDefault(module, 'brightness_restore', '', desc="Restore brightness from previously saved value (1=restore).", valOptions=["0", "1"])
     Params.setDefault(module, 'nits_map', '100nits:50% 150nits:65%', desc="Nits-to-slider mapping.")
 
     # HOBL registry key base for persisting initial state across scenario instances
@@ -175,6 +177,33 @@ class Tool(Scenario):
             self._call(["cmd.exe", "/c Powercfg.exe -SETDCVALUEINDEX scheme_balanced SUB_VIDEO aded5e82-b909-4619-9949-f5d71dac0bcb " + str(brightness_val)])
             self._call(["cmd.exe", "/c Powercfg.exe -SETACVALUEINDEX scheme_balanced SUB_VIDEO aded5e82-b909-4619-9949-f5d71dac0bcb " + str(brightness_val)])
             self._call(["cmd.exe", "/c Powercfg.exe -SETACTIVE scheme_balanced"])
+
+    def _save_brightness(self):
+        """Read current brightness from powercfg and save to DUT registry."""
+        result = self._call(["cmd.exe", "/C powercfg -query scheme_balanced SUB_VIDEO aded5e82-b909-4619-9949-f5d71dac0bcb"])
+        if not result or "Current AC Power Setting Index" not in result:
+            logging.warning("Could not read current brightness from powercfg.")
+            return
+
+        for line in result.splitlines():
+            if "Current AC Power Setting Index" in line:
+                match = re.search(r'0x([0-9a-fA-F]+)', line)
+                if match:
+                    brightness_val = str(int(match.group(1), 16))
+                    logging.info("Saving current brightness: %s", brightness_val)
+                    self._save_state("InitialBrightness", brightness_val)
+                    return
+        logging.warning("Could not parse brightness value from powercfg output.")
+
+    def _restore_brightness(self):
+        """Restore brightness from previously saved value in DUT registry."""
+        brightness_val = self._read_state("InitialBrightness")
+        if brightness_val is not None:
+            logging.info("Restoring brightness to: %s", brightness_val)
+            self._call(["cmd.exe", "/c Powercfg.exe -SETDCVALUEINDEX scheme_balanced SUB_VIDEO aded5e82-b909-4619-9949-f5d71dac0bcb " + brightness_val])
+            self._call(["cmd.exe", "/c Powercfg.exe -SETACVALUEINDEX scheme_balanced SUB_VIDEO aded5e82-b909-4619-9949-f5d71dac0bcb " + brightness_val])
+            self._call(["cmd.exe", "/c Powercfg.exe -SETACTIVE scheme_balanced"])
+        self._clear_state("InitialBrightness")
 
     # =========================================================================
     # CABC (Content Adaptive Brightness) — registry
@@ -846,8 +875,14 @@ class Tool(Scenario):
         cabc = Params.get(self.module, 'content_adaptive_brightness').strip()
         acm = Params.get(self.module, 'adaptive_color').strip()
         brightness = Params.get(self.module, 'brightness').strip()
+        brightness_save = Params.get(self.module, 'brightness_save').strip()
+        brightness_restore = Params.get(self.module, 'brightness_restore').strip()
 
-        # Brightness first (fast, no restore)
+        # Save current brightness before any changes (run once before a sweep)
+        if brightness_save == '1':
+            self._save_brightness()
+
+        # Brightness (fast, no per-scenario restore)
         if brightness:
             self._init_brightness(brightness)
 
@@ -873,6 +908,11 @@ class Tool(Scenario):
         return
 
     def testEndCallback(self):
+        # Restore brightness from saved value if requested (runs after measurement)
+        brightness_restore = Params.get(self.module, 'brightness_restore').strip()
+        if brightness_restore == '1':
+            self._restore_brightness()
+
         # Restore in reverse order of init
         self._restore_refresh_rate()
         self._restore_hdr()
