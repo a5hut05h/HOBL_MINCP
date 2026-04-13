@@ -18,7 +18,7 @@
 
 import os
 import re
-import glob
+import fnmatch
 import csv
 import logging
 import collections
@@ -60,7 +60,7 @@ def _collect_metrics(dirpath):
     metrics = collections.OrderedDict()
     basepath = "*metrics.csv"
 
-    for root, dirs, files in os.walk(dirpath):
+    for root, _, files in os.walk(dirpath):
         parent = os.path.abspath(os.path.join(root, ".."))
         parent_parent = os.path.abspath(os.path.join(parent, ".."))
 
@@ -70,10 +70,8 @@ def _collect_metrics(dirpath):
             continue
 
         for file in files:
-            path = os.path.join(root, file)
-            if glob.fnmatch.fnmatch(file, basepath):
-                dirname_lower = os.path.dirname(path).lower()
-                if any(skip in dirname_lower for skip in ["config_check", "training", "misc", "prep", "fail"]):
+            if fnmatch.fnmatch(file, basepath):
+                if any(skip in root.lower() for skip in ["config_check", "training", "misc", "prep", "fail"]):
                     continue
                 inputfile = os.path.join(root, file)
 
@@ -105,6 +103,8 @@ def _collect_metrics(dirpath):
                 with open(inputfile) as csvfile:
                     reader = csv.reader(csvfile, delimiter=',', quotechar='"')
                     for r in reader:
+                        if len(r) < 2:
+                            continue
                         key = r[0]
                         val = _convert_type(r[1])
                         if key not in metrics[compound_name]:
@@ -185,8 +185,8 @@ def _create_backlight_curve_sheet(wb, metrics, backlight_key, analog_key):
 
     table_start_row = row
     columns = [
-        ("Bucket", 10),
-        ("Slider %", 10),
+        ("Bucket", 23),
+        ("Slider %", 23),
         ("Backlight Power (W)", 22),
         ("Analog Power (W)", 20),
         ("Total Display Power (W)", 24),
@@ -273,15 +273,15 @@ def _create_backlight_curve_sheet(wb, metrics, backlight_key, analog_key):
 
     x_values = Reference(ws, min_col=2, min_row=data_start_row, max_row=data_end_row)
 
-    y_total = Reference(ws, min_col=5, min_row=table_start_row, max_row=data_end_row)
+    y_total = Reference(ws, min_col=5, min_row=data_start_row, max_row=data_end_row)
     series_total = Series(y_total, x_values, title="Total Display Power (W)")
     chart.series.append(series_total)
 
-    y_backlight = Reference(ws, min_col=3, min_row=table_start_row, max_row=data_end_row)
+    y_backlight = Reference(ws, min_col=3, min_row=data_start_row, max_row=data_end_row)
     series_bl = Series(y_backlight, x_values, title="Backlight Power (W)")
     chart.series.append(series_bl)
 
-    y_analog = Reference(ws, min_col=4, min_row=table_start_row, max_row=data_end_row)
+    y_analog = Reference(ws, min_col=4, min_row=data_start_row, max_row=data_end_row)
     series_analog = Series(y_analog, x_values, title="Analog Power (W)")
     chart.series.append(series_analog)
 
@@ -304,17 +304,13 @@ def _create_per_brightness_sheets(wb, metrics):
             runtype_order_list.append(test_name)
 
     for test_name in runtype_order_list:
-        runtype, shortname = test_name.split('.', 1)
-        if runtype not in summary_table_metrics:
-            summary_table_metrics[runtype] = collections.OrderedDict()
-
-    for test_name in runtype_order_list:
-        wb.create_sheet(test_name)
-        sheet = wb[test_name]
-        runtype, shortname = test_name.split('.', 1)
+        sheet = wb.create_sheet(test_name)
+        runtype, _ = test_name.split('.', 1)
+        summary_table_metrics.setdefault(runtype, collections.OrderedDict())
         summary_table[test_name] = collections.OrderedDict()
         row = 1
         end_col_num = 0
+        conditional_term_set = {'Power', 'MOS', 'Record Time', 'Drain Rate', 'Energy Drained', 'Duration', 'W)'}
         for key in metrics[test_name]:
             data_row = [key] + metrics[test_name][key]
             data_len = len(data_row)
@@ -325,19 +321,16 @@ def _create_per_brightness_sheets(wb, metrics):
                 data_row.append("NA")
 
             start_col_num = 2
-            col = openpyxl.utils.get_column_letter(start_col_num)
-            start = col + str(row)
-            col = openpyxl.utils.get_column_letter(end_col_num)
-            end = col + str(row)
-            avg_col = openpyxl.utils.get_column_letter(end_col_num + 1)
+            start = get_column_letter(start_col_num) + str(row)
+            end = get_column_letter(end_col_num) + str(row)
+            avg_col = get_column_letter(end_col_num + 1)
             if row == 1:
                 data_row += ['Average', 'Std Dev']
                 summary_formula = test_name.split('.', 1)[-1]
             else:
                 rng = start + ':' + end
                 data_row += ['=IFERROR(AVERAGE(' + rng + '),IF(COUNTIF(' + rng + ',' + start + ')=COUNTA(' + rng + '),' + start + ',"Various"))']
-                conditional_term_set = set(['Power', 'MOS', 'Record Time', 'Drain Rate', 'Energy Drained', 'Duration', 'W)'])
-                if any([x in key for x in conditional_term_set]):
+                if any(x in key for x in conditional_term_set):
                     data_row += ['=_xlfn.STDEV.P(' + rng + ')']
                     try:
                         mean = np.mean(metrics[test_name][key])
@@ -348,7 +341,7 @@ def _create_per_brightness_sheets(wb, metrics):
                                         mid_type='num', mid_value=mean, mid_color='FFFFFF',
                                         end_type='num', end_value=max_val+0.001, end_color='FF7777'))
                     except Exception:
-                        pass
+                        logging.debug("Skipped conditional formatting for %s in %s", key, test_name)
                 summary_formula = "='" + test_name + "'!" + avg_col + str(row)
             sheet.append(data_row)
             if "Power" in key or "MOS" in key:
@@ -381,7 +374,7 @@ def _create_power_summary_sheet(wb, summary_table, summary_table_metrics):
     col = 1
     first_runtype = True
     for compound_name in summary_table:
-        runtype, testname = compound_name.split('.', 1)
+        runtype, _ = compound_name.split('.', 1)
         if runtype not in summary_table_metrics:
             continue
         row = 1
