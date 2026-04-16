@@ -101,7 +101,7 @@
                 "description": "OK not logged in popup",
                 "enabled": true,
                 "id": "18KLKM1",
-                "text": "\ue007\ue007",
+                "text": "\ue007\ue007\ue007",
                 "type": "Type",
                 "typing_delay": "1000"
             },
@@ -111,7 +111,7 @@
                 "description": "PLAY",
                 "enabled": true,
                 "id": "18KLM5W",
-                "text": "\ue013\ue013\ue013\ue013\ue013\ue007",
+                "text": "\ue013\ue013\ue013\ue013\ue013\ue013\ue015\ue007",
                 "type": "Type",
                 "typing_delay": "500"
             },
