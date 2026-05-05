@@ -21,7 +21,7 @@ def run(scenario):
     
     # Create link to abl_docs if needed
     abl_docs_link = "/Users/Shared/abl_docs"
-    onedrive_docs = os.path.join(userprofile, "OneDrive/abl_docs")
+    onedrive_docs = userprofile+"/OneDrive/abl_docs"
     
     # Remove existing link if present
     scenario._call(["bash", "-c \"rm -f " + abl_docs_link + "\""], expected_exit_code="", fail_on_exception=False)
@@ -32,7 +32,7 @@ def run(scenario):
     # Upload Office docs for MacOS
     upload_successful = False
     doc_source = os.path.join(os.path.dirname(__file__), "abl_docs")
-    doc_dest = os.path.join(userprofile, "OneDrive")
+    doc_dest = userprofile+"/OneDrive"
     
     if os.path.exists(doc_source):
         for i in range(12):
