@@ -1,0 +1,22 @@
+[
+    {
+        "author": "dasashutosh",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-04",
+        "description": "",
+        "enabled": true,
+        "id": "1L73RRR",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Ctrl+Cmd+f (Resize Window)",
+        "enabled": true,
+        "id": "1L73RW5",
+        "text": "\ue009\ue03df",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    }
+]
