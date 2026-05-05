@@ -28,6 +28,28 @@ def run(scenario):
     
     # Create symbolic link
     scenario._call(["bash", "-c \"ln -s " + onedrive_docs + " " + abl_docs_link + "\""], fail_on_exception=False)
+
+    # Upload Word Normal.dotm template so custom shortcuts are available on the DUT.
+    normal_dotm_source = os.path.join(os.path.dirname(__file__), "abl_docs", "Normal.dotm")
+    if not os.path.exists(normal_dotm_source):
+        normal_dotm_source = os.path.join(os.path.dirname(__file__), "abl_docs", "normal.dotm")
+
+    if os.path.exists(normal_dotm_source):
+        # Stage upload through a path without spaces to avoid chmod splitting in _upload.
+        temp_template_upload_dest = "/Users/Shared"
+        temp_template_file = "/Users/Shared/Normal.dotm"
+        scenario._upload(normal_dotm_source, temp_template_upload_dest)
+
+        template_dest = userprofile + "/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Templates.localized"
+        scenario._call(["bash", "-c \"mkdir -p \\\"" + template_dest + "\\\"\""], fail_on_exception=False)
+        scenario._call([
+            "bash",
+            "-c \"cp -f \\\"" + temp_template_file + "\\\" \\\"" + template_dest + "/Normal.dotm\\\"\"",
+        ], fail_on_exception=False)
+
+        logging.info(f"Uploaded Word template {normal_dotm_source} to {template_dest}")
+    else:
+        scenario.fail("Normal.dotm was not found under scenarios\\macos\\_library\\productivity\\prod_setup\\abl_docs")
     
     # Upload Office docs for MacOS
     upload_successful = False
