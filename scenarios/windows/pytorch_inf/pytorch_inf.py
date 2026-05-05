@@ -14,19 +14,21 @@ from datetime import datetime
 class PytorchInf(core.app_scenario.Scenario):
 
     module = __module__.split('.')[-1]
-    prep_version = "10"
+    prep_version = "11"
     # prep_scenarios = [(module, prep_version)]
     resources = module + "_resources"
 
 
     # Set default parameters
     Params.setDefault(module, 'loops', '2')
+    Params.setDefault(module, 'use_custom_pytorch_wheel', 'false')
 
 
     def setUp(self):
         # Get parameters
         self.platform = Params.get('global', 'platform')
         self.loops = Params.get(self.module, 'loops')
+        self.use_custom_pytorch_wheel = Params.get(self.module, 'use_custom_pytorch_wheel').lower() == 'true'
 
         self.target = f"{self.dut_exec_path}\\{self.resources}"
 
@@ -55,8 +57,11 @@ class PytorchInf(core.app_scenario.Scenario):
             finally:
                 self._copy_data_from_remote(self.result_dir)
         else:
+            prep_cmd = f"{self.target}\\{self.module}_prep.ps1"
+            if self.use_custom_pytorch_wheel:
+                prep_cmd += " -useCustomPyTorchWheel"
             try:
-                self._call(["pwsh", f"{self.target}\\{self.module}_prep.ps1"])
+                self._call(["pwsh", prep_cmd])
             finally:
                 self._copy_data_from_remote(self.result_dir)
         self.createPrepStatusControlFile(self.prep_version)
