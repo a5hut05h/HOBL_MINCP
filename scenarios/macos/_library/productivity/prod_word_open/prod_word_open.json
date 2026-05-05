@@ -11,117 +11,21 @@
     },
     {
         "children": [],
-        "delay": "0",
-        "description": "",
+        "delay": "0.0",
+        "description": "Open test_long_doc",
         "enabled": true,
-        "id": "V2MVKY",
-        "include_path": "..\\..\\misc\\recording_phase_begin",
-        "type": "Include"
-    },
-    {
-        "children": [],
-        "delay": "0",
-        "description": "",
-        "enabled": true,
-        "id": "UHA64V",
-        "include_path": "..\\prod_word_switchto",
-        "type": "Include"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "",
-        "enabled": true,
-        "id": "UHA612",
-        "type": "Delay"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "ESC",
-        "enabled": true,
-        "id": "UWK84K",
-        "text": "\ue00c",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "9",
-        "description": "CMD+O to open file",
-        "enabled": false,
-        "id": "UFN19V",
-        "text": "\ue03do",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "CMD+SHIFT+G for Go to folder",
-        "enabled": false,
-        "id": "UFN2CA",
-        "text": "\ue03d\ue008g",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "Path to document",
-        "enabled": false,
-        "id": "UFN2CY",
-        "text": "/Users/Shared/abl_docs/word_productivity.docx",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "Enter",
-        "enabled": false,
-        "id": "UFN34E",
-        "text": "\ue006",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "Enter again to open",
-        "enabled": false,
-        "id": "UFN35F",
-        "text": "\ue006",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "10",
-        "description": "Wait for document to open",
-        "enabled": false,
-        "id": "UFN3M3",
-        "type": "Delay"
-    },
-    {
-        "children": [],
-        "delay": "0",
-        "description": "",
-        "enabled": true,
-        "id": "V2MW49",
-        "include_path": "..\\..\\misc\\recording_phase_end",
-        "params": [
-            {
-                "name": "[phase_category]",
-                "val_options": "",
-                "value": "productivity"
-            },
-            {
-                "name": "[phase_name]",
-                "val_options": "",
-                "value": "word_open"
-            }
+        "file_name": [
+            "code_1L054J5.py"
         ],
-        "type": "Include"
+        "id": "1L054J5",
+        "type": "Code"
+    },
+    {
+        "children": [],
+        "delay": "5",
+        "description": "",
+        "enabled": true,
+        "id": "1L05AAV",
+        "type": "Delay"
     }
 ]
