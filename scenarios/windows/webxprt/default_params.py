@@ -7,6 +7,7 @@ from utilities.open_source.modules import import_run_user_only
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
+    Params.setDefault('webxprt', 'version', '4', desc='', valOptions=['4', '5'])
     return
 
 def run_user_only():

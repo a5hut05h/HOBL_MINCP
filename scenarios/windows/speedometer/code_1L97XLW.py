@@ -12,6 +12,6 @@ def run(scenario):
     score = speedometer_score.split("\n")[2]
     logging.info("Speedometer Score: " + score)
 
-    speedometer_score_txt = os.path.join(scenario.result_dir, "speedometer_score.txt")
-    with open(speedometer_score_txt, "w") as f:
-        f.write("Speedometer Score: " + score)
+    speedometer_score_csv = os.path.join(scenario.result_dir, "speedometer_score.csv")
+    with open(speedometer_score_csv, "w") as f:
+        f.write("Speedometer Score," + score)

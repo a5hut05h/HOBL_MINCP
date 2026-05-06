@@ -102,6 +102,14 @@
             },
             {
                 "children": [],
+                "delay": "60",
+                "description": "Wait before checking if test finished",
+                "enabled": true,
+                "id": "1LAPPWX",
+                "type": "Delay"
+            },
+            {
+                "children": [],
                 "delay": "2",
                 "description": "",
                 "enabled": true,

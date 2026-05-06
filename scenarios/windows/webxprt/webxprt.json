@@ -10,7 +10,64 @@
         "type": "Information"
     },
     {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "1LALXRC",
+        "name": "[version]",
+        "type": "Set Default",
+        "val_options": "4,5",
+        "value": "4"
+    },
+    {
         "children": [
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "delay": "0.0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1LAM08F",
+                        "name": "[benchmark_site]",
+                        "type": "Set",
+                        "value": "https://www.principledtechnologies.com/benchmarkxprt/webxprt/2021/wx4_build_3_7_3/"
+                    }
+                ],
+                "description": "",
+                "enabled": true,
+                "eval_method": "==",
+                "id": "1LALYNK",
+                "left_term": "[version]",
+                "right_term": "4",
+                "type": "If"
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "delay": "0.0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1LALYCU",
+                        "name": "[benchmark_site]",
+                        "type": "Set",
+                        "value": "https://www.principledtechnologies.com/wx5/"
+                    }
+                ],
+                "description": "",
+                "enabled": true,
+                "id": "1LAM8JE",
+                "type": "Else"
+            },
+            {
+                "children": [],
+                "description": "",
+                "enabled": true,
+                "id": "1LALYNL",
+                "type": "End If"
+            },
             {
                 "children": [],
                 "delay": "0",
@@ -38,7 +95,7 @@
                     {
                         "name": "web_site_address",
                         "val_options": "",
-                        "value": "https://www.principledtechnologies.com/wx5/"
+                        "value": "[benchmark_site]"
                     },
                     {
                         "name": "new_tab",
@@ -67,71 +124,180 @@
     {
         "children": [
             {
-                "children": [],
-                "delay": "5",
-                "description": "webxprt main page",
-                "enabled": true,
-                "file_name": [
-                    "image_1L995XP.png"
+                "children": [
+                    {
+                        "children": [],
+                        "delay": "5",
+                        "description": "webxprt main menu",
+                        "enabled": true,
+                        "file_name": [
+                            "image_1LAMMEP.png"
+                        ],
+                        "h": "0.877",
+                        "id": "1LAMMEP",
+                        "recapture": false,
+                        "type": "Capture",
+                        "w": "0.636",
+                        "x": "0.170",
+                        "y": "0.076"
+                    },
+                    {
+                        "capture_id": "1LAMMEP",
+                        "children": [],
+                        "delay": "2",
+                        "description": "Start Test",
+                        "enabled": true,
+                        "exception_on": "No match",
+                        "file_name": [
+                            "image_1LAMMVF.png"
+                        ],
+                        "id": "1LAMMVF",
+                        "match_threshold": "",
+                        "primary": true,
+                        "scale": "",
+                        "type": "Click",
+                        "x": "0.500",
+                        "y": "0.500"
+                    },
+                    {
+                        "children": [],
+                        "delay": "480",
+                        "description": "8 minutes for test to be nearly finished",
+                        "enabled": true,
+                        "id": "1LAN7NJ",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0.5",
+                        "description": "",
+                        "enabled": true,
+                        "file_name": [
+                            "image_1LAMY2U.png"
+                        ],
+                        "h": "0.630",
+                        "id": "1LAMY2U",
+                        "recapture": false,
+                        "type": "Capture",
+                        "w": "0.524",
+                        "x": "0.235",
+                        "y": "0.076"
+                    },
+                    {
+                        "capture_id": "1LAMY2U",
+                        "children": [],
+                        "delay": "30",
+                        "description": "Test finished",
+                        "enabled": true,
+                        "file_name": [
+                            "image_1LAMY97.png"
+                        ],
+                        "h": "0.630",
+                        "id": "1LAMY97",
+                        "timeout": "600",
+                        "type": "Check Until Found",
+                        "w": "0.524",
+                        "x": "0.235",
+                        "y": "0.076"
+                    }
                 ],
-                "h": "0.729",
-                "id": "1L995XP",
-                "recapture": false,
-                "type": "Capture",
-                "w": "0.820",
-                "x": "0.099",
-                "y": "0.088"
-            },
-            {
-                "capture_id": "1L995XP",
-                "children": [],
-                "delay": "2",
-                "description": "Start Test",
-                "enabled": true,
-                "exception_on": "No match",
-                "file_name": [
-                    "image_1L9967V.png"
-                ],
-                "id": "1L9967V",
-                "match_threshold": "",
-                "primary": true,
-                "scale": "",
-                "type": "Click",
-                "x": "0.500",
-                "y": "0.500"
-            },
-            {
-                "children": [],
-                "delay": "5",
                 "description": "",
                 "enabled": true,
-                "file_name": [
-                    "image_1L998TW.png"
-                ],
-                "h": "0.602",
-                "id": "1L998TW",
-                "recapture": false,
-                "type": "Capture",
-                "w": "0.662",
-                "x": "0.150",
-                "y": "0.079"
+                "eval_method": "==",
+                "id": "1LAMLYU",
+                "left_term": "[version]",
+                "right_term": "4",
+                "type": "If"
             },
             {
-                "capture_id": "1L998TW",
-                "children": [],
-                "delay": "30",
+                "children": [
+                    {
+                        "children": [],
+                        "delay": "5",
+                        "description": "webxprt main page",
+                        "enabled": true,
+                        "file_name": [
+                            "image_1L995XP.png"
+                        ],
+                        "h": "0.729",
+                        "id": "1L995XP",
+                        "recapture": false,
+                        "type": "Capture",
+                        "w": "0.820",
+                        "x": "0.099",
+                        "y": "0.088"
+                    },
+                    {
+                        "capture_id": "1L995XP",
+                        "children": [],
+                        "delay": "2",
+                        "description": "Start Test",
+                        "enabled": true,
+                        "exception_on": "No match",
+                        "file_name": [
+                            "image_1L9967V.png"
+                        ],
+                        "id": "1L9967V",
+                        "match_threshold": "",
+                        "primary": true,
+                        "scale": "",
+                        "type": "Click",
+                        "x": "0.500",
+                        "y": "0.500"
+                    },
+                    {
+                        "children": [],
+                        "delay": "120",
+                        "description": "2 minutes for test to finish",
+                        "enabled": true,
+                        "id": "1LAN865",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "5",
+                        "description": "",
+                        "enabled": true,
+                        "file_name": [
+                            "image_1L998TW.png"
+                        ],
+                        "h": "0.602",
+                        "id": "1L998TW",
+                        "recapture": false,
+                        "type": "Capture",
+                        "w": "0.662",
+                        "x": "0.150",
+                        "y": "0.079"
+                    },
+                    {
+                        "capture_id": "1L998TW",
+                        "children": [],
+                        "delay": "30",
+                        "description": "Test finished",
+                        "enabled": true,
+                        "file_name": [
+                            "image_1L99953.png"
+                        ],
+                        "h": "0.602",
+                        "id": "1L99953",
+                        "timeout": "180",
+                        "type": "Check Until Found",
+                        "w": "0.662",
+                        "x": "0.150",
+                        "y": "0.079"
+                    }
+                ],
                 "description": "",
                 "enabled": true,
-                "file_name": [
-                    "image_1L99953.png"
-                ],
-                "h": "0.602",
-                "id": "1L99953",
-                "timeout": "240",
-                "type": "Check Until Found",
-                "w": "0.662",
-                "x": "0.150",
-                "y": "0.079"
+                "id": "1LAMM2F",
+                "type": "Else"
+            },
+            {
+                "children": [],
+                "description": "",
+                "enabled": true,
+                "id": "1LAMLYV",
+                "type": "End If"
             },
             {
                 "children": [],
