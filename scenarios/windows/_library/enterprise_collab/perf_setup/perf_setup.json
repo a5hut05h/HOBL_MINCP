@@ -33,7 +33,7 @@
         "children": [],
         "delay": "0",
         "description": "",
-        "enabled": true,
+        "enabled": false,
         "id": "1HX83P3",
         "include_path": "scenarios\\windows\\_library\\enterprise_collab\\restart_diagtrack",
         "type": "Include"
