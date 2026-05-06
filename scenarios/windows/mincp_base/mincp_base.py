@@ -15,6 +15,13 @@ class MincpBase(core.app_scenario.Scenario):
     # Set default parameters:
     default_params.run()
 
+    module = __module__.split('.')[-1]
+
+    if Params.get(module, 'perf_run') == '1':
+        logging.info("Adding stress_utc tool for parsing perf metrics")
+        Params.setOverride("global", "tools", "+stress_utc")
+        Params.setOverride("stress_utc", "provider", "perf_utc.wprp")
+
     actions = None
 
     def setUp(self):
