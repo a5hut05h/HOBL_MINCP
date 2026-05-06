@@ -316,41 +316,15 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1H6JNYW",
-                "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
-                "params": [
-                    {
-                        "name": "[app_name]",
-                        "val_options": "",
-                        "value": "File Explorer"
-                    },
-                    {
-                        "name": "[etw_event_tag]",
-                        "val_options": "",
-                        "value": "FileExplorerLaunch"
-                    },
-                    {
-                        "name": "[app_open_delay]",
-                        "val_options": "",
-                        "value": "3"
-                    }
-                ],
+                "id": "1L8MWR0",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_open",
                 "type": "Include"
             },
             {
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": true,
-                "id": "1FXHRH8",
-                "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_open_file_explorer",
-                "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
+                "enabled": false,
                 "id": "1FXHYE6",
                 "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_run",
                 "type": "Include"
@@ -360,32 +334,15 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1H6JPHH",
-                "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
-                "params": [
-                    {
-                        "name": "[app_name]",
-                        "val_options": "",
-                        "value": "[userprofile]\\onedrive\\abl_docs\\FamilyBudget.xlsx"
-                    },
-                    {
-                        "name": "[etw_event_tag]",
-                        "val_options": "",
-                        "value": "ExcelLaunch"
-                    },
-                    {
-                        "name": "[app_open_delay]",
-                        "val_options": "",
-                        "value": "3"
-                    }
-                ],
+                "id": "1L8MWJH",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_open",
                 "type": "Include"
             },
             {
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": true,
+                "enabled": false,
                 "id": "1FXHU97",
                 "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_run",
                 "type": "Include"
@@ -702,32 +659,15 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1H6U664",
-                "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
-                "params": [
-                    {
-                        "name": "[app_name]",
-                        "val_options": "",
-                        "value": "[userprofile]\\onedrive\\abl_docs\\test_long_doc.docx"
-                    },
-                    {
-                        "name": "[etw_event_tag]",
-                        "val_options": "",
-                        "value": ""
-                    },
-                    {
-                        "name": "[app_open_delay]",
-                        "val_options": "",
-                        "value": "3"
-                    }
-                ],
+                "id": "1L8MXVP",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_open",
                 "type": "Include"
             },
             {
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": true,
+                "enabled": false,
                 "id": "1H28KCM",
                 "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_run",
                 "type": "Include"
@@ -773,7 +713,7 @@
         "eval_method": "in",
         "id": "1FUNWTF",
         "left_term": "productivity",
-        "right_term": "[enterprise_collab:mincp_workloads]",
+        "right_term": "[mincp_workloads]",
         "type": "If"
     },
     {
@@ -810,7 +750,7 @@
         "eval_method": "in",
         "id": "1HH4RJV",
         "left_term": "click_todo",
-        "right_term": "[enterprise_collab:mincp_workloads]",
+        "right_term": "[mincp_workloads]",
         "type": "If"
     },
     {
@@ -1101,6 +1041,42 @@
         "type": "End If"
     },
     {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1L8PTRW",
+                "include_path": "scenarios\\windows\\_library\\misc\\switchto_file_explorer",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1L8PU16",
+                "include_path": "scenarios\\windows\\_library\\misc\\switchto_file_explorer",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "eval_method": "in",
+        "id": "1L8PHXP",
+        "left_term": "file_explorer",
+        "right_term": "[mincp_workloads]",
+        "type": "If"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "1L8PHXR",
+        "type": "End If"
+    },
+    {
         "children": [],
         "delay": "0.0",
         "description": "Tab 10",
@@ -1296,6 +1272,24 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
+                "id": "1L9T2FH",
+                "include_path": "scenarios\\windows\\_library\\misc\\start_launch",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1L9T2KK",
+                "include_path": "scenarios\\windows\\_library\\misc\\start_launch",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
                 "id": "1HECJT4",
                 "include_path": "scenarios\\windows\\_library\\misc\\snipping_tool",
                 "type": "Include"
@@ -1305,32 +1299,15 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1H6U7P7",
-                "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
-                "params": [
-                    {
-                        "name": "[app_name]",
-                        "val_options": "",
-                        "value": "Outlook Classic"
-                    },
-                    {
-                        "name": "[etw_event_tag]",
-                        "val_options": "",
-                        "value": "OutlookLaunch"
-                    },
-                    {
-                        "name": "[app_open_delay]",
-                        "val_options": "",
-                        "value": "3"
-                    }
-                ],
+                "id": "1L8MYJU",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_open",
                 "type": "Include"
             },
             {
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": true,
+                "enabled": false,
                 "id": "1H6JTLL",
                 "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_run",
                 "type": "Include"
