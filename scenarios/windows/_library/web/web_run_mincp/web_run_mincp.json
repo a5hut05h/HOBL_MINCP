@@ -74,7 +74,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1V7AJ",
+                "id": "1LA9NWK",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_reddit",
                 "params": [
                     {
@@ -85,7 +85,12 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
+                    },
+                    {
+                        "name": "[web_site_load_time]",
+                        "val_options": "",
+                        "value": "20"
                     }
                 ],
                 "type": "Include"
@@ -140,7 +145,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1V815",
+                "id": "1LA9P5N",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_instagram",
                 "params": [
                     {
@@ -151,7 +156,12 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
+                    },
+                    {
+                        "name": "[web_site_load_time]",
+                        "val_options": "",
+                        "value": "20"
                     }
                 ],
                 "type": "Include"
@@ -206,7 +216,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1A93KF2",
+                "id": "1LA9PFA",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_amazon_got",
                 "params": [
                     {
@@ -267,7 +277,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1V90X",
+                "id": "1LA9R6U",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_amazon_vacuum",
                 "params": [
                     {
@@ -278,7 +288,7 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
                     }
                 ],
                 "type": "Include"
@@ -324,7 +334,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1FXHYE6",
                 "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_run",
                 "type": "Include"
@@ -342,7 +352,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1FXHU97",
                 "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_run",
                 "type": "Include"
@@ -403,7 +413,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1V9F0",
+                "id": "1LA9T2N",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_google_images_apollo",
                 "params": [
                     {
@@ -414,7 +424,12 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
+                    },
+                    {
+                        "name": "[web_site_load_time]",
+                        "val_options": "",
+                        "value": "15"
                     }
                 ],
                 "type": "Include"
@@ -469,7 +484,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1V9J1",
+                "id": "1LA9TCT",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_google_images_london",
                 "params": [
                     {
@@ -480,7 +495,7 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
                     }
                 ],
                 "type": "Include"
@@ -570,7 +585,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "110FT6A",
+                "id": "1LA9TMW",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_youtube_tos",
                 "params": [
                     {
@@ -581,12 +596,22 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
                     },
                     {
                         "name": "[enable_pause]",
                         "val_options": "0,1",
                         "value": "1"
+                    },
+                    {
+                        "name": "[full_screen]",
+                        "val_options": "0,1",
+                        "value": "0"
+                    },
+                    {
+                        "name": "[duration]",
+                        "val_options": "",
+                        "value": "120"
                     }
                 ],
                 "type": "Include"
@@ -667,7 +692,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1H28KCM",
                 "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_run",
                 "type": "Include"
@@ -836,7 +861,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1VA6C",
+                "id": "1LA9U5E",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_wikipedia",
                 "params": [
                     {
@@ -847,7 +872,12 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
+                    },
+                    {
+                        "name": "[web_site_load_time]",
+                        "val_options": "",
+                        "value": "15"
                     }
                 ],
                 "type": "Include"
@@ -937,7 +967,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1VATC",
+                "id": "1LA9V70",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_youtube_nasa",
                 "params": [
                     {
@@ -948,7 +978,12 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
+                    },
+                    {
+                        "name": "[web_site_load_time]",
+                        "val_options": "",
+                        "value": "15"
                     }
                 ],
                 "type": "Include"
@@ -1100,7 +1135,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1VAWC",
+                "id": "1LA9VLW",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_google_search_belgium",
                 "params": [
                     {
@@ -1111,7 +1146,7 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
                     }
                 ],
                 "type": "Include"
@@ -1166,7 +1201,7 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1VCC1",
+                "id": "1LA9VTY",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_the_verge",
                 "params": [
                     {
@@ -1177,7 +1212,12 @@
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
+                    },
+                    {
+                        "name": "[web_site_load_time]",
+                        "val_options": "",
+                        "value": "20"
                     }
                 ],
                 "type": "Include"
@@ -1223,18 +1263,18 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "W1VCPR",
+                "id": "1LA9W9J",
                 "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_google_search_super_bowl",
                 "params": [
                     {
                         "name": "[new_tab]",
                         "val_options": "0, 1",
-                        "value": "1"
+                        "value": "0"
                     },
                     {
                         "name": "[load_only]",
                         "val_options": "0,1",
-                        "value": "[load_only]"
+                        "value": "0"
                     }
                 ],
                 "type": "Include"
@@ -1307,7 +1347,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1H6JTLL",
                 "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_run",
                 "type": "Include"
