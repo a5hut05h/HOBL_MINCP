@@ -74,7 +74,7 @@
                 "file_name": [
                     "image_1L97CE7.png"
                 ],
-                "h": "0.814",
+                "h": "0.868",
                 "id": "1L97CE7",
                 "recapture": false,
                 "type": "Capture",
@@ -116,7 +116,7 @@
                 "file_name": [
                     "image_1L97J46.png"
                 ],
-                "h": "0.810",
+                "h": "0.866",
                 "id": "1L97J46",
                 "recapture": false,
                 "type": "Capture",
@@ -133,7 +133,7 @@
                 "file_name": [
                     "image_1L97JWN.png"
                 ],
-                "h": "0.810",
+                "h": "0.866",
                 "id": "1L97JWN",
                 "timeout": "180",
                 "type": "Check Until Found",
