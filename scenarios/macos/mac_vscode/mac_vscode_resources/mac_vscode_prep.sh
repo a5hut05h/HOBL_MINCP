@@ -160,6 +160,27 @@ check_status "VS Code checkout v1.106.2"
 
 # 7. Install npm dependencies
 log "-- Installing npm dependencies (this may take 10-20 minutes)..."
+# First attempt - this will fail on @vscode/spdlog due to Apple Clang consteval issue on Darwin 25.4+
+npm install --loglevel=error 2>/dev/null
+
+# Patch bundled fmt in @vscode/spdlog to work around Apple Clang consteval issue
+SPDLOG_FMT_DIR="node_modules/@vscode/spdlog/deps/spdlog/include/spdlog/fmt/bundled"
+if [ -d "$SPDLOG_FMT_DIR" ]; then
+    log "-- Patching spdlog fmt headers (consteval -> constexpr)"
+    sed -i '' 's/consteval/constexpr/g' "$SPDLOG_FMT_DIR/format.h"
+    sed -i '' 's/consteval/constexpr/g' "$SPDLOG_FMT_DIR/core.h"
+    check_status "spdlog fmt patch"
+
+    # Rebuild just spdlog with the patched source (npm uses its bundled node-gyp)
+    log "-- Rebuilding @vscode/spdlog..."
+    npm rebuild @vscode/spdlog
+    check_status "spdlog rebuild"
+else
+    log "-- No spdlog fmt patch needed"
+fi
+
+# Re-run npm install to complete any remaining steps (postinstall, etc.)
+log "-- Completing npm install..."
 npm install --loglevel=error
 check_status "npm install"
 
