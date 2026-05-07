@@ -114,6 +114,28 @@
                     }
                 ],
                 "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "2",
+                "description": "scrolling down to handle case for smaller scaling factor",
+                "direction": "down",
+                "enabled": true,
+                "id": "1LCW931",
+                "type": "Scroll",
+                "x": "0.465",
+                "y": "0.487"
+            },
+            {
+                "children": [],
+                "delay": "2",
+                "description": "",
+                "direction": "down",
+                "enabled": false,
+                "id": "1LCW937",
+                "type": "Scroll",
+                "x": "0.465",
+                "y": "0.487"
             }
         ],
         "description": "",
@@ -133,7 +155,7 @@
                         "file_name": [
                             "image_1LAMMEP.png"
                         ],
-                        "h": "0.877",
+                        "h": "0.900",
                         "id": "1LAMMEP",
                         "recapture": false,
                         "type": "Capture",
@@ -219,7 +241,7 @@
                         "file_name": [
                             "image_1L995XP.png"
                         ],
-                        "h": "0.729",
+                        "h": "0.900",
                         "id": "1L995XP",
                         "recapture": false,
                         "type": "Capture",
