@@ -334,7 +334,12 @@ def main():
     parser.add_argument('--log-dir', type=str, help='Directory to save metrics CSV file (default: current directory)')
     args = parser.parse_args()
 
-    device = 'cuda' if args.gpu and torch.cuda.is_available() else 'cpu'
+    if args.gpu and torch.cuda.is_available():
+        device = 'cuda'
+    elif args.gpu and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        device = 'mps'
+    else:
+        device = 'cpu'
     model_name = args.model
     
     # Check cache management modes first

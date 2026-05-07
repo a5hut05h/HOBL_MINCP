@@ -20,12 +20,14 @@ class MacPytorchInf(core.app_scenario.Scenario):
 
     # Set default parameters
     Params.setDefault(module, 'loops', '2')
+    Params.setDefault(module, 'use_gpu', 'true')
 
 
     def setUp(self):
         # Get parameters
         self.platform = Params.get('global', 'platform')
         self.loops = Params.get(self.module, 'loops')
+        self.use_gpu = Params.get(self.module, 'use_gpu').lower() == 'true'
 
         self.target = f"{self.dut_exec_path}/{self.resources}"
 
@@ -56,7 +58,10 @@ class MacPytorchInf(core.app_scenario.Scenario):
     def runTest(self):
         for i in range(int(self.loops)):
             logging.info(f"Running loop {i + 1}")
-            self._call(["zsh", f"{self.target}/{self.module}_run.sh"], timeout=3600)
+            run_cmd = f"{self.target}/{self.module}_run.sh"
+            if not self.use_gpu:
+                run_cmd += " --no-gpu"
+            self._call(["zsh", run_cmd], timeout=3600)
 
             # TODO: Do we need to call teardown script between each loop to clear cache?
 

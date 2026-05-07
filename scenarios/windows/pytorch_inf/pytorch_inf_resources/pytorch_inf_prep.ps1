@@ -3,7 +3,10 @@
 
 param(
     [string]$logFile = "",
-    [switch]$useCustomPyTorchWheel = $false
+    [string]$customResourcesPath = "",
+    [switch]$useCustomPyTorchWheel = $false,
+    [switch]$installCuda = $false,
+    [switch]$installCudnn = $false
 )
 
 $scriptDrive = Split-Path -Qualifier $PSScriptRoot
@@ -274,17 +277,14 @@ if ($isARM64) {
     $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 }
 
-# --- Custom wheel: Install CUDA Toolkit and cuDNN from custom_bits ---
-if ($useCustomPyTorchWheel) {
-    "-- Installing custom dependencies for custom PyTorch wheel" | log
-    $customBitsDir = "$scriptDrive\hobl_data\custom_bits"
-    if (-not (Test-Path $customBitsDir)) {
-        " ERROR - Custom bits directory not found: $customBitsDir" | log
+# --- Install CUDA Toolkit (when -installCuda is specified) ---
+if ($installCuda) {
+    "-- Installing CUDA Toolkit" | log
+    if (-not $customResourcesPath -or -not (Test-Path $customResourcesPath)) {
+        " ERROR - Custom resources path required for CUDA install: $customResourcesPath" | log
         Exit 1
     }
-
-    # --- Install CUDA Toolkit from exe (silent) ---
-    $cudaExe = Get-ChildItem -Path $customBitsDir -Filter "cuda_*.exe" | Select-Object -First 1
+    $cudaExe = Get-ChildItem -Path $customResourcesPath -Filter "cuda_*.exe" | Select-Object -First 1
     if ($cudaExe) {
         "Found CUDA Toolkit installer: $($cudaExe.Name)" | log
         "Installing CUDA Toolkit (silent, this may take several minutes)..." | log
@@ -298,7 +298,8 @@ if ($useCustomPyTorchWheel) {
         # Refresh PATH so nvcc is available
         $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
     } else {
-        "No CUDA Toolkit installer (cuda_*.exe) found in $customBitsDir, assuming already installed" | log
+        " ERROR - No cuda_*.exe found in: $customResourcesPath" | log
+        Exit 1
     }
 
     # Verify nvcc is available
@@ -310,8 +311,25 @@ if ($useCustomPyTorchWheel) {
         Exit 1
     }
 
-    # --- Install cuDNN from exe (silent) ---
-    $cudnnExe = Get-ChildItem -Path $customBitsDir -Filter "cudnn*.exe" | Select-Object -First 1
+    # Ensure CUDA_PATH is set for this session
+    if (-not $env:CUDA_PATH) {
+        $env:CUDA_PATH = [System.Environment]::GetEnvironmentVariable("CUDA_PATH", "Machine")
+    }
+    if ($env:CUDA_PATH) {
+        "CUDA_PATH: $env:CUDA_PATH" | log
+    } else {
+        "WARNING: CUDA_PATH not set. torch.cuda.is_available() may return False." | log
+    }
+}
+
+# --- Install cuDNN (when -installCudnn is specified) ---
+if ($installCudnn) {
+    "-- Installing cuDNN" | log
+    if (-not $customResourcesPath -or -not (Test-Path $customResourcesPath)) {
+        " ERROR - Custom resources path required for cuDNN install: $customResourcesPath" | log
+        Exit 1
+    }
+    $cudnnExe = Get-ChildItem -Path $customResourcesPath -Filter "cudnn*.exe" | Select-Object -First 1
     if ($cudnnExe) {
         "Found cuDNN installer: $($cudnnExe.Name)" | log
         "Installing cuDNN (silent)..." | log
@@ -322,19 +340,9 @@ if ($useCustomPyTorchWheel) {
         }
         "cuDNN installed successfully" | log
     } else {
-        "No cuDNN installer found in $customBitsDir, assuming already installed" | log
+        " ERROR - No cudnn*.exe found in: $customResourcesPath" | log
+        Exit 1
     }
-
-    # Ensure CUDA_PATH is set for this session (installer typically sets it persistently)
-    if (-not $env:CUDA_PATH) {
-        $env:CUDA_PATH = [System.Environment]::GetEnvironmentVariable("CUDA_PATH", "Machine")
-    }
-    if ($env:CUDA_PATH) {
-        "CUDA_PATH: $env:CUDA_PATH" | log
-    } else {
-        "WARNING: CUDA_PATH not set. torch.cuda.is_available() may return False." | log
-    }
-    "Custom dependencies setup complete" | log
 }
 
 # --- Install pyenv-win ---
@@ -580,15 +588,13 @@ if ($currentPythonVersion -like "*$expectedVersionPattern*") {
 if ($useCustomPyTorchWheel) {
     # --- Custom wheel path: install custom PyTorch wheel + remaining deps ---
     "-- Installing PyTorch from custom wheel" | log
-    $wheelsDir = "$scriptDrive\hobl_data\wheels"
-    if (-not (Test-Path $wheelsDir)) {
-        " ERROR - Wheels directory not found: $wheelsDir" | log
-        " ERROR - Place the custom PyTorch wheel in: $wheelsDir" | log
+    if (-not $customResourcesPath -or -not (Test-Path $customResourcesPath)) {
+        " ERROR - Custom resources path required for custom wheel install: $customResourcesPath" | log
         Exit 1
     }
-    $wheelFile = Get-ChildItem -Path $wheelsDir -Filter "torch-*.whl" | Select-Object -First 1
+    $wheelFile = Get-ChildItem -Path $customResourcesPath -Filter "torch-*.whl" | Select-Object -First 1
     if (-not $wheelFile) {
-        " ERROR - No torch-*.whl found in: $wheelsDir" | log
+        " ERROR - No torch-*.whl found in: $customResourcesPath" | log
         " ERROR - No matching custom PyTorch wheel found." | log
         Exit 1
     }

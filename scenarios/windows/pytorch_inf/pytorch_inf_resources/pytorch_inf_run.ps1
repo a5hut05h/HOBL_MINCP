@@ -3,7 +3,8 @@
 
 param(
     [string]$logFile = "",
-    [string]$startTime = (Get-Date).ToString("o")
+    [string]$startTime = (Get-Date).ToString("o"),
+    [switch]$noGpu = $false
 )
 
 # 9F0F6E2E-8D06-4D2F-B8F5-6F1F2D5A1C01 is a custom provider we use to emit phase markers from the scenario script (optional, may not be present)
@@ -270,7 +271,12 @@ Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
 "-- Run LLM Phi-4-mini inferencing" | log
-python inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" > "$logDir\pytorch_inf_output.txt" 2>&1
+$inferenceArgs = "--prompt `"What is the meaning of life?`" --log-dir `"$logDir`""
+if ($noGpu) {
+    $inferenceArgs += " --no-gpu"
+    "Running in CPU-only mode (--no-gpu)" | log
+}
+python inference.py $inferenceArgs > "$logDir\pytorch_inf_output.txt" 2>&1
 check($lastexitcode)
 Write-RunPhaseMarker "phase.run_build.end"
 Write-RunPhaseMarker "phase.run_results.start"
