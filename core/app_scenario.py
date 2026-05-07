@@ -1741,7 +1741,7 @@ class Scenario(unittest.TestCase):
                                 except Exception:
                                     result_time = None
 
-                            # NOTE: This fallback change is done only to support MTL-SU-IDCLAB-23,
+                            # NOTE: This fallback change is to support other locales,
                             # where `forfiles` returns values like "08-03-2026 17:00:47".
                             if result_time is None and len(time_pieces) >= 2:
                                 mod_time_str = time_pieces[0] + " " + time_pieces[1]
@@ -1919,10 +1919,12 @@ class Scenario(unittest.TestCase):
         return True
 
     ''' Creates the prep status file if there is no error or failures. If exists, deletes first. '''
-    def createPrepStatusControlFile(self, suffix=""):
+    def createPrepStatusControlFile(self, suffix="", module=""):
         if isinstance(suffix, list):
             suffix = self._getLatestFileTimestampSuffix(suffix)
-        path = os.path.join(self.dut_exec_path, "prep_status", self._module + suffix)
+        if module == "":
+            module = self._module
+        path = os.path.join(self.dut_exec_path, "prep_status", module + suffix)
         if self.platform.lower() == "macos":
             path = path.replace("\\", "/")
         self._remote_make_dir(path, True)
