@@ -117,6 +117,7 @@ class Scenario(unittest.TestCase):
         self.typing_delay = Params.get('global', 'typing_delay')
         self.dut_scaling_override = Params.get('global', 'dut_scaling_override')
         self.dut_coord_scaler = float(Params.get('global', 'dut_coord_scaler'))
+        self.dashboard_url = Params.get('global', 'dashboard_url')
 
         self.web_replay_run = Params.get('global', 'web_replay_run')
         self.web_replay_action = Params.get('global', 'web_replay_action')
@@ -127,6 +128,9 @@ class Scenario(unittest.TestCase):
         self.web_replay_http_proxy_port = Params.get('global', 'web_replay_http_proxy_port')
         self.web_replay_excludes_list = Params.get('global', 'web_replay_excludes_list')
         self.web_replay_ip = Params.get('global', 'web_replay_ip')
+
+        # Output full hobl command to log file
+        logging.debug("Hobl Command: " + " ".join(sys.argv))
 
         if self.platform.lower() == "macos":
             # On MacOS, 300ms tends to be a long press, so we reduce the default click time.
@@ -213,6 +217,10 @@ class Scenario(unittest.TestCase):
             # Store the resolved IP in the Params object
             Params.setCalculated("dut_resolved_ip", self.dut_resolved_ip)
 
+        # Checking for local execution and running from web ui. If so then we want to kill web ui.
+        if self.dut_ip == "127.0.0.1" and self.dashboard_url != '':
+            self._kill("msedge.exe")
+            
         # Set up dut_exec_path and dut_data_path.  Doing it before tools initialized in case they need it.
         if Params.get('global', 'local_execution') == '1':
             self.dut_exec_path = "C:\\hobl_bin"
@@ -451,7 +459,7 @@ class Scenario(unittest.TestCase):
         if (Params.get('global', 'module_name') != ""):
             test_name = Params.get('global', 'module_name')
 
-        self.dashboard_url = Params.get('global', 'dashboard_url')
+        
         url = ""
         if self.dashboard_url != '':
             url = urlunparse(
@@ -481,9 +489,12 @@ class Scenario(unittest.TestCase):
             logging.info("Running pre-config_check.")
 
             # Write hobl version
-            with open("hobl_version.txt", "r") as fo:
-                hobl_ver = fo.readline(50).strip()
-                
+            hobl_ver = "Unknown"
+            try:
+                with open("hobl_version.txt", "r") as fo:
+                    hobl_ver = fo.readline(50).strip()
+            except Exception as e:
+                logging.warning(f"Failed to read hobl_version.txt: {e}")
 
             override_dict = {}
             override_dict["Hardware Version"] = Params.get('global', 'hardware_version', log = False)
@@ -564,6 +575,12 @@ class Scenario(unittest.TestCase):
             # Cancel any existing traces first.
             self._call(
                 ["cmd.exe", "/c wpr.exe -cancel > null 2>&1"], expected_exit_code="")
+            
+            # Getting built in providers to support that as well when calling for etl providers
+            output = self._call(["cmd.exe", "/c wpr.exe -profiles"], expected_exit_code="")
+            lines = output.strip().split('\n')
+            built_in_profiles = [line.split()[0].lower() for line in lines[2:] if line.strip()]
+            
 
             provider_list = self.trace_providers.split()
             provider_list = list(set(provider_list)) #remove any duplicate wprp files
@@ -571,6 +588,12 @@ class Scenario(unittest.TestCase):
 
             for profile in provider_list:
                 try:
+                    # Checking if provider provided was a built in one. 
+                    if profile.lower() in built_in_profiles:
+                        logging.debug("Profile " + profile + " is a built in profile, no need to upload.")
+                        wpr_command = wpr_command + " -start " + profile
+                        continue
+
                     logging.debug("Attempting to move " + profile)
                     self._upload(self.resolve("providers\\" + profile), self.dut_exec_path)
 
@@ -579,30 +602,26 @@ class Scenario(unittest.TestCase):
                     raise Exception("Couldn't find provider " + profile)
                     
 
-            # Start ETL trace. In filemode use an instance name so we can avoid collisions with existing tracing sessions.
+            # Start ETL trace.
             try:
                 if Params.get('global', 'trace_filemode') == '1':
-                    self._call(["cmd.exe", "/c wpr.exe" + wpr_command + " -filemode -instancename perfTrace"])
+                    self._call(["cmd.exe", "/c wpr.exe" + wpr_command + " -filemode"])
                 else:
                     self._call(["cmd.exe", "/c wpr.exe" + wpr_command])
             except Exception as e:
                 err_msg = str(e)
                 if "-984076287" in err_msg or "0xc5583001" in err_msg.lower():
                     logging.warning("WPR reported profiles already running. Retrying trace start after cancel.")
-                    self._call(["cmd.exe", "/c wpr.exe -cancel -instancename perfTrace > null 2>&1"], expected_exit_code="")
                     self._call(["cmd.exe", "/c wpr.exe -cancel > null 2>&1"], expected_exit_code="")
                     if Params.get('global', 'trace_filemode') == '1':
-                        self._call(["cmd.exe", "/c wpr.exe" + wpr_command + " -filemode -instancename perfTrace"])
+                        self._call(["cmd.exe", "/c wpr.exe" + wpr_command + " -filemode"])
                     else:
                         self._call(["cmd.exe", "/c wpr.exe" + wpr_command])
                 else:
                     raise
 
             # Mark beginning of test
-            if Params.get('global', 'trace_filemode') == '1':
-                self._call(["cmd.exe", '/c wpr.exe -marker "test_begin" -instancename perfTrace'])
-            else:
-                self._call(["cmd.exe", '/c wpr.exe -marker "test_begin"'])
+            self._call(["cmd.exe", '/c wpr.exe -marker "test_begin"'])
             self.trace_started = True
 
         # Trigger global test begin callback
@@ -758,6 +777,7 @@ class Scenario(unittest.TestCase):
         logging.info("Life monitoring thread started")
         # Poll DUT to see if it's still responsive, if not, raise timeout exception
         file_path = self.result_dir + os.sep + 'battery_level.txt'
+        csv_path = self.result_dir + os.sep + 'battery_level.csv'
         while(True):
             try:
                 if self.platform.lower() == 'windows':
@@ -772,13 +792,26 @@ class Scenario(unittest.TestCase):
                         # logging.info("RTC Wake timer reset")
                     time.sleep(900)
                 elif self.platform.lower() == 'macos':
-                    result = self._call(["pmset", "-g batt"], blocking=True)
-                    level = result.split("\n")[1].split("\t")[1].split("%")[0]
+                    # Get AppleRawCurrentCapacity level via ioreg
+                    raw_current_capacity_result = self._call(["bash", '-c "ioreg -r -c AppleSmartBattery -a | plutil -extract 0.AppleRawCurrentCapacity raw -"'], blocking=True)
+                    raw_current_capacity_level = raw_current_capacity_result.strip()
+
+                    # Get AppleRawMaxCapacity level via ioreg
+                    raw_max_capacity_result = self._call(["bash", '-c "ioreg -r -c AppleSmartBattery -a | plutil -extract 0.AppleRawMaxCapacity raw -"'], blocking=True)
+                    raw_max_capacity_level = raw_max_capacity_result.strip()
+
+                    # Calculate Battery level to 2 decimal places
+                    level = round(float(raw_current_capacity_level) / float(raw_max_capacity_level) * 100, 2)
+
                     current_time = datetime.now()
                     time_s = current_time.strftime("%m/%d/%Y %I:%M:%S %p")
-                    logging.info(f"Battery level: {level}")
+                    logging.info(f"Battery level : {str(level)}")
+
+                    # Write human-readable txt log
                     with open(file_path, 'a', newline='') as f:
-                        f.write(f"{time_s}: total battery: {level}\n")
+                        f.write(f"{time_s}: total battery: {str(level)}\n")
+
+            
                     if int(level) <= int(self.stop_soc):
                         break
                     time.sleep(int(self.poll_rate))
@@ -1128,17 +1161,14 @@ class Scenario(unittest.TestCase):
                         ["cmd.exe", "/c wpr.exe -cancel > null 2>&1"], expected_exit_code="")
                 else:
                     # Mark end of test
-                    if Params.get('global', 'trace_filemode') == '1':
-                        self._call(["cmd.exe", '/c wpr.exe -marker "test_end" -instancename perfTrace'])
-                    else:
-                        self._call(["cmd.exe", '/c wpr.exe -marker "test_end"'])
+                    self._call(["cmd.exe", '/c wpr.exe -marker "test_end"'])
                     # Stop ETL trace
                     outfile = os.path.join(
                         self.dut_data_path, self.testname + ".etl")
 
                     logging.info("Ending trace and saving at: " + outfile)
                     if Params.get('global', 'trace_filemode') == '1':
-                        self._call(["cmd.exe", f"/c wpr.exe -stop {outfile} -compress -instancename perfTrace"])
+                        self._call(["cmd.exe", f"/c wpr.exe -stop {outfile} -compress"])
                     else:
                         self._call(["cmd.exe", f"/c wpr.exe -stop {outfile} -compress"])
                 self.trace_started = False
@@ -3521,10 +3551,7 @@ class Scenario(unittest.TestCase):
 
     def _mark_trace(self, tag):
         if self.trace == "1":
-            if Params.get('global', 'trace_filemode') == '1':
-                self._call(["cmd.exe", '/c wpr.exe -marker ' + tag + ' -instancename perfTrace'])
-            else:
-                self._call(["cmd.exe", '/c wpr.exe -marker ' + tag])
+            self._call(["cmd.exe", '/c wpr.exe -marker ' + tag])
 
     def _assert(self, assert_list):
         logging.error(assert_list)
@@ -3566,7 +3593,7 @@ class Scenario(unittest.TestCase):
 
     def _check_local_exec_reboot(self):
         if self.dut_ip == "127.0.0.1" and self.platform.lower() == "windows":
-            Params.setCalculated("local_exec_reboot", "1")
+            Params.setCalculated("local_execution_reboot", "1")
             dashboard_url = Params.get('global', 'dashboard_url')
 
             if dashboard_url != "":

@@ -65,7 +65,7 @@ params.setDefault('global', 'host_ip', '', desc="Option to override IP address o
 params.setDefault('global', 'run_type', '', desc="A results sub-folde to indicate the type of run it is, such as 'Power', 'ETL', 'Misc', etc.")
 params.setDefault('global', 'iterations', '1', desc="How many time to repeat the scenario.")
 params.setDefault('global', 'training_mode', '0', desc="Specify if this is a training run (1) or not (0).", valOptions=["0", "1"])
-params.setDefault('global', 'platform', 'Windows', desc="Operating system platform.", valOptions=["Windows", "Android", "W365", "MacOS"])
+params.setDefault('global', 'platform', '[PLATFORM]', desc="Operating system platform.", valOptions=["[PLATFORM]", "Windows", "Android", "W365", "MacOS"])
 params.setDefault('global', 'msa_account', '', desc="The test account that Windows and apps will be logged in with.")
 params.setDefault('global', 'dut_password', '', desc="The password for the test account (msa_account).")
 params.setDefault('global', 'dut_ip', '127.0.0.1', desc="IP address of the Device Under Test (name can be used if DNS is supported).")
@@ -156,7 +156,7 @@ if params_file is None or params_file == "":
 elif not os.path.exists(params_file):
     print("ERROR:  Specified device profile path does not exist: " + params_file)
     sys.exit(1)
-print("Using profile: " + params_file)
+# print("Using profile: " + params_file)
 params.setCalculated("params_file", params_file)
 
 cmd_tests = args.scenarios
@@ -201,7 +201,7 @@ if args.dump or args.dump_verbose:
 
 # Check if we're runnign a scenario that shouldn't contact the DUT before
 # loading params, which can make calls to the DUT
-for scenario in ['charge_off', 'charge_on', 'hard_reboot', 'sleep_wake', 'manual_offline', 'study_report', 'run_report', 'dut_setup']:
+for scenario in ['comm_check', 'charge_off', 'charge_on', 'hard_reboot', 'sleep_wake', 'manual_offline', 'study_report', 'run_report', 'dut_setup']:
     if scenario in sys.argv:
         print("Forcing dut_alive to 0")
         Params.setCalculated("dut_alive", '0')
@@ -386,7 +386,7 @@ def set_run_dir(module):
 
     # Copy profile to run dir
     # shutil.copy(args.profile, run_dir)
-    shutil.copy(params_file, run_dir)
+    # shutil.copy(params_file, run_dir)
     
 
 
@@ -756,7 +756,7 @@ if __name__ == '__main__':
                         fo.close()
                         logging.info ("HOBL Version: " + hobl_ver)
                     except:
-                        pass
+                        logging.info ("HOBL Version: Unknown")
                     logging.info("run_dir: " + run_dir)
                     params.get('global', 'host_ip') # just to get it to be set properly before dumping
                     params.dump()
@@ -942,7 +942,13 @@ if __name__ == '__main__':
             print("Deleting " + result_dir)
             shutil.rmtree(result_dir, onerror=lambda func, path, _: (os.chmod(path, stat.S_IWRITE), func(path)))
 
-    local_execution_reboot_flag = Params.getCalculated("local_exec_reboot")
+    # Checking if local execution and if running from dashboard if so then we want to relaunch the web ui to help notify user that scenario ran. 
+    try:
+        if dashboard_url != '' and dut_ip == "127.0.0.1":
+            subprocess.call(f'start /MAX "" "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" --app="http://localhost:80/plan/Scenarios?PlanID={dashboard_plan_id}" --start-maximized', shell=True)
+    except:
+        pass
+    local_execution_reboot_flag = Params.getCalculated("local_execution_reboot")
 
     if suite_success:
         print("Suite passed")

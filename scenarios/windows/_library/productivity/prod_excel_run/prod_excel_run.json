@@ -1,7 +1,7 @@
 [
     {
-        "author": "Jeff Wilder",
-        "capture_device": "Surface Laptop 8 15-in",
+        "author": "jewilder",
+        "capture_device": "Surface Laptop 7 15in, light theme, 150% scaling",
         "children": [],
         "create_date": "2025-03-02",
         "description": "Edit Excel document",
@@ -17,6 +17,17 @@
         "id": "V2MYXP",
         "include_path": "..\\..\\misc\\recording_phase_begin",
         "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "PSECSTX0",
+        "name": "[short_typing]",
+        "type": "Set Default",
+        "val_options": "0,1",
+        "value": "0"
     },
     {
         "children": [],

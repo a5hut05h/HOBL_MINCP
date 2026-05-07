@@ -1,7 +1,7 @@
 [
     {
-        "author": "Jeff Wilder",
-        "capture_device": "Surface Laptop 8 15in",
+        "author": "jewilder",
+        "capture_device": "Surface Laptop 7 15in,  light theme, 150% scaling",
         "children": [],
         "create_date": "2025-02-15",
         "description": "Play NASA YouTube video",
@@ -188,6 +188,17 @@
                 "enabled": true,
                 "id": "UCL4U1",
                 "type": "Delay"
+            },
+            {
+                "children": [],
+                "delay": "0.0",
+                "description": "Capture screenshot",
+                "enabled": true,
+                "file_name": [
+                    "code_1KN4CL2.py"
+                ],
+                "id": "1KN4CL2",
+                "type": "Code"
             },
             {
                 "children": [],

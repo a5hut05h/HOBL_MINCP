@@ -327,6 +327,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#standby" class="md-nav__link">
+    standby
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#system_prep" class="md-nav__link">
     system_prep
   </a>
@@ -406,6 +413,13 @@
         <li class="md-nav__item">
   <a href="#youtube" class="md-nav__link">
     youtube
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#brightness_study_report" class="md-nav__link">
+    brightness_study_report
   </a>
   
 </li>
@@ -575,6 +589,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#standby" class="md-nav__link">
+    standby
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#system_prep" class="md-nav__link">
     system_prep
   </a>
@@ -654,6 +675,13 @@
         <li class="md-nav__item">
   <a href="#youtube" class="md-nav__link">
     youtube
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#brightness_study_report" class="md-nav__link">
+    brightness_study_report
   </a>
   
 </li>
@@ -755,13 +783,22 @@ Local camera and mic are on, other 9 participants are bots sending video and aud
 <p><code>loops</code> - Number of times the automation will attempt to perform tasks <strong>Default:</strong> <code>3</code> </p>
 <p><code>run_idle_tasks</code> - Queues Windows idle tasks so they will not be running during tests <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
 <p><code>final_reboot</code> - Sets if the device will reboot at the conclusion of process_idle_tasks <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<h2 id="standby">standby</h2>
+<p>Puts the device into standby mode, still conneccted to the network.</p>
+<p><u>Parameters:</u></p>
+<p><code>cs_duration</code> -  <strong>Default:</strong> <code>1200</code> </p>
+<p><code>button_to_record_delay</code> -  <strong>Default:</strong> <code>900</code> </p>
+<p><code>button_sleep_callback</code> -  <strong>Default:</strong> `` </p>
+<p><code>button_wake_callback</code> -  <strong>Default:</strong> `` </p>
+<p><code>local_button</code> -  <strong>Default:</strong> <code>1</code> </p>
+<p><code>sleep_mode</code> -  <strong>Default:</strong> `` </p>
+<p><code>connection</code> - Connected or Disconnected from the network during standby <strong>Default:</strong> <code>Connected</code>  <strong>Options:</strong> <code>Disconnected, Connected</code></p>
 <h2 id="system_prep">system_prep</h2>
 <p>Preforms various tasks that prepare a device for testing.</p>
 <p><u>Parameters:</u></p>
 <p><code>hibernate_enabled</code> - Enables or disables hibernation on the device <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
 <p><code>telemetry_enabled</code> - Enables or disables the gathering of optional diagnostic data in the OS <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
-<p><code>hdr_enabled</code> - Enables or disables HDR on the device (if supported by the device) <strong>Default:</strong> <code>`  **Options:**</code>0, 1`</p>
-<p><code>dark_theme_enabled</code> - Enables or disables the dark theme on Windows <strong>Default:</strong> <code>`  **Options:**</code>0, 1`</p>
+<p><code>theme</code> - Change the Windows theme <strong>Default:</strong> <code>current</code>  <strong>Options:</strong> <code>current, light, dark</code></p>
 <p><code>wallpaper</code> - Sets the device's background image.  Uses image files stored in the %SYSTEMDRIVE%\hobl_bin\DesktopImages folder <strong>Default:</strong> <code>ColorChecker3000x2000.png</code> </p>
 <p><code>final_reboot</code> - Sets if the device will reboot at the conclusion of daily_prep <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
 <p><code>bpm_pcc_blm_disable</code> - Disable BPM, PCC, and BLM <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
@@ -996,6 +1033,14 @@ Local user is sharing desktop.</p>
 <p><code>duration</code> - Total scenario duration <strong>Default:</strong> <code>600</code> </p>
 <p><code>loop_duration</code> - YouTube video playback duration before looping (max 480s) <strong>Default:</strong> <code>300</code> </p>
 <p><code>full_screen</code> - Full Screen mode <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<h2 id="brightness_study_report">brightness_study_report</h2>
+<p>Extract brightness value from a path containing a Brightness-XX folder.</p>
+<p><u>Parameters:</u></p>
+<p><code>result_path</code> -  <strong>Default:</strong> `` </p>
+<p><code>name</code> -  <strong>Default:</strong> `` </p>
+<p><code>device_name</code> -  <strong>Default:</strong> `` </p>
+<p><code>backlight_key</code> - Metric name for backlight power in brightness curve report. <strong>Default:</strong> <code>DisplayLight Power (W)</code> </p>
+<p><code>analog_key</code> - Metric name for analog/panel power in brightness curve report. <strong>Default:</strong> <code>DisplayLogic Power (W)</code> </p>
 <h2 id="comm_check">comm_check</h2>
 <p>Checks for valid communications between host and DUT.</p>
 <p>Steps:</p>

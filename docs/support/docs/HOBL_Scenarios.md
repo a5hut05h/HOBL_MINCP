@@ -124,6 +124,27 @@ Preforms various tasks that prepare a device for testing.  This includes queuing
 
 `final_reboot` - Sets if the device will reboot at the conclusion of process_idle_tasks **Default:** `1`  **Options:** `0, 1`
 
+## standby
+
+Puts the device into standby mode, still conneccted to the network.
+
+
+<u>Parameters:</u>
+
+`cs_duration` -  **Default:** `1200` 
+
+`button_to_record_delay` -  **Default:** `900` 
+
+`button_sleep_callback` -  **Default:** `` 
+
+`button_wake_callback` -  **Default:** `` 
+
+`local_button` -  **Default:** `1` 
+
+`sleep_mode` -  **Default:** `` 
+
+`connection` - Connected or Disconnected from the network during standby **Default:** `Connected`  **Options:** `Disconnected, Connected`
+
 ## system_prep
 
 Preforms various tasks that prepare a device for testing.
@@ -135,9 +156,7 @@ Preforms various tasks that prepare a device for testing.
 
 `telemetry_enabled` - Enables or disables the gathering of optional diagnostic data in the OS **Default:** `0`  **Options:** `0, 1`
 
-`hdr_enabled` - Enables or disables HDR on the device (if supported by the device) **Default:** ``  **Options:** `0, 1`
-
-`dark_theme_enabled` - Enables or disables the dark theme on Windows **Default:** ``  **Options:** `0, 1`
+`theme` - Change the Windows theme **Default:** `current`  **Options:** `current, light, dark`
 
 `wallpaper` - Sets the device's background image.  Uses image files stored in the %SYSTEMDRIVE%\hobl_bin\DesktopImages folder **Default:** `ColorChecker3000x2000.png` 
 
@@ -596,6 +615,23 @@ Steps:
 `loop_duration` - YouTube video playback duration before looping (max 480s) **Default:** `300` 
 
 `full_screen` - Full Screen mode **Default:** `0`  **Options:** `0, 1`
+
+## brightness_study_report
+
+Extract brightness value from a path containing a Brightness-XX folder.
+
+
+<u>Parameters:</u>
+
+`result_path` -  **Default:** `` 
+
+`name` -  **Default:** `` 
+
+`device_name` -  **Default:** `` 
+
+`backlight_key` - Metric name for backlight power in brightness curve report. **Default:** `DisplayLight Power (W)` 
+
+`analog_key` - Metric name for analog/panel power in brightness curve report. **Default:** `DisplayLogic Power (W)` 
 
 ## comm_check
 

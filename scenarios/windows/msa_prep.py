@@ -118,7 +118,11 @@ class msaPrep(core.app_scenario.Scenario):
         time.sleep(1)
 
         # Verify account was set properly
-        found_account = self._call(["powershell.exe", r"(get-childitem hkcu:\Software\Microsoft\IdentityCRL\UserExtendedProperties\ | select pschildname).pschildname"], expected_exit_code="")
+        found_account = ""
+        try:
+            found_account = self._call(["powershell.exe", r"(get-childitem hkcu:\Software\Microsoft\IdentityCRL\UserExtendedProperties\ | select pschildname).pschildname"], expected_exit_code="", fail_on_exception=False)
+        except:
+            pass
         if self.msa_account.lower() != found_account.strip().lower():
             logging.error(f"MSA account verification failed. Expected: {self.msa_account}, Found: {found_account.strip()}")
             self.fail("MSA account verification failed.")
