@@ -110,6 +110,7 @@ class OsInstall(core.app_scenario.Scenario):
             rc = recharge.Recharge()
             rc.setResumeThreshold('40')
             rc.setMonitorOnly('1')  # Do not turn on charger, just monitor battery level
+            rc.post_charge_delay = '0'  # Skip recharge hold delay for os_install.
             rc.runTest()
             time.sleep(2)
 
