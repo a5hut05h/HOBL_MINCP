@@ -11,10 +11,26 @@
     },
     {
         "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1LEKCYH",
+        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
+        "params": [
+            {
+                "name": "[event_tag]",
+                "val_options": "",
+                "value": "SnippintToolLaunch"
+            }
+        ],
+        "type": "Include"
+    },
+    {
+        "children": [],
         "delay": "2",
         "description": "Launch Snipping Tool",
         "enabled": true,
-        "id": "1L9NVTT",
+        "id": "1LEHK1R",
         "text": "\ue03d\ue008s",
         "type": "Type",
         "typing_delay": "[typing_delay]"
