@@ -186,10 +186,8 @@ class Tool(Scenario):
         # The PT_10010 state machine in StressUtcPerftrack.xml targets legacy
         # Cortana events that modern Windows does not emit, so PerfParser cannot
         # produce this metric. We read the modern TestInProduction TestResult
-        # event from the ETL via tracerpt and emit a single averaged row.
-        # Every search/keystroke during the run produces one passing event, so
-        # individual rows can't be tied back to a specific user action; the mean
-        # of all passing samples is the meaningful aggregate.
+        # event from the ETL via tracerpt and emit one row per passing event,
+        # matching the non-aggregated behavior used for the other PT metrics.
         try:
             extra = self._extract_type_to_search(etl_trace)
             if extra and os.path.isfile(perf_output):
@@ -200,15 +198,14 @@ class Tool(Scenario):
                     except (TypeError, ValueError):
                         continue
                 if durations_ms:
-                    avg_ms = sum(durations_ms) / len(durations_ms)
-                    # Round to integer ms to match the format of other rows.
-                    avg_str = str(int(round(avg_ms)))
                     with open(perf_output, 'a', newline='') as f_out:
                         w = csv.writer(f_out)
-                        w.writerow([_TIP_PT_NUMBER, _TIP_METRIC_NAME, avg_str])
+                        for value_ms in durations_ms:
+                            w.writerow([_TIP_PT_NUMBER, _TIP_METRIC_NAME, str(int(round(value_ms)))])
                     logging.info(
-                        f"Perf Stress Tool - Appended PT_{_TIP_PT_NUMBER} "
-                        f"{_TIP_METRIC_NAME} avg={avg_str}ms over "
+                        f"Perf Stress Tool - Appended {len(durations_ms)} PT_{_TIP_PT_NUMBER} "
+                        f"{_TIP_METRIC_NAME} instance(s) "
+                        f"from ETL side-channel over "
                         f"{len(durations_ms)} passing event(s) from ETL side-channel"
                     )
         except Exception as e:
