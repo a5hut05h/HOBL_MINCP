@@ -1082,17 +1082,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1L8PTRW",
-                "include_path": "scenarios\\windows\\_library\\misc\\switchto_file_explorer",
-                "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1L8PU16",
-                "include_path": "scenarios\\windows\\_library\\misc\\switchto_file_explorer",
+                "id": "1LCH9MT",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\file_explorer_launch",
                 "type": "Include"
             }
         ],
@@ -1312,17 +1303,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1L9T2FH",
-                "include_path": "scenarios\\windows\\_library\\misc\\start_launch",
-                "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1L9T2KK",
-                "include_path": "scenarios\\windows\\_library\\misc\\start_launch",
+                "id": "1LCH9YN",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\type_to_search",
                 "type": "Include"
             },
             {
@@ -1348,8 +1330,15 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1H6JTLL",
-                "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_run",
+                "id": "1LCK742",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_run_minwin",
+                "params": [
+                    {
+                        "name": "[short_typing]",
+                        "val_options": "0,1",
+                        "value": "1"
+                    }
+                ],
                 "type": "Include"
             },
             {
@@ -1413,24 +1402,6 @@
                 "enabled": true,
                 "id": "1HE6UNH",
                 "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_close",
-                "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1HFPFUF",
-                "include_path": "scenarios\\windows\\_library\\misc\\switchto_file_explorer",
-                "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1HE6VX4",
-                "include_path": "scenarios\\windows\\_library\\misc\\close_file_explorer",
                 "type": "Include"
             },
             {
