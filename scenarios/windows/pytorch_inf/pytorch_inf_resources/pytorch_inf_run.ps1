@@ -271,12 +271,12 @@ Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
 "-- Run LLM Phi-4-mini inferencing" | log
-$inferenceArgs = "--prompt `"What is the meaning of life?`" --log-dir `"$logDir`""
 if ($noGpu) {
-    $inferenceArgs += " --no-gpu"
     "Running in CPU-only mode (--no-gpu)" | log
+    python inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" --no-gpu > "$logDir\pytorch_inf_output.txt" 2>&1
+} else {
+    python inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" > "$logDir\pytorch_inf_output.txt" 2>&1
 }
-python inference.py $inferenceArgs > "$logDir\pytorch_inf_output.txt" 2>&1
 check($lastexitcode)
 Write-RunPhaseMarker "phase.run_build.end"
 Write-RunPhaseMarker "phase.run_results.start"
