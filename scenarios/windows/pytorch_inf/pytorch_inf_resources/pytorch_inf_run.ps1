@@ -3,7 +3,8 @@
 
 param(
     [string]$logFile = "",
-    [string]$startTime = (Get-Date).ToString("o")
+    [string]$startTime = (Get-Date).ToString("o"),
+    [switch]$noGpu = $false
 )
 
 # 9F0F6E2E-8D06-4D2F-B8F5-6F1F2D5A1C01 is a custom provider we use to emit phase markers from the scenario script (optional, may not be present)
@@ -90,12 +91,38 @@ $arch = $osInfo.OSArchitecture
 $processorArch = $env:PROCESSOR_ARCHITECTURE
 
 if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
-    $pythonVersion = "3.12.10"
+    # Detect whether the custom wheel path was used during prep by checking the active pyenv version
+    $activeVersion = (pyenv version 2>$null) -replace '\s.*', ''
+    if ($activeVersion -match "^3\.13") {
+        $pythonVersion = $activeVersion
+    } else {
+        $pythonVersion = "3.12.10"
+    }
 } elseif ($arch -match "ARM" -or $processorArch -match "ARM") {
-    $pythonVersion = "3.12.10-arm"
+    # Detect whether the custom wheel path was used during prep by checking the active pyenv version
+    $activeVersion = (pyenv version 2>$null) -replace '\s.*', ''
+    if ($activeVersion -match "^3\.13") {
+        $pythonVersion = $activeVersion
+    } else {
+        $pythonVersion = "3.12.10-arm"
+    }
 } else {
     " ERROR - Unsupported architecture: $arch (Processor: $processorArch)" | log
     Exit 1
+}
+
+# --- Ensure CUDA paths are in session PATH if available ---
+if ($env:CUDA_PATH -and (Test-Path $env:CUDA_PATH)) {
+    $cudaBin = Join-Path $env:CUDA_PATH "bin"
+    $cuptiLib = Join-Path $env:CUDA_PATH "extras\CUPTI\lib64"
+    if ($env:PATH -notlike "*$cudaBin*") {
+        $env:PATH = "$cudaBin;$env:PATH"
+        "Added CUDA bin to session PATH: $cudaBin" | log
+    }
+    if ((Test-Path $cuptiLib) -and $env:PATH -notlike "*$cuptiLib*") {
+        $env:PATH = "$cuptiLib;$env:PATH"
+        "Added CUPTI to session PATH: $cuptiLib" | log
+    }
 }
 
 # --- Optimize PATH: pyenv shims before WindowsApps ---
@@ -244,7 +271,12 @@ Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
 "-- Run LLM Phi-4-mini inferencing" | log
-python inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" > "$logDir\pytorch_inf_output.txt" 2>&1
+if ($noGpu) {
+    "Running in CPU-only mode (--no-gpu)" | log
+    python inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" --no-gpu > "$logDir\pytorch_inf_output.txt" 2>&1
+} else {
+    python inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" > "$logDir\pytorch_inf_output.txt" 2>&1
+}
 check($lastexitcode)
 Write-RunPhaseMarker "phase.run_build.end"
 Write-RunPhaseMarker "phase.run_results.start"
