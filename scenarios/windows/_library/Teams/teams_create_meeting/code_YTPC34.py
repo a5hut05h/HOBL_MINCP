@@ -32,28 +32,15 @@ def run(scenario):
     # logging.info("bots_test_server: " + bots_test_server)
     # logging.info("==========================================")
 
-    #####
-    # Modification of these limits can result in loss of access to bot server
-    #####
-    max_bots = 9
-    max_duration = 600
-    # Access key for VERY LIMITED INTERNAL testing of larger meetings. Do NOT use for normal testing. Large meetings from other access keys will be rejected and may result in loss of access to bot server.
-    if "dRXP2CvR58BXF2" in access_key or "WPYWEbsMfvoIPbX" in access_key:
-        max_bots = 49
-        max_duration = 50000
-    #####
+    max_duration = 43200
 
     # Validation of test params
     if access_key == "-1" and number_of_bots > 0:
         logging.error("No valid Teams Bots access key provided! Check that profile contains a Teams Bots Access key, or request one from HOBL Support (HOBLsupport@microsoft.com).")
         raise Exception("No Teams Bots Key Provided.")
-    if number_of_bots > max_bots:
-        logging.error("Requested bots exceeds the limit of " + str(max_bots) + ".  Attempting to exceed these limits can result in permanent loss of access to bot services for your organization.")
-        raise Exception("Requested bots exceeds the limit of " + str(max_bots) + ".  Attempting to exceed these limits can result in permanent loss of access to bot services for your organization.")
     if float(duration) > max_duration:
         logging.error("Requested call duration exceeds the limit of " + str(max_duration) + "s.  Attempting to exceed these limits can result in permanent loss of access to bot services for your organization.")
         raise Exception("Requested call duration exceeds the limit of " + str(max_duration) + "s.  Attempting to exceed these limits can result in permanent loss of access to bot services for your organization.")
-    
 
     if number_of_bots > 0:
         request_string = ""
