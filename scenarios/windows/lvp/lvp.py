@@ -175,7 +175,7 @@ class LVP(core.app_scenario.Scenario):
                 f"//*[contains(@Name, 'Full screen') and @ClassName = 'AppBarButton']"
             ).click()
 
-            ActionChains(self.driver).move_by_offset(-200, -200).click().perform()
+            ActionChains(self.driver).move_by_offset(-200, -200).perform()
         except:
             # Navigate to Personal menu
             self.driver.find_element_by_name("Personal").click()
@@ -204,7 +204,7 @@ class LVP(core.app_scenario.Scenario):
 
             # Move mouse away from the menu
             time.sleep(5)
-            ActionChains(self.driver).move_by_offset(150, -150).click().perform()
+            ActionChains(self.driver).move_by_offset(150, -150).perform()
 
     def tearDown(self):
         logging.info("Performing teardown.")

@@ -1,0 +1,34 @@
+[
+    {
+        "author": "jewilder",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-06",
+        "description": "Run Procyon",
+        "enabled": true,
+        "id": "1LC3YWY",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Workload to run",
+        "enabled": true,
+        "id": "1LC437A",
+        "name": "[test_definition]",
+        "type": "Set Default",
+        "val_options": "office_productivity,essentials,video_playback_batterylife,photo_editing,video_editing,ai_computer_vision_winml,ai_computer_vision_snpe,ai_computer_vision_openvino,ai_computer_vision_tensorrt,ai_computer_vision_ryzenai",
+        "value": "office_productivity"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Run Procyon",
+        "enabled": true,
+        "file_name": [
+            "code_1LC4L8F.py"
+        ],
+        "id": "1LC4L8F",
+        "type": "Code"
+    }
+]

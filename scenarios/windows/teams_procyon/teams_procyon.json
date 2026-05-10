@@ -1,0 +1,339 @@
+[
+    {
+        "author": "",
+        "capture_device": "",
+        "children": [],
+        "create_date": "",
+        "description": "Runs Teams and Procyon",
+        "enabled": true,
+        "id": "YTN8NX",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Set Default Params",
+        "enabled": true,
+        "id": "YTNUEV",
+        "type": "Comment"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Workload to run",
+        "enabled": true,
+        "id": "1HV5R1F",
+        "name": "[procyon:test]",
+        "type": "Set Default",
+        "val_options": "office_productivity,essentials,video_playback_batterylife,photo_editing,video_editing,ai_computer_vision_winml,ai_computer_vision_snpe,ai_computer_vision_openvino,ai_computer_vision_tensorrt,ai_computer_vision_ryzenai",
+        "value": "office_productivity"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Number of seconds to wait and let the device warm up before starting the Procyon run.",
+        "enabled": true,
+        "id": "1HV5WL9",
+        "name": "[procyon:warmup_delay]",
+        "type": "Set Default",
+        "val_options": "",
+        "value": "1800"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "The path on the host where the Procyon installer has been downloaded.",
+        "enabled": true,
+        "id": "1L9EU5K",
+        "name": "[procyon:host_path]",
+        "type": "Set Default",
+        "val_options": "",
+        "value": ""
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Procyon license key",
+        "enabled": true,
+        "id": "1L9FP9K",
+        "name": "[procyon:key]",
+        "type": "Set Default",
+        "val_options": "",
+        "value": ""
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Sets the time in seconds for the test to run.",
+        "enabled": true,
+        "id": "1514842",
+        "multiple": false,
+        "name": "[teams:duration]",
+        "type": "Set User Default",
+        "val_options": "60,120,240,300,600,900",
+        "value": "3600"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "15VP7ER",
+        "name": "[teams:send_screen]",
+        "type": "Set",
+        "value": "1"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "15VP7MP",
+        "name": "[teams:show_desktop]",
+        "type": "Set",
+        "value": "1"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "15VP9C7",
+        "name": "[teams:number_of_bots]",
+        "type": "Set",
+        "value": "1"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "15VPALR",
+        "name": "[teams:send_video]",
+        "type": "Set",
+        "value": "1"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "162ATH5",
+        "name": "[teams:send_audio]",
+        "type": "Set",
+        "value": "1"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "15VPXTE",
+        "name": "[teams:bots_send_video]",
+        "type": "Set",
+        "value": "1"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "15VPXYE",
+        "name": "[teams:bots_send_audio]",
+        "type": "Set",
+        "value": "1"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "15VPY63",
+        "name": "[teams:bots_share_screen]",
+        "type": "Set",
+        "value": "0"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "162EFJK",
+        "name": "[teams:bots_force_subscribe_resolution]",
+        "type": "Set",
+        "value": "0"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "1FY2TRN",
+        "name": "[phase_reporting]",
+        "type": "Set",
+        "value": "1"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LFKLLC",
+                "include_path": "scenarios\\windows\\_library\\procyon\\procyon_setup",
+                "params": [
+                    {
+                        "name": "[host_path]",
+                        "val_options": "",
+                        "value": "[procyon:host_path]"
+                    },
+                    {
+                        "name": "[key]",
+                        "val_options": "",
+                        "value": "[procyon:key]"
+                    }
+                ],
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1H3CH75",
+                "include_path": "scenarios\\windows\\_library\\Teams\\teams_setup",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "5",
+                "description": "",
+                "enabled": true,
+                "id": "1H39WNC",
+                "include_path": "scenarios\\windows\\_library\\run_command",
+                "params": [
+                    {
+                        "name": "[command]",
+                        "val_options": "",
+                        "value": "[teams:join_meeting_uri]"
+                    }
+                ],
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1H39Y9J",
+                "include_path": "scenarios\\windows\\_library\\window_move",
+                "params": [
+                    {
+                        "name": "[screen]",
+                        "val_options": "",
+                        "value": "1"
+                    }
+                ],
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "YTXF95",
+        "type": "Setup"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "[procyon:warmup_delay]",
+                "description": "Letting device warm up",
+                "enabled": true,
+                "id": "1LFKMUM",
+                "type": "Delay"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LFKM2W",
+                "include_path": "scenarios\\windows\\_library\\procyon\\procyon_run",
+                "params": [
+                    {
+                        "name": "[test_definition]",
+                        "val_options": "office_productivity,essentials,video_playback_batterylife,photo_editing,video_editing,ai_computer_vision_winml,ai_computer_vision_snpe,ai_computer_vision_openvino,ai_computer_vision_tensorrt,ai_computer_vision_ryzenai",
+                        "value": "[procyon:test]"
+                    }
+                ],
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "YTX9MY",
+        "type": "Run Test"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0.0",
+                "description": "",
+                "enabled": true,
+                "id": "1H3A0RV",
+                "screen": "1",
+                "type": "Set Display"
+            },
+            {
+                "children": [],
+                "delay": "2",
+                "description": "",
+                "enabled": true,
+                "id": "1H3AMUR",
+                "type": "Click Coord",
+                "x": "0.01",
+                "y": "0.01"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1H3A14F",
+                "include_path": "scenarios\\windows\\_library\\window_move",
+                "params": [
+                    {
+                        "name": "[screen]",
+                        "val_options": "",
+                        "value": "0"
+                    }
+                ],
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0.0",
+                "description": "",
+                "enabled": true,
+                "id": "1H3A197",
+                "screen": "0",
+                "type": "Set Display"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "13LPX71",
+                "include_path": "scenarios\\windows\\_library\\Teams\\teams_teardown",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "YTXARH",
+        "type": "Teardown"
+    }
+]
