@@ -10,12 +10,14 @@
 # a reference number.
 #
 # Default behavior: rolling 5-minute captures using general_cpi_collector.wprp,
-# saved to C:\WPR_Traces\<RunName>\WPR_<timestamp>.etl.
+# saved to C:\hobl_data\perf_stress\<RunName>\WPR_<timestamp>.etl. Writing under
+# C:\hobl_data lets HOBL's base scenario._copy_data_from_remote() pull the heavy
+# ETLs back to the host result_dir automatically (no extra teardown wiring needed).
 
 param(
     [int]$IntervalMinutes = 5,
     [int]$Iterations = 0,
-    [string]$OutputDir = "C:\WPR_Traces",
+    [string]$OutputDir = "C:\hobl_data\perf_stress",
     [string]$RunName = "",
 
     # Default custom WPRP profile uploaded by code_PSECTRC.py

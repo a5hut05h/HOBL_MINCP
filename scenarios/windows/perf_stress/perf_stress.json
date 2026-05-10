@@ -40,7 +40,7 @@
         "name": "[stress_cpu_target]",
         "type": "Set Default",
         "val_options": "0,25,50,65,75,85",
-        "value": "65"
+        "value": "25"
     },
     {
         "children": [],
@@ -133,7 +133,7 @@
     {
         "children": [],
         "delay": "0.0",
-        "description": "1 = launch collect_5min_traces.ps1 in the background on the DUT alongside the core trace. Uses a named WPR instance (perfStressHeavy). Saves rolling ETLs to C:\\WPR_Traces\\<runname>\\WPR_<timestamp>.etl. WARNING: dual-session WPR perturbs metrics - debug use only.",
+        "description": "1 = launch collect_5min_traces.ps1 in the background on the DUT alongside the core trace. Uses a named WPR instance (perfStressHeavy). Saves rolling ETLs to C:\\hobl_data\\perf_stress\\<RunName>\\WPR_<timestamp>.etl. WARNING: dual-session WPR perturbs metrics - debug use only.",
         "enabled": true,
         "id": "1KTY6FE",
         "name": "[bg_heavy_capture]",
@@ -252,12 +252,12 @@
                     {
                         "children": [],
                         "delay": "0.0",
-                        "description": "",
+                        "description": "2x2 grid (DUT + 3 bots = 4 participants). 3x3 (9 bots) plus 30 Edge tabs plus python stress was unstable; 2x2 keeps real-use Teams pressure while leaving headroom.",
                         "enabled": true,
                         "id": "19V8920",
                         "name": "[teams:number_of_bots]",
                         "type": "Set",
-                        "value": "9"
+                        "value": "3"
                     },
                     {
                         "children": [],
@@ -635,6 +635,32 @@
                     },
                     {
                         "children": [],
+                        "delay": "0",
+                        "description": "Pre-launch Snipping Tool via Start menu search to fire Microsoft.Windows.AppLifeCycle.UI.AppLaunch_UserClick (appId=Microsoft.ScreenSketch_8wekyb3d8bbwe!App). This satisfies PT_9971 state machine T0 transition reliably on all devices; the subsequent Win+Shift+S then drives T2/T3 to _complete. ETW tag is empty here so this Start-launch boot time is not counted in the snipping_tool_launch recording phase below.",
+                        "enabled": true,
+                        "id": "PSECPTRSL",
+                        "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
+                        "params": [
+                            {
+                                "name": "[app_name]",
+                                "val_options": "",
+                                "value": "Snipping Tool"
+                            },
+                            {
+                                "name": "[etw_event_tag]",
+                                "val_options": "",
+                                "value": ""
+                            },
+                            {
+                                "name": "[app_open_delay]",
+                                "val_options": "",
+                                "value": "3"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
                         "delay": "3",
                         "description": "",
                         "enabled": true,
@@ -661,7 +687,7 @@
                     {
                         "children": [],
                         "delay": "1",
-                        "description": "Launch Snipping Tool overlay (Win+Shift+S)",
+                        "description": "Trigger Snipping Tool overlay via Win+Shift+S (fires Microsoft.ScreenSketch.LaunchedFrom T2 + Microsoft.ScreenSketch.ReadyForSelection T3, completing PT_9971 state machine).",
                         "enabled": true,
                         "id": "PSECPTRK5",
                         "text": "\ue03d\ue008s",
@@ -706,6 +732,15 @@
                         "text": "\ue00c",
                         "type": "Type",
                         "typing_delay": "[typing_delay]"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c taskkill /F /T /IM ScreenClippingHost.exe > nul 2>&1 & taskkill /F /T /IM SnippingTool.exe > nul 2>&1 & exit /b 0",
+                        "delay": "1",
+                        "description": "Close Snipping Tool main window + ScreenClipping host so the next phase (Settings launch) is not focus-stolen.",
+                        "enabled": true,
+                        "id": "PSECPTRKL",
+                        "type": "Command"
                     },
                     {
                         "children": [],
@@ -1789,15 +1824,25 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Kill and relaunch Edge (same as enterprise_collab)",
+                        "description": "Relaunch Edge via Start menu (taskbar icon click in web_setup fails when Edge is already focused). Start-menu launch is reliable when 30 tab Edge is already up.",
                         "enabled": true,
                         "id": "PSECEK01",
-                        "include_path": "scenarios\\windows\\_library\\web\\web_setup",
+                        "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
                         "params": [
                             {
-                                "name": "[disable_delay]",
-                                "val_options": "0,1",
-                                "value": "1"
+                                "name": "[app_name]",
+                                "val_options": "",
+                                "value": "msedge"
+                            },
+                            {
+                                "name": "[etw_event_tag]",
+                                "val_options": "",
+                                "value": "EdgeRelaunch"
+                            },
+                            {
+                                "name": "[app_open_delay]",
+                                "val_options": "",
+                                "value": "8"
                             }
                         ],
                         "type": "Include"
@@ -1915,6 +1960,17 @@
                 "enabled": true,
                 "id": "19K5J8E",
                 "type": "End If"
+            },
+            {
+                "children": [],
+                "delay": "0.0",
+                "description": "Final python stress kill - LAST job in Run Test. Under heavy CPU stress, base-class teardown stretches because percentile_stress.py is still pinning every core; killing it here (while WPR is still running) keeps teardown wall time bounded on back-to-back unattended runs.",
+                "enabled": true,
+                "file_name": [
+                    "code_PSECPYK.py"
+                ],
+                "id": "PSECPYK",
+                "type": "Code"
             }
         ],
         "description": "",

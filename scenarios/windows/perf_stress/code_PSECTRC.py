@@ -9,7 +9,11 @@
 #   3. The script runs rolling WPR captures on a NAMED instance (perfStressHeavy)
 #      so it does NOT collide with HOBL's core unnamed WPR session.
 #
-# Output ETLs land at C:\WPR_Traces\<runname>\WPR_<timestamp>.etl on the DUT.
+# Output ETLs land at C:\hobl_data\perf_stress\<runname>\WPR_<timestamp>.etl on
+# the DUT. Because that path is under C:\hobl_data (= scenario.dut_data_path on
+# Windows), HOBL's base tearDown copies the heavy ETLs back to the host result_dir
+# automatically - no extra pull step required. Important for unattended back-to-back
+# runs where leaving heavy ETLs on the DUT would fill the disk.
 #
 # CAVEAT: two concurrent WPR sessions perturb perf numbers ~10-30%.
 # The PT CSV from this run is for debug use only.
@@ -49,17 +53,23 @@ def run(scenario):
     collect_ps = rf"{dut_bin_dir}\collect_5min_traces.ps1"
     run_name = scenario.testname  # e.g. perf_stress_050
 
+    # Land rolling ETLs under C:\hobl_data\perf_stress\<run_name>\ so that
+    # base scenario._copy_data_from_remote(self.result_dir) at tearDown sweeps
+    # them back to the host result_dir automatically.
+    out_dir = r"C:\hobl_data\perf_stress"
+
     interval = Params.get('perf_stress', 'bg_heavy_capture_interval') or '5'
     logging.info(
         f"Starting collect_5min_traces.ps1 in background (instance=perfStressHeavy, "
-        f"interval={interval}m, RunName={run_name}). PT numbers will be perturbed "
-        f"~10-30% - debug use only."
+        f"interval={interval}m, RunName={run_name}, OutputDir={out_dir}). PT numbers "
+        f"will be perturbed ~10-30% - debug use only."
     )
 
     scenario._call([
         "cmd.exe",
         f'/C start "" /min powershell.exe -NoProfile -ExecutionPolicy Bypass -File '
-        f'"{collect_ps}" -RunName "{run_name}" -IntervalMinutes {interval}',
+        f'"{collect_ps}" -RunName "{run_name}" -IntervalMinutes {interval} '
+        f'-OutputDir "{out_dir}"',
     ], expected_exit_code="", blocking=False)
 
     scenario._sleep_to_now()

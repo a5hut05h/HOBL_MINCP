@@ -36,9 +36,11 @@ class PerfStress(scenarios.app_scenario.Scenario):
         logging.info("Applying stress_run parameter profile")
         cpu_param = Params.get(module, "stress_cpu_target")
         if cpu_param not in ["0", "25", "50", "65", "75", "85"]:
-            cpu_param = "65"
+            # 65% with 30 Edge tabs + Teams 2x2 caused instability;
+            # 25% is the reliability-validated floor for unattended back-to-back runs.
+            cpu_param = "25"
             Params.setParam(module, "stress_cpu_target", cpu_param)
-            logging.info("stress_run=1 and stress_cpu_target not provided; defaulting to 65 (medium-high cpu load)")
+            logging.info("stress_run=1 and stress_cpu_target not provided; defaulting to 25 (low cpu load - reliability-tested)")
 
         cpu_load_label = {
             "25": "low",
