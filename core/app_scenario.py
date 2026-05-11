@@ -1510,6 +1510,22 @@ class Scenario(unittest.TestCase):
         result = rpc.get_job_result(target_ip, port, jobid, log=log_output)
         return result
 
+    def _safe_call(self, cmd, desc=""):
+        try:
+            result = self._call(
+                ["bash", f"-c \"{cmd}\""],
+                expected_exit_code="",
+                fail_on_exception=False,
+            )
+            if result is None:
+                return ""
+            if isinstance(result, dict):
+                return str(result.get("stdout", result.get("output", "")))
+            return str(result).strip()
+        except Exception as e:
+            logging.warning(f" ERROR - {desc}: {e}")
+            return ""
+
 
     def _host_call(self, command, cwd=".", expected_exit_code="0", blocking=True, timeout=None, output=True):
         if (command == ""):
