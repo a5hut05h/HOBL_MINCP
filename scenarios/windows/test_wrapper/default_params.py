@@ -1,0 +1,18 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+from core.parameters import Params
+from utilities.open_source.modules import import_run_user_only
+
+def run():
+    Params.setCalculated('scenario_section', __package__.split('.')[-1])
+    run_user_only()
+    return
+
+def run_user_only():
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\file_explorer_launch')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\perf_setup')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\perf_teardown')
+    import_run_user_only('scenarios\\windows\\_library\\enterprise_collab\\type_to_search')
+    import_run_user_only('scenarios\\windows\\_library\\misc\\snipping_tool')
+    return

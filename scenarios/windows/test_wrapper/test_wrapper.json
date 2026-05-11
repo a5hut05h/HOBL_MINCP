@@ -1,0 +1,135 @@
+[
+    {
+        "author": "dasashutosh",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-06",
+        "description": "",
+        "enabled": true,
+        "id": "1L9P22M",
+        "type": "Information"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1L9P2CX",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\perf_setup",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "1L9P26L",
+        "type": "Setup"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1LCH35J",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\type_to_search",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1LEKM62",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\type_to_search",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1LEKM80",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\type_to_search",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1LCH5YC",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\file_explorer_launch",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1LEF2UH",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\file_explorer_launch",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1LEF328",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\file_explorer_launch",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1L9P3AU",
+                "include_path": "scenarios\\windows\\_library\\misc\\snipping_tool",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1LCKF5T",
+                "include_path": "scenarios\\windows\\_library\\misc\\snipping_tool",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1LCKF7T",
+                "include_path": "scenarios\\windows\\_library\\misc\\snipping_tool",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "1L9P272",
+        "type": "Run Test"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1L9P2HE",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\perf_teardown",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "1L9P27M",
+        "type": "Teardown"
+    }
+]
