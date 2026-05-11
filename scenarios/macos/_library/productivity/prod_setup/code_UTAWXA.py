@@ -8,6 +8,18 @@ import time
 
 def run(scenario):
     logging.debug('Executing code block: code_UTAWXA.py (MacOS)')
+
+    # Kill Office apps once during prod setup for a fresh cold boot baseline.
+    for app in ["Microsoft Excel", "Microsoft Word", "Microsoft PowerPoint", "Microsoft OneNote"]:
+        scenario._safe_call(f"pkill -f '{app}' 2>/dev/null || true", f"kill {app}")
+
+    time.sleep(2)
+
+    check = scenario._safe_call(
+        "pgrep -fl 'Microsoft Excel|Microsoft Word|Microsoft PowerPoint|Microsoft OneNote' || echo 'ALL_KILLED'",
+        "verify kill",
+    )
+    logging.info(f"Office apps after kill: {check}")
     
     # For MacOS, Office themes are handled differently
     # This is a placeholder for MacOS-specific setup
