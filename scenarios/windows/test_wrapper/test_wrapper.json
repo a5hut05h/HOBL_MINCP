@@ -32,7 +32,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1LCH35J",
                 "include_path": "scenarios\\windows\\_library\\enterprise_collab\\type_to_search",
                 "type": "Include"
@@ -50,7 +50,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1LEKM80",
                 "include_path": "scenarios\\windows\\_library\\enterprise_collab\\type_to_search",
                 "type": "Include"
@@ -59,7 +59,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1LCH5YC",
                 "include_path": "scenarios\\windows\\_library\\enterprise_collab\\file_explorer_launch",
                 "type": "Include"
@@ -77,7 +77,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1LEF328",
                 "include_path": "scenarios\\windows\\_library\\enterprise_collab\\file_explorer_launch",
                 "type": "Include"
@@ -86,7 +86,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1L9P3AU",
                 "include_path": "scenarios\\windows\\_library\\misc\\snipping_tool",
                 "type": "Include"
@@ -95,7 +95,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1LCKF5T",
                 "include_path": "scenarios\\windows\\_library\\misc\\snipping_tool",
                 "type": "Include"
@@ -104,7 +104,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": false,
+                "enabled": true,
                 "id": "1LCKF7T",
                 "include_path": "scenarios\\windows\\_library\\misc\\snipping_tool",
                 "type": "Include"
