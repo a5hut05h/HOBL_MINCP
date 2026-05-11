@@ -1,0 +1,67 @@
+[
+    {
+        "author": "dasashutosh",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-11",
+        "description": "",
+        "enabled": true,
+        "id": "1LKUAUH",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1LKUAY6",
+        "include_path": "scenarios\\macos\\_library\\misc\\capture_dock",
+        "type": "Include"
+    },
+    {
+        "capture_id": "10RH3M0",
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LKUCT1.png"
+        ],
+        "id": "1LKUCT1",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Youtube Music",
+        "enabled": true,
+        "id": "1LKUJ0X",
+        "text": "Youtube\ue00dMusic\ue007",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "5",
+        "description": "Wait for results to load",
+        "enabled": true,
+        "id": "1LKUJM8",
+        "type": "Delay"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Quit",
+        "enabled": true,
+        "id": "1LKUK2L",
+        "text": "\ue03dq",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    }
+]
