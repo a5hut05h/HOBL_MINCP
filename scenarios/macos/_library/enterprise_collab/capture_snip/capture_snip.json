@@ -1,0 +1,22 @@
+[
+    {
+        "author": "dasashutosh",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-11",
+        "description": "",
+        "enabled": true,
+        "id": "1LKT39A",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Capture full screen to clipboard",
+        "enabled": true,
+        "id": "1LKT3H4",
+        "text": "\ue009\ue03d\ue0083",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    }
+]
