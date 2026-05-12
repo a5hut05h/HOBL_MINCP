@@ -647,6 +647,22 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
+                "id": "1LM44X2",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_run",
+                "params": [
+                    {
+                        "name": "[short_typing]",
+                        "val_options": "0,1",
+                        "value": "0"
+                    }
+                ],
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
                 "id": "1LKY4T9",
                 "include_path": "scenarios\\macos\\_library\\web\\web_switchto",
                 "type": "Include"
@@ -675,6 +691,15 @@
         "enabled": true,
         "id": "1LKY334",
         "type": "End If"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1LM3NVF",
+        "include_path": "scenarios\\macos\\_library\\enterprise_collab\\finder_launch",
+        "type": "Include"
     },
     {
         "children": [],
@@ -956,8 +981,80 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
+                "id": "1LM2T17",
+                "include_path": "scenarios\\macos\\_library\\enterprise_collab\\capture_snip",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
                 "id": "1LKYTLJ",
                 "include_path": "scenarios\\macos\\_library\\productivity\\prod_outlook_open",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LM9FUF",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_outlook_close",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LM9FYX",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_switchto",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LM9H4H",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_close",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LM9R33",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_switchto",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LM9T3C",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_close",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LM9TCJ",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_switchto",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LM9THP",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_close",
                 "type": "Include"
             },
             {

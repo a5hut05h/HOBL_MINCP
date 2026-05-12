@@ -11,10 +11,20 @@ def run():
     return
 
 def run_user_only():
+    import_run_user_only('scenarios\\macos\\_library\\enterprise_collab\\capture_snip')
+    import_run_user_only('scenarios\\macos\\_library\\enterprise_collab\\finder_launch')
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_excel_close')
     import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_excel_open')
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_excel_switchto')
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_outlook_close')
     import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_outlook_open')
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_powerpoint_close')
     import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_powerpoint_open')
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_powerpoint_switchto')
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_word_close')
     import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_word_open')
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_word_run')
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_word_switchto')
     import_run_user_only('scenarios\\macos\\_library\\web\\disable_proxy')
     import_run_user_only('scenarios\\macos\\_library\\web\\enable_proxy')
     import_run_user_only('scenarios\\macos\\_library\\web\\site\\web_site_amazon_got')
