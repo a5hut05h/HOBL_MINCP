@@ -51,6 +51,18 @@ function Write-RunPhaseMarker {
 # Configuration
 $scriptDrive = Split-Path -Qualifier $PSScriptRoot
 
+# Refresh PATH from Machine+User environment so dotnet (installed via winget during prep)
+# is visible to this session. The HOBL RPC service started before prep ran, so the inherited
+# PATH is stale and does not include C:\Program Files\dotnet without this refresh.
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+
+# Fallback: ensure the default dotnet install directory is on PATH even if the env var
+# was not updated (e.g. dotnet installed by a non-winget installer that did not update PATH).
+$dotnetDir = "C:\Program Files\dotnet"
+if ((Test-Path "$dotnetDir\dotnet.exe") -and (";$env:Path;" -notlike "*;$dotnetDir;*")) {
+    $env:Path = "$dotnetDir;$env:Path"
+}
+
 if (-not (Test-Path "$scriptDrive\hobl_data")) {
     Write-Host " ERROR - Required directory not found: $scriptDrive\hobl_data" -ForegroundColor Red
     Exit 1
@@ -125,7 +137,13 @@ if (-not (Test-Path ".\Aspire.slnx")) {
 # that doesn't inherit env vars set during prep.
 $env:DOTNET_INSTALL_DIR = "C:\Program Files\dotnet"
 "-- DOTNET_INSTALL_DIR set to '$($env:DOTNET_INSTALL_DIR)' (prevents Arcade SDK from downloading x64 runtimes)" | log
-"-- dotnet on PATH: $(Get-Command dotnet -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)" | log
+$dotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
+if (-not $dotnetCmd) {
+    " ERROR - dotnet not found on PATH. Prep may not have completed, or PATH was not refreshed." | log
+    " ERROR - PATH: $env:Path" | log
+    Exit 1
+}
+"-- dotnet on PATH: $($dotnetCmd.Source)" | log
 "-- Active SDK version: $(dotnet --version 2>&1)" | log
 "-- All installed SDKs:" | log
 dotnet --list-sdks 2>&1 | ForEach-Object { "   $_" | log }

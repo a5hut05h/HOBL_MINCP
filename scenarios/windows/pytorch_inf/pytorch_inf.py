@@ -14,7 +14,7 @@ from datetime import datetime
 class PytorchInf(core.app_scenario.Scenario):
 
     module = __module__.split('.')[-1]
-    prep_version = "12"
+    prep_version = "13"
     # prep_scenarios = [(module, prep_version)]
     resources = module + "_resources"
 
