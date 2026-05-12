@@ -636,7 +636,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Pre-launch Snipping Tool via Start menu search to fire Microsoft.Windows.AppLifeCycle.UI.AppLaunch_UserClick (appId=Microsoft.ScreenSketch_8wekyb3d8bbwe!App). This satisfies PT_9971 state machine T0 transition reliably on all devices; the subsequent Win+Shift+S then drives T2/T3 to _complete. ETW tag is empty here so this Start-launch boot time is not counted in the snipping_tool_launch recording phase below.",
+                        "description": "Pre-launch Snipping Tool via Start menu search so the user-click launch path is exercised. The subsequent Win+Shift+S then triggers the overlay. ETW tag is empty here so this Start-launch boot time is not counted in the snipping_tool_launch recording phase below.",
                         "enabled": true,
                         "id": "PSECPTRSL",
                         "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
@@ -687,7 +687,7 @@
                     {
                         "children": [],
                         "delay": "1",
-                        "description": "Trigger Snipping Tool overlay via Win+Shift+S (fires Microsoft.ScreenSketch.LaunchedFrom T2 + Microsoft.ScreenSketch.ReadyForSelection T3, completing PT_9971 state machine).",
+                        "description": "Trigger Snipping Tool overlay via Win+Shift+S.",
                         "enabled": true,
                         "id": "PSECPTRK5",
                         "text": "\ue03d\ue008s",
@@ -1964,12 +1964,12 @@
             {
                 "children": [],
                 "delay": "0.0",
-                "description": "Final python stress kill - LAST job in Run Test. Under heavy CPU stress, base-class teardown stretches because percentile_stress.py is still pinning every core; killing it here (while WPR is still running) keeps teardown wall time bounded on back-to-back unattended runs.",
+                "description": "LAST job in Run Test (success path). Kill the python percentile_stress workers BEFORE the framework's base-class teardown begins, because the result tar download (_copy_data_from_remote) runs as part of base teardown which executes before the scenario JSON Teardown phase. Killing python here lets the multi-GB DUT->host download complete on an unsaturated CPU, dramatically reducing teardown wall time and preventing tarfile truncation. The duplicate PSECPYK at the top of the Teardown phase covers the failure path where Run Test aborts mid-iteration and never reaches this point.",
                 "enabled": true,
                 "file_name": [
                     "code_PSECPYK.py"
                 ],
-                "id": "PSECPYK",
+                "id": "PSECPYKR",
                 "type": "Code"
             }
         ],
@@ -1980,6 +1980,26 @@
     },
     {
         "children": [
+            {
+                "children": [],
+                "delay": "0.0",
+                "description": "FIRST job in Teardown. Kill the python percentile_stress workers up front so the rest of teardown (web_kill, prod_kill, teams_teardown, DiagTrack restart, trace stop, RPC tar/download) is not contending with a fully pinned CPU. Without this, teardown wall time stretches significantly on multi-iteration unattended runs and the DUT->host result tar can truncate. Placed at the start of Teardown (not end of Run Test) so it always executes even when a Run Test action fails late.",
+                "enabled": true,
+                "file_name": [
+                    "code_PSECPYK.py"
+                ],
+                "id": "PSECPYK",
+                "type": "Code"
+            },
+            {
+                "children": [],
+                "command": "cmd /c taskkill /F /T /IM OUTLOOK.EXE > nul 2>&1 & taskkill /F /T /IM WINWORD.EXE > nul 2>&1 & taskkill /F /T /IM EXCEL.EXE > nul 2>&1 & taskkill /F /T /IM POWERPNT.EXE > nul 2>&1 & taskkill /F /T /IM ONENOTE.EXE > nul 2>&1 & taskkill /F /T /IM MSACCESS.EXE > nul 2>&1 & exit /b 0",
+                "delay": "1",
+                "description": "Force-kill any leftover Office apps so iteration N's stuck dialogs / unsaved-changes prompts / recovery panes do not bleed into iteration N+1 and break image-template matching of the next run's productivity phase.",
+                "enabled": true,
+                "id": "PSECTDOK",
+                "type": "Command"
+            },
             {
                 "children": [],
                 "delay": "0",
