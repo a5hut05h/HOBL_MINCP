@@ -1,0 +1,49 @@
+[
+    {
+        "author": "dasashutosh",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-12",
+        "description": "",
+        "enabled": true,
+        "id": "1LM337J",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1LM33EP",
+        "include_path": "scenarios\\macos\\_library\\misc\\capture_dock",
+        "type": "Include"
+    },
+    {
+        "capture_id": "10RH3M0",
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LM3KHF.png"
+        ],
+        "id": "1LM3KHF",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Hide Finder",
+        "enabled": true,
+        "id": "1LM3M1N",
+        "text": "\ue03dw",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    }
+]
