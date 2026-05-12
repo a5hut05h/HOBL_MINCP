@@ -146,6 +146,19 @@ $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";
 # Re-prepend pyenv paths after PATH refresh
 $env:PATH = "$pyenvRoot\pyenv-win\bin;$pyenvRoot\pyenv-win\shims;$pythonDir;$env:PATH"
 
+# Verify required commands are findable on PATH after refresh.
+# Fail fast with a clear diagnostic instead of a chain of "term not recognized" errors.
+foreach ($cmd in @('pyenv', 'npm')) {
+    $resolved = Get-Command $cmd -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+        " ERROR - Required command '$cmd' not found on PATH after refresh." | log
+        " ERROR - Prep may not have completed, or the RPC service has a stale PATH." | log
+        " ERROR - PATH: $env:Path" | log
+        Exit 1
+    }
+    "Found ${cmd}: $($resolved.Source)" | log
+}
+
 # Navigate to VS Code directory
 if (-not (Test-Path $vscodePath)) {
     " ERROR - VS Code directory not found: $vscodePath. Run vscode_prep.ps1 first." | log
