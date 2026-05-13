@@ -342,10 +342,17 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "",
+                        "description": "Library-aligned with regular productivity scenario: pass office_theme=System so first-run theme dialog is suppressed identically.",
                         "enabled": true,
                         "id": "1H2VHHH",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_setup",
+                        "params": [
+                            {
+                                "name": "[office_theme]",
+                                "val_options": "Colorful, Dark Gray, Black, White, System",
+                                "value": "System"
+                            }
+                        ],
                         "type": "Include"
                     }
                 ],
@@ -1660,7 +1667,7 @@
                     {
                         "children": [],
                         "delay": "0.0",
-                        "description": "Enable short typing for perf_stress",
+                        "description": "Enable short typing for perf_stress (keeps prod_*_run keystrokes shorter under stress)",
                         "enabled": true,
                         "id": "PSECST20",
                         "name": "[short_typing]",
@@ -1669,7 +1676,15 @@
                     },
                     {
                         "children": [],
-                        "description": "Inner Try: prod_run_no_onenote may fail under stress (e.g., New Email click below threshold). Catch so prod_close and web_switchto still run.",
+                        "delay": "3",
+                        "description": "Settle before opening Office apps under stress (avoid DPI/race image mismatches)",
+                        "enabled": true,
+                        "id": "PSECPRD0",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "description": "Safety net: protect productivity PT collection so a single image-match miss in prod_open or prod_run_no_onenote does not abort prod_close + web_switchto. Only wraps the PT-emitting productivity includes, not the rest of perf_stress.",
                         "enabled": true,
                         "id": "PSECTRYRUN",
                         "type": "Try"
@@ -1677,73 +1692,27 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "prod_*_open includes the switchto click AND opens the file in one go. Using prod_*_open per-app right before each prod_*_run avoids the dual-window bug we got from a separate prod_open phase + later prod_*_switchto: each file is opened exactly once.",
+                        "description": "Library-aligned: open all 5 apps (gives OneNote boot PT) — same as regular productivity scenario.",
                         "enabled": true,
-                        "id": "PSECPRO0",
-                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_open",
+                        "id": "PSECPRO_OPEN",
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_open",
                         "type": "Include"
                     },
                     {
                         "children": [],
-                        "delay": "0",
-                        "description": "",
+                        "delay": "3",
+                        "description": "Settle after opening all 5 apps before per-app switchto+run (avoid DPI/race image mismatches under stress)",
                         "enabled": true,
-                        "id": "PSECPRO1",
-                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_run",
-                        "type": "Include"
+                        "id": "PSECPRD1",
+                        "type": "Delay"
                     },
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "",
+                        "description": "Library-aligned: per-app switchto+run for Outlook/Excel/Word/PowerPoint (OneNote run intentionally skipped; OneNote boot PT still captured by prod_open above).",
                         "enabled": true,
-                        "id": "PSECPRO2",
-                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_open",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPRO3",
-                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_run",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPRO4",
-                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_open",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPRO5",
-                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_run",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPRO6",
-                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_open",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPRO7",
-                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_run",
+                        "id": "PSECPRO_RUN",
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_run_no_onenote",
                         "type": "Include"
                     },
                     {
@@ -1762,8 +1731,16 @@
                     },
                     {
                         "children": [],
+                        "delay": "2",
+                        "description": "Settle before close/web_switchto (runs even if productivity Try caught a failure above)",
+                        "enabled": true,
+                        "id": "PSECPRD5",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
                         "delay": "0",
-                        "description": "Cleanup runs even if prod_run_no_onenote failed",
+                        "description": "Cleanup runs even if productivity Try caught a failure",
                         "enabled": true,
                         "id": "19K59V7",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_close",
@@ -1772,7 +1749,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Switch to Edge runs even if prod_run_no_onenote failed",
+                        "description": "Switch to Edge runs even if productivity Try caught a failure",
                         "enabled": true,
                         "id": "1CFNENY",
                         "include_path": "scenarios\\windows\\_library\\web\\web_switchto",
