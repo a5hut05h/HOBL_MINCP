@@ -298,14 +298,16 @@ if ($LASTEXITCODE -ne 0) {
     Exit 1
 }
 
-"-- Extract log directory from logFile path" | log
+"-- Extract log directory from logFile path for storing additional logs" | log
 $logDir = Split-Path -Parent $logFile
-"Log directory: $logDir" | log
+"Log directory for storing additional logs: $logDir" | log
 
 # inference.py writes pytorch_inference_info.csv to --log-dir with these metrics:
 #   time_to_first_token_ms, time_to_first_token_s, tokens_per_second,
 #   total_tokens_generated, total_generation_time_s, ai_model, ai_device
 $inferenceCSV = Join-Path $logDir "pytorch_inference_info.csv"
+"-- Metrics will be stored in $inferenceCSV" | log
+
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
