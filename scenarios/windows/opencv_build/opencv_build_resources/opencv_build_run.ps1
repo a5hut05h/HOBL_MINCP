@@ -100,6 +100,19 @@ Write-RunPhaseMarker "phase.run_prep.start"
 
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
+# Verify required commands are findable on PATH after refresh.
+# Fail fast with a clear diagnostic instead of a chain of "term not recognized" errors.
+foreach ($cmd in @('cmake')) {
+    $resolved = Get-Command $cmd -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+        " ERROR - Required command '$cmd' not found on PATH after refresh." | log
+        " ERROR - Prep may not have completed, or the RPC service has a stale PATH." | log
+        " ERROR - PATH: $env:Path" | log
+        Exit 1
+    }
+    "Found ${cmd}: $($resolved.Source)" | log
+}
+
 $time = Get-Date -Format "HH:mm:ss"
 "$time - Clean build files" | log
 

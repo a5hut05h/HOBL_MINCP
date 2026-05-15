@@ -110,6 +110,7 @@ class OsInstall(core.app_scenario.Scenario):
             rc = recharge.Recharge()
             rc.setResumeThreshold('40')
             rc.setMonitorOnly('1')  # Do not turn on charger, just monitor battery level
+            rc.post_charge_delay = '0'  # Skip recharge hold delay for os_install.
             rc.runTest()
             time.sleep(2)
 
@@ -216,7 +217,7 @@ class OsInstall(core.app_scenario.Scenario):
         self._upload("scenarios\\windows\\os_install\\os_install_resources", self.dut_exec_path)
 
         # Upload updated VerifyVersions package from utilities.
-        self._upload("utilities\\proprietary\\VerifyVersions", self.dut_exec_path)
+        self._upload("scenarios\\windows\\os_install\\os_install_resources\\VerifyVersions", self.dut_exec_path)
         verify_versions_path = self.dut_exec_path + "\\VerifyVersions"
 
         # copy d:\bin\postdeploy\drivers folder to support folder if c:\support doesn't already exist

@@ -44,12 +44,36 @@ $arch = $osInfo.OSArchitecture
 $processorArch = $env:PROCESSOR_ARCHITECTURE
 
 if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
-    $pythonVersion = "3.12.10"
+    # Detect whether the custom wheel path was used during prep by checking the active pyenv version
+    $activeVersion = (pyenv version 2>$null) -replace '\s.*', ''
+    if ($activeVersion -match "^3\.13") {
+        $pythonVersion = $activeVersion
+    } else {
+        $pythonVersion = "3.12.10"
+    }
 } elseif ($arch -match "ARM" -or $processorArch -match "ARM") {
-    $pythonVersion = "3.12.10-arm"
+    # Detect whether the custom wheel path was used during prep by checking the active pyenv version
+    $activeVersion = (pyenv version 2>$null) -replace '\s.*', ''
+    if ($activeVersion -match "^3\.13") {
+        $pythonVersion = $activeVersion
+    } else {
+        $pythonVersion = "3.12.10-arm"
+    }
 } else {
     " ERROR - Unsupported architecture: $arch (Processor: $processorArch)" | log
     Exit 1
+}
+
+# --- Ensure CUDA paths are in session PATH if available ---
+if ($env:CUDA_PATH -and (Test-Path $env:CUDA_PATH)) {
+    $cudaBin = Join-Path $env:CUDA_PATH "bin"
+    $cuptiLib = Join-Path $env:CUDA_PATH "extras\CUPTI\lib64"
+    if ($env:PATH -notlike "*$cudaBin*") {
+        $env:PATH = "$cudaBin;$env:PATH"
+    }
+    if ((Test-Path $cuptiLib) -and $env:PATH -notlike "*$cuptiLib*") {
+        $env:PATH = "$cuptiLib;$env:PATH"
+    }
 }
 
 # Ensure pyenv shims are in PATH for this session

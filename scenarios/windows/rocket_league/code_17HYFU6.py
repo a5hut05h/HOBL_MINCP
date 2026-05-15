@@ -7,7 +7,8 @@ def run(scenario):
     logging.debug('Executing code block: code_17HYFU6.py')
 
     try:
-        scenario._kill("RocketLeague.exe")
+        scenario._call(["cmd.exe", "/c start steam://exit"])
+        scenario._call(["powershell.exe", "Wait-Process -Name steam -Timeout 30"])
     except:
         pass
 

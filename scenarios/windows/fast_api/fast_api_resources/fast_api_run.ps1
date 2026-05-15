@@ -281,6 +281,19 @@ Set-OptimizedPathOrder
 # PATH is now optimized: pyenv first (from User PATH), then system dirs (from Machine PATH)
 # Windows Store Python is at the end with lowest priority
 
+# Verify required commands are findable on PATH after Set-OptimizedPathOrder.
+# Fail fast with a clear diagnostic instead of a chain of "term not recognized" errors.
+foreach ($cmd in @('pyenv', 'python')) {
+    $resolved = Get-Command $cmd -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+        " ERROR - Required command '$cmd' not found on PATH after PATH optimization." | log
+        " ERROR - Prep may not have completed, or the RPC service has a stale PATH." | log
+        " ERROR - PATH: $env:Path" | log
+        Exit 1
+    }
+    "Found ${cmd}: $($resolved.Source)" | log
+}
+
 Set-Location "$scriptDrive\FastAPI"
 
 "Setting Python global version to $pythonVersion..." | log

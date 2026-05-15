@@ -91,26 +91,26 @@ class CommCheck(core.app_scenario.Scenario):
                 failed = True
 
         # WinAppDriver
-        # try:
-        if self.platform.lower() == "windows":
-            self._call([(self.dut_exec_path + "\\WindowsApplicationDriver\\WinAppDriver.exe"), (self.dut_resolved_ip + " " + self.app_port)], blocking=False, timeout=5)
-            time.sleep(1)
-            desired_caps = {}
-            desired_caps["app"] = "Root"
-            desktop = self._launchApp(desired_caps)
-            logging.info("WinAppDriver launch:\tOK")
-            # except:
-            #     logging.info("WinAppDriver launch:\tFAIL")
-            #     failed = True
+        # Note: currently self.dut_resolved_ip is not defined for comm_check
+        # if self.platform.lower() == "windows":
+        #     self._call([(self.dut_exec_path + "\\WindowsApplicationDriver\\WinAppDriver.exe"), (self.dut_resolved_ip + " " + self.app_port)], blocking=False, timeout=5)
+        #     time.sleep(1)
+        #     desired_caps = {}
+        #     desired_caps["app"] = "Root"
+        #     desktop = self._launchApp(desired_caps)
+        #     logging.info("WinAppDriver launch:\tOK")
+        #     # except:
+        #     #     logging.info("WinAppDriver launch:\tFAIL")
+        #     #     failed = True
 
-            try:
-                desktop.find_element_by_name("Start")
-                self._kill("winappdriver.exe")
-                logging.info("WinAppDriver comm:\tOK")
-            except:
-                logging.info("WinAppDriver comm:\tFAIL")
-                self._page_source(desktop)
-                failed = True
+        #     try:
+        #         desktop.find_element_by_name("Start")
+        #         self._kill("winappdriver.exe")
+        #         logging.info("WinAppDriver comm:\tOK")
+        #     except:
+        #         logging.info("WinAppDriver comm:\tFAIL")
+        #         self._page_source(desktop)
+        #         failed = True
         
         if failed:
             self.fail("At least one communication check failed")
