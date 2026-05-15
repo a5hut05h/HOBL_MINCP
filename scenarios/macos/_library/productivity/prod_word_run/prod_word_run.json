@@ -248,6 +248,14 @@
     },
     {
         "children": [],
+        "delay": "5",
+        "description": "",
+        "enabled": true,
+        "id": "1LTJML1",
+        "type": "Delay"
+    },
+    {
+        "children": [],
         "delay": "1",
         "description": "CMD+DOWN",
         "enabled": true,
