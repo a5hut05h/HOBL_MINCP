@@ -1,0 +1,23 @@
+[
+    {
+        "author": "dasashutosh",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-11",
+        "description": "",
+        "enabled": true,
+        "id": "1LKY8KT",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "code_1LKY8MT.py"
+        ],
+        "id": "1LKY8MT",
+        "type": "Code"
+    }
+]

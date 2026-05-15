@@ -1510,6 +1510,22 @@ class Scenario(unittest.TestCase):
         result = rpc.get_job_result(target_ip, port, jobid, log=log_output)
         return result
 
+    def _safe_call(self, cmd, desc=""):
+        try:
+            result = self._call(
+                ["bash", f"-c \"{cmd}\""],
+                expected_exit_code="",
+                fail_on_exception=False,
+            )
+            if result is None:
+                return ""
+            if isinstance(result, dict):
+                return str(result.get("stdout", result.get("output", "")))
+            return str(result).strip()
+        except Exception as e:
+            logging.warning(f" ERROR - {desc}: {e}")
+            return ""
+
 
     def _host_call(self, command, cwd=".", expected_exit_code="0", blocking=True, timeout=None, output=True):
         if (command == ""):
@@ -1741,7 +1757,7 @@ class Scenario(unittest.TestCase):
                                 except Exception:
                                     result_time = None
 
-                            # NOTE: This fallback change is done only to support MTL-SU-IDCLAB-23,
+                            # NOTE: This fallback change is to support other locales,
                             # where `forfiles` returns values like "08-03-2026 17:00:47".
                             if result_time is None and len(time_pieces) >= 2:
                                 mod_time_str = time_pieces[0] + " " + time_pieces[1]
@@ -1919,10 +1935,12 @@ class Scenario(unittest.TestCase):
         return True
 
     ''' Creates the prep status file if there is no error or failures. If exists, deletes first. '''
-    def createPrepStatusControlFile(self, suffix=""):
+    def createPrepStatusControlFile(self, suffix="", module=""):
         if isinstance(suffix, list):
             suffix = self._getLatestFileTimestampSuffix(suffix)
-        path = os.path.join(self.dut_exec_path, "prep_status", self._module + suffix)
+        if module == "":
+            module = self._module
+        path = os.path.join(self.dut_exec_path, "prep_status", module + suffix)
         if self.platform.lower() == "macos":
             path = path.replace("\\", "/")
         self._remote_make_dir(path, True)
@@ -3428,6 +3446,7 @@ class Scenario(unittest.TestCase):
             param = str(action['name']).strip("[]")
             inc_value = float(self._resolve_params_in_item(action['value'], component))
             param_section, param_name = self._parse_param_name(param, component)
+            logging.debug(f"Incrementing parameter pre {param_section}:{param_name} to {inc_value}")
             param_value = float(Params.get(param_section, param_name))
             new_value = str(param_value + inc_value)
             logging.debug(f"Incrementing parameter {param_section}:{param_name} to {new_value}")

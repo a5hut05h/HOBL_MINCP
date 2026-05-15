@@ -11,10 +11,11 @@ script_map = {
 
     "scenarios.app_scenario": "core.app_scenario",
 
-    "utilities.modules":       "utilities.open_source.modules",
-    "utilities.dump_tools":    "utilities.open_source.dump_tools",
-    "utilities.scenario_type": "utilities.open_source.scenario_type",
-    "utilities.device_ping":   "utilities.open_source.device_ping",
+    "utilities.modules":        "utilities.open_source.modules",
+    "utilities.dump_scenarios": "utilities.open_source.dump_scenarios",
+    "utilities.dump_tools":     "utilities.open_source.dump_tools",
+    "utilities.scenario_type":  "utilities.open_source.scenario_type",
+    "utilities.device_ping":    "utilities.open_source.device_ping",
 
     "utilities.remote":              "utilities.third_party.remote",
     "utilities.remote.start_remote": "utilities.third_party.remote.start_remote",

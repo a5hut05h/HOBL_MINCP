@@ -58,6 +58,17 @@
         "delay": "0.0",
         "description": "",
         "enabled": true,
+        "id": "1LKYUVC",
+        "name": "[workloads]",
+        "type": "Set Default",
+        "val_options": "productivity",
+        "value": "productivity"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
         "id": "1CFLR7T",
         "name": "[simple_office_launch]",
         "type": "Set Default",
@@ -114,7 +125,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1AKUT8L",
-                        "include_path": "..\\_library\\Teams\\teams_setup",
+                        "include_path": "scenarios\\macos\\_library\\Teams\\teams_setup",
                         "type": "Include"
                     }
                 ],
@@ -141,7 +152,7 @@
                         "description": "Upload timers executable from Host to DUT",
                         "enabled": true,
                         "id": "MAC_TIMERS_INCLUDE",
-                        "include_path": "..\\_library\\enterprise_collab\\timers_setup",
+                        "include_path": "scenarios\\macos\\_library\\enterprise_collab\\timers_setup",
                         "type": "Include"
                     },
                     {
@@ -179,7 +190,7 @@
                         "description": "Create large binaries and upload to DUT",
                         "enabled": true,
                         "id": "1ANJY4X",
-                        "include_path": "..\\_library\\enterprise_collab\\onedrive_upload_setup",
+                        "include_path": "scenarios\\macos\\_library\\enterprise_collab\\onedrive_upload_setup",
                         "type": "Include"
                     }
                 ],
@@ -204,7 +215,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1ARKHNH",
-                "include_path": "..\\_library\\web\\web_setup",
+                "include_path": "scenarios\\macos\\_library\\web\\web_setup",
                 "type": "Include"
             },
             {
@@ -215,7 +226,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1CFLW86",
-                        "include_path": "..\\_library\\productivity\\prod_setup",
+                        "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
                         "type": "Include"
                     }
                 ],
@@ -285,9 +296,18 @@
                         "children": [],
                         "delay": "0",
                         "description": "",
-                        "enabled": true,
+                        "enabled": false,
                         "id": "1ARKEY9",
-                        "include_path": "..\\_library\\web\\web_run_12",
+                        "include_path": "scenarios\\macos\\_library\\web\\web_run_12",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1LKYULF",
+                        "include_path": "scenarios\\macos\\_library\\web\\web_run_minmac",
                         "type": "Include"
                     },
                     {
@@ -298,7 +318,7 @@
                                 "description": "",
                                 "enabled": true,
                                 "id": "1CFLY49",
-                                "include_path": "..\\_library\\productivity\\prod_open",
+                                "include_path": "scenarios\\macos\\_library\\productivity\\prod_open",
                                 "type": "Include"
                             },
                             {
@@ -307,7 +327,7 @@
                                 "description": "",
                                 "enabled": true,
                                 "id": "1CFLY8J",
-                                "include_path": "..\\_library\\productivity\\prod_close",
+                                "include_path": "scenarios\\macos\\_library\\productivity\\prod_close",
                                 "type": "Include"
                             }
                         ],
@@ -332,7 +352,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1ARKF37",
-                        "include_path": "..\\_library\\web\\web_close_tabs",
+                        "include_path": "scenarios\\macos\\_library\\web\\web_close_tabs",
                         "params": [
                             {
                                 "name": "[num_tabs_to_close]",
@@ -408,7 +428,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1AKUY0M",
-                "include_path": "..\\_library\\web\\web_close_browser",
+                "include_path": "scenarios\\macos\\_library\\web\\web_close_browser",
                 "type": "Include"
             },
             {
@@ -417,7 +437,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "1AKUY5R",
-                "include_path": "..\\_library\\web\\web_kill",
+                "include_path": "scenarios\\macos\\_library\\web\\web_kill",
                 "type": "Include"
             },
             {
@@ -457,7 +477,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1CFLX9W",
-                        "include_path": "..\\_library\\productivity\\prod_kill",
+                        "include_path": "scenarios\\macos\\_library\\productivity\\prod_kill",
                         "type": "Include"
                     }
                 ],
@@ -484,7 +504,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1AMCRPK",
-                        "include_path": "..\\_library\\Teams\\teams_teardown",
+                        "include_path": "scenarios\\macos\\_library\\Teams\\teams_teardown",
                         "type": "Include"
                     }
                 ],

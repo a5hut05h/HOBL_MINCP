@@ -1,0 +1,429 @@
+[
+    {
+        "author": "jewilder",
+        "capture_device": "Surface Laptop 7 15in, light theme, 150% scaling",
+        "children": [],
+        "create_date": "2025-03-01",
+        "description": "Edit PowerPoint slide",
+        "enabled": true,
+        "id": "UR7X03",
+        "type": "Information"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "4",
+                "description": "PGDN",
+                "enabled": true,
+                "id": "V5U5A8",
+                "text": "\ue015",
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
+            }
+        ],
+        "count": "4",
+        "delay": "1",
+        "description": "",
+        "enabled": true,
+        "id": "V5U549",
+        "type": "Loop"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "V5U54A",
+        "type": "End Loop"
+    },
+    {
+        "children": [],
+        "delay": "3.5",
+        "description": "Page down 3x",
+        "enabled": true,
+        "id": "UR9CLF",
+        "text": "\ue015\ue015\ue015",
+        "type": "Type",
+        "typing_delay": "500"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Insert New Slide",
+        "enabled": true,
+        "id": "1LR8UKR",
+        "text": "\ue03d\ue008n",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "New Slide Region",
+        "enabled": true,
+        "file_name": [
+            "image_1LP1YNE.png"
+        ],
+        "h": "0.564",
+        "id": "1LP1YNE",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.464",
+        "x": "0.001",
+        "y": "0.000"
+    },
+    {
+        "capture_id": "1LP1YNE",
+        "children": [],
+        "delay": "2",
+        "description": "Slide Content",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LP2125.png"
+        ],
+        "id": "1LP2125",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "4.5",
+        "description": "Select all content",
+        "enabled": true,
+        "id": "UR969J",
+        "text": "\ue03da",
+        "type": "Type",
+        "typing_delay": "400"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Delete",
+        "enabled": true,
+        "id": "1LR78KT",
+        "text": "\ue017",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Paste Clipboard",
+        "enabled": true,
+        "id": "1LR7966",
+        "text": "\ue03dv",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "id": "1LTAW7E",
+        "type": "Delay"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Move to Navigation Pane",
+        "enabled": true,
+        "id": "1LTCX5H",
+        "type": "Click Coord",
+        "x": "0.1",
+        "y": "0.75"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "4",
+                "description": "PGUP",
+                "enabled": true,
+                "id": "V36KLA",
+                "text": "\ue013",
+                "type": "Type",
+                "typing_delay": "400"
+            }
+        ],
+        "count": "4",
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "V36K62",
+        "type": "Loop"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "V36K63",
+        "type": "End Loop"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "4",
+                "description": "PGDN",
+                "enabled": true,
+                "id": "V36KY4",
+                "text": "\ue015",
+                "type": "Type",
+                "typing_delay": "400"
+            }
+        ],
+        "count": "4",
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "V36KVV",
+        "type": "Loop"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "V36KVW",
+        "type": "End Loop"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "id": "V36LYF",
+        "type": "Delay"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "Top Bar",
+        "enabled": true,
+        "file_name": [
+            "image_1LTCR52.png"
+        ],
+        "h": "0.285",
+        "id": "1LTCR52",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.544",
+        "x": "0.001",
+        "y": "0.000"
+    },
+    {
+        "capture_id": "1LTCR52",
+        "children": [],
+        "delay": "2",
+        "description": "Edit Button",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LTCRJ6.png"
+        ],
+        "id": "1LTCRJ6",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "Edit Drop Down Menu",
+        "enabled": true,
+        "file_name": [
+            "image_1LTCTCR.png"
+        ],
+        "h": "0.633",
+        "id": "1LTCTCR",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.441",
+        "x": "0.005",
+        "y": "0.005"
+    },
+    {
+        "capture_id": "1LTCTCR",
+        "children": [],
+        "delay": "2",
+        "description": "Delete Slide",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LTCU2J.png"
+        ],
+        "id": "1LTCU2J",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "3.5",
+        "description": "Copy Paste slide",
+        "enabled": true,
+        "id": "UR9UHR",
+        "text": "\ue03dcv",
+        "type": "Type",
+        "typing_delay": "500"
+    },
+    {
+        "children": [],
+        "delay": "2.5",
+        "description": "Undo",
+        "enabled": true,
+        "id": "UR9VH2",
+        "text": "\ue03dz",
+        "type": "Type",
+        "typing_delay": "500"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "App Bar",
+        "enabled": true,
+        "file_name": [
+            "image_1LR6TV9.png"
+        ],
+        "h": "0.319",
+        "id": "1LR6TV9",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.356",
+        "x": "0.001",
+        "y": "0.003"
+    },
+    {
+        "capture_id": "1LR6TV9",
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LR6W78.png"
+        ],
+        "id": "1LR6W78",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "File Drop Down Menu",
+        "enabled": true,
+        "file_name": [
+            "image_1LTE74N.png"
+        ],
+        "h": "0.711",
+        "id": "1LTE74N",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.440",
+        "x": "0.000",
+        "y": "0.099"
+    },
+    {
+        "capture_id": "1LTE74N",
+        "children": [],
+        "delay": "2",
+        "description": "Properties",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LTE6TP.png"
+        ],
+        "id": "1LTE6TP",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "OK Button Region",
+        "enabled": true,
+        "file_name": [
+            "image_1LTEEKE.png"
+        ],
+        "h": "0.370",
+        "id": "1LTEEKE",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.337",
+        "x": "0.462",
+        "y": "0.444"
+    },
+    {
+        "capture_id": "1LTEEKE",
+        "children": [],
+        "delay": "2",
+        "description": "Dismiss (OK)",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LTEF5K.png"
+        ],
+        "id": "1LTEF5K",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "capture_id": "1LR6TV9",
+        "children": [],
+        "delay": "2",
+        "description": "Insert",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LTE81N.png"
+        ],
+        "id": "1LTE81N",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "capture_id": "1LR6TV9",
+        "children": [],
+        "delay": "2",
+        "description": "Home",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LTE7PW.png"
+        ],
+        "id": "1LTE7PW",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    }
+]

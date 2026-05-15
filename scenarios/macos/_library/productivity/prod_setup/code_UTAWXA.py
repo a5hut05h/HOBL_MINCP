@@ -8,6 +8,18 @@ import time
 
 def run(scenario):
     logging.debug('Executing code block: code_UTAWXA.py (MacOS)')
+
+    # Kill Office apps once during prod setup for a fresh cold boot baseline.
+    for app in ["Microsoft Excel", "Microsoft Word", "Microsoft PowerPoint", "Microsoft OneNote"]:
+        scenario._safe_call(f"pkill -f '{app}' 2>/dev/null || true", f"kill {app}")
+
+    time.sleep(2)
+
+    check = scenario._safe_call(
+        "pgrep -fl 'Microsoft Excel|Microsoft Word|Microsoft PowerPoint|Microsoft OneNote' || echo 'ALL_KILLED'",
+        "verify kill",
+    )
+    logging.info(f"Office apps after kill: {check}")
     
     # For MacOS, Office themes are handled differently
     # This is a placeholder for MacOS-specific setup
@@ -21,18 +33,40 @@ def run(scenario):
     
     # Create link to abl_docs if needed
     abl_docs_link = "/Users/Shared/abl_docs"
-    onedrive_docs = os.path.join(userprofile, "OneDrive/abl_docs")
+    onedrive_docs = userprofile+"/OneDrive/abl_docs"
     
     # Remove existing link if present
     scenario._call(["bash", "-c \"rm -f " + abl_docs_link + "\""], expected_exit_code="", fail_on_exception=False)
     
     # Create symbolic link
     scenario._call(["bash", "-c \"ln -s " + onedrive_docs + " " + abl_docs_link + "\""], fail_on_exception=False)
+
+    # Upload Word Normal.dotm template so custom shortcuts are available on the DUT.
+    normal_dotm_source = os.path.join(os.path.dirname(__file__), "abl_docs", "Normal.dotm")
+    if not os.path.exists(normal_dotm_source):
+        normal_dotm_source = os.path.join(os.path.dirname(__file__), "abl_docs", "normal.dotm")
+
+    if os.path.exists(normal_dotm_source):
+        # Stage upload through a path without spaces to avoid chmod splitting in _upload.
+        temp_template_upload_dest = "/Users/Shared"
+        temp_template_file = "/Users/Shared/Normal.dotm"
+        scenario._upload(normal_dotm_source, temp_template_upload_dest)
+
+        template_dest = userprofile + "/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Templates.localized"
+        scenario._call(["bash", "-c \"mkdir -p \\\"" + template_dest + "\\\"\""], fail_on_exception=False)
+        scenario._call([
+            "bash",
+            "-c \"cp -f \\\"" + temp_template_file + "\\\" \\\"" + template_dest + "/Normal.dotm\\\"\"",
+        ], fail_on_exception=False)
+
+        logging.info(f"Uploaded Word template {normal_dotm_source} to {template_dest}")
+    else:
+        scenario.fail("Normal.dotm was not found under scenarios\\macos\\_library\\productivity\\prod_setup\\abl_docs")
     
     # Upload Office docs for MacOS
     upload_successful = False
     doc_source = os.path.join(os.path.dirname(__file__), "abl_docs")
-    doc_dest = os.path.join(userprofile, "OneDrive")
+    doc_dest = userprofile+"/OneDrive"
     
     if os.path.exists(doc_source):
         for i in range(12):

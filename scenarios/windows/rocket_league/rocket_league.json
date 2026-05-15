@@ -35,47 +35,12 @@
             },
             {
                 "children": [],
-                "delay": "2",
-                "description": "",
+                "command": "start steam://run/252950",
+                "delay": "0",
+                "description": "Start Rocket League",
                 "enabled": true,
-                "file_name": [
-                    "image_17HXU4R.png"
-                ],
-                "h": "1",
-                "id": "17HXU4R",
-                "recapture": false,
-                "type": "Capture",
-                "w": "1",
-                "x": "0",
-                "y": "0"
-            },
-            {
-                "capture_id": "17HXU4R",
-                "children": [],
-                "delay": "4",
-                "description": "Windows icon",
-                "enabled": true,
-                "exception_on": "No match",
-                "file_name": [
-                    "image_17HXTLU.png"
-                ],
-                "id": "17HXTLU",
-                "match_threshold": "",
-                "primary": true,
-                "scale": "",
-                "type": "Click",
-                "x": "0.500",
-                "y": "0.500"
-            },
-            {
-                "children": [],
-                "delay": "2",
-                "description": "Rocket League",
-                "enabled": true,
-                "id": "17HXV6P",
-                "text": "Rocket\ue00dLeague\ue007",
-                "type": "Type",
-                "typing_delay": "[typing_delay]"
+                "id": "1KC0KV9",
+                "type": "Command"
             },
             {
                 "children": [],
@@ -101,7 +66,7 @@
                 "description": "OK not logged in popup",
                 "enabled": true,
                 "id": "18KLKM1",
-                "text": "\ue007\ue007",
+                "text": "\ue007\ue007\ue007",
                 "type": "Type",
                 "typing_delay": "1000"
             },
@@ -111,7 +76,7 @@
                 "description": "PLAY",
                 "enabled": true,
                 "id": "18KLM5W",
-                "text": "\ue013\ue013\ue013\ue013\ue013\ue007",
+                "text": "\ue013\ue013\ue013\ue013\ue013\ue013\ue015\ue007",
                 "type": "Type",
                 "typing_delay": "500"
             },

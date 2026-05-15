@@ -1,56 +1,56 @@
 [
     {
-        "id": "UR1W56",
-        "type": "Information",
-        "description": "",
-        "enabled": true,
         "author": "",
         "capture_device": "",
+        "children": [],
         "create_date": "2025-03-01",
-        "children": []
+        "description": "",
+        "enabled": true,
+        "id": "UR1W56",
+        "type": "Information"
     },
     {
+        "children": [],
+        "delay": "5",
+        "description": "Down 5s",
+        "direction": "down",
+        "enabled": true,
         "id": "UR1WC2",
         "type": "Scroll",
-        "description": "Down 5s",
-        "enabled": true,
-        "delay": "5",
         "x": "0.5",
-        "y": "0.25",
-        "direction": "down",
-        "children": []
+        "y": "0.25"
     },
     {
+        "children": [],
+        "delay": "4",
+        "description": "Down 4s",
+        "direction": "down",
+        "enabled": true,
         "id": "UR1X2P",
         "type": "Scroll",
-        "description": "Down 4s",
-        "enabled": true,
-        "delay": "4",
         "x": "0.5",
-        "y": "0.250",
-        "direction": "down",
-        "children": []
+        "y": "0.250"
     },
     {
+        "children": [],
+        "delay": "3",
+        "description": "Down 3s",
+        "direction": "down",
+        "enabled": true,
         "id": "UR1X2W",
         "type": "Scroll",
-        "description": "Down 3s",
-        "enabled": true,
-        "delay": "3",
         "x": "0.5",
-        "y": "0.25",
-        "direction": "down",
-        "children": []
+        "y": "0.25"
     },
     {
+        "children": [],
+        "delay": "4",
+        "description": "Down 4s",
+        "direction": "down",
+        "enabled": true,
         "id": "UR1X32",
         "type": "Scroll",
-        "description": "Down 4s",
-        "enabled": true,
-        "delay": "4",
         "x": "0.50",
-        "y": "0.25",
-        "direction": "down",
-        "children": []
+        "y": "0.25"
     }
 ]
