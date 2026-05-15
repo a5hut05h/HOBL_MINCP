@@ -1,0 +1,433 @@
+================================================================================
+         ETL PERFORMANCE BOTTLENECK ANALYSIS - SUMMARY REPORT
+================================================================================
+Generated: 2026-05-15 16:50:21
+Files Analyzed: 6
+Total Trace Size: 4552.5 MB
+
+--------------------------------------------------------------------------------
+SYSTEM CONFIGURATION
+--------------------------------------------------------------------------------
+  Computer Name: TESTPC
+  ProcessorNum: 12
+  ProcessorSpeed: 3686 MHz
+  MemorySize: 11938 MB
+  ProductName: Windows 10 Pro
+  BuildLab: 26100.8037.amd64fre.ge_release.240331-1435
+
+================================================================================
+1. TOP 10 PROCESSES CONSUMING MOST CPU TIME (excl. Idle)
+================================================================================
+
+  #   Process                      CPU Time(s)  Avg CPU%   Reads    Writes   R Size     W Size    
+  --- ---                          ---          ---        ---      ---      ---        ---       
+  1   wpr.exe                      2.96         12.59      215      0        5.0 MB     0 B       
+  2   SimpleTimer.exe              0.87         4.29       0        0        0 B        0 B       
+  3   ms-teams.exe                 0.82         2.07       0        0        0 B        0 B       
+  4   svchost.exe                  0.40         0.15       1        3        16.0 KB    16.0 KB   
+  5   System                       0.35         1.48       16       993      131.0 KB   809.7 MB  
+  6   msedge.exe                   0.32         0.17       7        10       320.0 KB   132.0 KB  
+  7   audiodg.exe                  0.14         0.59       0        0        0 B        0 B       
+  8   dwm.exe                      0.14         0.67       0        0        0 B        0 B       
+  9   msedgewebview2.exe           0.10         0.12       1        1        3.0 KB     4.0 KB    
+  10  WUDFCompanionHost.exe        0.06         0.25       0        0        0 B        0 B       
+
+  Per-Trace CPU Snapshot (top 5 per trace excl. Idle):
+    [WPR_20260428_140125.etl]
+      wpr.exe                   CPU: 12.2%  Time: 492ms  R:16 W:0
+      SimpleTimer.exe           CPU: 4.3%  Time: 173ms  R:0 W:0
+      ms-teams.exe              CPU: 4.1%  Time: 166ms  R:0 W:0
+      System                    CPU: 1.6%  Time: 63ms  R:2 W:172
+      svchost.exe               CPU: 1.3%  Time: 53ms  R:0 W:0
+
+    [WPR_20260428_140654.etl]
+      wpr.exe                   CPU: 12.2%  Time: 497ms  R:16 W:0
+      ms-teams.exe              CPU: 4.4%  Time: 181ms  R:0 W:0
+      SimpleTimer.exe           CPU: 4.2%  Time: 170ms  R:0 W:0
+      System                    CPU: 1.5%  Time: 61ms  R:3 W:188
+      svchost.exe               CPU: 1.4%  Time: 59ms  R:0 W:0
+
+    [WPR_20260428_141222.etl]
+      wpr.exe                   CPU: 12.4%  Time: 507ms  R:182 W:0
+      SimpleTimer.exe           CPU: 4.4%  Time: 181ms  R:0 W:0
+      ms-teams.exe              CPU: 4.3%  Time: 178ms  R:0 W:0
+      msedge.exe                CPU: 2.0%  Time: 83ms  R:0 W:0
+      msedge.exe                CPU: 1.8%  Time: 74ms  R:0 W:0
+
+    [WPR_20260428_141757.etl]
+      wpr.exe                   CPU: 12.6%  Time: 502ms  R:0 W:0
+      SimpleTimer.exe           CPU: 4.3%  Time: 171ms  R:0 W:0
+      ms-teams.exe              CPU: 2.6%  Time: 103ms  R:0 W:0
+      svchost.exe               CPU: 1.3%  Time: 53ms  R:0 W:0
+      System                    CPU: 1.3%  Time: 50ms  R:3 W:160
+
+    [WPR_20260428_142329.etl]
+      wpr.exe                   CPU: 12.3%  Time: 520ms  R:1 W:0
+      SimpleTimer.exe           CPU: 4.2%  Time: 179ms  R:0 W:0
+      ms-teams.exe              CPU: 2.7%  Time: 115ms  R:0 W:0
+      svchost.exe               CPU: 1.6%  Time: 66ms  R:0 W:0
+      System                    CPU: 1.3%  Time: 56ms  R:3 W:163
+
+    [WPR_20260428_142907.etl]
+      wpr.exe                   CPU: 13.8%  Time: 441ms  R:0 W:0
+      ms-teams.exe              CPU: 2.4%  Time: 78ms  R:0 W:0
+      svchost.exe               CPU: 1.7%  Time: 55ms  R:0 W:0
+      System                    CPU: 1.5%  Time: 48ms  R:2 W:157
+      msedgewebview2.exe        CPU: 1.0%  Time: 31ms  R:0 W:0
+
+================================================================================
+2. MEMORY ANALYSIS
+================================================================================
+
+  [WPR_20260428_140125.etl]
+  Total Physical:  11938 MB (11.7 GB)
+  In Use:          9829 MB (82.3%)
+  Available:       2109 MB (17.7%)
+
+  Category Breakdown:
+    Active:        9067 MB  (76.0%)
+    Standby:       2001 MB  (16.8%)
+    Modified:         0 MB  (0.0%)
+    Free:             0 MB  (0.0%)
+
+================================================================================
+3. DISK I/O UTILIZATION (from cpudisk)
+================================================================================
+
+  Aggregate I/O (all 6 traces):
+    Read Ops:           669
+    Write Ops:         1047
+    Flush Ops:            9
+    Data Read:      21.9 MB
+    Data Written:  810.2 MB
+
+  Top 10 Disk Consumers:
+    Process                   Reads   Writes  Flush  Read Size  Write Size R SvcT us  W SvcT us 
+    ---                       ---     ---     ---    ---        ---        ---        ---       
+    System                    16      993     2      131.0 KB   809.7 MB   10275      854364    
+    MemCompression            350     0       0      13.9 MB    0 B        32439      0         
+    wpr.exe                   215     0       0      5.0 MB     0 B        52653      0         
+    powershell.exe            42      0       0      915.5 KB   0 B        6790       0         
+    SearchFilterHost.exe      16      0       0      752.0 KB   0 B        2173       0         
+    msedge.exe                7       10      4      320.0 KB   132.0 KB   2059       1866      
+    SimpleRemoteConsole.exe   11      0       0      452.0 KB   0 B        1294       0         
+    Registry                  0       40      2      0 B        372.0 KB   0          1627      
+    conhost.exe               2       0       0      128.0 KB   0 B        170        0         
+    WindowsTerminal.exe       1       0       0      64.0 KB    0 B        120        0         
+
+================================================================================
+4. BOOT / APPLICATION LAUNCH ANALYSIS
+================================================================================
+
+  These are runtime traces (not boot traces).
+  Boot time metrics require WPR boot trace capture.
+  Below: Target app activity detected in traces:
+
+================================================================================
+5. CPA - CPU ANALYSIS FOR TARGET APPLICATIONS
+================================================================================
+   Targets: Edge, PowerPoint, Outlook, Excel, Teams, Word
+
+  === Microsoft Edge ===
+    Process instances:  72 (PIDs: 31 unique)
+    Total CPU Time:    0.42 sec (422 ms)
+    Avg CPU %:         0.15%
+    Peak CPU %:        2.01% (single process)
+    Disk Reads:        8 ops (323.0 KB)
+    Disk Writes:       11 ops (136.0 KB)
+    Read Svc Time:     2351 us
+    Write Svc Time:    1945 us
+
+  === Outlook ===
+    Process instances:  1 (PIDs: 1 unique)
+    Total CPU Time:    0.00 sec (1 ms)
+    Avg CPU %:         0.02%
+    Peak CPU %:        0.02% (single process)
+    Disk Reads:        0 ops (0 B)
+    Disk Writes:       0 ops (0 B)
+    Read Svc Time:     0 us
+    Write Svc Time:    0 us
+
+  === PowerPoint ===
+    Process instances:  4 (PIDs: 1 unique)
+    Total CPU Time:    0.00 sec (1 ms)
+    Avg CPU %:         0.01%
+    Peak CPU %:        0.01% (single process)
+    Disk Reads:        0 ops (0 B)
+    Disk Writes:       0 ops (0 B)
+    Read Svc Time:     0 us
+    Write Svc Time:    0 us
+
+  === Excel ===
+    Process instances:  1 (PIDs: 1 unique)
+    Total CPU Time:    0.00 sec (0 ms)
+    Avg CPU %:         0.00%
+    Peak CPU %:        0.00% (single process)
+    Disk Reads:        0 ops (0 B)
+    Disk Writes:       0 ops (0 B)
+    Read Svc Time:     0 us
+    Write Svc Time:    0 us
+
+  === Microsoft Teams ===
+    Process instances:  10 (PIDs: 2 unique)
+    Total CPU Time:    0.82 sec (823 ms)
+    Avg CPU %:         2.07%
+    Peak CPU %:        4.44% (single process)
+    Disk Reads:        0 ops (0 B)
+    Disk Writes:       0 ops (0 B)
+    Read Svc Time:     0 us
+    Write Svc Time:    0 us
+
+  === Microsoft Word ===
+    Process instances:  3 (PIDs: 2 unique)
+    Total CPU Time:    0.00 sec (1 ms)
+    Avg CPU %:         0.01%
+    Peak CPU %:        0.01% (single process)
+    Disk Reads:        0 ops (0 B)
+    Disk Writes:       0 ops (0 B)
+    Read Svc Time:     0 us
+    Write Svc Time:    0 us
+
+================================================================================
+6. PER-CORE CPU UTILIZATION (P-core vs E-core)
+================================================================================
+
+  Cores: 12 (P-cores: 0-7, E-cores: 8-11)
+  Sample intervals: 302
+
+  Core         Type     Avg %    Max %   
+  ---          ---      ---      ---     
+  Core 0     P-core   4.0      63.4    
+  Core 1     P-core   4.3      66.4    
+  Core 2     P-core   4.4      64.2    
+  Core 3     P-core   5.6      82.8    
+  Core 4     P-core   1.2      43.0    
+  Core 5     P-core   2.5      54.5    
+  Core 6     P-core   2.1      48.6    
+  Core 7     P-core   1.6      45.5    
+  Core 8     E-core   29.9     49.6    
+  Core 9     E-core   31.0     51.2    
+  Core 10    E-core   38.9     59.0    
+  Core 11    E-core   38.8     59.1    
+
+  P-core Avg: 3.2%   E-core Avg: 34.7%
+  WARNING: E-cores more loaded than P-cores - scheduling imbalance
+
+================================================================================
+7. PERFTRACK LAUNCH TIMES - ALL PT NUMBERS
+================================================================================
+
+  No PerfTrack timing data extracted from traces.
+  NOTE: PerfTrack data requires Microsoft-Windows-Diagnostics-PerfTrack ETW provider
+  to be enabled during trace capture. Showing estimated launch times from CPU activity:
+
+  PT ID    Scenario                                 Est. Status         
+  ---      ---                                      ---                 
+  8998     Edge Launch                              ACTIVE in traces    
+  9412     Edge Page Load (Avg)                     ACTIVE in traces    
+  6352     Explorer Input Delay                     ACTIVE in traces    
+  9475     File Explorer Launch                     ACTIVE in traces    
+  10052    File Explorer Launch                     ACTIVE in traces    
+  8804     Office-Outlook-Boot v2                   ACTIVE in traces    
+  8807     Office-PPT-Boot v2                       ACTIVE in traces    
+  8805     Office-Word-Boot v2                      ACTIVE in traces    
+  8806     Office-XL-Boot v2                        ACTIVE in traces    
+  9232     Search Full Activation (max)             Not detected        
+  9169     Slow Keyboard                            Not detected        
+  9159     Slow Mouse                               Not detected        
+  9971     Snipping Tool Overlay Launch             Not detected        
+  1809     Start Launch (max)                       Not detected        
+  9917     Start Launch (max)                       Not detected        
+  2430     Type-to-Search (TopResultRender)         Not detected        
+  9459     Type-to-Search (TopResultRender)         Not detected        
+
+
+================================================================================
+8. CRITICAL PATH ANALYSIS - OUTLOOK, EXCEL, PPT, EDGE
+================================================================================
+
+  Critical Path Analysis identifies the longest sequential chain of operations
+  that determines minimum launch time for each application.
+
+  ======================================================================
+  CRITICAL PATH: Outlook (PT 8804 - Office-Outlook-Boot v2)
+  ======================================================================
+
+    Process Instances: 1 (1 unique PIDs)
+    Total CPU Time: 0.7 ms (0.00 s)
+    Avg CPU %: 0.0%
+    Peak CPU %: 0.0%
+
+    CRITICAL PATH BREAKDOWN:
+    Phase                               Time (ms)    % of Path 
+    ─────────────────────────────────── ──────────── ──────────
+    Process Init & DLL Load             0.1          15.0  %  █████
+    Config & Registry Reads             0.0          0.0   %  
+    File I/O (Data Loading)             0.0          0.0   %  
+    CPU Compute (Render/Parse)          0.4          55.0  %  ██████████████████
+    Network/IPC Initialization          0.1          10.0  %  ███
+    UI Rendering & Display              0.1          20.0  %  ██████
+    Disk Writes (Cache/Profile)         0.0          0.0   %  
+    ─────────────────────────────────── ──────────── ──────────
+    ESTIMATED CRITICAL PATH TOTAL       0.7         
+
+    BOTTLENECK IDENTIFICATION:
+      #1 CPU Compute (Render/Parse): 0.4 ms (55.0% of critical path)
+      #2 UI Rendering & Display: 0.1 ms (20.0% of critical path)
+      #3 Process Init & DLL Load: 0.1 ms (15.0% of critical path)
+
+    OPTIMIZATION OPPORTUNITIES:
+      → CPU dominant: Consider code optimization, lazy loading,
+        or deferring non-critical computation (1 ms CPU)
+
+  ======================================================================
+  CRITICAL PATH: Excel (PT 8806 - Office-XL-Boot v2)
+  ======================================================================
+
+    Process Instances: 1 (1 unique PIDs)
+    Total CPU Time: 0.1 ms (0.00 s)
+    Avg CPU %: 0.0%
+    Peak CPU %: 0.0%
+
+    CRITICAL PATH BREAKDOWN:
+    Phase                               Time (ms)    % of Path 
+    ─────────────────────────────────── ──────────── ──────────
+    Process Init & DLL Load             0.0          15.0  %  █████
+    Config & Registry Reads             0.0          0.0   %  
+    File I/O (Data Loading)             0.0          0.0   %  
+    CPU Compute (Render/Parse)          0.0          55.0  %  ██████████████████
+    Network/IPC Initialization          0.0          10.0  %  ███
+    UI Rendering & Display              0.0          20.0  %  ██████
+    Disk Writes (Cache/Profile)         0.0          0.0   %  
+    ─────────────────────────────────── ──────────── ──────────
+    ESTIMATED CRITICAL PATH TOTAL       0.1         
+
+    BOTTLENECK IDENTIFICATION:
+      #1 CPU Compute (Render/Parse): 0.0 ms (55.0% of critical path)
+      #2 UI Rendering & Display: 0.0 ms (20.0% of critical path)
+      #3 Process Init & DLL Load: 0.0 ms (15.0% of critical path)
+
+    OPTIMIZATION OPPORTUNITIES:
+      → CPU dominant: Consider code optimization, lazy loading,
+        or deferring non-critical computation (0 ms CPU)
+
+  ======================================================================
+  CRITICAL PATH: PowerPoint (PT 8807 - Office-PPT-Boot v2)
+  ======================================================================
+
+    Process Instances: 4 (1 unique PIDs)
+    Total CPU Time: 1.5 ms (0.00 s)
+    Avg CPU %: 0.0%
+    Peak CPU %: 0.0%
+
+    CRITICAL PATH BREAKDOWN:
+    Phase                               Time (ms)    % of Path 
+    ─────────────────────────────────── ──────────── ──────────
+    Process Init & DLL Load             0.2          15.0  %  ████
+    Config & Registry Reads             0.0          0.0   %  
+    File I/O (Data Loading)             0.0          0.0   %  
+    CPU Compute (Render/Parse)          0.8          55.0  %  ██████████████████
+    Network/IPC Initialization          0.1          10.0  %  ███
+    UI Rendering & Display              0.3          20.0  %  ██████
+    Disk Writes (Cache/Profile)         0.0          0.0   %  
+    ─────────────────────────────────── ──────────── ──────────
+    ESTIMATED CRITICAL PATH TOTAL       1.5         
+
+    BOTTLENECK IDENTIFICATION:
+      #1 CPU Compute (Render/Parse): 0.8 ms (55.0% of critical path)
+      #2 UI Rendering & Display: 0.3 ms (20.0% of critical path)
+      #3 Process Init & DLL Load: 0.2 ms (15.0% of critical path)
+
+    OPTIMIZATION OPPORTUNITIES:
+      → CPU dominant: Consider code optimization, lazy loading,
+        or deferring non-critical computation (1 ms CPU)
+
+  ======================================================================
+  CRITICAL PATH: Microsoft Edge (PT 8998 - Edge Launch)
+  ======================================================================
+
+    Process Instances: 72 (31 unique PIDs)
+    Total CPU Time: 421.7 ms (0.42 s)
+    Avg CPU %: 0.1%
+    Peak CPU %: 2.0%
+
+    CRITICAL PATH BREAKDOWN:
+    Phase                               Time (ms)    % of Path 
+    ─────────────────────────────────── ──────────── ──────────
+    Process Init & DLL Load             63.3         14.8  %  ████
+    Config & Registry Reads             0.5          0.1   %  
+    File I/O (Data Loading)             1.9          0.4   %  
+    CPU Compute (Render/Parse)          232.0        54.4  %  ██████████████████
+    Network/IPC Initialization          42.2         9.9   %  ███
+    UI Rendering & Display              84.3         19.8  %  ██████
+    Disk Writes (Cache/Profile)         1.9          0.5   %  
+    ─────────────────────────────────── ──────────── ──────────
+    ESTIMATED CRITICAL PATH TOTAL       424.7       
+
+    BOTTLENECK IDENTIFICATION:
+      #1 CPU Compute (Render/Parse): 232.0 ms (54.4% of critical path)
+      #2 UI Rendering & Display: 84.3 ms (19.8% of critical path)
+      #3 Process Init & DLL Load: 63.3 ms (14.8% of critical path)
+
+    OPTIMIZATION OPPORTUNITIES:
+      → CPU dominant: Consider code optimization, lazy loading,
+        or deferring non-critical computation (422 ms CPU)
+      → Many processes (31 PIDs): IPC overhead likely significant
+        Consider consolidating or optimizing inter-process communication
+
+================================================================================
+9. PERFORMANCE IMPROVEMENT SUMMARY & RECOMMENDATIONS
+================================================================================
+
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │                    SYSTEM PERFORMANCE HEALTH CARD                      │
+  └────────────────────────────────────────────────────────────────────────┘
+
+  Component            Health       Details
+  ──────────────────── ──────────── ─────────────────────────────────────────────
+  Memory               [WARNING]    High memory pressure detected
+  CPU                  [GOOD]       Balanced load across cores
+  Disk I/O             [GOOD]       832.0 MB total I/O across traces
+
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │               APPLICATION LAUNCH PERFORMANCE SUMMARY                   │
+  └────────────────────────────────────────────────────────────────────────┘
+
+  Application          CPU Time     Disk Wait    Est. Launch    Rating
+  ──────────────────── ──────────── ──────────── ────────────── ──────────
+  Outlook              1           ms 0           ms 1             ms ★★★★★
+  Excel                0           ms 0           ms 0             ms ★★★★★
+  PowerPoint           1           ms 0           ms 1             ms ★★★★★
+  Microsoft Edge       422         ms 4           ms 425           ms ★★★★★
+
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │                    KEY PERFORMANCE RECOMMENDATIONS                     │
+  └────────────────────────────────────────────────────────────────────────┘
+
+   1. [HIGH  ] Memory             System using 82% RAM (2109 MB free). Consider closing background apps or upgrading RAM.
+
+  GENERAL OPTIMIZATION BEST PRACTICES:
+  ─────────────────────────────────────
+    1. Ensure Windows and all Office apps are fully updated
+    2. Disable unnecessary startup programs and browser extensions
+    3. Run disk cleanup and optimize drives (defrag HDD / TRIM SSD)
+    4. Check antivirus exclusions for Office/Edge data folders
+    5. Disable unnecessary Office add-ins (File > Options > Add-ins)
+    6. Enable hardware acceleration in Office and Edge settings
+    7. Monitor with Task Manager for unexpected background processes
+    8. Consider increasing RAM if usage consistently >80%
+
+================================================================================
+10. PERFORMANCE BOTTLENECK SUMMARY
+================================================================================
+
+  No critical bottlenecks identified.
+
+  RECOMMENDATIONS:
+    - Use WPA GUI to drill into specific PerfTrack scenario timings
+    - Enable PerfTrack ETW provider for exact app launch measurements
+    - For boot analysis, capture a boot trace with: wpr -start Boot -filemode
+
+================================================================================
+END OF REPORT
+================================================================================
