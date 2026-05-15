@@ -306,8 +306,17 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LKY01E",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_open",
+                "id": "1LTM8MU",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_exel_fileopen",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LTM8VW",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_run",
                 "type": "Include"
             },
             {
@@ -1018,6 +1027,22 @@
                 "enabled": true,
                 "id": "1LKYTLJ",
                 "include_path": "scenarios\\macos\\_library\\productivity\\prod_outlook_open",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LTM96Y",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_outlook_run_minmac",
+                "params": [
+                    {
+                        "name": "[short_typing]",
+                        "val_options": "0,1",
+                        "value": "0"
+                    }
+                ],
                 "type": "Include"
             },
             {
