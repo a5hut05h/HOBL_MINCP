@@ -331,13 +331,18 @@ if ($LASTEXITCODE -ne 0) {
 "Building FastAPI..." | log
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
+# Redirect output to a per-phase log so it is preserved in the results share.
+# Measure-Command discards pipeline output, and the RPC buffer is lost on timeout,
+# so file redirection is the only way to capture build/test output.
+$buildLog = "$LOG_DIR\fast_api_build.log"
+"Build output: $buildLog" | log
 $buildTime = (Measure-Command {
-    & $venvPython -m build
+    & $venvPython -m build *> $buildLog
 }).TotalSeconds
 $buildExitCode = $LASTEXITCODE
 Write-RunPhaseMarker "phase.run_build.end"
 if ($buildExitCode -ne 0) {
-    " ERROR - Build failed" | log
+    " ERROR - Build failed. See $buildLog for details." | log
     Exit 1
 }
 $buildTime = [math]::Round($buildTime, 2)
@@ -349,8 +354,10 @@ $env:PYTHONIOENCODING = "utf-8"
 
 "Running tests with coverage..." | log
 Write-RunPhaseMarker "phase.run_test.start"
+$testLog = "$LOG_DIR\fast_api_test.log"
+"Test output: $testLog" | log
 $testTime = (Measure-Command {
-    coverage run -m pytest tests
+    coverage run -m pytest tests *> $testLog
 }).TotalSeconds
 $testExitCode = $LASTEXITCODE
 Write-RunPhaseMarker "phase.run_test.end"

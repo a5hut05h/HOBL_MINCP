@@ -156,7 +156,11 @@ log "✓ Build module is available"
 
 log "-- fast_api build started"
 
-/usr/bin/time -p -o "$LOG_DIR/mac_fast_api_build_time.log" python -m build
+# Redirect output to a per-phase log so it is preserved in the results share.
+# Without redirection, stdout goes only to the RPC buffer and is lost on timeout.
+BUILD_LOG="$LOG_DIR/mac_fast_api_build.log"
+log "-- Build output: $BUILD_LOG"
+/usr/bin/time -p -o "$LOG_DIR/mac_fast_api_build_time.log" python -m build > "$BUILD_LOG" 2>&1
 check_status "Building Fast API"
 
 # Parse build phase timing
@@ -166,7 +170,9 @@ log "-- fast_api build ended"
 
 log "-- fast_api tests started"
 
-/usr/bin/time -p -o "$LOG_DIR/mac_fast_api_test_time.log" bash scripts/test.sh
+TEST_LOG="$LOG_DIR/mac_fast_api_test.log"
+log "-- Test output: $TEST_LOG"
+/usr/bin/time -p -o "$LOG_DIR/mac_fast_api_test_time.log" bash scripts/test.sh > "$TEST_LOG" 2>&1
 check_status "Running Fast API tests"
 
 # Parse test phase timing
