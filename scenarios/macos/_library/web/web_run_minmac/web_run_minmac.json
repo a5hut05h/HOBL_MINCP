@@ -315,8 +315,17 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LKY0R7",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_open",
+                "id": "1LR8MT7",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_fileopen",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LR8N9K",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_run",
                 "type": "Include"
             },
             {
@@ -638,8 +647,25 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LKY43A",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_open",
+                "id": "1LTJXX0",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_fileopen",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "5",
+                "description": "Wait for FileOpen",
+                "enabled": true,
+                "id": "1LTJY7Y",
+                "type": "Delay"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LTJY48",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_switchto",
                 "type": "Include"
             },
             {
