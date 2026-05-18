@@ -246,6 +246,33 @@
                 "type": "End If"
             },
             {
+                "children": [
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1LXTVJ8",
+                        "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
+                        "type": "Include"
+                    }
+                ],
+                "description": "",
+                "enabled": true,
+                "eval_method": "in",
+                "id": "1LXTV21",
+                "left_term": "productivity",
+                "right_term": "[workloads]",
+                "type": "If"
+            },
+            {
+                "children": [],
+                "description": "",
+                "enabled": true,
+                "id": "1LXTV22",
+                "type": "End If"
+            },
+            {
                 "children": [],
                 "delay": "100",
                 "description": "",
