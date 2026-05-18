@@ -1,0 +1,197 @@
+[
+    {
+        "author": "",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-04-29",
+        "description": "Edit Excel document",
+        "enabled": true,
+        "id": "URX997",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "image_1LA0UYC.png"
+        ],
+        "h": "0.041",
+        "id": "1LA0UYC",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.409",
+        "x": "0.039",
+        "y": "0.850"
+    },
+    {
+        "capture_id": "1LA0UYC",
+        "children": [],
+        "delay": "2",
+        "description": "Monthly Expernse",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LA0V4K.png"
+        ],
+        "id": "1LA0V4K",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "capture_id": "1LA0UYC",
+        "children": [],
+        "delay": "2",
+        "description": "Test Data",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LA0VUM.png"
+        ],
+        "id": "1LA0VUM",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "Enter data",
+        "enabled": true,
+        "file_name": [
+            "code_URXKA1.py"
+        ],
+        "id": "URXKA1",
+        "type": "Code"
+    },
+    {
+        "children": [],
+        "delay": "2.5",
+        "description": "Select all",
+        "enabled": true,
+        "id": "UT29MF",
+        "text": "\ue014\ue013\ue03d\ue008\ue011",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "capture title  bar",
+        "enabled": true,
+        "file_name": [
+            "image_1LEJRKH.png"
+        ],
+        "h": "0.135",
+        "id": "1LEJRKH",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.371",
+        "x": "0.004",
+        "y": "0.042"
+    },
+    {
+        "capture_id": "1LEJRKH",
+        "children": [],
+        "delay": "2",
+        "description": "insert",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LEJRUP.png"
+        ],
+        "id": "1LEJRUP",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "Chart menu",
+        "enabled": true,
+        "file_name": [
+            "image_1LA39MR.png"
+        ],
+        "h": "0.084",
+        "id": "1LA39MR",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.155",
+        "x": "0.356",
+        "y": "0.092"
+    },
+    {
+        "capture_id": "1LA39MR",
+        "children": [],
+        "delay": "2",
+        "description": "insert",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LA39RW.png"
+        ],
+        "id": "1LA39RW",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "Scatter choices",
+        "enabled": true,
+        "file_name": [
+            "image_1LA39XV.png"
+        ],
+        "h": "0.125",
+        "id": "1LA39XV",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.347",
+        "x": "0.424",
+        "y": "0.196"
+    },
+    {
+        "capture_id": "1LA39XV",
+        "children": [],
+        "delay": "2",
+        "description": "click plot",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1LA3A3T.png"
+        ],
+        "id": "1LA3A3T",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "1",
+        "description": "CMD-c",
+        "enabled": true,
+        "id": "UT2L0K",
+        "text": "\ue03dc",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    }
+]
