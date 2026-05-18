@@ -110,13 +110,13 @@ BIN_DIR="/Users/Shared/hobl_bin/fastapi"
 
 # Set Python version
 log "-- Setting Python version"
-pyenv global 3.11.9
+pyenv global 3.12.10
 check_status "Setting Python global version"
 
 # Verify Python version
 PYTHON_VERSION=$(python --version 2>&1 | awk '{print $2}')
-if [ "$PYTHON_VERSION" != "3.11.9" ]; then
-    log " ERROR - Python version is $PYTHON_VERSION, expected 3.11.9"
+if [ "$PYTHON_VERSION" != "3.12.10" ]; then
+    log " ERROR - Python version is $PYTHON_VERSION, expected 3.12.10"
     pyenv versions
     exit 1
 fi

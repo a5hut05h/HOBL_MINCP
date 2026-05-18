@@ -66,10 +66,10 @@ $arch = $osInfo.OSArchitecture
 $processorArch = $env:PROCESSOR_ARCHITECTURE
 
 if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
-    $pythonVersion = "3.11.9"
+    $pythonVersion = "3.12.10"
     $logSuffix = "x64"
 } elseif ($arch -match "ARM" -or $processorArch -match "ARM") {
-    $pythonVersion = "3.11.9-arm"
+    $pythonVersion = "3.12.10-arm"
     $logSuffix = "ARM64"
 } else {
     Write-Host " ERROR - Unsupported architecture: $arch (Processor: $processorArch)" -ForegroundColor Red

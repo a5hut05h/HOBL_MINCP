@@ -41,7 +41,7 @@ $processorArch = $env:PROCESSOR_ARCHITECTURE
 if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
     $isARM64 = $false
     $logSuffix = "x64"
-    $pythonVersion = "3.11.9"
+    $pythonVersion = "3.12.10"
     $vsArchParam = "x64"
     $vsHostArchParam = "x64"
     $vsInstallPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022"
@@ -49,7 +49,7 @@ if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
 } elseif ($arch -match "ARM" -or $processorArch -match "ARM") {
     $isARM64 = $true
     $logSuffix = "ARM64"
-    $pythonVersion = "3.11.9-arm"
+    $pythonVersion = "3.12.10-arm"
     $vsArchParam = "arm64"
     $vsHostArchParam = "arm64"
     $vsInstallPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022"
