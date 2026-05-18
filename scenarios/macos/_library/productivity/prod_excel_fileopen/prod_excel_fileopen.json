@@ -1,0 +1,23 @@
+[
+    {
+        "author": "",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-07",
+        "description": "",
+        "enabled": true,
+        "id": "1LC5NAR",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "code_1LC5NH8.py"
+        ],
+        "id": "1LC5NH8",
+        "type": "Code"
+    }
+]
