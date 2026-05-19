@@ -10,13 +10,13 @@ def run(scenario):
     logging.debug('Executing code block: code_UTAWXA.py (MacOS)')
 
     # Kill Office apps once during prod setup for a fresh cold boot baseline.
-    for app in ["Microsoft Excel", "Microsoft Word", "Microsoft PowerPoint", "Microsoft OneNote"]:
+    for app in ["Microsoft Excel", "Microsoft Word", "Microsoft PowerPoint"]:
         scenario._safe_call(f"pkill -f '{app}' 2>/dev/null || true", f"kill {app}")
 
     time.sleep(2)
 
     check = scenario._safe_call(
-        "pgrep -fl 'Microsoft Excel|Microsoft Word|Microsoft PowerPoint|Microsoft OneNote' || echo 'ALL_KILLED'",
+        "pgrep -fl 'Microsoft Excel|Microsoft Word|Microsoft PowerPoint' || echo 'ALL_KILLED'",
         "verify kill",
     )
     logging.info(f"Office apps after kill: {check}")
@@ -33,13 +33,13 @@ def run(scenario):
     
     # Create link to abl_docs if needed
     abl_docs_link = "/Users/Shared/abl_docs"
-    onedrive_docs = userprofile+"/OneDrive/abl_docs"
+    abl_docs = userprofile+"/OneDrive/abl_docs"
     
     # Remove existing link if present
     scenario._call(["bash", "-c \"rm -f " + abl_docs_link + "\""], expected_exit_code="", fail_on_exception=False)
     
     # Create symbolic link
-    scenario._call(["bash", "-c \"ln -s " + onedrive_docs + " " + abl_docs_link + "\""], fail_on_exception=False)
+    scenario._call(["bash", "-c \"ln -s " + abl_docs + " " + abl_docs_link + "\""], fail_on_exception=False)
 
     # Upload Word Normal.dotm template so custom shortcuts are available on the DUT.
     normal_dotm_source = os.path.join(os.path.dirname(__file__), "abl_docs", "Normal.dotm")
@@ -66,7 +66,7 @@ def run(scenario):
     # Upload Office docs for MacOS
     upload_successful = False
     doc_source = os.path.join(os.path.dirname(__file__), "abl_docs")
-    doc_dest = userprofile+"/OneDrive"
+    doc_dest = userprofile
     
     if os.path.exists(doc_source):
         for i in range(12):

@@ -16,7 +16,7 @@ def run(scenario):
     logging.debug(f"User profile: {userprofile}")
     
     # Create link to abl_docs if needed
-    word_doc_path = userprofile+"/Onedrive/abl_docs/FamilyBudget.xlsx"
-    scenario._call(["bash", "-c \"open "+ word_doc_path+"\""]).strip()    
+    excel_doc_path = userprofile+"/abl_docs/FamilyBudget.xlsx"
+    scenario._call(["bash", "-c \"open "+ excel_doc_path+"\""]).strip()    
            
   

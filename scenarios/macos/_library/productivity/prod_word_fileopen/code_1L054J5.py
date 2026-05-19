@@ -14,5 +14,5 @@ def run(scenario):
     logging.debug(f"User profile: {userprofile}")
     
     # Create link to abl_docs if needed
-    word_doc_path = userprofile+"/Onedrive/abl_docs/test_long_doc.docx"
+    word_doc_path = userprofile+"/abl_docs/test_long_doc.docx"
     scenario._call(["bash", "-c \"open "+ word_doc_path+"\""]).strip()
