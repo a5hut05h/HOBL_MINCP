@@ -75,7 +75,7 @@ log "   Command: $MLPERF_EXE --config $CONFIG_FILE --temp-dir . --output-dir $OU
 
 # Redirect output to a per-phase log so it is preserved in the results share.
 # Without redirection, stdout goes only to the RPC buffer and is lost on timeout.
-MLPERF_LOG="$LOG_DIR/mac_mlperf_run_output.log"
+MLPERF_LOG="$OUTPUT_DIR/mac_mlperf_run_output.log"
 log "-- MLPerf output: $MLPERF_LOG"
 "$MLPERF_EXE" --config "$CONFIG_FILE" --temp-dir . --output-dir "$OUTPUT_DIR" --download_behaviour skip_all --pause false > "$MLPERF_LOG" 2>&1
 
