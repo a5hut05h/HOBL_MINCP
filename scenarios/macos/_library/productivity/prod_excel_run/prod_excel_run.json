@@ -12,24 +12,24 @@
     {
         "children": [],
         "delay": "0.5",
-        "description": "",
+        "description": "Sheets Tab",
         "enabled": true,
         "file_name": [
-            "image_1LA0UYC.png"
+            "image_1M08KJV.png"
         ],
-        "h": "0.041",
-        "id": "1LA0UYC",
+        "h": "0.197",
+        "id": "1M08KJV",
         "recapture": false,
         "type": "Capture",
-        "w": "0.409",
-        "x": "0.039",
-        "y": "0.850"
+        "w": "0.578",
+        "x": "0.002",
+        "y": "0.758"
     },
     {
-        "capture_id": "1LA0UYC",
+        "capture_id": "1M08KJV",
         "children": [],
         "delay": "2",
-        "description": "Monthly Expernse",
+        "description": "Monthly Expense",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
@@ -44,7 +44,7 @@
         "y": "0.500"
     },
     {
-        "capture_id": "1LA0UYC",
+        "capture_id": "1M08KJV",
         "children": [],
         "delay": "2",
         "description": "Test Data",
@@ -71,16 +71,6 @@
         ],
         "id": "URXKA1",
         "type": "Code"
-    },
-    {
-        "children": [],
-        "delay": "2.5",
-        "description": "Select all",
-        "enabled": true,
-        "id": "UT29MF",
-        "text": "\ue014\ue013\ue03d\ue008\ue011",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
     },
     {
         "children": [],
@@ -136,7 +126,7 @@
         "capture_id": "1LA39MR",
         "children": [],
         "delay": "2",
-        "description": "insert",
+        "description": "Insert Chart",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
@@ -153,21 +143,21 @@
     {
         "children": [],
         "delay": "0.5",
-        "description": "Scatter choices",
+        "description": "Plot Types",
         "enabled": true,
         "file_name": [
-            "image_1LA39XV.png"
+            "image_1M08RV9.png"
         ],
-        "h": "0.125",
-        "id": "1LA39XV",
+        "h": "0.453",
+        "id": "1M08RV9",
         "recapture": false,
         "type": "Capture",
-        "w": "0.347",
-        "x": "0.424",
-        "y": "0.196"
+        "w": "0.517",
+        "x": "0.384",
+        "y": "0.055"
     },
     {
-        "capture_id": "1LA39XV",
+        "capture_id": "1M08RV9",
         "children": [],
         "delay": "2",
         "description": "click plot",
