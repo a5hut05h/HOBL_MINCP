@@ -1068,8 +1068,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LM9H4H",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_close",
+                "id": "1M0231U",
+                "include_path": "scenarios\\macos\\_library\\productivity\\close_app",
                 "type": "Include"
             },
             {
@@ -1086,8 +1086,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LM9T3C",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_close",
+                "id": "1M023L8",
+                "include_path": "scenarios\\macos\\_library\\productivity\\close_app",
                 "type": "Include"
             },
             {
@@ -1104,8 +1104,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LM9THP",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_close",
+                "id": "1M023A1",
+                "include_path": "scenarios\\macos\\_library\\productivity\\close_app",
                 "type": "Include"
             },
             {
