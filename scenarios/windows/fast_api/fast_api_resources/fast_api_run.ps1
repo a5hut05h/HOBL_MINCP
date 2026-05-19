@@ -319,10 +319,10 @@ if (-not (Test-Path $venvPython)) {
 }
 "Using venv python: $venvPython" | log
 
-"Validating venv has build tool..." | log
-& $venvPython -c "import build; print('build', build.__version__)" 2>&1 | log
+"Validating venv has required packages..." | log
+& $venvPython -c "import build, coverage, pytest; print('build', build.__version__, '| coverage', coverage.__version__, '| pytest', pytest.__version__)" 2>&1 | log
 if ($LASTEXITCODE -ne 0) {
-    " ERROR - venv has missing/broken 'build' package." | log
+    " ERROR - venv has missing/broken Python packages (build, coverage, pytest expected)." | log
     " ERROR - Possible causes: Defender quarantine, disk cleanup, or external tampering." | log
     " ERROR - Re-prep required: delete C:\hobl_bin\prep_status\fast_api<version> on the DUT and re-run." | log
     Exit 1
@@ -356,8 +356,11 @@ $env:PYTHONIOENCODING = "utf-8"
 Write-RunPhaseMarker "phase.run_test.start"
 $testLog = "$LOG_DIR\fast_api_test.log"
 "Test output: $testLog" | log
+# Invoke coverage via the venv's python so it resolves to the venv-installed
+# coverage package (installed via requirements-tests.txt). A bare `coverage`
+# would go through PATH lookup and either fail or hit a different Python.
 $testTime = (Measure-Command {
-    coverage run -m pytest tests *> $testLog
+    & $venvPython -m coverage run -m pytest tests *> $testLog
 }).TotalSeconds
 $testExitCode = $LASTEXITCODE
 Write-RunPhaseMarker "phase.run_test.end"
