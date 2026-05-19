@@ -701,15 +701,6 @@
                 "children": [
                     {
                         "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1H6JM1M",
-                        "include_path": "scenarios\\windows\\_library\\web\\web_switchto",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
                         "delay": "5",
                         "description": "",
                         "enabled": true,
@@ -731,6 +722,15 @@
                 "enabled": true,
                 "id": "1HE5RH4",
                 "type": "End If"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1H6JM1M",
+                "include_path": "scenarios\\windows\\_library\\web\\web_switchto",
+                "type": "Include"
             }
         ],
         "description": "",
@@ -815,7 +815,7 @@
             },
             {
                 "children": [],
-                "delay": "3",
+                "delay": "5",
                 "description": "",
                 "enabled": true,
                 "id": "1HJA867",
