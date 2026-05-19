@@ -1,0 +1,40 @@
+[
+    {
+        "author": "Soupik Chowdhury",
+        "capture_device": "MacBook",
+        "children": [],
+        "create_date": "2025-12-22",
+        "description": "Close Word",
+        "enabled": true,
+        "id": "UFMKAM",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "CMD+Q to quit Word",
+        "enabled": true,
+        "id": "CLOSEWORD",
+        "text": "\ue03dq",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "3",
+        "description": "Wait for app to close",
+        "enabled": true,
+        "id": "WAIT002",
+        "type": "Delay"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Save Changes",
+        "enabled": true,
+        "id": "1M01T02",
+        "text": "\ue007",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    }
+]
