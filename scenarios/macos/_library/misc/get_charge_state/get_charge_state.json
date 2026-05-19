@@ -1,0 +1,23 @@
+[
+    {
+        "author": "",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-18",
+        "description": "",
+        "enabled": true,
+        "id": "1LXV2M6",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Get Battery Percentage",
+        "enabled": true,
+        "file_name": [
+            "code_1LXV5LH.py"
+        ],
+        "id": "1LXV5LH",
+        "type": "Code"
+    }
+]
