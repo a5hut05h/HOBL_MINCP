@@ -45,7 +45,7 @@ class Cinebench(core.app_scenario.Scenario):
         else:
             workload_arg = 'g_CinebenchCpuXTest=true'
         logging.info("Cinebench started.")
-        self._call(["cmd.exe", f'/c start /B /wait "parent" {self.cinebench_path} {workload_arg} g_CinebenchMinimumTestDuration={self.duration} > {self.dut_data_path}\\{self.out_filename}"'], timeout=self.duration + 1200)
+        self._call(["cmd.exe", f'/c start /B /wait "parent" {self.cinebench_path} {workload_arg} g_CinebenchMinimumTestDuration={self.duration} > {self.dut_data_path}\\{self.out_filename}"'], timeout=self.duration + 2700)
         logging.info("Cinebench completed.")
 
 
