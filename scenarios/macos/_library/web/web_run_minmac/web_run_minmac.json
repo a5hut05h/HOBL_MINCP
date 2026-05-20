@@ -330,6 +330,15 @@
             },
             {
                 "children": [],
+                "delay": "2",
+                "description": "",
+                "enabled": true,
+                "id": "1M1ECP9",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_switchto",
+                "type": "Include"
+            },
+            {
+                "children": [],
                 "delay": "0",
                 "description": "",
                 "enabled": true,
