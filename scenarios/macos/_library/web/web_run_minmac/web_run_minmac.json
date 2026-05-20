@@ -342,8 +342,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LKY4F7",
-                "include_path": "scenarios\\macos\\_library\\web\\web_switchto",
+                "id": "1LKYR2Y",
+                "include_path": "scenarios\\macos\\_library\\web\\enable_proxy",
                 "type": "Include"
             },
             {
@@ -351,8 +351,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LKYR2Y",
-                "include_path": "scenarios\\macos\\_library\\web\\enable_proxy",
+                "id": "1LKY4F7",
+                "include_path": "scenarios\\macos\\_library\\web\\web_switchto",
                 "type": "Include"
             }
         ],
@@ -698,8 +698,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LKY4T9",
-                "include_path": "scenarios\\macos\\_library\\web\\web_switchto",
+                "id": "1LKYRME",
+                "include_path": "scenarios\\macos\\_library\\web\\enable_proxy",
                 "type": "Include"
             },
             {
@@ -707,8 +707,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LKYRME",
-                "include_path": "scenarios\\macos\\_library\\web\\enable_proxy",
+                "id": "1LKY4T9",
+                "include_path": "scenarios\\macos\\_library\\web\\web_switchto",
                 "type": "Include"
             }
         ],
