@@ -49,7 +49,7 @@ class Tool(Scenario):
             cmd = os.path.join(self.dut_exec_path, "ffmpeg.exe")
             args = "-f gdigrab -framerate 6 -i desktop -loglevel quiet -c:v libx264 -tune stillimage -crf 40 -pix_fmt yuv420p " + output_file
             stop_key = "q"
-            self._call(["powershell.exe", os.path.join(self.dut_exec_path, "command_wrapper.ps1"), " \"" + cmd + " \'" + args + "\' " + self.stop_file + " " + stop_key + "\"" ], blocking=False)
+            self._call(["powershell.exe", os.path.join(self.dut_exec_path, "command_wrapper.ps1") + " \"" + cmd + " \'" + args + "\' " + self.stop_file + " " + stop_key + "\"" ], blocking=False)
         elif self.platform.lower() == "macos":
             output_file = self.scenario.dut_data_path + "/" + self.scenario.testname + "_recording.mp4"
             cmd = "/opt/homebrew/bin/ffmpeg"

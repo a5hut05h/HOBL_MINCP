@@ -91,8 +91,8 @@ params.setDefault('global', 'pre_run_delay', '0', desc="Seconds to pause to let 
 # params.setDefault('global', 'power_after', '0') # deprecated
 params.setDefault('global', 'module_name', '', desc="Override the name of a scenario, if needed.")
 params.setDefault('global', 'attempts', '1', desc="How many times to re-attempt the scenario, in case of failure.")
-params.setDefault('global', 'tools', '', desc="Space-separated list of tools to run with each non-prep scenario.")
-params.setDefault('global', 'prep_tools', '', desc="Space-separated list of tools to run with each prep scenario.")
+params.setDefault('global', 'tools', '', desc="Space-separated list of tools to run with each non-prep scenario.", multiple=True)
+params.setDefault('global', 'prep_tools', '', desc="Space-separated list of tools to run with each prep scenario.", multiple=True)
 params.setDefault('global', 'trace_filemode', '1', desc="Whether to run ETL traces in filemode (1) or memory mode (0).", valOptions=["1", "0"])
 params.setDefault('global', 'typing_delay', '200', desc="Milliseconds between injected key strokes.")
 params.setDefault('global', 'local_execution', '0')
@@ -484,7 +484,7 @@ def get_test_module(test_name, ext_paths=[]):
             test_module = "scenarios.common.scenario_invalid"
             params.setCalculated("scenario_invalid", f"Invalid platform for {test_name}. Expected platform: {display_name}.")
             break
-    
+
     return test_module
 
 

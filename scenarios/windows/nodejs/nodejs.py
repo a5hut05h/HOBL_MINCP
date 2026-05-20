@@ -14,7 +14,7 @@ from datetime import datetime
 class Nodejs(core.app_scenario.Scenario):
 
     module = __module__.split('.')[-1]
-    prep_version = "6"
+    prep_version = "7"
     resources = module + "_resources"
 
 

@@ -7,6 +7,14 @@ BIN_DIR="/Users/Shared/hobl_bin"
 LOG_DIR="/Users/Shared/hobl_data"
 LOG_FILE="$LOG_DIR/mac_pytorch_inf_run.log"
 METRICS_FILE="$LOG_DIR/mac_pytorch_inf_results.csv"
+NO_GPU_FLAG=""
+
+# Parse arguments
+for arg in "$@"; do
+    case "$arg" in
+        --no-gpu) NO_GPU_FLAG="--no-gpu" ;;
+    esac
+done
 
 # Create log directory if it doesn't exist
 if [ ! -d "$LOG_DIR" ]; then
@@ -63,13 +71,16 @@ cd $BIN_DIR/mac_pytorch_inf_resources
 check $?
 
 log "-- Performing inferencing with prompt: What is the meaning of life?"
+if [ -n "$NO_GPU_FLAG" ]; then
+    log "Running in CPU-only mode (--no-gpu)"
+fi
 
 # inference.py writes pytorch_inference_info.csv to --log-dir with these metrics:
 #   time_to_first_token_ms, time_to_first_token_s, tokens_per_second,
 #   total_tokens_generated, total_generation_time_s, ai_model, ai_device
 INFERENCE_CSV="$LOG_DIR/pytorch_inference_info.csv"
 
-python inference.py --prompt "What is the meaning of life?" --log-dir "$LOG_DIR" > "$LOG_DIR/mac_pytorch_inf_output.txt" 2>&1
+python inference.py --prompt "What is the meaning of life?" --log-dir "$LOG_DIR" $NO_GPU_FLAG > "$LOG_DIR/mac_pytorch_inf_output.txt" 2>&1
 check $?
 
 log "-- Parsing inference metrics"

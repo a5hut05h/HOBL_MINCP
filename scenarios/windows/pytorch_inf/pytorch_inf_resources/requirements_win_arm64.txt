@@ -5,3 +5,4 @@ torch==2.8.0
 # requiring the Rust toolchain for source compilation on Arm64
 tokenizers==0.22.2
 transformers==4.56.1
+safetensors==0.8.0rc0

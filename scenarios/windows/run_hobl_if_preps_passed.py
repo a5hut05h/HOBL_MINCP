@@ -34,7 +34,7 @@ class RunAblIfPrepsPassed(core.app_scenario.Scenario):
 
 
     def runTest(self):
-        prep_scenarios = ["productivity_prep", "button_install", "edge_install", "msa_prep", "onedrive_prep", "daily_prep", "config_check", "store_prep", "adaptive_color_disable", "teams_install", "lvp_prep", "cs_floor_prep"]
+        prep_list = ["productivity_prep", "button_install", "edge_install", "msa_prep", "onedrive_prep", "system_prep", "config_check", "store_prep", "adaptive_color_disable", "teams_install", "lvp_prep", "cs_floor_prep"]
         # Check if preps ran
         assert_list = ""
         assert_list += self.checkPrepStatus(prep_list)
@@ -61,11 +61,10 @@ class RunAblIfPrepsPassed(core.app_scenario.Scenario):
             response = requests.get(url + "?profile=" + profile + "&plan=hobl.ps1" + study_type_param)
             logging.info("Launching hobl.ps1 for profile " + profile + ": " + str(response))
             if self.dut_architecture.lower() == "x64":
-                response = requests.get(url + "?profile=" + profile + "&plan=hobl_23_phm.ps1" + study_type_param)
+                response = requests.get(url + "?profile=" + profile + "&plan=hobl_phm.ps1" + study_type_param)
                 logging.info("Launching hobl_phm.ps1 for profile " + profile + ": " + str(response))
             response = requests.get(url + "?profile=" + profile + "&plan=hobl_etl.ps1" + study_type_param)
             logging.info("Launching hobl_etl.ps1 for profile " + profile + ": " + str(response))
-
 
 
     def tearDown(self):
