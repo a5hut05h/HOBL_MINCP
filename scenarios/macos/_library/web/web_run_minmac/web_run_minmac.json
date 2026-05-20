@@ -1064,6 +1064,14 @@
             },
             {
                 "children": [],
+                "delay": "5",
+                "description": "",
+                "enabled": true,
+                "id": "1M1R2UL",
+                "type": "Delay"
+            },
+            {
+                "children": [],
                 "delay": "0",
                 "description": "",
                 "enabled": true,
@@ -1079,6 +1087,14 @@
                 "id": "1M0231U",
                 "include_path": "scenarios\\macos\\_library\\productivity\\close_app",
                 "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "5",
+                "description": "",
+                "enabled": true,
+                "id": "1M1R3NK",
+                "type": "Delay"
             },
             {
                 "children": [],
@@ -1100,6 +1116,14 @@
             },
             {
                 "children": [],
+                "delay": "5",
+                "description": "",
+                "enabled": true,
+                "id": "1M1R3WM",
+                "type": "Delay"
+            },
+            {
+                "children": [],
                 "delay": "0",
                 "description": "",
                 "enabled": true,
@@ -1114,15 +1138,6 @@
                 "enabled": true,
                 "id": "1M023A1",
                 "include_path": "scenarios\\macos\\_library\\productivity\\close_app",
-                "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1LKYT1R",
-                "include_path": "scenarios\\macos\\_library\\web\\enable_proxy",
                 "type": "Include"
             }
         ],
