@@ -4016,10 +4016,17 @@ class Scenario(unittest.TestCase):
             result = self._call(["networksetup", f'-listallnetworkservices'])
             services = result.splitlines()
             for service in services:
-                if "*" in service:
+                service = service.strip()
+                if not service or service.startswith("*") or service.startswith("An asterisk"):
                     continue
-                self._call(["networksetup", f'-setwebproxystate "{service}" off'])
-                self._call(["networksetup", f'-setsecurewebproxystate "{service}" off'])
+                self._safe_call(
+                    f'networksetup -setwebproxystate "{service}" off',
+                    f'disable http proxy for {service}'
+                )
+                self._safe_call(
+                    f'networksetup -setsecurewebproxystate "{service}" off',
+                    f'disable https proxy for {service}'
+                )
         else:
             self._call(remove_cmd)
 
@@ -4048,10 +4055,17 @@ class Scenario(unittest.TestCase):
             result = self._call(["networksetup", f'-listallnetworkservices'])
             services = result.splitlines()
             for service in services:
-                if "*" in service:
+                service = service.strip()
+                if not service or service.startswith("*") or service.startswith("An asterisk"):
                     continue
-                self._call(["networksetup", f'-setwebproxy "{service}" {self.web_replay_ip} {self.web_replay_http_port}'])
-                self._call(["networksetup", f'-setsecurewebproxy "{service}" {self.web_replay_ip} {self.web_replay_https_port}'])
+                self._safe_call(
+                    f'networksetup -setwebproxy "{service}" {self.web_replay_ip} {self.web_replay_http_port}',
+                    f'set http proxy for {service}'
+                )
+                self._safe_call(
+                    f'networksetup -setsecurewebproxy "{service}" {self.web_replay_ip} {self.web_replay_https_port}',
+                    f'set https proxy for {service}'
+                )
         else:
             self._call([
                 "powershell.exe", f"{self.dut_exec_path}\\web_replay\\set_args.ps1 {web_replay_ps1_args}"
