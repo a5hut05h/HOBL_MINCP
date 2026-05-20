@@ -67,8 +67,15 @@ def run(scenario):
     upload_successful = False
     doc_source = os.path.join(os.path.dirname(__file__), "abl_docs")
     doc_dest = userprofile
+    doc_dest_abl_docs = doc_dest+"/abl_docs"
     
     if os.path.exists(doc_source):
+        # Ensure stale destination content does not mix with newly uploaded docs.
+        scenario._call([
+            "bash",
+            "-c \"rm -rf \\\"" + doc_dest_abl_docs + "\\\"\"",
+        ], expected_exit_code="", fail_on_exception=False)
+
         for i in range(12):
             try:
                 scenario._upload(doc_source, doc_dest)
