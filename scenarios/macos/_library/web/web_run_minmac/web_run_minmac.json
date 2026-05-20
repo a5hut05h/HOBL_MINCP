@@ -306,24 +306,6 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LXTW9M",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_exel_fileopen",
-                "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1LTM8VW",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_run",
-                "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
                 "id": "1LR8MT7",
                 "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_fileopen",
                 "type": "Include"
@@ -335,6 +317,24 @@
                 "enabled": true,
                 "id": "1LR8N9K",
                 "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_run",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LXTW9M",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_exel_fileopen",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1LTM8VW",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_run",
                 "type": "Include"
             },
             {
