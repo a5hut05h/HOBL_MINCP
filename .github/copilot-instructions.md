@@ -69,6 +69,103 @@ When logging or displaying error messages in PowerShell scripts:
   ```
 - When passing Python paths to tools like CMake (`-DPython3_EXECUTABLE`), the path must point to the actual `.exe`, not a shim/batch file
 
+### Shared-State Hazards Across Scenarios (CRITICAL — read before touching any prep script)
+
+Multiple HOBL scenarios share the same pyenv-managed Python version (Windows: `3.12.10-arm` is used by `pytorch_inf`, `llvm`, `nodejs`, `vscode`, `opencv_build`, `fast_api`; macOS: `3.12.10` is used by `mac_pytorch_inf`, `mac_llvm`, `mac_nodejs`, `mac_opencv_build`, `mac_net_aspire`). When several scenarios share a single pyenv version directory, **anything one scenario does to that directory affects every other scenario**.
+
+The most damaging operation observed in production was `pyenv install <version> -f`, which deletes and re-extracts the entire `~\.pyenv\pyenv-win\versions\<version>\` directory — including `Lib\site-packages\`. A single scenario's prep silently wiped torch (and every other pip-installed package) from another scenario's site-packages. Because HOBL's `prep_status` file says prep is "done," the next iteration skipped prep and failed cryptically.
+
+**Rules to prevent this class of bug:**
+
+- **Never** use force flags on version-manager installs that target shared toolchains:
+  - ❌ `pyenv install <version> -f` (Windows or macOS)
+  - ❌ `nvm install <version> --reinstall-packages-from=<other>` (clobbers a shared Node)
+  - ❌ `brew reinstall <pkg>` for a `brew` package another scenario depends on
+  - ❌ `rustup toolchain install <toolchain> --force-non-host`
+
+  Replace with a conditional install pattern:
+
+  Windows:
+  ```powershell
+  $installedVersions = (pyenv versions --bare 2>$null) -split "`n" | ForEach-Object { $_.Trim() }
+  if ($installedVersions -notcontains $pythonVersion) {
+      "Installing Python $pythonVersion via pyenv..." | log
+      pyenv install $pythonVersion
+      check($lastexitcode)
+  } else {
+      "Python $pythonVersion already installed via pyenv — preserving existing install" | log
+  }
+  ```
+  macOS (bash):
+  ```bash
+  if ! pyenv versions --bare | grep -qx "$PYTHON_VERSION"; then
+      log "Installing Python $PYTHON_VERSION via pyenv..."
+      pyenv install "$PYTHON_VERSION"
+  else
+      log "Python $PYTHON_VERSION already installed via pyenv — preserving existing install"
+  fi
+  ```
+
+- **Never** `pip install` directly into the shared pyenv site-packages. Always create a **per-scenario venv** at `<scriptDrive>\hobl_bin\<scenario>_resources\.venv\` (Windows) or `$BIN_DIR/<scenario>_resources/.venv/` (macOS). All `pip install` calls must target the venv's pip via absolute path.
+
+  Windows venv creation pattern (in prep.ps1, after pyenv is set up):
+  ```powershell
+  $venvDir = "$scriptDrive\hobl_bin\<scenario>_resources\.venv"
+  $pyenvPython = (pyenv which python 2>$null).Trim()
+  if (-not (Test-Path $pyenvPython)) {
+      " ERROR - pyenv python not found at: $pyenvPython" | log
+      Exit 1
+  }
+  if (Test-Path $venvDir) { Remove-Item -Recurse -Force $venvDir }
+  & $pyenvPython -m venv $venvDir
+  check($lastexitcode)
+
+  $venvPython = Join-Path $venvDir "Scripts\python.exe"
+  $venvPip    = Join-Path $venvDir "Scripts\pip.exe"
+
+  & $venvPip install -r requirements.txt
+  check($lastexitcode)
+  ```
+  macOS equivalent uses `bin/python` and `bin/pip` instead of `Scripts/`.
+
+- **Never** `pip install --upgrade pip` in a venv. The pip bundled with the pinned Python release is what we want — reproducible across DUTs, no network dependency.
+
+- **Always** invoke the venv's python by absolute path in run.ps1 / teardown.ps1 — never via `python` on PATH:
+  ```powershell
+  $venvPython = "$scriptDrive\hobl_bin\<scenario>_resources\.venv\Scripts\python.exe"
+  if (-not (Test-Path $venvPython)) {
+      " ERROR - venv missing at $venvPython. Re-prep required:" | log
+      " ERROR -   delete C:\hobl_bin\prep_status\<scenario><version> on the DUT and re-run." | log
+      Exit 1
+  }
+  & $venvPython script.py args
+  ```
+
+- **Always** validate critical imports at the top of run.ps1 with a fail-fast guard. This converts a cryptic `ModuleNotFoundError` 200 lines into the workload into an actionable error message at run start:
+  ```powershell
+  & $venvPython -c "import torch, transformers; print('torch', torch.__version__)" 2>&1 | log
+  if ($LASTEXITCODE -ne 0) {
+      " ERROR - venv has missing/broken Python packages." | log
+      " ERROR - Possible causes: Defender quarantine, disk cleanup, or external tampering." | log
+      " ERROR - Re-prep required: delete C:\hobl_bin\prep_status\<scenario><version> on the DUT and re-run." | log
+      Exit 1
+  }
+  ```
+
+- **The venv survives `pyenv install -f` from other scenarios** because it lives outside the pyenv version directory. Even if a defensive boundary breaks elsewhere, the venv directory and its site-packages are untouched. (On Windows, the venv even survives a Python force-reinstall as long as it's the same major.minor.patch version — see the Python venv docs for details.)
+
+- **The `prep_status` file alone is not a reliable signal that prep artifacts are still present.** External actors (Microsoft Defender quarantine, OS re-imaging, Windows Update, lab tech intervention) can remove prep-installed files without HOBL knowing. The run-time import validation guard above is the durable defense against this.
+
+### Diagnosing Scenario Failures After iter 0 Succeeded
+
+When a scenario succeeds on iter 0 but fails on subsequent iters with what looks like missing dependencies, check **in this order**:
+
+1. **What `prep_status` file does the DUT have?** Look in `hobl.log` for the `if exist C:\hobl_bin\prep_status\<scenario><N>` RPC call. If `<N>` doesn't match the host's current `prep_version` value, **the host hasn't been updated** — the lab's local clone needs `git pull`.
+2. **Did another scenario between iter 0 and the failing iter call `pyenv install -f`?** Search intermediate scenarios' preps for the pattern. If yes, this PR's venv pattern is the fix.
+3. **Was anything quarantined by Defender?** Check Windows Event Viewer → Microsoft → Windows → Windows Defender → Operational.
+4. **Was the DUT re-imaged between iterations?** Look at the study profile's `os_install` parameter and timestamps on `C:\Users\<user>` vs. `C:\hobl_bin\prep_status\`.
+5. **Did `pyenv global` get switched by another scenario's prep?** Run `pyenv version` on the DUT; should match what the failing scenario expects.
+
 ### Execution Policy for PowerShell Archive Module
 - Scripts that use `pyenv install` (which internally calls `Expand-Archive`) must set the execution policy at the top of the script
 - Without this, `Microsoft.PowerShell.Archive` module fails to load on fresh Windows installs
@@ -120,7 +217,9 @@ macOS-only additional keys (from `/usr/bin/time -p`):
 
 ### Prep Version Bumping
 - Each developer scenario has a `prep_version` string in its Python file (e.g., `prep_version = "2"`) that controls whether the prep script re-runs on the DUT
-- **Whenever prep or run PowerShell/shell scripts are modified in a PR**, increment `prep_version` by 1 in the corresponding scenario's Python file (both Windows and macOS)
+- **When a prep change REQUIRES re-execution on existing DUTs** (e.g., a different Python version, a new mandatory dependency, a changed install path), increment `prep_version` by 1 in the corresponding scenario's Python file (both Windows and macOS).
+- **When a prep change is purely defensive and safe to re-apply against existing state** (e.g., replacing `pyenv install -f` with a conditional install that's a no-op when the version exists), **do NOT bump prep_version**. Bumping forces every lab DUT to re-prep, which can take 10–15 minutes per scenario across the whole fleet. The fix should ship without forcing a re-prep wave.
+- Decision rule: ask "if this prep is skipped on an existing DUT, will the run still work correctly?" If yes → don't bump. If no → bump.
 - This only needs to happen **once per PR** — not per commit
 - Always increment for both platforms if both were changed, or just the affected platform if only one was modified
 

@@ -129,12 +129,19 @@ fi
 log "✓ Maven wrapper found"
 
 log "-- Cleaning previous build"
-./mvnw -Dmaven.repo.local=$BIN_DIR/m2-spring-petclinic clean
+# Redirect Maven output to a per-phase log under hobl_data so it is preserved
+# in the results share. Without redirection, stdout goes only to the RPC
+# buffer and is lost on RPC timeout.
+MAVEN_CLEAN_LOG="$LOG_DIR/mac_spring_petclinic_maven_clean.log"
+log "-- Maven clean output: $MAVEN_CLEAN_LOG"
+./mvnw -Dmaven.repo.local=$BIN_DIR/m2-spring-petclinic clean > "$MAVEN_CLEAN_LOG" 2>&1
 check_status "Maven clean"
 
 log "-- spring_petclinic build started"
 
-/usr/bin/time -p -o "$LOG_DIR/mac_spring_petclinic_build_time.log" ./mvnw -o -Dmaven.repo.local=$BIN_DIR/m2-spring-petclinic -DskipTests package
+MAVEN_BUILD_LOG="$LOG_DIR/mac_spring_petclinic_maven_build.log"
+log "-- Maven build output: $MAVEN_BUILD_LOG"
+/usr/bin/time -p -o "$LOG_DIR/mac_spring_petclinic_build_time.log" ./mvnw -o -Dmaven.repo.local=$BIN_DIR/m2-spring-petclinic -DskipTests package > "$MAVEN_BUILD_LOG" 2>&1
 check_status "Maven package (build)"
 
 # Parse build phase timing
@@ -144,7 +151,9 @@ log "-- spring_petclinic build ended"
 
 log "-- spring_petclinic tests started"
 
-/usr/bin/time -p -o "$LOG_DIR/mac_spring_petclinic_test_time.log" ./mvnw -o -Dmaven.repo.local=$BIN_DIR/m2-spring-petclinic test
+MAVEN_TEST_LOG="$LOG_DIR/mac_spring_petclinic_maven_test.log"
+log "-- Maven test output: $MAVEN_TEST_LOG"
+/usr/bin/time -p -o "$LOG_DIR/mac_spring_petclinic_test_time.log" ./mvnw -o -Dmaven.repo.local=$BIN_DIR/m2-spring-petclinic test > "$MAVEN_TEST_LOG" 2>&1
 check_status "Maven test"
 
 # Parse test phase timing
