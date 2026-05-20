@@ -36,5 +36,13 @@
         "text": "\ue007",
         "type": "Type",
         "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "3",
+        "description": "",
+        "enabled": true,
+        "id": "1M1F44F",
+        "type": "Delay"
     }
 ]
