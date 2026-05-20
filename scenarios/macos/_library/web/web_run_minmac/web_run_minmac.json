@@ -321,7 +321,7 @@
             },
             {
                 "children": [],
-                "delay": "8",
+                "delay": "0",
                 "description": "",
                 "enabled": true,
                 "id": "1M1E15P",
@@ -330,12 +330,11 @@
             },
             {
                 "children": [],
-                "delay": "2",
-                "description": "",
+                "delay": "5",
+                "description": "File Open Delay",
                 "enabled": true,
-                "id": "1M1ECP9",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_switchto",
-                "type": "Include"
+                "id": "1M1EU0X",
+                "type": "Delay"
             },
             {
                 "children": [],
