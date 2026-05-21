@@ -176,15 +176,6 @@
                 "enabled": true,
                 "id": "1AKURLP",
                 "type": "End If"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1LXTVJ8",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
-                "type": "Include"
             }
         ],
         "description": "",
@@ -213,9 +204,34 @@
                                 "delay": "0",
                                 "description": "",
                                 "enabled": true,
+                                "id": "1LXTVJ8",
+                                "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
+                                "type": "Include"
+                            },
+                            {
+                                "children": [],
+                                "delay": "10",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1M3FLT8",
+                                "type": "Delay"
+                            },
+                            {
+                                "children": [],
+                                "delay": "0",
+                                "description": "",
+                                "enabled": true,
                                 "id": "1AKUT8L",
                                 "include_path": "scenarios\\macos\\_library\\Teams\\teams_setup",
                                 "type": "Include"
+                            },
+                            {
+                                "children": [],
+                                "delay": "5",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1M3FLX0",
+                                "type": "Delay"
                             },
                             {
                                 "children": [],
@@ -225,6 +241,14 @@
                                 "id": "MAC_TIMERS_INCLUDE",
                                 "include_path": "scenarios\\macos\\_library\\enterprise_collab\\timers_setup",
                                 "type": "Include"
+                            },
+                            {
+                                "children": [],
+                                "delay": "5",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1M3FM22",
+                                "type": "Delay"
                             },
                             {
                                 "children": [],
@@ -239,12 +263,28 @@
                             },
                             {
                                 "children": [],
+                                "delay": "5",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1M3FME6",
+                                "type": "Delay"
+                            },
+                            {
+                                "children": [],
                                 "delay": "0",
                                 "description": "Create large binaries and upload to DUT",
                                 "enabled": true,
                                 "id": "1ANJY4X",
                                 "include_path": "scenarios\\macos\\_library\\enterprise_collab\\onedrive_upload_setup",
                                 "type": "Include"
+                            },
+                            {
+                                "children": [],
+                                "delay": "5",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1M3FMM7",
+                                "type": "Delay"
                             },
                             {
                                 "children": [],
@@ -256,6 +296,14 @@
                                 ],
                                 "id": "1ARK9VL",
                                 "type": "Code"
+                            },
+                            {
+                                "children": [],
+                                "delay": "5",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1M3FMWH",
+                                "type": "Delay"
                             },
                             {
                                 "children": [],
@@ -290,17 +338,6 @@
                                     }
                                 ],
                                 "type": "Include"
-                            },
-                            {
-                                "children": [],
-                                "delay": "0.0",
-                                "description": "Delete downloaded files and folders",
-                                "enabled": true,
-                                "file_name": [
-                                    "code_1ARLLJA.py"
-                                ],
-                                "id": "1ARLLJA",
-                                "type": "Code"
                             }
                         ],
                         "description": "",
@@ -343,6 +380,25 @@
                     {
                         "children": [],
                         "delay": "0.0",
+                        "description": "Delete downloaded files and folders",
+                        "enabled": true,
+                        "file_name": [
+                            "code_1ARLLJA.py"
+                        ],
+                        "id": "1ARLLJA",
+                        "type": "Code"
+                    },
+                    {
+                        "children": [],
+                        "delay": "5",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M3FNE1",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0.0",
                         "description": "Terminate background timers",
                         "enabled": true,
                         "file_name": [
@@ -350,6 +406,14 @@
                         ],
                         "id": "1AMW1R9",
                         "type": "Code"
+                    },
+                    {
+                        "children": [],
+                        "delay": "5",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M3FNLH",
+                        "type": "Delay"
                     },
                     {
                         "children": [],
@@ -409,6 +473,14 @@
                     },
                     {
                         "children": [],
+                        "delay": "5",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M3FPXC",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
                         "delay": "0",
                         "description": "",
                         "enabled": true,
@@ -427,20 +499,19 @@
                     },
                     {
                         "children": [],
-                        "delay": "0",
+                        "delay": "5",
                         "description": "",
                         "enabled": true,
-                        "id": "1AMCRPK",
-                        "include_path": "scenarios\\macos\\_library\\Teams\\teams_teardown",
-                        "type": "Include"
+                        "id": "1M3FU5C",
+                        "type": "Delay"
                     },
                     {
                         "children": [],
                         "delay": "0",
                         "description": "",
                         "enabled": true,
-                        "id": "1LXTVJ8",
-                        "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
+                        "id": "1AMCRPK",
+                        "include_path": "scenarios\\macos\\_library\\Teams\\teams_teardown",
                         "type": "Include"
                     }
                 ],
@@ -468,11 +539,22 @@
         "children": [
             {
                 "children": [],
+                "delay": "0.0",
+                "description": "",
+                "enabled": true,
+                "file_name": [
+                    "code_1M3FV02.py"
+                ],
+                "id": "1M3FV02",
+                "type": "Code"
+            },
+            {
+                "children": [],
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1AKUY0M",
-                "include_path": "scenarios\\macos\\_library\\web\\web_close_browser",
+                "id": "1M3FUTU",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_kill",
                 "type": "Include"
             },
             {
@@ -483,33 +565,6 @@
                 "id": "1AKUY5R",
                 "include_path": "scenarios\\macos\\_library\\web\\web_kill",
                 "type": "Include"
-            },
-            {
-                "children": [
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1CFLX9W",
-                        "include_path": "scenarios\\macos\\_library\\productivity\\prod_kill",
-                        "type": "Include"
-                    }
-                ],
-                "description": "",
-                "enabled": true,
-                "eval_method": "==",
-                "id": "1CFLX3T",
-                "left_term": "[simple_office_launch]",
-                "right_term": "1",
-                "type": "If"
-            },
-            {
-                "children": [],
-                "description": "",
-                "enabled": true,
-                "id": "1CFLX3U",
-                "type": "End If"
             }
         ],
         "description": "",
