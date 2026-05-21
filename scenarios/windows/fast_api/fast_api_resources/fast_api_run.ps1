@@ -66,10 +66,10 @@ $arch = $osInfo.OSArchitecture
 $processorArch = $env:PROCESSOR_ARCHITECTURE
 
 if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
-    $pythonVersion = "3.11.9"
+    $pythonVersion = "3.12.10"
     $logSuffix = "x64"
 } elseif ($arch -match "ARM" -or $processorArch -match "ARM") {
-    $pythonVersion = "3.11.9-arm"
+    $pythonVersion = "3.12.10-arm"
     $logSuffix = "ARM64"
 } else {
     Write-Host " ERROR - Unsupported architecture: $arch (Processor: $processorArch)" -ForegroundColor Red
@@ -304,106 +304,45 @@ if ($LASTEXITCODE -ne 0) {
     Exit 1
 }
 
-"Current Python version:" | log
-pyenv version
-
-"Location of python:" | log
-pyenv which python
-
-"Location of python3:" | log
-pyenv which python3
-
-"Dump environment variables:" | log
-Get-ChildItem Env:
-
-# Comprehensive Python detection function
-function Find-AllPython {
-    "=== Python Detection Report ===" | log
-    
-    # Check PATH
-    "`n1. Python in PATH:" | log
-    try {
-        $pathPython = Get-Command python -ErrorAction SilentlyContinue
-        if ($pathPython) {
-            "  Found: $($pathPython.Source)" | log
-            & python --version 2>&1
-        } else {
-            "  No python in PATH" | log
-        }
-    } catch {
-        "  No python in PATH" | log
-    }
-    
-    # Check file system
-    "`n2. Python installations on disk:" | log
-    $searchPaths = @(
-        "${env:ProgramFiles}\Python*",
-        "${env:ProgramFiles(x86)}\Python*",
-        "${env:LOCALAPPDATA}\Programs\Python\Python*",
-        "${env:APPDATA}\Python\Python*"
-    )
-    
-    foreach ($path in $searchPaths) {
-        $found = Get-ChildItem $path -ErrorAction SilentlyContinue
-        foreach ($dir in $found) {
-            $pythonExe = Join-Path $dir.FullName "python.exe"
-            if (Test-Path $pythonExe) {
-                "  Found: $pythonExe" | log
-                try {
-                    & $pythonExe --version 2>&1
-                } catch {}
-            }
-        }
-    }
-    
-    # Check Windows Store
-    "`n3. Windows Store Python:" | log
-    $storePython = "${env:LOCALAPPDATA}\Microsoft\WindowsApps\python.exe"
-    if (Test-Path $storePython) {
-        "  Found: $storePython" | log
-        & $storePython --version 2>&1
-    } else {
-        "  Not installed" | log
-    }
-    
-    # Check pyenv
-    "`n4. pyenv-win managed Python:" | log
-    if (Get-Command pyenv -ErrorAction SilentlyContinue) {
-        "  pyenv is available" | log
-        pyenv versions
-    } else {
-        "  pyenv not found" | log
-    }
+# --- Validate per-scenario venv and required packages ---
+# Prep stages all Python packages into a private venv under this scenario's
+# resource directory. We invoke that venv's python.exe by absolute path to
+# bypass any pyenv/PATH instability caused by other scenarios. If the venv
+# is missing or an expected package is not importable, we fail fast with a
+# clear diagnostic instead of cryptic errors mid-build.
+$venvPython = "$scriptDrive\hobl_bin\fast_api_resources\.venv\Scripts\python.exe"
+if (-not (Test-Path $venvPython)) {
+    " ERROR - fast_api venv missing at $venvPython" | log
+    " ERROR - Prep state is corrupt. Re-prep required:" | log
+    " ERROR -   delete C:\hobl_bin\prep_status\fast_api<version> on the DUT and re-run." | log
+    Exit 1
 }
+"Using venv python: $venvPython" | log
 
-# Run the detection
-Find-AllPython
-
-# Verify pyenv Python is being used
-"`n=== Python Resolution Verification ===" | log
-$whichPython = Get-Command python -ErrorAction SilentlyContinue
-if ($whichPython) {
-    "Resolved python.exe: $($whichPython.Source)" | log
-        if ($whichPython.Source -like "*pyenv*") {
-        "SUCCESS: pyenv Python is being used" | log
-    } else {
-        "WARNING: Non-pyenv Python is being used" | log
-        "This may cause version conflicts" | log
-    }
-    } else {
-    " ERROR - No python found in PATH" | log
+"Validating venv has required packages..." | log
+& $venvPython -c "import build, coverage, pytest; print('build', build.__version__, '| coverage', coverage.__version__, '| pytest', pytest.__version__)" 2>&1 | log
+if ($LASTEXITCODE -ne 0) {
+    " ERROR - venv has missing/broken Python packages (build, coverage, pytest expected)." | log
+    " ERROR - Possible causes: Defender quarantine, disk cleanup, or external tampering." | log
+    " ERROR - Re-prep required: delete C:\hobl_bin\prep_status\fast_api<version> on the DUT and re-run." | log
+    Exit 1
 }
 
 "Building FastAPI..." | log
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
+# Redirect output to a per-phase log so it is preserved in the results share.
+# Measure-Command discards pipeline output, and the RPC buffer is lost on timeout,
+# so file redirection is the only way to capture build/test output.
+$buildLog = "$LOG_DIR\fast_api_build.log"
+"Build output: $buildLog" | log
 $buildTime = (Measure-Command {
-    python -m build
+    & $venvPython -m build *> $buildLog
 }).TotalSeconds
 $buildExitCode = $LASTEXITCODE
 Write-RunPhaseMarker "phase.run_build.end"
 if ($buildExitCode -ne 0) {
-    " ERROR - Build failed" | log
+    " ERROR - Build failed. See $buildLog for details." | log
     Exit 1
 }
 $buildTime = [math]::Round($buildTime, 2)
@@ -415,8 +354,13 @@ $env:PYTHONIOENCODING = "utf-8"
 
 "Running tests with coverage..." | log
 Write-RunPhaseMarker "phase.run_test.start"
+$testLog = "$LOG_DIR\fast_api_test.log"
+"Test output: $testLog" | log
+# Invoke coverage via the venv's python so it resolves to the venv-installed
+# coverage package (installed via requirements-tests.txt). A bare `coverage`
+# would go through PATH lookup and either fail or hit a different Python.
 $testTime = (Measure-Command {
-    coverage run -m pytest tests
+    & $venvPython -m coverage run -m pytest tests *> $testLog
 }).TotalSeconds
 $testExitCode = $LASTEXITCODE
 Write-RunPhaseMarker "phase.run_test.end"

@@ -41,7 +41,7 @@ $processorArch = $env:PROCESSOR_ARCHITECTURE
 if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
     $isARM64 = $false
     $logSuffix = "x64"
-    $pythonVersion = "3.11.9"
+    $pythonVersion = "3.12.10"
     $vsArchParam = "x64"
     $vsHostArchParam = "x64"
     $vsInstallPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022"
@@ -49,7 +49,7 @@ if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
 } elseif ($arch -match "ARM" -or $processorArch -match "ARM") {
     $isARM64 = $true
     $logSuffix = "ARM64"
-    $pythonVersion = "3.11.9-arm"
+    $pythonVersion = "3.12.10-arm"
     $vsArchParam = "arm64"
     $vsHostArchParam = "arm64"
     $vsInstallPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022"
@@ -765,10 +765,19 @@ Set-OptimizedPathOrder
 "Current session PATH contains System32: $($env:PATH -like "*System32*")" | log
 "Current session PATH contains WindowsApps: $($env:PATH -like "*WindowsApps*")" | log
 
+# --- Install Python via pyenv (conditional — DO NOT use -f) ---
+# Force-reinstall (`-f`) wipes the pyenv version directory including any packages
+# installed by other scenarios that share this Python version. We only install
+# when the version is truly missing.
 "-- Installing python $pythonVersion for $logSuffix" | log
-"Installing Python $pythonVersion (this may take several minutes)..." | log
-pyenv install $pythonVersion -f
-check($lastexitcode)
+$installedVersions = (pyenv versions --bare 2>$null) -split "`n" | ForEach-Object { $_.Trim() }
+if ($installedVersions -notcontains $pythonVersion) {
+    "Installing Python $pythonVersion via pyenv (this may take several minutes)..." | log
+    pyenv install $pythonVersion
+    check($lastexitcode)
+} else {
+    "Python $pythonVersion already installed via pyenv — preserving existing install" | log
+}
 
 "Setting Python $pythonVersion as global version..." | log
 pyenv global $pythonVersion
@@ -841,16 +850,45 @@ if ($currentPythonVersion -like "*$expectedVersionPattern*") {
     Exit 1
 }
 
-"Checking pip Version"
-$pipVersion = pip --version
-"pip version: $pipVersion" | log
+# --- Create per-scenario venv ---
+# Packages live in this scenario's private venv directory, NOT in the shared pyenv
+# site-packages. This isolates fast_api's packages from any future `pyenv install`
+# (force or otherwise) from other scenarios, and from `pyenv global` switches.
+$venvDir = "$scriptDrive\hobl_bin\fast_api_resources\.venv"
+$pyenvPythonRaw = (pyenv which python 2>$null)
+if (-not $pyenvPythonRaw) {
+    " ERROR - pyenv which python returned no path; pyenv install may have failed" | log
+    Exit 1
+}
+$pyenvPython = $pyenvPythonRaw.Trim()
+if (-not (Test-Path $pyenvPython)) {
+    " ERROR - pyenv python not found at: $pyenvPython" | log
+    Exit 1
+}
+"Base pyenv python: $pyenvPython" | log
 
-"Installing requirements.txt..." | log
-pip install -r requirements.txt
+if (Test-Path $venvDir) {
+    "Removing existing venv to ensure clean rebuild: $venvDir" | log
+    Remove-Item -Recurse -Force $venvDir
+}
+"Creating venv at: $venvDir" | log
+& $pyenvPython -m venv $venvDir
 check($lastexitcode)
 
-"Installing build tools..." | log
-pip install build
+$venvPython = Join-Path $venvDir "Scripts\python.exe"
+$venvPip = Join-Path $venvDir "Scripts\pip.exe"
+if (-not (Test-Path $venvPython)) {
+    " ERROR - venv python missing after venv creation: $venvPython" | log
+    Exit 1
+}
+"Venv python: $venvPython" | log
+
+"Installing requirements.txt into venv..." | log
+& $venvPip install -r requirements.txt
+check($lastexitcode)
+
+"Installing build tool into venv..." | log
+& $venvPip install build
 check($lastexitcode)
 
 "-- FastAPI prep completed ($logSuffix version)" | log
