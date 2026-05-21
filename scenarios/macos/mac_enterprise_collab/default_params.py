@@ -7,7 +7,7 @@ from utilities.open_source.modules import import_run_user_only
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
-    Params.setDefault('mac_enterprise_collab', 'loops', '1', desc='', valOptions=[])
+    Params.setDefault('mac_enterprise_collab', 'loops', '100', desc='', valOptions=[])
     Params.setDefault('mac_enterprise_collab', 'background_teams', '1', desc='', valOptions=['0', '1'])
     Params.setDefault('mac_enterprise_collab', 'background_timers', '1', desc='', valOptions=['0', '1'])
     Params.setDefault('mac_enterprise_collab', 'background_onedrive_copy', '1', desc='', valOptions=['0', '1'])
@@ -26,8 +26,6 @@ def run_user_only():
     import_run_user_only('scenarios\\macos\\_library\\enterprise_collab\\onedrive_upload_setup')
     import_run_user_only('scenarios\\macos\\_library\\enterprise_collab\\timers_setup')
     import_run_user_only('scenarios\\macos\\_library\\power\\check_battery_percentage')
-    import_run_user_only('scenarios\\macos\\_library\\power\\powertool_setup')
-    import_run_user_only('scenarios\\macos\\_library\\power\\powertool_teardown')
     import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_kill')
     import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_setup')
     import_run_user_only('scenarios\\macos\\_library\\web\\web_close_browser')

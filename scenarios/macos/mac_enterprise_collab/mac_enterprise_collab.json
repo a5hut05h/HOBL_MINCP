@@ -18,7 +18,7 @@
         "name": "[loops]",
         "type": "Set Default",
         "val_options": "",
-        "value": "1"
+        "value": "100"
     },
     {
         "children": [],
@@ -160,15 +160,6 @@
                         "name": "[teams:collect_call_health]",
                         "type": "Set",
                         "value": "0"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1AKUT8L",
-                        "include_path": "scenarios\\macos\\_library\\Teams\\teams_setup",
-                        "type": "Include"
                     }
                 ],
                 "description": "",
@@ -187,148 +178,12 @@
                 "type": "End If"
             },
             {
-                "children": [
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "Upload timers executable from Host to DUT",
-                        "enabled": true,
-                        "id": "MAC_TIMERS_INCLUDE",
-                        "include_path": "scenarios\\macos\\_library\\enterprise_collab\\timers_setup",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0.0",
-                        "description": "Run timers in the background",
-                        "enabled": true,
-                        "file_name": [
-                            "code_1AMVJC3.py"
-                        ],
-                        "id": "1AMVJC3",
-                        "type": "Code"
-                    }
-                ],
-                "description": "",
-                "enabled": true,
-                "eval_method": "==",
-                "id": "1AMVHYC",
-                "left_term": "[background_timers]",
-                "right_term": "1",
-                "type": "If"
-            },
-            {
-                "children": [],
-                "description": "",
-                "enabled": true,
-                "id": "1AMVHYE",
-                "type": "End If"
-            },
-            {
-                "children": [
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "Create large binaries and upload to DUT",
-                        "enabled": true,
-                        "id": "1ANJY4X",
-                        "include_path": "scenarios\\macos\\_library\\enterprise_collab\\onedrive_upload_setup",
-                        "type": "Include"
-                    }
-                ],
-                "description": "",
-                "enabled": true,
-                "eval_method": "==",
-                "id": "1ANJXRW",
-                "left_term": "[background_onedrive_copy]",
-                "right_term": "1",
-                "type": "If"
-            },
-            {
-                "children": [],
-                "description": "",
-                "enabled": true,
-                "id": "1ANJXRX",
-                "type": "End If"
-            },
-            {
                 "children": [],
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1ARKHNH",
-                "include_path": "scenarios\\macos\\_library\\web\\web_setup",
-                "type": "Include"
-            },
-            {
-                "children": [
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1CFLW86",
-                        "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
-                        "type": "Include"
-                    }
-                ],
-                "description": "",
-                "enabled": true,
-                "eval_method": "==",
-                "id": "1CFLW0N",
-                "left_term": "[simple_office_launch]",
-                "right_term": "1",
-                "type": "If"
-            },
-            {
-                "children": [],
-                "description": "",
-                "enabled": true,
-                "id": "1CFLW0R",
-                "type": "End If"
-            },
-            {
-                "children": [
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1LXTVJ8",
-                        "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
-                        "type": "Include"
-                    }
-                ],
-                "description": "",
-                "enabled": true,
-                "eval_method": "in",
-                "id": "1LXTV21",
-                "left_term": "productivity",
-                "right_term": "[workloads]",
-                "type": "If"
-            },
-            {
-                "children": [],
-                "description": "",
-                "enabled": true,
-                "id": "1LXTV22",
-                "type": "End If"
-            },
-            {
-                "children": [],
-                "delay": "100",
-                "description": "",
-                "enabled": false,
-                "id": "1CAPW9N",
-                "type": "Delay"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1M2R9V8",
-                "include_path": "scenarios\\macos\\_library\\power\\powertool_setup",
+                "id": "1LXTVJ8",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
                 "type": "Include"
             }
         ],
@@ -354,33 +209,62 @@
                     {
                         "children": [
                             {
-                                "children": [
-                                    {
-                                        "children": [],
-                                        "delay": "0.0",
-                                        "description": "Download a large file from Internet",
-                                        "enabled": true,
-                                        "file_name": [
-                                            "code_1ARK9VL.py"
-                                        ],
-                                        "id": "1ARK9VL",
-                                        "type": "Code"
-                                    }
-                                ],
+                                "children": [],
+                                "delay": "0",
                                 "description": "",
                                 "enabled": true,
-                                "eval_method": "==",
-                                "id": "1ARK98F",
-                                "left_term": "[background_onedrive_copy]",
-                                "right_term": "1",
-                                "type": "If"
+                                "id": "1AKUT8L",
+                                "include_path": "scenarios\\macos\\_library\\Teams\\teams_setup",
+                                "type": "Include"
                             },
                             {
                                 "children": [],
+                                "delay": "0",
+                                "description": "Upload timers executable from Host to DUT",
+                                "enabled": true,
+                                "id": "MAC_TIMERS_INCLUDE",
+                                "include_path": "scenarios\\macos\\_library\\enterprise_collab\\timers_setup",
+                                "type": "Include"
+                            },
+                            {
+                                "children": [],
+                                "delay": "0.0",
+                                "description": "Run timers in the background",
+                                "enabled": true,
+                                "file_name": [
+                                    "code_1AMVJC3.py"
+                                ],
+                                "id": "1AMVJC3",
+                                "type": "Code"
+                            },
+                            {
+                                "children": [],
+                                "delay": "0",
+                                "description": "Create large binaries and upload to DUT",
+                                "enabled": true,
+                                "id": "1ANJY4X",
+                                "include_path": "scenarios\\macos\\_library\\enterprise_collab\\onedrive_upload_setup",
+                                "type": "Include"
+                            },
+                            {
+                                "children": [],
+                                "delay": "0.0",
+                                "description": "Download a large file from Internet",
+                                "enabled": true,
+                                "file_name": [
+                                    "code_1ARK9VL.py"
+                                ],
+                                "id": "1ARK9VL",
+                                "type": "Code"
+                            },
+                            {
+                                "children": [],
+                                "delay": "0",
                                 "description": "",
                                 "enabled": true,
-                                "id": "1ARK98H",
-                                "type": "End If"
+                                "id": "1ARKHNH",
+                                "include_path": "scenarios\\macos\\_library\\web\\web_setup",
+                                "type": "Include"
                             },
                             {
                                 "children": [],
@@ -408,33 +292,15 @@
                                 "type": "Include"
                             },
                             {
-                                "children": [
-                                    {
-                                        "children": [],
-                                        "delay": "0.0",
-                                        "description": "Delete downloaded files and folders",
-                                        "enabled": true,
-                                        "file_name": [
-                                            "code_1ARLLJA.py"
-                                        ],
-                                        "id": "1ARLLJA",
-                                        "type": "Code"
-                                    }
-                                ],
-                                "description": "",
-                                "enabled": true,
-                                "eval_method": "==",
-                                "id": "1ARLJLK",
-                                "left_term": "[background_onedrive_copy]",
-                                "right_term": "1",
-                                "type": "If"
-                            },
-                            {
                                 "children": [],
-                                "description": "",
+                                "delay": "0.0",
+                                "description": "Delete downloaded files and folders",
                                 "enabled": true,
-                                "id": "1ARLJLM",
-                                "type": "End If"
+                                "file_name": [
+                                    "code_1ARLLJA.py"
+                                ],
+                                "id": "1ARLLJA",
+                                "type": "Code"
                             }
                         ],
                         "description": "",
@@ -460,79 +326,6 @@
                                 "name": "[success_count]",
                                 "type": "Increment",
                                 "value": "1"
-                            },
-                            {
-                                "children": [],
-                                "delay": "0",
-                                "description": "",
-                                "enabled": true,
-                                "id": "1M2R84W",
-                                "include_path": "scenarios\\macos\\_library\\power\\check_battery_percentage",
-                                "type": "Include"
-                            },
-                            {
-                                "children": [],
-                                "delay": "2",
-                                "description": "",
-                                "enabled": true,
-                                "id": "1ARKFX4",
-                                "type": "Delay"
-                            },
-                            {
-                                "children": [
-                                    {
-                                        "children": [],
-                                        "delay": "0.0",
-                                        "description": "Execution Summary",
-                                        "enabled": true,
-                                        "file_name": [
-                                            "code_1M2JTAF.py"
-                                        ],
-                                        "id": "1M2JTAF",
-                                        "type": "Code"
-                                    },
-                                    {
-                                        "children": [],
-                                        "delay": "0",
-                                        "description": "",
-                                        "enabled": true,
-                                        "id": "1M2R8C2",
-                                        "include_path": "scenarios\\macos\\_library\\power\\powertool_teardown",
-                                        "type": "Include"
-                                    },
-                                    {
-                                        "children": [],
-                                        "count": "1",
-                                        "delay": "0.0",
-                                        "description": "",
-                                        "enabled": true,
-                                        "id": "1LY152X",
-                                        "type": "Exit Loop"
-                                    }
-                                ],
-                                "description": "",
-                                "enabled": true,
-                                "eval_method": "==",
-                                "id": "1LY14RY",
-                                "left_term": "[isDischarged]",
-                                "right_term": "1",
-                                "type": "If"
-                            },
-                            {
-                                "children": [],
-                                "description": "",
-                                "enabled": true,
-                                "id": "1LY14T0",
-                                "type": "End If"
-                            },
-                            {
-                                "children": [],
-                                "delay": "0",
-                                "description": "",
-                                "enabled": true,
-                                "id": "1LXTVJ8",
-                                "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
-                                "type": "Include"
                             }
                         ],
                         "description": "",
@@ -546,6 +339,109 @@
                         "enabled": true,
                         "id": "1M2TE21",
                         "type": "End Try"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0.0",
+                        "description": "Terminate background timers",
+                        "enabled": true,
+                        "file_name": [
+                            "code_1AMW1R9.py"
+                        ],
+                        "id": "1AMW1R9",
+                        "type": "Code"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M2R84W",
+                        "include_path": "scenarios\\macos\\_library\\power\\check_battery_percentage",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "delay": "0.0",
+                                "description": "Execution Summary",
+                                "enabled": true,
+                                "file_name": [
+                                    "code_1M2JTAF.py"
+                                ],
+                                "id": "1M2JTAF",
+                                "type": "Code"
+                            },
+                            {
+                                "children": [],
+                                "count": "1",
+                                "delay": "0.0",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1LY152X",
+                                "type": "Exit Loop"
+                            }
+                        ],
+                        "description": "",
+                        "enabled": true,
+                        "eval_method": "==",
+                        "id": "1LY14RY",
+                        "left_term": "[isDischarged]",
+                        "right_term": "1",
+                        "type": "If"
+                    },
+                    {
+                        "children": [],
+                        "description": "",
+                        "enabled": true,
+                        "id": "1LY14T0",
+                        "type": "End If"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M31NHR",
+                        "include_path": "scenarios\\macos\\_library\\web\\web_close_browser",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1CFLX9W",
+                        "include_path": "scenarios\\macos\\_library\\productivity\\prod_kill",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1AKUY5R",
+                        "include_path": "scenarios\\macos\\_library\\web\\web_kill",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1AMCRPK",
+                        "include_path": "scenarios\\macos\\_library\\Teams\\teams_teardown",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1LXTVJ8",
+                        "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
+                        "type": "Include"
                     }
                 ],
                 "count": "[loops]",
@@ -592,35 +488,6 @@
                 "children": [
                     {
                         "children": [],
-                        "delay": "0.0",
-                        "description": "Terminate background timers",
-                        "enabled": true,
-                        "file_name": [
-                            "code_1AMW1R9.py"
-                        ],
-                        "id": "1AMW1R9",
-                        "type": "Code"
-                    }
-                ],
-                "description": "",
-                "enabled": true,
-                "eval_method": "==",
-                "id": "1AMW13M",
-                "left_term": "[background_timers]",
-                "right_term": "1",
-                "type": "If"
-            },
-            {
-                "children": [],
-                "description": "",
-                "enabled": true,
-                "id": "1AMW13P",
-                "type": "End If"
-            },
-            {
-                "children": [
-                    {
-                        "children": [],
                         "delay": "0",
                         "description": "",
                         "enabled": true,
@@ -642,33 +509,6 @@
                 "description": "",
                 "enabled": true,
                 "id": "1CFLX3U",
-                "type": "End If"
-            },
-            {
-                "children": [
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1AMCRPK",
-                        "include_path": "scenarios\\macos\\_library\\Teams\\teams_teardown",
-                        "type": "Include"
-                    }
-                ],
-                "description": "",
-                "enabled": true,
-                "eval_method": "==",
-                "id": "1AKUY7K",
-                "left_term": "[background_teams]",
-                "right_term": "1",
-                "type": "If"
-            },
-            {
-                "children": [],
-                "description": "",
-                "enabled": true,
-                "id": "1AKUY7M",
                 "type": "End If"
             }
         ],
