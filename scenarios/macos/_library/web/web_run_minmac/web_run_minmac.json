@@ -296,7 +296,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": true,
+                "enabled": false,
                 "id": "1LKYPWR",
                 "include_path": "scenarios\\macos\\_library\\web\\disable_proxy",
                 "type": "Include"
@@ -349,7 +349,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": true,
+                "enabled": false,
                 "id": "1LKYR2Y",
                 "include_path": "scenarios\\macos\\_library\\web\\enable_proxy",
                 "type": "Include"
@@ -654,7 +654,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": true,
+                "enabled": false,
                 "id": "1LKYRAU",
                 "include_path": "scenarios\\macos\\_library\\web\\disable_proxy",
                 "type": "Include"
@@ -705,7 +705,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": true,
+                "enabled": false,
                 "id": "1LKYRME",
                 "include_path": "scenarios\\macos\\_library\\web\\enable_proxy",
                 "type": "Include"
@@ -1014,7 +1014,7 @@
                 "children": [],
                 "delay": "0",
                 "description": "",
-                "enabled": true,
+                "enabled": false,
                 "id": "1LKYRWN",
                 "include_path": "scenarios\\macos\\_library\\web\\disable_proxy",
                 "type": "Include"
