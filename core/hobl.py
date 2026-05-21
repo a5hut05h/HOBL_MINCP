@@ -145,6 +145,8 @@ params.setDefault('global', 'dut_coord_scaler', '1.0', desc="Multiply InputInjec
 params.setDefault('global', 'prep_status_enable', '1', desc="Check prep status before scenario execution.", valOptions=["1", "0"])
 params.setDefault('global', 'prep_run_only', '0', desc="Run prep only for scenarios that have both a prep and test component.", valOptions=["1", "0"])
 params.setDefault('global', 'result_dir_complete', '', desc="Completed file path for storing test results (already including study type, study variables, and run type).")
+params.setDefault('global', 'fungates_upload_enabled', '0', desc="Auto-extract results and upload ETL files to Fungates after each PASS run.", valOptions=["1", "0"])
+params.setDefault('global', 'fungates_cse_uploader_path', '', desc="Full path to CSEUploader.exe. Leave blank to use the bundled one in utilities/fungates_uploader.")
 
 
 # Command line arguments
@@ -597,6 +599,60 @@ def preps_missing_print(prep_scenarios_to_run):
             logging.error(f"Missing prep: {p}")
 
 
+def _post_run_extract_and_upload(run_dir_str):
+    """Extract run results to hobl_result.json and upload ETL files to Fungates.
+
+    Controlled by global params:
+      fungates_upload_enabled  - must be '1' to run
+      fungates_cse_uploader_path - optional override for CSEUploader.exe path
+    """
+    if params.get('global', 'fungates_upload_enabled') != '1':
+        return
+    if params.get('global', 'collection_enabled') == '0':
+        return
+
+    from utilities.extractor.json_builder import extract_run, save_json
+
+    run_path = Path(run_dir_str)
+
+    # Step 1: Extract CSVs -> hobl_result.json
+    logging.info("Extracting run results from: %s", run_dir_str)
+    extracted = extract_run(run_path)
+    if extracted is None:
+        logging.warning("Extractor returned no data for %s — skipping Fungates upload", run_dir_str)
+        return
+
+    hobl_result_json = run_path / "hobl_result.json"
+    save_json(extracted, hobl_result_json)
+    logging.info("Saved hobl_result.json to %s", hobl_result_json)
+
+    # Step 2: Invoke Upload-ToFungates.ps1 with the run dir as input folder
+    uploader_ps1 = Path(__file__).parents[1] / "utilities" / "fungates_uploader" / "Upload-ToFungates.ps1"
+    if not uploader_ps1.exists():
+        logging.error("Upload-ToFungates.ps1 not found at %s", uploader_ps1)
+        return
+
+    cmd = [
+        "powershell.exe",
+        "-ExecutionPolicy", "Unrestricted",
+        "-File", str(uploader_ps1),
+        "-InputFolder", run_dir_str,
+    ]
+    cse_path = params.get('global', 'fungates_cse_uploader_path')
+    if cse_path:
+        cmd += ["-CSEUploaderPath", cse_path]
+
+    logging.info("Launching Fungates uploader for %s", run_dir_str)
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.stdout:
+        for line in proc.stdout.splitlines():
+            logging.info("[fungates] %s", line)
+    if proc.returncode != 0:
+        logging.error("Fungates upload failed (exit %d): %s", proc.returncode, proc.stderr.strip())
+    else:
+        logging.info("Fungates upload completed successfully for %s", run_dir_str)
+
+
 if __name__ == '__main__':
 
     try:
@@ -849,6 +905,12 @@ if __name__ == '__main__':
                         # Write desktop.ini file to change Windows File Explorer icon to pass icon
                         write_desktop_ini(run_dir, "pass")
                         success = True
+
+                        # Extract results and upload to Fungates (if enabled)
+                        try:
+                            _post_run_extract_and_upload(run_dir)
+                        except Exception as e:
+                            logging.error("Post-run extract/upload failed: %s", e)
 
                         try:
                             close_log()
