@@ -54,14 +54,15 @@ class StorePrep(core.app_scenario.Scenario):
 
         # Determine if old store or new store app
         try:
-            self.driver.find_element_by_accessibility_id("DownloadsAndUpdatesButton").click()
-            logging.info("New store detected.")
+            self.driver.find_element_by_accessibility_id("nav_downloadsandupdates").click()
+            # logging.info("New store detected.")
         except:
-            self.driver.find_element_by_accessibility_id("MyLibraryButton").click()
+            # self.driver.find_element_by_accessibility_id("MyLibraryButton").click()
+            self.driver.find_element_by_accessibility_id("DownloadsAndUpdatesButton").click()
             # WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.NAME, 'See More'))).click()
             # WebDriverWait(self.driver, 2).until(EC.presence_of_element_located((By.XPATH, '//*[contains(@Name, "Downloads and updates")]'))).click()
             self.new_store = False
-            logging.info("Old store detected.")
+            # logging.info("Old store detected.")
 
 
 
@@ -91,7 +92,8 @@ class StorePrep(core.app_scenario.Scenario):
         for i in range(15):
             # If the Store itself updates it will go to the Home page, and we will need to click the Downloads button again.
             try:
-                self.driver.find_element_by_name("Updates & downloads")
+                # self.driver.find_element_by_name("Updates & downloads")
+                self.driver.find_element_by_accessibility_id("nav_downloadsandupdates").click()
                 self.new_store = True
             except:
                 try:
