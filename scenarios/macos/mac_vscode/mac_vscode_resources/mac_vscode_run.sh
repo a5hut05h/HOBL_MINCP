@@ -118,7 +118,13 @@ log "✓ Cleaned .build and out directories"
 # Build VS Code
 log "-- Starting VS Code compilation"
 
-/usr/bin/time -p -o "$LOG_DIR/mac_vscode_build_time.log" npm run compile
+# Redirect npm output to a per-phase log so it is preserved in the results
+# share. Without redirection, stdout goes only to the RPC buffer and is lost
+# on timeout.
+BUILD_LOG="$LOG_DIR/mac_vscode_build.log"
+log "-- Build output: $BUILD_LOG"
+
+/usr/bin/time -p -o "$LOG_DIR/mac_vscode_build_time.log" npm run compile > "$BUILD_LOG" 2>&1
 check_status "VS Code build"
 
 parse_time_output "$LOG_DIR/mac_vscode_build_time.log" "build"

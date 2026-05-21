@@ -150,7 +150,11 @@ log "-- net_aspire restore ended"
 # ============================================================================
 log "-- net_aspire build started"
 
-/usr/bin/time -p -o "$LOG_DIR/mac_net_aspire_build_time.log" ./build.sh --build
+# Redirect output to a per-phase log so it is preserved in the results share.
+# Without redirection, stdout goes only to the RPC buffer and is lost on timeout.
+BUILD_LOG="$LOG_DIR/mac_net_aspire_build.log"
+log "-- Build output: $BUILD_LOG"
+/usr/bin/time -p -o "$LOG_DIR/mac_net_aspire_build_time.log" ./build.sh --build > "$BUILD_LOG" 2>&1
 check_status "Building .NET Aspire"
 
 # Parse build phase timing
