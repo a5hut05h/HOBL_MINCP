@@ -354,59 +354,41 @@
                     {
                         "children": [
                             {
-                                "children": [],
-                                "delay": "0.0",
-                                "description": "Download a large file from Internet",
-                                "enabled": true,
-                                "file_name": [
-                                    "code_1ARK9VL.py"
+                                "children": [
+                                    {
+                                        "children": [],
+                                        "delay": "0.0",
+                                        "description": "Download a large file from Internet",
+                                        "enabled": true,
+                                        "file_name": [
+                                            "code_1ARK9VL.py"
+                                        ],
+                                        "id": "1ARK9VL",
+                                        "type": "Code"
+                                    }
                                 ],
-                                "id": "1ARK9VL",
-                                "type": "Code"
-                            }
-                        ],
-                        "description": "",
-                        "enabled": true,
-                        "eval_method": "==",
-                        "id": "1ARK98F",
-                        "left_term": "[background_onedrive_copy]",
-                        "right_term": "1",
-                        "type": "If"
-                    },
-                    {
-                        "children": [],
-                        "description": "",
-                        "enabled": true,
-                        "id": "1ARK98H",
-                        "type": "End If"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": false,
-                        "id": "1ARKEY9",
-                        "include_path": "scenarios\\macos\\_library\\web\\web_run_12",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1LKYULF",
-                        "include_path": "scenarios\\macos\\_library\\web\\web_run_minmac",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [
+                                "description": "",
+                                "enabled": true,
+                                "eval_method": "==",
+                                "id": "1ARK98F",
+                                "left_term": "[background_onedrive_copy]",
+                                "right_term": "1",
+                                "type": "If"
+                            },
+                            {
+                                "children": [],
+                                "description": "",
+                                "enabled": true,
+                                "id": "1ARK98H",
+                                "type": "End If"
+                            },
                             {
                                 "children": [],
                                 "delay": "0",
                                 "description": "",
                                 "enabled": true,
-                                "id": "1CFLY49",
-                                "include_path": "scenarios\\macos\\_library\\productivity\\prod_open",
+                                "id": "1LKYULF",
+                                "include_path": "scenarios\\macos\\_library\\web\\web_run_minmac",
                                 "type": "Include"
                             },
                             {
@@ -414,144 +396,156 @@
                                 "delay": "0",
                                 "description": "",
                                 "enabled": true,
-                                "id": "1CFLY8J",
-                                "include_path": "scenarios\\macos\\_library\\productivity\\prod_close",
+                                "id": "1ARKF37",
+                                "include_path": "scenarios\\macos\\_library\\web\\web_close_tabs",
+                                "params": [
+                                    {
+                                        "name": "[num_tabs_to_close]",
+                                        "val_options": "",
+                                        "value": "[web:tabs]"
+                                    }
+                                ],
                                 "type": "Include"
-                            }
-                        ],
-                        "description": "",
-                        "enabled": true,
-                        "eval_method": "==",
-                        "id": "1CFLXWA",
-                        "left_term": "[simple_office_launch]",
-                        "right_term": "1",
-                        "type": "If"
-                    },
-                    {
-                        "children": [],
-                        "description": "",
-                        "enabled": true,
-                        "id": "1CFLXWE",
-                        "type": "End If"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1ARKF37",
-                        "include_path": "scenarios\\macos\\_library\\web\\web_close_tabs",
-                        "params": [
+                            },
                             {
-                                "name": "[num_tabs_to_close]",
-                                "val_options": "",
-                                "value": "[web:tabs]"
+                                "children": [
+                                    {
+                                        "children": [],
+                                        "delay": "0.0",
+                                        "description": "Delete downloaded files and folders",
+                                        "enabled": true,
+                                        "file_name": [
+                                            "code_1ARLLJA.py"
+                                        ],
+                                        "id": "1ARLLJA",
+                                        "type": "Code"
+                                    }
+                                ],
+                                "description": "",
+                                "enabled": true,
+                                "eval_method": "==",
+                                "id": "1ARLJLK",
+                                "left_term": "[background_onedrive_copy]",
+                                "right_term": "1",
+                                "type": "If"
+                            },
+                            {
+                                "children": [],
+                                "description": "",
+                                "enabled": true,
+                                "id": "1ARLJLM",
+                                "type": "End If"
                             }
                         ],
-                        "type": "Include"
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M2TE1X",
+                        "type": "Try"
+                    },
+                    {
+                        "children": [],
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M2TE1Y",
+                        "type": "Except"
                     },
                     {
                         "children": [
                             {
                                 "children": [],
                                 "delay": "0.0",
-                                "description": "Delete downloaded files and folders",
+                                "description": "",
                                 "enabled": true,
-                                "file_name": [
-                                    "code_1ARLLJA.py"
-                                ],
-                                "id": "1ARLLJA",
-                                "type": "Code"
-                            }
-                        ],
-                        "description": "",
-                        "enabled": true,
-                        "eval_method": "==",
-                        "id": "1ARLJLK",
-                        "left_term": "[background_onedrive_copy]",
-                        "right_term": "1",
-                        "type": "If"
-                    },
-                    {
-                        "children": [],
-                        "description": "",
-                        "enabled": true,
-                        "id": "1ARLJLM",
-                        "type": "End If"
-                    },
-                    {
-                        "children": [],
-                        "delay": "2",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1ARKFX4",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1M2R84W",
-                        "include_path": "scenarios\\macos\\_library\\power\\check_battery_percentage",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0.0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1M2JRMA",
-                        "name": "[success_count]",
-                        "type": "Increment",
-                        "value": "1"
-                    },
-                    {
-                        "children": [
-                            {
-                                "children": [],
-                                "delay": "0.0",
-                                "description": "Execution Summary",
-                                "enabled": true,
-                                "file_name": [
-                                    "code_1M2JTAF.py"
-                                ],
-                                "id": "1M2JTAF",
-                                "type": "Code"
+                                "id": "1M2JRMA",
+                                "name": "[success_count]",
+                                "type": "Increment",
+                                "value": "1"
                             },
                             {
                                 "children": [],
                                 "delay": "0",
                                 "description": "",
                                 "enabled": true,
-                                "id": "1M2R8C2",
-                                "include_path": "scenarios\\macos\\_library\\power\\powertool_teardown",
+                                "id": "1M2R84W",
+                                "include_path": "scenarios\\macos\\_library\\power\\check_battery_percentage",
                                 "type": "Include"
                             },
                             {
                                 "children": [],
-                                "count": "1",
-                                "delay": "0.0",
+                                "delay": "2",
                                 "description": "",
                                 "enabled": true,
-                                "id": "1LY152X",
-                                "type": "Exit Loop"
+                                "id": "1ARKFX4",
+                                "type": "Delay"
+                            },
+                            {
+                                "children": [
+                                    {
+                                        "children": [],
+                                        "delay": "0.0",
+                                        "description": "Execution Summary",
+                                        "enabled": true,
+                                        "file_name": [
+                                            "code_1M2JTAF.py"
+                                        ],
+                                        "id": "1M2JTAF",
+                                        "type": "Code"
+                                    },
+                                    {
+                                        "children": [],
+                                        "delay": "0",
+                                        "description": "",
+                                        "enabled": true,
+                                        "id": "1M2R8C2",
+                                        "include_path": "scenarios\\macos\\_library\\power\\powertool_teardown",
+                                        "type": "Include"
+                                    },
+                                    {
+                                        "children": [],
+                                        "count": "1",
+                                        "delay": "0.0",
+                                        "description": "",
+                                        "enabled": true,
+                                        "id": "1LY152X",
+                                        "type": "Exit Loop"
+                                    }
+                                ],
+                                "description": "",
+                                "enabled": true,
+                                "eval_method": "==",
+                                "id": "1LY14RY",
+                                "left_term": "[isDischarged]",
+                                "right_term": "1",
+                                "type": "If"
+                            },
+                            {
+                                "children": [],
+                                "description": "",
+                                "enabled": true,
+                                "id": "1LY14T0",
+                                "type": "End If"
+                            },
+                            {
+                                "children": [],
+                                "delay": "0",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1LXTVJ8",
+                                "include_path": "scenarios\\macos\\_library\\productivity\\prod_setup",
+                                "type": "Include"
                             }
                         ],
                         "description": "",
                         "enabled": true,
-                        "eval_method": "==",
-                        "id": "1LY14RY",
-                        "left_term": "[isDischarged]",
-                        "right_term": "1",
-                        "type": "If"
+                        "id": "1M2TE20",
+                        "type": "On Success"
                     },
                     {
                         "children": [],
                         "description": "",
                         "enabled": true,
-                        "id": "1LY14T0",
-                        "type": "End If"
+                        "id": "1M2TE21",
+                        "type": "End Try"
                     }
                 ],
                 "count": "[loops]",
