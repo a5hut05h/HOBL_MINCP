@@ -10,7 +10,7 @@ from . import default_params
 # Description:
 #   Automatically generated standard scenario.
 
-class GetChargeState(core.app_scenario.Scenario):
+class PowertoolTeardown(core.app_scenario.Scenario):
     # Set default parameters:
     default_params.run()
 
@@ -18,7 +18,7 @@ class GetChargeState(core.app_scenario.Scenario):
 
     def setUp(self):
         # Load actions JSON.
-        actions_json = os.path.join(os.path.dirname(__file__), "get_charge_state.json")
+        actions_json = os.path.join(os.path.dirname(__file__), "powertool_teardown.json")
         self.actions = self.load_action_json(actions_json)
 
         # Execute Setup actions, if they exist

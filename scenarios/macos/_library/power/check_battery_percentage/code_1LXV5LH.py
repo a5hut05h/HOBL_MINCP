@@ -7,7 +7,7 @@ from parameters import Params
 def run(scenario):
     logging.debug('Executing code block: code_1LXV5LH.py')
 
-    module = "battery_test"
+    module = getattr(scenario, '_module', '') or scenario.__module__.split('.')[-1]
 
     # Get battery percentage as a number from DUT
     try:
@@ -33,21 +33,6 @@ def run(scenario):
         logging.info(f"Decision: isDischarged set to {is_discharged} based on battery_percent ({battery_percent}) and battery_threshold ({battery_threshold}).")
         Params.setParam(module, 'isDischarged', str(is_discharged))
         logging.info(f"isDischarged parameter updated in Params: {is_discharged}")
-
-        # If isDischarged is 1, kill the powertool process
-        if is_discharged == 1:
-            try:
-                powertool_pid = Params.get(module, 'powertool_pid')
-                if powertool_pid:
-                    powertool_pid = str(powertool_pid).strip()
-                    logging.info(f"isDischarged is 1. Retrieved powertool_pid: {powertool_pid}")
-                    kill_cmd = f'bash -c "kill -9 {powertool_pid}"'
-                    scenario._call([kill_cmd])
-                    logging.info(f"Executed: kill -9 {powertool_pid}")
-                else:
-                    logging.warning("isDischarged is 1, but powertool_pid is not set.")
-            except Exception as e:
-                logging.error(f"Failed to kill powertool process: {e}")
         
         return battery_percent
     except Exception as e:

@@ -80,10 +80,52 @@
         "delay": "0.0",
         "description": "",
         "enabled": true,
+        "id": "1LY135J",
+        "name": "[battery_threshold]",
+        "type": "Set Default",
+        "val_options": "20,30,40,50",
+        "value": "30"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "1LY140X",
+        "name": "[isDischarged]",
+        "type": "Set Default",
+        "val_options": "0,1",
+        "value": "0"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
         "id": "1AL8WHR",
         "name": "[web_replay_run]",
         "type": "Set",
         "value": "1"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "1M2JNV4",
+        "name": "[loop_count]",
+        "type": "Set",
+        "value": "0"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "1M2JPWW",
+        "name": "[success_count]",
+        "type": "Set",
+        "value": "0"
     },
     {
         "children": [
@@ -279,6 +321,15 @@
                 "enabled": false,
                 "id": "1CAPW9N",
                 "type": "Delay"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1M2R9V8",
+                "include_path": "scenarios\\macos\\_library\\power\\powertool_setup",
+                "type": "Include"
             }
         ],
         "description": "",
@@ -290,6 +341,16 @@
         "children": [
             {
                 "children": [
+                    {
+                        "children": [],
+                        "delay": "0.0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M2JPC5",
+                        "name": "[loop_count]",
+                        "type": "Increment",
+                        "value": "1"
+                    },
                     {
                         "children": [
                             {
@@ -425,6 +486,72 @@
                         "enabled": true,
                         "id": "1ARKFX4",
                         "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M2R84W",
+                        "include_path": "scenarios\\macos\\_library\\power\\check_battery_percentage",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0.0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1M2JRMA",
+                        "name": "[success_count]",
+                        "type": "Increment",
+                        "value": "1"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "delay": "0.0",
+                                "description": "Execution Summary",
+                                "enabled": true,
+                                "file_name": [
+                                    "code_1M2JTAF.py"
+                                ],
+                                "id": "1M2JTAF",
+                                "type": "Code"
+                            },
+                            {
+                                "children": [],
+                                "delay": "0",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1M2R8C2",
+                                "include_path": "scenarios\\macos\\_library\\power\\powertool_teardown",
+                                "type": "Include"
+                            },
+                            {
+                                "children": [],
+                                "count": "1",
+                                "delay": "0.0",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1LY152X",
+                                "type": "Exit Loop"
+                            }
+                        ],
+                        "description": "",
+                        "enabled": true,
+                        "eval_method": "==",
+                        "id": "1LY14RY",
+                        "left_term": "[isDischarged]",
+                        "right_term": "1",
+                        "type": "If"
+                    },
+                    {
+                        "children": [],
+                        "description": "",
+                        "enabled": true,
+                        "id": "1LY14T0",
+                        "type": "End If"
                     }
                 ],
                 "count": "[loops]",

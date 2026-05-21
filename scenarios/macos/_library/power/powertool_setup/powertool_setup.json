@@ -1,0 +1,23 @@
+[
+    {
+        "author": "",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-21",
+        "description": "",
+        "enabled": true,
+        "id": "1M2KT75",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Teminate job and download plist_file",
+        "enabled": true,
+        "file_name": [
+            "code_1M2KT9R.py"
+        ],
+        "id": "1M2KT9R",
+        "type": "Code"
+    }
+]
