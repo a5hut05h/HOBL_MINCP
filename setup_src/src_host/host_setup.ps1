@@ -8,7 +8,7 @@ param(
 )
 
 # HOBL UI and Dut Setup versions
-$hobl_ui_version = "0.96"
+$hobl_ui_version = "1.1"
 # Set $dut_setup_version to value at top of setup_src\src_dut_win\dut_setup.cmd
 $dut_setup_cmd = "$PSScriptRoot\..\src_dut_win\dut_setup.cmd"
 if (Test-Path $dut_setup_cmd) {
@@ -236,6 +236,24 @@ if ($ui) {
     "-- Copying launch shortcut to desktop" | log
     $desktopPath = [Environment]::GetFolderPath('Desktop')
     Copy-Item c:\HOBLweb\HOBLweb.lnk "$desktopPath\HOBLweb.lnk" 2>&1 | log
+
+    # Update appsettings.json with path to hobl set to the location of hobl, which is the location of this script and up two levels.
+    "-- Adding HoblPath to appsettings.json" | log
+    $appSettingsPath = "c:\HOBLweb\appsettings.json"
+    # Set $hoblPath to the parent directory of the script's directory (which is the root of the HOBL repo)
+    $hoblPath = Join-Path $PSScriptRoot "..\.."
+    $hoblPath = (Resolve-Path $hoblPath).Path | ConvertTo-Json
+    if (Test-Path $appSettingsPath) {
+        $appSettingsContent = Get-Content $appSettingsPath -Raw
+        # if HoblPath already exists, replace it, otherwise add it
+        if ($appSettingsContent -match '"HoblPath"\s*:\s*".*?"') {
+            $appSettingsContent = $appSettingsContent -replace '"HoblPath"\s*:\s*".*?"', "`"HoblPath`": $hoblPath"
+        } else {
+            # Add HoblPath before the last closing curly brace
+            $appSettingsContent = $appSettingsContent -replace '(?s)\}\s*$', ",`n  `"HoblPath`": $hoblPath`n}"
+        }
+        Set-Content -Path $appSettingsPath -Value $appSettingsContent -Encoding UTF8
+    }
 
     # Launch HOBL UI
     "-- Launching HOBLweb" | log

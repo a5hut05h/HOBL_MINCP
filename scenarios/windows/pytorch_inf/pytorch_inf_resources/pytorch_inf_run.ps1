@@ -3,7 +3,8 @@
 
 param(
     [string]$logFile = "",
-    [string]$startTime = (Get-Date).ToString("o")
+    [string]$startTime = (Get-Date).ToString("o"),
+    [switch]$noGpu = $false
 )
 
 # 9F0F6E2E-8D06-4D2F-B8F5-6F1F2D5A1C01 is a custom provider we use to emit phase markers from the scenario script (optional, may not be present)
@@ -90,12 +91,38 @@ $arch = $osInfo.OSArchitecture
 $processorArch = $env:PROCESSOR_ARCHITECTURE
 
 if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
-    $pythonVersion = "3.12.10"
+    # Detect whether the custom wheel path was used during prep by checking the active pyenv version
+    $activeVersion = (pyenv version 2>$null) -replace '\s.*', ''
+    if ($activeVersion -match "^3\.13") {
+        $pythonVersion = $activeVersion
+    } else {
+        $pythonVersion = "3.12.10"
+    }
 } elseif ($arch -match "ARM" -or $processorArch -match "ARM") {
-    $pythonVersion = "3.12.10-arm"
+    # Detect whether the custom wheel path was used during prep by checking the active pyenv version
+    $activeVersion = (pyenv version 2>$null) -replace '\s.*', ''
+    if ($activeVersion -match "^3\.13") {
+        $pythonVersion = $activeVersion
+    } else {
+        $pythonVersion = "3.12.10-arm"
+    }
 } else {
     " ERROR - Unsupported architecture: $arch (Processor: $processorArch)" | log
     Exit 1
+}
+
+# --- Ensure CUDA paths are in session PATH if available ---
+if ($env:CUDA_PATH -and (Test-Path $env:CUDA_PATH)) {
+    $cudaBin = Join-Path $env:CUDA_PATH "bin"
+    $cuptiLib = Join-Path $env:CUDA_PATH "extras\CUPTI\lib64"
+    if ($env:PATH -notlike "*$cudaBin*") {
+        $env:PATH = "$cudaBin;$env:PATH"
+        "Added CUDA bin to session PATH: $cudaBin" | log
+    }
+    if ((Test-Path $cuptiLib) -and $env:PATH -notlike "*$cuptiLib*") {
+        $env:PATH = "$cuptiLib;$env:PATH"
+        "Added CUPTI to session PATH: $cuptiLib" | log
+    }
 }
 
 # --- Optimize PATH: pyenv shims before WindowsApps ---
@@ -217,6 +244,19 @@ function Set-OptimizedPathOrder {
 
 Set-OptimizedPathOrder
 
+# Verify required commands are findable on PATH after Set-OptimizedPathOrder.
+# Fail fast with a clear diagnostic instead of a chain of "term not recognized" errors.
+foreach ($cmd in @('pyenv', 'python')) {
+    $resolved = Get-Command $cmd -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+        " ERROR - Required command '$cmd' not found on PATH after PATH optimization." | log
+        " ERROR - Prep may not have completed, or the RPC service has a stale PATH." | log
+        " ERROR - PATH: $env:Path" | log
+        Exit 1
+    }
+    "Found ${cmd}: $($resolved.Source)" | log
+}
+
 "Setting Python global version to $pythonVersion..." | log
 pyenv global $pythonVersion
 if ($LASTEXITCODE -ne 0) {
@@ -232,19 +272,52 @@ pyenv which python
 Set-Location "$scriptDrive\hobl_bin\pytorch_inf_resources"
 checkCmd($?)
 
-"-- Extract log directory from logFile path" | log
+# --- Validate per-scenario venv and required imports ---
+# Prep stages all Python packages into a private venv under this scenario's
+# resource directory. We invoke that venv's python.exe by absolute path to
+# bypass any pyenv/PATH instability caused by other scenarios. If the venv
+# is missing or an expected package is not importable (e.g. an external tool
+# quarantined a DLL), we fail fast with a clear diagnostic instead of a
+# cryptic ModuleNotFoundError partway through the workload.
+$venvPython = "$scriptDrive\hobl_bin\pytorch_inf_resources\.venv\Scripts\python.exe"
+if (-not (Test-Path $venvPython)) {
+    " ERROR - pytorch_inf venv missing at $venvPython" | log
+    " ERROR - Prep state is corrupt. Re-prep required:" | log
+    " ERROR -   delete C:\hobl_bin\prep_status\pytorch_inf<version> on the DUT and re-run." | log
+    Exit 1
+}
+"Using venv python: $venvPython" | log
+
+"Validating venv has required packages..." | log
+& $venvPython -c "import torch, transformers; print('torch', torch.__version__, '| transformers', transformers.__version__)" 2>&1 | log
+if ($LASTEXITCODE -ne 0) {
+    " ERROR - venv has missing/broken Python packages (import failed)." | log
+    " ERROR - Possible causes: Defender quarantine, disk cleanup, or external tampering." | log
+    " ERROR - Re-prep required:" | log
+    " ERROR -   delete C:\hobl_bin\prep_status\pytorch_inf<version> on the DUT and re-run." | log
+    Exit 1
+}
+
+"-- Extract log directory from logFile path for storing additional logs" | log
 $logDir = Split-Path -Parent $logFile
-"Log directory: $logDir" | log
+"Log directory for storing additional logs: $logDir" | log
 
 # inference.py writes pytorch_inference_info.csv to --log-dir with these metrics:
 #   time_to_first_token_ms, time_to_first_token_s, tokens_per_second,
 #   total_tokens_generated, total_generation_time_s, ai_model, ai_device
 $inferenceCSV = Join-Path $logDir "pytorch_inference_info.csv"
+"-- Metrics will be stored in $inferenceCSV" | log
+
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
 "-- Run LLM Phi-4-mini inferencing" | log
-python inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" > "$logDir\pytorch_inf_output.txt" 2>&1
+if ($noGpu) {
+    "Running in CPU-only mode (--no-gpu)" | log
+    & $venvPython inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" --no-gpu > "$logDir\pytorch_inf_output.txt" 2>&1
+} else {
+    & $venvPython inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" > "$logDir\pytorch_inf_output.txt" 2>&1
+}
 check($lastexitcode)
 Write-RunPhaseMarker "phase.run_build.end"
 Write-RunPhaseMarker "phase.run_results.start"

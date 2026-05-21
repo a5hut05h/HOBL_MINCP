@@ -146,6 +146,19 @@ $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";
 # Re-prepend pyenv paths after PATH refresh
 $env:PATH = "$pyenvRoot\pyenv-win\bin;$pyenvRoot\pyenv-win\shims;$pythonDir;$env:PATH"
 
+# Verify required commands are findable on PATH after refresh.
+# Fail fast with a clear diagnostic instead of a chain of "term not recognized" errors.
+foreach ($cmd in @('pyenv', 'npm')) {
+    $resolved = Get-Command $cmd -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+        " ERROR - Required command '$cmd' not found on PATH after refresh." | log
+        " ERROR - Prep may not have completed, or the RPC service has a stale PATH." | log
+        " ERROR - PATH: $env:Path" | log
+        Exit 1
+    }
+    "Found ${cmd}: $($resolved.Source)" | log
+}
+
 # Navigate to VS Code directory
 if (-not (Test-Path $vscodePath)) {
     " ERROR - VS Code directory not found: $vscodePath. Run vscode_prep.ps1 first." | log
@@ -170,14 +183,24 @@ $time = Get-Date -Format "HH:mm:ss"
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
+# Redirect npm output to a per-phase log so it is preserved in the results
+# share. Measure-Command discards pipeline output entirely; without a file
+# redirect, npm's output is lost.
+$logDir = Split-Path $logFile -Parent
+$buildLog = "$logDir\vscode_build_$($logSuffix.ToLower()).log"
+"Build output: $buildLog" | log
+
 $buildTime = (Measure-Command {
-    npm run compile
+    npm run compile *> $buildLog
 }).TotalSeconds
 $buildExitCode = $LASTEXITCODE
 $buildTime = [math]::Round($buildTime, 2)
 
 "Build completed in ${buildTime}s" | log
-check($buildExitCode)
+if ($buildExitCode -ne 0) {
+    " ERROR - npm compile failed. See $buildLog for details." | log
+    Exit 1
+}
 Write-RunPhaseMarker "phase.run_build.end"
 Write-RunPhaseMarker "phase.run_results.start"
 

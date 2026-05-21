@@ -141,12 +141,18 @@ ninja -t clean 2>/dev/null || log "   No previous build to clean"
 CORES=$(sysctl -n hw.ncpu)
 log "-- Building LLVM with $CORES cores"
 
+# Redirect ninja output to a per-phase log so it is preserved in the results
+# share. Without redirection, stdout goes only to the RPC buffer and is lost
+# on timeout (LLVM is the longest scenario, so this risk is real).
+BUILD_LOG="$DATA_DIR/mac_llvm_build.log"
+log "-- Build output: $BUILD_LOG"
+
 # Build LLVM with timing
-/usr/bin/time -p -o "$DATA_DIR/mac_llvm_build_time.log" ninja -j$CORES
+/usr/bin/time -p -o "$DATA_DIR/mac_llvm_build_time.log" ninja -j$CORES > "$BUILD_LOG" 2>&1
 BUILD_STATUS=$?
 
 if [ $BUILD_STATUS -ne 0 ]; then
-    log " ERROR - LLVM build failed with exit code $BUILD_STATUS"
+    log " ERROR - LLVM build failed with exit code $BUILD_STATUS. See $BUILD_LOG for details."
     exit 1
 fi
 log "✓ LLVM build completed successfully"

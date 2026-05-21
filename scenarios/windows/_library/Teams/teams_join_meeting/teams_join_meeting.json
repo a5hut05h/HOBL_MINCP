@@ -468,10 +468,11 @@
                         "exception_on": "No match",
                         "file_name": [
                             "image_YTV40X.png",
-                            "image_16AUJH4.png"
+                            "image_16AUJH4.png",
+                            "image_1LKT96N.png"
                         ],
                         "id": "YTV40X",
-                        "match_threshold": "",
+                        "match_threshold": "0.8",
                         "primary": true,
                         "type": "Click",
                         "x": "0.669",
@@ -494,11 +495,12 @@
                         "exception_on": "No match",
                         "file_name": [
                             "image_YTVHER.png",
-                            "image_16AUKM9.png"
+                            "image_16AUKM9.png",
+                            "image_1LKTR0U.png"
                         ],
                         "h": "1",
                         "id": "YTVAF6",
-                        "match_threshold": "",
+                        "match_threshold": "0.8",
                         "type": "Check",
                         "w": "1",
                         "x": "0",
@@ -546,10 +548,11 @@
                         "exception_on": "No match",
                         "file_name": [
                             "image_YTVHER.png",
-                            "image_16AUKM9.png"
+                            "image_16AUKM9.png",
+                            "image_1LKTR0U.png"
                         ],
                         "id": "YTVHER",
-                        "match_threshold": "",
+                        "match_threshold": "0.8",
                         "primary": true,
                         "type": "Click",
                         "x": "0.613",
@@ -572,11 +575,12 @@
                         "exception_on": "No match",
                         "file_name": [
                             "image_YTV40X.png",
-                            "image_16AUJH4.png"
+                            "image_16AUJH4.png",
+                            "image_1LKT96N.png"
                         ],
                         "h": "1",
                         "id": "YTVHR4",
-                        "match_threshold": "",
+                        "match_threshold": "0.8",
                         "type": "Check",
                         "w": "1",
                         "x": "0",

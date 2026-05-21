@@ -10,6 +10,15 @@ if (-not $logFile) { $logFile = "$scriptDrive\hobl_data\net_aspire_teardown.log"
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
+# Refresh PATH from Machine+User environment so dotnet (installed via winget during prep)
+# is visible to this session. The HOBL RPC service started before prep ran, so the inherited
+# PATH is stale and does not include C:\Program Files\dotnet without this refresh.
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+$dotnetDir = "C:\Program Files\dotnet"
+if ((Test-Path "$dotnetDir\dotnet.exe") -and (";$env:Path;" -notlike "*;$dotnetDir;*")) {
+    $env:Path = "$dotnetDir;$env:Path"
+}
+
 # Determine processor architecture for log file naming
 $osInfo = Get-CimInstance Win32_OperatingSystem
 $arch = $osInfo.OSArchitecture

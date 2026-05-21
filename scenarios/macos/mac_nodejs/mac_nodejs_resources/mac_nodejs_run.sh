@@ -155,7 +155,13 @@ log "-- Starting Node.js compilation"
 CORES=$(sysctl -n hw.ncpu)
 log "Building with $CORES cores"
 
-/usr/bin/time -p -o "$LOG_DIR/mac_nodejs_build_time.log" make -j$CORES
+# Redirect make output to a per-phase log so it is preserved in the results
+# share. Without redirection, stdout goes only to the RPC buffer and is lost
+# on timeout.
+BUILD_LOG="$LOG_DIR/mac_nodejs_build.log"
+log "-- Build output: $BUILD_LOG"
+
+/usr/bin/time -p -o "$LOG_DIR/mac_nodejs_build_time.log" make -j$CORES > "$BUILD_LOG" 2>&1
 check_status "Node.js build"
 
 # Parse build phase timing

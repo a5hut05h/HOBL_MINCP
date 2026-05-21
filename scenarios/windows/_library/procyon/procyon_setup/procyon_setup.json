@@ -1,0 +1,45 @@
+[
+    {
+        "author": "jewilder",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-05-07",
+        "description": "Setup Procyon",
+        "enabled": true,
+        "id": "1LCYHU8",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Path on host to Procyon setup files",
+        "enabled": true,
+        "id": "1LE65M3",
+        "name": "[host_path]",
+        "type": "Set Default",
+        "val_options": "",
+        "value": ""
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Procyon license key",
+        "enabled": true,
+        "id": "1LE6615",
+        "name": "[key]",
+        "type": "Set Default",
+        "val_options": "",
+        "value": ""
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Install Procyon",
+        "enabled": true,
+        "file_name": [
+            "code_1LCYJ1C.py"
+        ],
+        "id": "1LCYJ1C",
+        "type": "Code"
+    }
+]

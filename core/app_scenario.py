@@ -3437,6 +3437,7 @@ class Scenario(unittest.TestCase):
             param = str(action['name']).strip("[]")
             inc_value = float(self._resolve_params_in_item(action['value'], component))
             param_section, param_name = self._parse_param_name(param, component)
+            logging.debug(f"Incrementing parameter pre {param_section}:{param_name} to {inc_value}")
             param_value = float(Params.get(param_section, param_name))
             new_value = str(param_value + inc_value)
             logging.debug(f"Incrementing parameter {param_section}:{param_name} to {new_value}")
@@ -3646,7 +3647,7 @@ class Scenario(unittest.TestCase):
                 self._call(["shutdown.exe", "/r /f /t 5"])
         elif self.platform.lower() == "macos":
             logging.info("Rebooting DUT")
-            self._call(["zsh", f'-c "echo {self.dut_password} | sudo -S shutdown -r now"'])
+            self._call(["zsh", f'-c "echo {self.password} | sudo -S shutdown -r now"'])
         else:
             logging.error("Unsupported platform")
         time.sleep(15)

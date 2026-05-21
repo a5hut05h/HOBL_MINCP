@@ -2,7 +2,11 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 param(
-    [string]$logFile = ""
+    [string]$logFile = "",
+    [string]$customResourcesPath = "",
+    [switch]$useCustomPyTorchWheel = $false,
+    [switch]$installCuda = $false,
+    [switch]$installCudnn = $false
 )
 
 $scriptDrive = Split-Path -Qualifier $PSScriptRoot
@@ -31,14 +35,26 @@ $processorArch = $env:PROCESSOR_ARCHITECTURE
 
 if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
     $isARM64 = $false
-    $logSuffix = "x64"
-    $pythonVersion = "3.12.10"
-    $vsProduct = "BuildTools"
+    if ($useCustomPyTorchWheel) {
+        $logSuffix = "x64_Custom"
+        $pythonVersion = "3.13.1"
+        $vsProduct = "BuildTools"
+    } else {
+        $logSuffix = "x64"
+        $pythonVersion = "3.12.10"
+        $vsProduct = "BuildTools"
+    }
 } elseif ($arch -match "ARM" -or $processorArch -match "ARM") {
     $isARM64 = $true
-    $logSuffix = "ARM64"
-    $pythonVersion = "3.12.10-arm"
-    $vsProduct = "Community"
+    if ($useCustomPyTorchWheel) {
+        $logSuffix = "ARM64_Custom"
+        $pythonVersion = "3.13.1-arm"
+        $vsProduct = "Community"
+    } else {
+        $logSuffix = "ARM64"
+        $pythonVersion = "3.12.10-arm"
+        $vsProduct = "Community"
+    }
 } else {
     Write-Host " ERROR - Unsupported architecture: $arch (Processor: $processorArch)" -ForegroundColor Red
     Add-Content -Path $logFile -encoding utf8 " ERROR - Unsupported architecture: $arch (Processor: $processorArch)"
@@ -261,6 +277,74 @@ if ($isARM64) {
     $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 }
 
+# --- Install CUDA Toolkit (when -installCuda is specified) ---
+if ($installCuda) {
+    "-- Installing CUDA Toolkit" | log
+    if (-not $customResourcesPath -or -not (Test-Path $customResourcesPath)) {
+        " ERROR - Custom resources path required for CUDA install: $customResourcesPath" | log
+        Exit 1
+    }
+    $cudaExe = Get-ChildItem -Path $customResourcesPath -Filter "cuda_*.exe" | Select-Object -First 1
+    if ($cudaExe) {
+        "Found CUDA Toolkit installer: $($cudaExe.Name)" | log
+        "Installing CUDA Toolkit (silent, this may take several minutes)..." | log
+        $cudaProcess = Start-Process -FilePath $cudaExe.FullName -ArgumentList "/s" -Wait -PassThru
+        if ($cudaProcess.ExitCode -ne 0) {
+            " ERROR - CUDA Toolkit installation failed with exit code: $($cudaProcess.ExitCode)" | log
+            Exit 1
+        }
+        "CUDA Toolkit installed successfully" | log
+
+        # Refresh PATH so nvcc is available
+        $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    } else {
+        " ERROR - No cuda_*.exe found in: $customResourcesPath" | log
+        Exit 1
+    }
+
+    # Verify nvcc is available
+    $nvccVersion = nvcc --version 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        "nvcc verified: $($nvccVersion | Select-Object -Last 1)" | log
+    } else {
+        " ERROR - nvcc not found after CUDA Toolkit install. Check that CUDA bin is in PATH." | log
+        Exit 1
+    }
+
+    # Ensure CUDA_PATH is set for this session
+    if (-not $env:CUDA_PATH) {
+        $env:CUDA_PATH = [System.Environment]::GetEnvironmentVariable("CUDA_PATH", "Machine")
+    }
+    if ($env:CUDA_PATH) {
+        "CUDA_PATH: $env:CUDA_PATH" | log
+    } else {
+        "WARNING: CUDA_PATH not set. torch.cuda.is_available() may return False." | log
+    }
+}
+
+# --- Install cuDNN (when -installCudnn is specified) ---
+if ($installCudnn) {
+    "-- Installing cuDNN" | log
+    if (-not $customResourcesPath -or -not (Test-Path $customResourcesPath)) {
+        " ERROR - Custom resources path required for cuDNN install: $customResourcesPath" | log
+        Exit 1
+    }
+    $cudnnExe = Get-ChildItem -Path $customResourcesPath -Filter "cudnn*.exe" | Select-Object -First 1
+    if ($cudnnExe) {
+        "Found cuDNN installer: $($cudnnExe.Name)" | log
+        "Installing cuDNN (silent)..." | log
+        $cudnnProcess = Start-Process -FilePath $cudnnExe.FullName -ArgumentList "/s" -Wait -PassThru
+        if ($cudnnProcess.ExitCode -ne 0) {
+            " ERROR - cuDNN installation failed with exit code: $($cudnnProcess.ExitCode)" | log
+            Exit 1
+        }
+        "cuDNN installed successfully" | log
+    } else {
+        " ERROR - No cudnn*.exe found in: $customResourcesPath" | log
+        Exit 1
+    }
+}
+
 # --- Install pyenv-win ---
 "-- Installing python environment" | log
 "Installing pyenv-win for Python version management..." | log
@@ -420,11 +504,19 @@ function Set-OptimizedPathOrder {
 
 Set-OptimizedPathOrder
 
-# --- Install Python via pyenv ---
+# --- Install Python via pyenv (conditional — DO NOT use -f) ---
+# Force-reinstall (`-f`) wipes the pyenv version directory including any packages
+# installed by other scenarios that share this Python version. Multiple scenarios
+# use 3.12.10-arm, so we only install when truly missing.
 "-- Installing python $pythonVersion for $logSuffix" | log
-"Installing Python $pythonVersion (this may take several minutes)..." | log
-pyenv install $pythonVersion -f
-check($lastexitcode)
+$installedVersions = (pyenv versions --bare 2>$null) -split "`n" | ForEach-Object { $_.Trim() }
+if ($installedVersions -notcontains $pythonVersion) {
+    "Installing Python $pythonVersion via pyenv (this may take several minutes)..." | log
+    pyenv install $pythonVersion
+    check($lastexitcode)
+} else {
+    "Python $pythonVersion already installed via pyenv — preserving existing install" | log
+}
 
 "Setting Python $pythonVersion as global version..." | log
 pyenv global $pythonVersion
@@ -490,8 +582,6 @@ Set-Location "$scriptDrive\hobl_bin\pytorch_inf_resources"
 checkCmd($?)
 
 # --- Install Python packages ---
-$requirementsFile = if ($isARM64) { "requirements_win_arm64.txt" } else { "requirements_win.txt" }
-"-- Installing Python packages from $requirementsFile" | log
 $currentPythonVersion = & python --version 2>&1
 "Current Python version: $currentPythonVersion" | log
 
@@ -503,12 +593,69 @@ if ($currentPythonVersion -like "*$expectedVersionPattern*") {
     Exit 1
 }
 
-pip install -r $requirementsFile
+# --- Create per-scenario venv ---
+# Packages live in this scenario's private venv directory, NOT in the shared pyenv
+# site-packages. This isolates pytorch_inf's packages from any future `pyenv install`
+# (force or otherwise) from other scenarios, and from `pyenv global` switches.
+$venvDir = "$scriptDrive\hobl_bin\pytorch_inf_resources\.venv"
+$pyenvPythonRaw = (pyenv which python 2>$null)
+if (-not $pyenvPythonRaw) {
+    " ERROR - pyenv which python returned no path; pyenv install may have failed" | log
+    Exit 1
+}
+$pyenvPython = $pyenvPythonRaw.Trim()
+if (-not (Test-Path $pyenvPython)) {
+    " ERROR - pyenv python not found at: $pyenvPython" | log
+    Exit 1
+}
+"Base pyenv python: $pyenvPython" | log
+
+if (Test-Path $venvDir) {
+    "Removing existing venv to ensure clean rebuild: $venvDir" | log
+    Remove-Item -Recurse -Force $venvDir
+}
+"Creating venv at: $venvDir" | log
+& $pyenvPython -m venv $venvDir
 check($lastexitcode)
 
-# --- Download model ---
+$venvPython = Join-Path $venvDir "Scripts\python.exe"
+$venvPip = Join-Path $venvDir "Scripts\pip.exe"
+if (-not (Test-Path $venvPython)) {
+    " ERROR - venv python missing after venv creation: $venvPython" | log
+    Exit 1
+}
+"Venv python: $venvPython" | log
+
+if ($useCustomPyTorchWheel) {
+    # --- Custom wheel path: install custom PyTorch wheel + remaining deps ---
+    "-- Installing PyTorch from custom wheel into venv" | log
+    if (-not $customResourcesPath -or -not (Test-Path $customResourcesPath)) {
+        " ERROR - Custom resources path required for custom wheel install: $customResourcesPath" | log
+        Exit 1
+    }
+    $wheelFile = Get-ChildItem -Path $customResourcesPath -Filter "torch-*.whl" | Select-Object -First 1
+    if (-not $wheelFile) {
+        " ERROR - No torch-*.whl found in: $customResourcesPath" | log
+        " ERROR - No matching custom PyTorch wheel found." | log
+        Exit 1
+    }
+    "Found wheel: $($wheelFile.Name) ($([math]::Round($wheelFile.Length / 1MB, 1)) MB)" | log
+    & $venvPip install $wheelFile.FullName
+    check($lastexitcode)
+    "-- Installing remaining dependencies from requirements_custom.txt into venv" | log
+    & $venvPip install -r requirements_custom.txt
+    check($lastexitcode)
+} else {
+    # --- Standard path: x64 (cu128) or Arm64 CPU ---
+    $requirementsFile = if ($isARM64) { "requirements_win_arm64.txt" } else { "requirements_win.txt" }
+    "-- Installing Python packages from $requirementsFile into venv" | log
+    & $venvPip install -r $requirementsFile
+    check($lastexitcode)
+}
+
+# --- Download model (using venv python so torch is available) ---
 "-- Setup LLM Phi-4-mini inferencing" | log
-python inference.py --setup
+& $venvPython inference.py --setup
 check($lastexitcode)
 
 "-- pytorch_inf prep completed ($logSuffix version)" | log
