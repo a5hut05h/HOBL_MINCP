@@ -8,10 +8,10 @@
 #   None
 ##
 
-import builtins
 import logging
 import os
 import time
+import csv
 import core.app_scenario
 from core.parameters import Params
 
@@ -32,8 +32,6 @@ class IdleDesktopCharge(core.app_scenario.Scenario):
     resume_threshold = Params.get(module, 'resume_threshold')
     delay_til_5_percent = Params.get(module, 'delay_til_5_percent')
     leave_on_ac = Params.get(module, 'leave_on_ac')
-
-
 
     # Local parameters
     prep_scenarios = []
@@ -115,7 +113,7 @@ class IdleDesktopCharge(core.app_scenario.Scenario):
 
 
                 # Determine which thresholds to report
-                if int(self.resume_threshold) < 80:
+                if int(self.resume_threshold) < 80 or start_level > 10:
                     thresholds = [int(self.resume_threshold)]
                 else:
                     thresholds = [80, 90, 100]
@@ -138,12 +136,13 @@ class IdleDesktopCharge(core.app_scenario.Scenario):
 
                 # Write charge times to CSV
                 csv_path = os.path.join(self.result_dir, "charge_time_result.csv")
-                with open(csv_path, "w") as csv_file:
-                    csv_file.write(f"{'Charge Range':<20}{'Elapsed Seconds'}\n")
+                with open(csv_path, "w", newline='') as csv_file:
+                    csv_writer = csv.writer(csv_file)
+                    csv_writer.writerow([f"{'Charge Range'}", "Elapsed Seconds"])
                     for threshold in thresholds:
                         seconds = charge_times.get(threshold, "")
                         label = f"{start_level}-{threshold}"
-                        csv_file.write(f"{label:<20}{seconds}\n")
+                        csv_writer.writerow([f"{label}", seconds])
 
         # Prevent callback_test_end from executing in base tearDown() method
         core.app_scenario.Scenario.tearDown(self, callback_test_end="")
