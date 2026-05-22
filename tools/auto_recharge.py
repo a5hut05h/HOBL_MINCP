@@ -79,16 +79,16 @@ class Tool(Scenario):
                     if count == MAX_COUNT:
                         logging.info(f"Disengaging charger since seeing same battery level for {MAX_COUNT} times.")
                         self.chargeOff()
-                        try:
-                            delay = int(self.post_charge_delay)
-                        except:
-                            logging.error(f"Invalid post_charge_delay setting: {self.post_charge_delay}.  Make sure it's an integer.")
-                        else:
-                            logging.info(f"Delaying for {delay} seconds to let device quiesce.")
-                            time.sleep(delay)
                         break
                     time.sleep(300) # sleep 5 minutes
                     old_batt_level = batt_level
+            try:
+                delay = int(self.post_charge_delay)
+            except:
+                logging.error(f"Invalid post_charge_delay setting: {self.post_charge_delay}.  Make sure it's an integer.")
+            else:
+                logging.info(f"Delaying for {delay} seconds to let device quiesce.")
+                time.sleep(delay)
 
     def testBeginCallback(self):
         pass

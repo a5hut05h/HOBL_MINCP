@@ -475,8 +475,19 @@ Expand-Archive -Path .\nodejs.zip -DestinationPath .\nodejs -Force
 Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1" -OutFile "./install-pyenv-win.ps1"; &"./install-pyenv-win.ps1"
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
+# --- Install Python via pyenv (conditional — DO NOT use -f) ---
+# Force-reinstall (`-f`) wipes the pyenv version directory including any packages
+# installed by other scenarios that share this Python version. We only install
+# when the version is truly missing. Node.js only needs the interpreter (for
+# node-gyp / vcbuild.bat) so no venv is required.
 "-- Installing python $pythonVersion" | log
-pyenv install $pythonVersion -f
+$installedVersions = (pyenv versions --bare 2>$null) -split "`n" | ForEach-Object { $_.Trim() }
+if ($installedVersions -notcontains $pythonVersion) {
+    "Installing Python $pythonVersion via pyenv..." | log
+    pyenv install $pythonVersion
+} else {
+    "Python $pythonVersion already installed via pyenv — preserving existing install" | log
+}
 pyenv versions; pyenv global $pythonVersion; pyenv versions
 
 

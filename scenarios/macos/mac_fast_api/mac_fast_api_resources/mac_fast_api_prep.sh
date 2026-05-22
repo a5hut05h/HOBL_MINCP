@@ -169,18 +169,18 @@ source ~/.zprofile
 # Verify pyenv is available
 check_command "pyenv" || exit 1
 
-log "-- Installing Python 3.11.9"
-pyenv install 3.11.9 -f
-check_status "Python 3.11.9 installation"
+log "-- Installing Python 3.12.10"
+pyenv install 3.12.10 -f
+check_status "Python 3.12.10 installation"
 
 log "-- Setting Python version"
-pyenv global 3.11.9
+pyenv global 3.12.10
 check_status "Setting Python global version"
 
 # Verify Python version
 PYTHON_VERSION=$(python --version 2>&1 | awk '{print $2}')
-if [ "$PYTHON_VERSION" != "3.11.9" ]; then
-    log " ERROR - Python version is $PYTHON_VERSION, expected 3.11.9"
+if [ "$PYTHON_VERSION" != "3.12.10" ]; then
+    log " ERROR - Python version is $PYTHON_VERSION, expected 3.12.10"
     pyenv versions
     exit 1
 fi

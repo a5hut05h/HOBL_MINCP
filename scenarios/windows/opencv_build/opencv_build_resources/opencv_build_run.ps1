@@ -100,6 +100,19 @@ Write-RunPhaseMarker "phase.run_prep.start"
 
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
+# Verify required commands are findable on PATH after refresh.
+# Fail fast with a clear diagnostic instead of a chain of "term not recognized" errors.
+foreach ($cmd in @('cmake')) {
+    $resolved = Get-Command $cmd -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+        " ERROR - Required command '$cmd' not found on PATH after refresh." | log
+        " ERROR - Prep may not have completed, or the RPC service has a stale PATH." | log
+        " ERROR - PATH: $env:Path" | log
+        Exit 1
+    }
+    "Found ${cmd}: $($resolved.Source)" | log
+}
+
 $time = Get-Date -Format "HH:mm:ss"
 "$time - Clean build files" | log
 
@@ -109,18 +122,30 @@ if (-not (Test-Path "$scriptDrive\opencv\build_msvc")) {
 }
 
 Set-Location "$scriptDrive\opencv\build_msvc"
-cmake --build . --target clean --config Release
+# Redirect cmake output to per-phase logs preserved in hobl_data. Without
+# redirection, stdout goes only to the RPC buffer (lost on timeout); inside
+# Measure-Command, stdout is silently discarded entirely.
+$logDir = Split-Path $logFile -Parent
+$cleanLog = "$logDir\opencv_build_clean.log"
+$buildLog = "$logDir\opencv_build_build.log"
+$installLog = "$logDir\opencv_build_install.log"
+"Clean output: $cleanLog" | log
+cmake --build . --target clean --config Release *> $cleanLog
 check($lastexitcode)
 
 $time = Get-Date -Format "HH:mm:ss"
 "$time - Build OpenCV Project" | log
+"Build output: $buildLog" | log
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
 $buildDuration = Measure-Command {
-    cmake --build . --config Release
+    cmake --build . --config Release *> $buildLog
 }
-check($lastexitcode)
+if ($lastexitcode -ne 0) {
+    " ERROR - cmake build failed. See $buildLog for details." | log
+    Exit 1
+}
 
 $buildTime = [math]::Round($buildDuration.TotalSeconds, 2)
 $scenarioRuntime = $buildTime
@@ -132,8 +157,12 @@ $time = Get-Date -Format "HH:mm:ss"
 
 $time = Get-Date -Format "HH:mm:ss"
 "$time - Build OpenCV Install Project" | log
-cmake --build . --target INSTALL --config Release
-check($lastexitcode)
+"Install output: $installLog" | log
+cmake --build . --target INSTALL --config Release *> $installLog
+if ($lastexitcode -ne 0) {
+    " ERROR - cmake INSTALL failed. See $installLog for details." | log
+    Exit 1
+}
 
 $time = Get-Date -Format "HH:mm:ss"
 "$time - OpenCV completed building" | log
