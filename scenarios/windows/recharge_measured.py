@@ -2,8 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 ##
-# Idle at the Desktop
-#
+# Calculates the charge time from 5% (or test start if above 5%) to various thresholds, defaulted to 80%, 90%, 100%.
 # Setup instructions:
 #   None
 ##
@@ -16,7 +15,7 @@ import core.app_scenario
 from core.parameters import Params
 
 
-class IdleDesktopCharge(core.app_scenario.Scenario):
+class RechargeMeasured(core.app_scenario.Scenario):
 
     module = __module__.split('.')[-1]
     # Set default parameters
@@ -140,7 +139,7 @@ class IdleDesktopCharge(core.app_scenario.Scenario):
                     csv_writer = csv.writer(csv_file)
                     csv_writer.writerow([f"{'Charge Range'}", "Elapsed Seconds"])
                     for threshold in thresholds:
-                        seconds = charge_times.get(threshold, "")
+                        seconds = charge_times.get(threshold)
                         label = f"{start_level}-{threshold}"
                         csv_writer.writerow([f"{label}", seconds])
 
