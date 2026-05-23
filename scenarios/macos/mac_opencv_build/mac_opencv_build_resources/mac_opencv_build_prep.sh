@@ -157,10 +157,29 @@ if [ "$PYTHON_VERSION" != "3.12.10" ]; then
 fi
 log "✓ Python version confirmed: $PYTHON_VERSION"
 
-log "-- Installing CMake"
-brew install cmake
-check_status "CMake installation"
+log "-- Installing CMake and FFmpeg 6"
+brew install cmake ffmpeg@6
+check_status "CMake and FFmpeg 6 installation"
 check_command "cmake" || exit 1
+
+# OpenCV 4.10.0 is compatible with the FFmpeg 6 API surface. Windows uses the
+# FFmpeg revision pinned by OpenCV's 4.10 packaging; on macOS Homebrew's rolling
+# `ffmpeg` formula can advance to 7.x, which breaks OpenCV 4.10 videoio compile
+# with removed APIs like `avcodec_close`. Prefer the keg-only ffmpeg@6 formula
+# explicitly so mac stays aligned with the Windows workload.
+FFMPEG6_PREFIX="$(/opt/homebrew/bin/brew --prefix ffmpeg@6 2>/dev/null)"
+if [ -z "$FFMPEG6_PREFIX" ] || [ ! -d "$FFMPEG6_PREFIX" ]; then
+    log " ERROR - ffmpeg@6 prefix could not be resolved"
+    exit 1
+fi
+export PKG_CONFIG_PATH="$FFMPEG6_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+log "✓ Using ffmpeg@6 from: $FFMPEG6_PREFIX"
+FFMPEG_VERSION=$(PKG_CONFIG_PATH="$PKG_CONFIG_PATH" pkg-config --modversion libavcodec 2>/dev/null)
+if [ -z "$FFMPEG_VERSION" ]; then
+    log " ERROR - pkg-config could not resolve libavcodec from ffmpeg@6"
+    exit 1
+fi
+log "✓ libavcodec version resolved via pkg-config: $FFMPEG_VERSION"
 
 log "-- Creating build directory"
 mkdir -p $BIN_DIR/build_opencv
