@@ -92,8 +92,19 @@ Set-Location "$scriptDrive\hobl_bin\pytorch_inf_resources"
 checkCmd($?)
 
 "-- Cleanup GPU caching" | log
-python inference.py --cleanup-gpu
-check($lastexitcode)
+# Use the per-scenario venv python (created during prep) rather than the
+# shared pyenv python. The venv has torch installed; the shared pyenv
+# environment may not after other scenarios run.
+$venvPython = "$scriptDrive\hobl_bin\pytorch_inf_resources\.venv\Scripts\python.exe"
+if (-not (Test-Path $venvPython)) {
+    "-- venv missing at $venvPython; skipping GPU cleanup (will be recreated on next prep)" | log
+    Exit 0
+}
+& $venvPython inference.py --cleanup-gpu
+# Don't treat cleanup failure as fatal — teardown should not break the run cycle.
+if ($lastexitcode -ne 0) {
+    "-- GPU cleanup returned exit code $lastexitcode (non-fatal)" | log
+}
 
 "-- pytorch_inf teardown completed" | log
 Exit 0

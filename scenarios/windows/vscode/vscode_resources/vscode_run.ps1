@@ -183,14 +183,24 @@ $time = Get-Date -Format "HH:mm:ss"
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
+# Redirect npm output to a per-phase log so it is preserved in the results
+# share. Measure-Command discards pipeline output entirely; without a file
+# redirect, npm's output is lost.
+$logDir = Split-Path $logFile -Parent
+$buildLog = "$logDir\vscode_build_$($logSuffix.ToLower()).log"
+"Build output: $buildLog" | log
+
 $buildTime = (Measure-Command {
-    npm run compile
+    npm run compile *> $buildLog
 }).TotalSeconds
 $buildExitCode = $LASTEXITCODE
 $buildTime = [math]::Round($buildTime, 2)
 
 "Build completed in ${buildTime}s" | log
-check($buildExitCode)
+if ($buildExitCode -ne 0) {
+    " ERROR - npm compile failed. See $buildLog for details." | log
+    Exit 1
+}
 Write-RunPhaseMarker "phase.run_build.end"
 Write-RunPhaseMarker "phase.run_results.start"
 

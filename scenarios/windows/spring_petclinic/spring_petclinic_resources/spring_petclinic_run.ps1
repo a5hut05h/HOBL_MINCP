@@ -121,8 +121,15 @@ Set-Location "$scriptDrive\spring-petclinic"
 # ============================================================================
 # Clean phase (not timed)
 # ============================================================================
+# Redirect Maven output to a per-phase log under hobl_data so it is preserved
+# in the results share. Without redirection, stdout goes only to the RPC
+# buffer and is lost on RPC timeout. Build/test phases below are wrapped in
+# Measure-Command which DISCARDS stdout entirely, so file redirection is the
+# only way to capture their output.
 "-- spring_petclinic clean started" | log
-.\mvnw.cmd "-Dmaven.repo.local=$scriptDrive\temp\m2-spring-petclinic" clean
+$mavenCleanLog = "$scriptDrive\hobl_data\spring_petclinic_maven_clean_$($logSuffix.ToLower()).log"
+"-- Maven clean output: $mavenCleanLog" | log
+.\mvnw.cmd "-Dmaven.repo.local=$scriptDrive\temp\m2-spring-petclinic" clean *> $mavenCleanLog
 check($lastexitcode)
 "-- spring_petclinic clean completed" | log
 
@@ -133,11 +140,14 @@ check($lastexitcode)
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
+$mavenBuildLog = "$scriptDrive\hobl_data\spring_petclinic_maven_build_$($logSuffix.ToLower()).log"
+"-- Maven build output: $mavenBuildLog" | log
+
 $buildDuration = Measure-Command {
-    .\mvnw.cmd -o "-Dmaven.repo.local=$scriptDrive\temp\m2-spring-petclinic" "-DskipTests" package
+    .\mvnw.cmd -o "-Dmaven.repo.local=$scriptDrive\temp\m2-spring-petclinic" "-DskipTests" package *> $mavenBuildLog
 }
 if ($LASTEXITCODE -ne 0) {
-    " ERROR - Offline build failed. Ensure prep completed online and populated $scriptDrive\temp\m2-spring-petclinic" | log
+    " ERROR - Offline build failed. See $mavenBuildLog for Maven output. Ensure prep completed online and populated $scriptDrive\temp\m2-spring-petclinic" | log
     Exit 1
 }
 
@@ -151,11 +161,14 @@ Write-RunPhaseMarker "phase.run_test.start"
 # ============================================================================
 "-- spring_petclinic test started" | log
 
+$mavenTestLog = "$scriptDrive\hobl_data\spring_petclinic_maven_test_$($logSuffix.ToLower()).log"
+"-- Maven test output: $mavenTestLog" | log
+
 $testDuration = Measure-Command {
-    .\mvnw.cmd -o "-Dmaven.repo.local=$scriptDrive\temp\m2-spring-petclinic" test
+    .\mvnw.cmd -o "-Dmaven.repo.local=$scriptDrive\temp\m2-spring-petclinic" test *> $mavenTestLog
 }
 if ($LASTEXITCODE -ne 0) {
-    " ERROR - Offline test failed. Ensure prep completed online and populated $scriptDrive\temp\m2-spring-petclinic" | log
+    " ERROR - Offline test failed. See $mavenTestLog for Maven output. Ensure prep completed online and populated $scriptDrive\temp\m2-spring-petclinic" | log
     Exit 1
 }
 Write-RunPhaseMarker "phase.run_test.end"

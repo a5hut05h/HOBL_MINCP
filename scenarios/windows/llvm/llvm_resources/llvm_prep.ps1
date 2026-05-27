@@ -520,10 +520,19 @@ Set-OptimizedPathOrder
 "Current session PATH contains System32: $($env:PATH -like "*System32*")" | log
 "Current session PATH contains WindowsApps: $($env:PATH -like "*WindowsApps*")" | log
 
+# --- Install Python via pyenv (conditional — DO NOT use -f) ---
+# Force-reinstall (`-f`) wipes the pyenv version directory including any packages
+# installed by other scenarios that share this Python version. We only install
+# when the version is truly missing.
 "-- Installing python $pythonVersion for $logSuffix" | log
-"Installing Python $pythonVersion (this may take several minutes)..." | log
-pyenv install $pythonVersion -f
-check($lastexitcode)
+$installedVersions = (pyenv versions --bare 2>$null) -split "`n" | ForEach-Object { $_.Trim() }
+if ($installedVersions -notcontains $pythonVersion) {
+    "Installing Python $pythonVersion via pyenv (this may take several minutes)..." | log
+    pyenv install $pythonVersion
+    check($lastexitcode)
+} else {
+    "Python $pythonVersion already installed via pyenv — preserving existing install" | log
+}
 
 "Setting Python $pythonVersion as global version..." | log
 pyenv global $pythonVersion

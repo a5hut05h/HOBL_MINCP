@@ -14,7 +14,7 @@ import time
 class MacLlvm(scenarios.app_scenario.Scenario):
 
     module = __module__.split('.')[-1]
-    prep_version = "5"
+    prep_version = "6"
     resources = module + "_resources"
 
 
