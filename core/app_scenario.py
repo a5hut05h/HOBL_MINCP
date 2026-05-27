@@ -129,9 +129,6 @@ class Scenario(unittest.TestCase):
         self.web_replay_excludes_list = Params.get('global', 'web_replay_excludes_list')
         self.web_replay_ip = Params.get('global', 'web_replay_ip')
 
-        # Output full hobl command to log file
-        logging.debug("Hobl Command: " + " ".join(sys.argv))
-
         if self.platform.lower() == "macos":
             # On MacOS, 300ms tends to be a long press, so we reduce the default click time.
             self.default_click_time = 150  # milliseconds
@@ -165,6 +162,9 @@ class Scenario(unittest.TestCase):
             self.is_prep_tool = False
         if self.is_prep_tool:
             logging.debug("Initializing prep_tool " + self._module)
+
+        if not (self.is_tool or self.is_prep_tool):
+            logging.debug(f"HOBL command: {' '.join(sys.argv)}")
 
         # Resolve IP
         if self.is_tool or self.is_prep_tool:
