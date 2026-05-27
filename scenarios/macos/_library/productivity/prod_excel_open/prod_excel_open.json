@@ -14,17 +14,8 @@
         "delay": "0",
         "description": "",
         "enabled": true,
-        "id": "V2MVKY",
-        "include_path": "..\\..\\misc\\recording_phase_begin",
-        "type": "Include"
-    },
-    {
-        "children": [],
-        "delay": "0",
-        "description": "",
-        "enabled": true,
         "id": "UHA64V",
-        "include_path": "..\\prod_excel_switchto",
+        "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_switchto",
         "type": "Include"
     },
     {
@@ -37,91 +28,26 @@
     },
     {
         "children": [],
-        "delay": "5",
-        "description": "ESC",
-        "enabled": true,
-        "id": "UWK84K",
-        "text": "\ue00c",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "9",
-        "description": "CMD+O to open file",
-        "enabled": false,
-        "id": "UFN19V",
-        "text": "\ue03do",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "CMD+SHIFT+G for Go to folder",
-        "enabled": false,
-        "id": "UFN2CA",
-        "text": "\ue03d\ue008g",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "Path to document",
-        "enabled": false,
-        "id": "UFN2CY",
-        "text": "/Users/Shared/abl_docs/excel_productivity.xlsx",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "Enter",
-        "enabled": false,
-        "id": "UFN34E",
-        "text": "\ue006",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "5",
-        "description": "Enter again to open",
-        "enabled": false,
-        "id": "UFN35F",
-        "text": "\ue006",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "10",
-        "description": "Wait for document to open",
-        "enabled": false,
-        "id": "UFN3M3",
-        "type": "Delay"
-    },
-    {
-        "children": [],
         "delay": "0",
         "description": "",
         "enabled": true,
-        "id": "V2MW49",
-        "include_path": "..\\..\\misc\\recording_phase_end",
+        "id": "1MCAXX2",
+        "include_path": "scenarios\\macos\\_library\\productivity\\prod_fileopen",
         "params": [
             {
-                "name": "[phase_category]",
+                "name": "[relative_filepath]",
                 "val_options": "",
-                "value": "productivity"
-            },
-            {
-                "name": "[phase_name]",
-                "val_options": "",
-                "value": "excel_open"
+                "value": "abl_docs/FamilyBudget.xlsx"
             }
         ],
         "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "5",
+        "description": "",
+        "enabled": true,
+        "id": "1MCAYHV",
+        "type": "Delay"
     }
 ]

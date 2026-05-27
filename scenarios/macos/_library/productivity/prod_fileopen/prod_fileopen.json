@@ -1,0 +1,34 @@
+[
+    {
+        "author": "Soupik Chowdhury",
+        "capture_device": "MacBook",
+        "children": [],
+        "create_date": "2025-12-22",
+        "description": "Open Word",
+        "enabled": true,
+        "id": "UFMKAM",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Filepath relative to User Home",
+        "enabled": true,
+        "id": "1MCAKXR",
+        "name": "[relative_filepath]",
+        "type": "Set Default",
+        "val_options": "",
+        "value": ""
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Open file from terminal",
+        "enabled": true,
+        "file_name": [
+            "code_1L054J5.py"
+        ],
+        "id": "1L054J5",
+        "type": "Code"
+    }
+]

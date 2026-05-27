@@ -12,7 +12,12 @@ def run(scenario):
     else:
         userprofile = os.environ['HOME']
     logging.debug(f"User profile: {userprofile}")
-    
-    # Create link to abl_docs if needed
-    word_doc_path = userprofile+"/Onedrive/abl_docs/test_long_doc.docx"
-    scenario._call(["bash", "-c \"open "+ word_doc_path+"\""]).strip()
+
+    relative_filepath = str(Params.get("prod_fileopen", "relative_filepath") or "").strip()
+
+    # Ensure we append a relative path to the user profile directory.
+    relative_filepath = relative_filepath.lstrip("/")
+    full_filepath = userprofile + "/" + relative_filepath
+    logging.debug(f"Full file path: {full_filepath}")
+
+    scenario._call(["open", full_filepath]).strip()

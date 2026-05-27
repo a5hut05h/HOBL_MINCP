@@ -11,14 +11,12 @@
     },
     {
         "children": [],
-        "delay": "0.0",
-        "description": "Open test_long_doc",
+        "delay": "0",
+        "description": "",
         "enabled": true,
-        "file_name": [
-            "code_1L054J5.py"
-        ],
-        "id": "1L054J5",
-        "type": "Code"
+        "id": "1MCC3RF",
+        "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_switchto",
+        "type": "Include"
     },
     {
         "children": [],
@@ -26,6 +24,30 @@
         "description": "",
         "enabled": true,
         "id": "1L05AAV",
+        "type": "Delay"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1MCC3VU",
+        "include_path": "scenarios\\macos\\_library\\productivity\\prod_fileopen",
+        "params": [
+            {
+                "name": "[relative_filepath]",
+                "val_options": "",
+                "value": "abl_docs/test_long_doc.docx"
+            }
+        ],
+        "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "5",
+        "description": "File open delay",
+        "enabled": true,
+        "id": "1MCC3YJ",
         "type": "Delay"
     }
 ]

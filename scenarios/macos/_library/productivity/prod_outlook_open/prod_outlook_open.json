@@ -14,22 +14,13 @@
         "delay": "0",
         "description": "",
         "enabled": true,
-        "id": "LPVYHJG",
-        "include_path": "..\\..\\misc\\recording_phase_begin",
-        "type": "Include"
-    },
-    {
-        "children": [],
-        "delay": "0",
-        "description": "",
-        "enabled": true,
         "id": "WJKZJV5",
-        "include_path": "..\\prod_outlook_switchto",
+        "include_path": "scenarios\\macos\\_library\\productivity\\prod_outlook_switchto",
         "type": "Include"
     },
     {
         "children": [],
-        "delay": "11",
+        "delay": "5",
         "description": "",
         "enabled": true,
         "id": "MSRZOFZ",
@@ -44,26 +35,5 @@
         "text": "\ue00c",
         "type": "Type",
         "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "0",
-        "description": "",
-        "enabled": true,
-        "id": "M1FRUAD",
-        "include_path": "..\\..\\misc\\recording_phase_end",
-        "params": [
-            {
-                "name": "[phase_category]",
-                "val_options": "",
-                "value": "productivity"
-            },
-            {
-                "name": "[phase_name]",
-                "val_options": "",
-                "value": "outlook_open"
-            }
-        ],
-        "type": "Include"
     }
 ]
