@@ -306,8 +306,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LR8MT7",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_fileopen",
+                "id": "1MCF1V5",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_powerpoint_open",
                 "type": "Include"
             },
             {
@@ -324,17 +324,9 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1M1E15P",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_fileopen",
+                "id": "1MCF22C",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_excel_open",
                 "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "5",
-                "description": "File Open Delay",
-                "enabled": true,
-                "id": "1M1EU0X",
-                "type": "Delay"
             },
             {
                 "children": [],
@@ -664,25 +656,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1LTJXX0",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_fileopen",
-                "type": "Include"
-            },
-            {
-                "children": [],
-                "delay": "5",
-                "description": "Wait for FileOpen",
-                "enabled": true,
-                "id": "1LTJY7Y",
-                "type": "Delay"
-            },
-            {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1LTJY48",
-                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_switchto",
+                "id": "1MCF2K7",
+                "include_path": "scenarios\\macos\\_library\\productivity\\prod_word_open",
                 "type": "Include"
             },
             {
