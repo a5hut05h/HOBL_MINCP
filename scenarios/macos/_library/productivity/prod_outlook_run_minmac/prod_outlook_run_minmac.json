@@ -47,30 +47,30 @@
     {
         "children": [],
         "delay": "0.5",
-        "description": "capture new email",
+        "description": "New Email Region",
         "enabled": true,
         "file_name": [
-            "image_1L1K7AN.png"
+            "image_1MCC6XX.png"
         ],
-        "h": "0.244",
-        "id": "1L1K7AN",
+        "h": "0.243",
+        "id": "1MCC6XX",
         "recapture": false,
         "type": "Capture",
-        "w": "0.171",
-        "x": "0.040",
-        "y": "0.091"
+        "w": "0.259",
+        "x": "0.002",
+        "y": "0.002"
     },
     {
-        "capture_id": "1L1K7AN",
+        "capture_id": "1MCC6XX",
         "children": [],
         "delay": "2",
-        "description": "new eMail",
+        "description": "New Email",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_1L1K7T8.png"
+            "image_1MCC7XM.png"
         ],
-        "id": "1L1K7T8",
+        "id": "1MCC7XM",
         "match_threshold": "",
         "primary": true,
         "scale": "",
@@ -81,7 +81,7 @@
     {
         "children": [],
         "delay": "4",
-        "description": "recipient",
+        "description": "Recipient",
         "enabled": true,
         "id": "1L7AK4K",
         "text": "bogus@outlook.com",
@@ -165,7 +165,7 @@
     {
         "children": [],
         "delay": "2",
-        "description": "paste already copied picture",
+        "description": "Paste snapshot from clipboard",
         "enabled": true,
         "id": "1LP1NYF",
         "text": "\ue03dv",
@@ -191,30 +191,30 @@
     {
         "children": [],
         "delay": "0.5",
-        "description": "capture email screen",
+        "description": "Discard Region",
         "enabled": true,
         "file_name": [
-            "image_1L8AUFM.png"
+            "image_1MCC9H0.png"
         ],
-        "h": "1",
-        "id": "1L8AUFM",
+        "h": "0.274",
+        "id": "1MCC9H0",
         "recapture": false,
         "type": "Capture",
-        "w": "1",
-        "x": "0",
-        "y": "0"
+        "w": "0.602",
+        "x": "0.288",
+        "y": "0.001"
     },
     {
-        "capture_id": "1L8AUFM",
+        "capture_id": "1MCC9H0",
         "children": [],
         "delay": "2",
-        "description": "click Discard",
+        "description": "Discard Button",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_1L8AUFN.png"
+            "image_1MCC9VA.png"
         ],
-        "id": "1L8AUFN",
+        "id": "1MCC9VA",
         "match_threshold": "",
         "primary": true,
         "scale": "",
@@ -225,64 +225,30 @@
     {
         "children": [],
         "delay": "0.5",
-        "description": "Capture Discard popup",
+        "description": "Discard pop-up window",
         "enabled": true,
         "file_name": [
-            "image_1L8AUJW.png"
+            "image_1MCCA74.png"
         ],
-        "h": "1",
-        "id": "1L8AUJW",
+        "h": "0.427",
+        "id": "1MCCA74",
         "recapture": false,
         "type": "Capture",
-        "w": "1",
-        "x": "0",
-        "y": "0"
+        "w": "0.385",
+        "x": "0.315",
+        "y": "0.287"
     },
     {
-        "capture_id": "1L8AUJW",
+        "capture_id": "1MCCA74",
         "children": [],
         "delay": "2",
-        "description": "click discard",
+        "description": "",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_1L8AUJY.png"
+            "image_1MCCC2Y.png"
         ],
-        "id": "1L8AUJY",
-        "match_threshold": "",
-        "primary": true,
-        "scale": "",
-        "type": "Click",
-        "x": "0.500",
-        "y": "0.500"
-    },
-    {
-        "children": [],
-        "delay": "0.5",
-        "description": "Discard",
-        "enabled": true,
-        "file_name": [
-            "image_1L8C11P.png"
-        ],
-        "h": "0.072",
-        "id": "1L8C11P",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.148",
-        "x": "0.425",
-        "y": "0.501"
-    },
-    {
-        "capture_id": "1L8C11P",
-        "children": [],
-        "delay": "2",
-        "description": "Discard outllook",
-        "enabled": true,
-        "exception_on": "No match",
-        "file_name": [
-            "image_1L8C17J.png"
-        ],
-        "id": "1L8C17J",
+        "id": "1MCCC2Y",
         "match_threshold": "",
         "primary": true,
         "scale": "",

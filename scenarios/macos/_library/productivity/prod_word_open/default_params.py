@@ -10,4 +10,6 @@ def run():
     return
 
 def run_user_only():
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_fileopen')
+    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_word_switchto')
     return

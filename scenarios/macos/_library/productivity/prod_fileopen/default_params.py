@@ -7,9 +7,8 @@ from utilities.open_source.modules import import_run_user_only
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
+    Params.setDefault('prod_fileopen', 'relative_filepath', '', desc='Filepath relative to User Home', valOptions=[])
     return
 
 def run_user_only():
-    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_excel_switchto')
-    import_run_user_only('scenarios\\macos\\_library\\productivity\\prod_fileopen')
     return
