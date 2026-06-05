@@ -30,53 +30,45 @@
     },
     {
         "children": [],
-        "delay": "1",
-        "description": "New Email",
-        "enabled": true,
-        "file_name": [
-            "image_VKCEX4.png"
-        ],
-        "h": "0.168",
-        "id": "VKCEX4",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.165",
-        "x": "0.000",
-        "y": "0.000"
-    },
-    {
-        "children": [],
         "delay": "0.5",
-        "description": "capture new email",
+        "description": "caputre new email image",
         "enabled": true,
         "file_name": [
-            "image_1L1K7AN.png"
+            "image_1M9W5NT.png"
         ],
-        "h": "0.244",
-        "id": "1L1K7AN",
+        "h": "0.466",
+        "id": "1M9W5NT",
         "recapture": false,
         "type": "Capture",
-        "w": "0.171",
-        "x": "0.040",
-        "y": "0.091"
+        "w": "0.489",
+        "x": "0.011",
+        "y": "0.038"
     },
     {
-        "capture_id": "1L1K7AN",
+        "capture_id": "1M9W5NT",
         "children": [],
         "delay": "2",
-        "description": "new eMail",
+        "description": "new email",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_1L1K7T8.png"
+            "image_1M9W5V0.png"
         ],
-        "id": "1L1K7T8",
+        "id": "1M9W5V0",
         "match_threshold": "",
         "primary": true,
         "scale": "",
         "type": "Click",
         "x": "0.500",
         "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "5",
+        "description": "",
+        "enabled": true,
+        "id": "1M9X3KN",
+        "type": "Delay"
     },
     {
         "children": [],
@@ -224,31 +216,39 @@
     },
     {
         "children": [],
-        "delay": "0.5",
-        "description": "Capture Discard popup",
+        "delay": "2",
+        "description": "",
         "enabled": true,
-        "file_name": [
-            "image_1L8AUJW.png"
-        ],
-        "h": "1",
-        "id": "1L8AUJW",
-        "recapture": false,
-        "type": "Capture",
-        "w": "1",
-        "x": "0",
-        "y": "0"
+        "id": "1MRRLA8",
+        "type": "Delay"
     },
     {
-        "capture_id": "1L8AUJW",
+        "children": [],
+        "delay": "0.5",
+        "description": "popup discard",
+        "enabled": true,
+        "file_name": [
+            "image_1M9VNFJ.png"
+        ],
+        "h": "0.363",
+        "id": "1M9VNFJ",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.299",
+        "x": "0.389",
+        "y": "0.292"
+    },
+    {
+        "capture_id": "1M9VNFJ",
         "children": [],
         "delay": "2",
-        "description": "click discard",
+        "description": "discard",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_1L8AUJY.png"
+            "image_1M9VNLR.png"
         ],
-        "id": "1L8AUJY",
+        "id": "1M9VNLR",
         "match_threshold": "",
         "primary": true,
         "scale": "",
@@ -258,31 +258,39 @@
     },
     {
         "children": [],
-        "delay": "0.5",
-        "description": "Discard",
+        "delay": "2",
+        "description": "",
         "enabled": true,
-        "file_name": [
-            "image_1L8C11P.png"
-        ],
-        "h": "0.072",
-        "id": "1L8C11P",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.148",
-        "x": "0.425",
-        "y": "0.501"
+        "id": "1MRRLEX",
+        "type": "Delay"
     },
     {
-        "capture_id": "1L8C11P",
+        "children": [],
+        "delay": "0.5",
+        "description": "Discard from top ",
+        "enabled": true,
+        "file_name": [
+            "image_1M34JC1.png"
+        ],
+        "h": "0.165",
+        "id": "1M34JC1",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.658",
+        "x": "0.246",
+        "y": "0.029"
+    },
+    {
+        "capture_id": "1M34JC1",
         "children": [],
         "delay": "2",
-        "description": "Discard outllook",
+        "description": "discard again",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_1L8C17J.png"
+            "image_1M34JK0.png"
         ],
-        "id": "1L8C17J",
+        "id": "1M34JK0",
         "match_threshold": "",
         "primary": true,
         "scale": "",
