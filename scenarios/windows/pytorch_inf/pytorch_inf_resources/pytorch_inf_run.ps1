@@ -272,23 +272,51 @@ pyenv which python
 Set-Location "$scriptDrive\hobl_bin\pytorch_inf_resources"
 checkCmd($?)
 
-"-- Extract log directory from logFile path" | log
+# --- Validate per-scenario venv and required imports ---
+# Prep stages all Python packages into a private venv under this scenario's
+# resource directory. We invoke that venv's python.exe by absolute path to
+# bypass any pyenv/PATH instability caused by other scenarios. If the venv
+# is missing or an expected package is not importable (e.g. an external tool
+# quarantined a DLL), we fail fast with a clear diagnostic instead of a
+# cryptic ModuleNotFoundError partway through the workload.
+$venvPython = "$scriptDrive\hobl_bin\pytorch_inf_resources\.venv\Scripts\python.exe"
+if (-not (Test-Path $venvPython)) {
+    " ERROR - pytorch_inf venv missing at $venvPython" | log
+    " ERROR - Prep state is corrupt. Re-prep required:" | log
+    " ERROR -   delete C:\hobl_bin\prep_status\pytorch_inf<version> on the DUT and re-run." | log
+    Exit 1
+}
+"Using venv python: $venvPython" | log
+
+"Validating venv has required packages..." | log
+& $venvPython -c "import torch, transformers; print('torch', torch.__version__, '| transformers', transformers.__version__)" 2>&1 | log
+if ($LASTEXITCODE -ne 0) {
+    " ERROR - venv has missing/broken Python packages (import failed)." | log
+    " ERROR - Possible causes: Defender quarantine, disk cleanup, or external tampering." | log
+    " ERROR - Re-prep required:" | log
+    " ERROR -   delete C:\hobl_bin\prep_status\pytorch_inf<version> on the DUT and re-run." | log
+    Exit 1
+}
+
+"-- Extract log directory from logFile path for storing additional logs" | log
 $logDir = Split-Path -Parent $logFile
-"Log directory: $logDir" | log
+"Log directory for storing additional logs: $logDir" | log
 
 # inference.py writes pytorch_inference_info.csv to --log-dir with these metrics:
 #   time_to_first_token_ms, time_to_first_token_s, tokens_per_second,
 #   total_tokens_generated, total_generation_time_s, ai_model, ai_device
 $inferenceCSV = Join-Path $logDir "pytorch_inference_info.csv"
+"-- Metrics will be stored in $inferenceCSV" | log
+
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
 
 "-- Run LLM Phi-4-mini inferencing" | log
 if ($noGpu) {
     "Running in CPU-only mode (--no-gpu)" | log
-    python inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" --no-gpu > "$logDir\pytorch_inf_output.txt" 2>&1
+    & $venvPython inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" --no-gpu > "$logDir\pytorch_inf_output.txt" 2>&1
 } else {
-    python inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" > "$logDir\pytorch_inf_output.txt" 2>&1
+    & $venvPython inference.py --prompt "What is the meaning of life?" --log-dir "$logDir" > "$logDir\pytorch_inf_output.txt" 2>&1
 }
 check($lastexitcode)
 Write-RunPhaseMarker "phase.run_build.end"

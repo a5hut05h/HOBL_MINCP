@@ -50,6 +50,21 @@ if [ ! -d "$BIN_DIR" ]; then
     exit 1
 fi
 
+# Always copy resources to pick up script/config/patch changes.
+# This keeps prep resilient when invoked from different working directories
+# while still expecting files under $BIN_DIR/mac_vscode_resources.
+log "-- Copying resources to $BIN_DIR/mac_vscode_resources"
+SRC_RES_DIR="$(cd "$(dirname "$0")" && pwd)"
+DST_RES_DIR="$BIN_DIR/mac_vscode_resources"
+mkdir -p "$DST_RES_DIR"
+check_status "resource directory creation"
+if [ "$SRC_RES_DIR" = "$DST_RES_DIR" ]; then
+    log "✓ Resource copy skipped (already running from $DST_RES_DIR)"
+else
+    cp -r "$SRC_RES_DIR"/* "$DST_RES_DIR/"
+    check_status "resource copy"
+fi
+
 cd $BIN_DIR || { log " ERROR - Failed to change to $BIN_DIR"; exit 1; }
 
 # 1. Ensure Xcode command-line tools are installed
@@ -122,17 +137,17 @@ fi
 source ~/.zprofile
 check_command "pyenv" || exit 1
 
-log "-- Installing Python 3.10.11"
-pyenv install 3.10.11 -f
-check_status "Python 3.10.11 installation"
+log "-- Installing Python 3.12.10"
+pyenv install 3.12.10 -f
+check_status "Python 3.12.10 installation"
 
 log "-- Setting Python version"
-pyenv global 3.10.11
+pyenv global 3.12.10
 check_status "Setting Python global version"
 
 PYTHON_VERSION=$(python --version 2>&1 | awk '{print $2}')
-if [ "$PYTHON_VERSION" != "3.10.11" ]; then
-    log " ERROR - Python version is $PYTHON_VERSION, expected 3.10.11"
+if [ "$PYTHON_VERSION" != "3.12.10" ]; then
+    log " ERROR - Python version is $PYTHON_VERSION, expected 3.12.10"
     pyenv versions
     exit 1
 fi
@@ -160,29 +175,83 @@ check_status "VS Code checkout v1.106.2"
 
 # 7. Install npm dependencies
 log "-- Installing npm dependencies (this may take 10-20 minutes)..."
-# First attempt - this will fail on @vscode/spdlog due to Apple Clang consteval issue on Darwin 25.4+
-npm install --loglevel=error 2>/dev/null
-
-# Patch bundled fmt in @vscode/spdlog to work around Apple Clang consteval issue
-SPDLOG_FMT_DIR="node_modules/@vscode/spdlog/deps/spdlog/include/spdlog/fmt/bundled"
-if [ -d "$SPDLOG_FMT_DIR" ]; then
-    log "-- Patching spdlog fmt headers (consteval -> constexpr)"
-    sed -i '' 's/consteval/constexpr/g' "$SPDLOG_FMT_DIR/format.h"
-    sed -i '' 's/consteval/constexpr/g' "$SPDLOG_FMT_DIR/core.h"
-    check_status "spdlog fmt patch"
-
-    # Rebuild just spdlog with the patched source (npm uses its bundled node-gyp)
-    log "-- Rebuilding @vscode/spdlog..."
-    npm rebuild @vscode/spdlog
-    check_status "spdlog rebuild"
-else
-    log "-- No spdlog fmt patch needed"
+# Install deps without lifecycle scripts first so @vscode/spdlog headers are
+# guaranteed to exist for patching before node-gyp build kicks in.
+NPM_FIRST_LOG="$LOG_DIR/mac_vscode_npm_install_first.log"
+log "   phase-1 npm install (--ignore-scripts) output -> $NPM_FIRST_LOG"
+npm install --ignore-scripts --loglevel=error >>"$NPM_FIRST_LOG" 2>&1
+NPM_FIRST_RC=$?
+if [ $NPM_FIRST_RC -ne 0 ]; then
+    log " ERROR - First npm install phase failed (rc=$NPM_FIRST_RC)."
+    log " ERROR - See $NPM_FIRST_LOG for the underlying error."
+    exit 1
 fi
+log "✓ phase-1 npm install completed"
+
+# Apply a checked-in patch (durable and auditable) instead of ad-hoc string
+# replacement in the script. This keeps the workaround deterministic for the
+# pinned VS Code tag.
+# TODO: Revisit/remove this patch when we move off VS Code 1.106.2 or when
+# upstream @vscode/spdlog/fmt builds cleanly on Darwin 25+ with Node 22.
+PATCH_FILE="$BIN_DIR/mac_vscode_resources/spdlog_fmt_darwin25.patch"
+if [ ! -f "$PATCH_FILE" ]; then
+    log " ERROR - Required patch file not found: $PATCH_FILE"
+    exit 1
+fi
+
+CORE_H="node_modules/@vscode/spdlog/deps/spdlog/include/spdlog/fmt/bundled/core.h"
+if [ ! -f "$CORE_H" ]; then
+    log " ERROR - Expected spdlog header not found: $CORE_H"
+    exit 1
+fi
+
+# Fast-path: if this package build already carries the Apple-compatible
+# constexpr form, skip patching entirely.
+if grep -Eq '^#[[:space:]]*define[[:space:]]+FMT_CONSTEVAL[[:space:]]+constexpr$' "$CORE_H"; then
+    log "✓ spdlog/fmt already in compatible state (FMT_CONSTEVAL constexpr)"
+else
+    log "-- Applying spdlog/fmt compatibility patch: $PATCH_FILE"
+    if git apply --check "$PATCH_FILE" >/dev/null 2>&1; then
+        git apply "$PATCH_FILE"
+        check_status "spdlog/fmt patch apply"
+    elif git apply --reverse --check "$PATCH_FILE" >/dev/null 2>&1; then
+        log "✓ spdlog/fmt patch already applied"
+    else
+        # Fallback for minor upstream drift where patch hunk context changed
+        # but the required token replacement is still well-defined.
+        if grep -Eq '^#[[:space:]]*define[[:space:]]+FMT_CONSTEVAL[[:space:]]+consteval$' "$CORE_H"; then
+            log "-- Patch did not apply cleanly; applying tolerant fallback edit in $CORE_H"
+            sed -E -i '' 's@^#[[:space:]]*define[[:space:]]+FMT_CONSTEVAL[[:space:]]+consteval$@#  define FMT_CONSTEVAL constexpr@' "$CORE_H"
+            check_status "spdlog/fmt fallback edit"
+            if grep -Eq '^#[[:space:]]*define[[:space:]]+FMT_CONSTEVAL[[:space:]]+constexpr$' "$CORE_H"; then
+                log "✓ spdlog/fmt fallback edit applied"
+            else
+                log " ERROR - spdlog/fmt fallback edit failed to verify"
+                exit 1
+            fi
+        else
+            log " ERROR - spdlog/fmt patch does not apply cleanly and FMT_CONSTEVAL token was not found in core.h"
+            exit 1
+        fi
+    fi
+fi
+
+# Rebuild just spdlog with the patched source (npm uses its bundled node-gyp)
+log "-- Rebuilding @vscode/spdlog..."
+npm rebuild @vscode/spdlog
+check_status "spdlog rebuild"
 
 # Re-run npm install to complete any remaining steps (postinstall, etc.)
 log "-- Completing npm install..."
-npm install --loglevel=error
-check_status "npm install"
+NPM_FINAL_LOG="$LOG_DIR/mac_vscode_npm_install_final.log"
+log "   phase-2 npm install output -> $NPM_FINAL_LOG"
+npm install --loglevel=error >>"$NPM_FINAL_LOG" 2>&1
+if [ $? -ne 0 ]; then
+    log " ERROR - Final npm install failed."
+    log " ERROR - See $NPM_FINAL_LOG for details."
+    exit 1
+fi
+log "✓ npm install successful"
 
 log ""
 log "✓ All checks passed"

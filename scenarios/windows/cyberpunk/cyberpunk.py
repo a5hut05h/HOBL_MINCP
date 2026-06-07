@@ -45,16 +45,23 @@ class Cyberpunk(core.app_scenario.Scenario):
 
 
     def tearDown(self):
-        # Call base class tearDown() to stop measurment, copy back data from DUT, and call tool callbacks
-        core.app_scenario.Scenario.tearDown(self)
 
         # Execute Teardown actions, if they exist
         teardown_action = self._find_next_type("Teardown", json=self.actions)
         if teardown_action:
             self.run_actions(teardown_action["children"])
 
+        # Call base class tearDown() to stop measurment, copy back data from DUT, and call tool callbacks
+        core.app_scenario.Scenario.tearDown(self)
     
     def kill(self):
         # In case of scenario failure or termination, kill any applications left open here:
-
+        try:
+            self._kill("Cyberpunk2077.exe")
+        except:
+            pass
+        try:
+            self._kill("CrashReporter.exe")
+        except:
+            pass
         return

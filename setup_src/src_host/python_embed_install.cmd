@@ -84,7 +84,7 @@ for %%f in ("%PYTHON_DIR%\python*._pth.disabled") do (
 )
 
 REM Check if hobl can run
-%PYTHON_DIR%\python.exe %HOBL_PY% -d "web teams"
+%PYTHON_DIR%\python.exe -s %HOBL_PY% -d "web teams"
 if %errorlevel% neq 0 goto ERROR
 echo Hobl command successful
 

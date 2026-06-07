@@ -203,9 +203,20 @@ try {
 $pyenvRoot = "$env:USERPROFILE\.pyenv"
 $env:PATH = "$pyenvRoot\pyenv-win\bin;$pyenvRoot\pyenv-win\shims;$env:PATH"
 
+# --- Install Python via pyenv (conditional — DO NOT use -f) ---
+# Force-reinstall (`-f`) wipes the pyenv version directory including any packages
+# installed by other scenarios that share this Python version. VS Code only needs
+# the interpreter (for node-gyp during native module builds) so no venv is
+# required — but we must avoid wiping it.
 "-- Installing Python $pythonVersion via pyenv" | log
-pyenv install $pythonVersion -f
-check($lastexitcode)
+$installedVersions = (pyenv versions --bare 2>$null) -split "`n" | ForEach-Object { $_.Trim() }
+if ($installedVersions -notcontains $pythonVersion) {
+    "Installing Python $pythonVersion via pyenv..." | log
+    pyenv install $pythonVersion
+    check($lastexitcode)
+} else {
+    "Python $pythonVersion already installed via pyenv — preserving existing install" | log
+}
 
 "Setting Python $pythonVersion as global version" | log
 pyenv global $pythonVersion

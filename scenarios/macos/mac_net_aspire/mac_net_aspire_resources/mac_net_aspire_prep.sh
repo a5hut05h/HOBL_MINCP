@@ -180,8 +180,22 @@ log "✓ Python version confirmed: $PYTHON_VERSION"
 # iterations (which use plain --build) pass cleanly.
 log "-- Regenerating ConfigurationSchema.json files"
 cd $BIN_DIR/aspire
-./build.sh --restore --build /p:UpdateConfigurationSchema=true
-check_status "ConfigurationSchema regeneration"
+# Capture build output so a failure is diagnosable. Without this the entire
+# MSBuild/dotnet error was swallowed and the prep log only said
+# "ConfigurationSchema regeneration failed" with no further clues.
+ASPIRE_BUILD_LOG="$LOG_DIR/mac_net_aspire_build.log"
+log "   build output -> $ASPIRE_BUILD_LOG"
+./build.sh --restore --build /p:UpdateConfigurationSchema=true >>"$ASPIRE_BUILD_LOG" 2>&1
+ASPIRE_BUILD_RC=$?
+if [ $ASPIRE_BUILD_RC -ne 0 ]; then
+    log " ERROR - ConfigurationSchema regeneration failed (rc=$ASPIRE_BUILD_RC)."
+    log " ERROR - See $ASPIRE_BUILD_LOG for full build output. Last 40 lines:"
+    tail -n 40 "$ASPIRE_BUILD_LOG" 2>/dev/null | while IFS= read -r line; do
+        log "   | $line"
+    done
+    exit 1
+fi
+log "✓ ConfigurationSchema regeneration successful"
 
 log ""
 log "✓ All checks passed"

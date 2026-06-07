@@ -504,11 +504,19 @@ function Set-OptimizedPathOrder {
 
 Set-OptimizedPathOrder
 
-# --- Install Python via pyenv ---
+# --- Install Python via pyenv (conditional — DO NOT use -f) ---
+# Force-reinstall (`-f`) wipes the pyenv version directory including any packages
+# installed by other scenarios that share this Python version. Multiple scenarios
+# use 3.12.10-arm, so we only install when truly missing.
 "-- Installing python $pythonVersion for $logSuffix" | log
-"Installing Python $pythonVersion (this may take several minutes)..." | log
-pyenv install $pythonVersion -f
-check($lastexitcode)
+$installedVersions = (pyenv versions --bare 2>$null) -split "`n" | ForEach-Object { $_.Trim() }
+if ($installedVersions -notcontains $pythonVersion) {
+    "Installing Python $pythonVersion via pyenv (this may take several minutes)..." | log
+    pyenv install $pythonVersion
+    check($lastexitcode)
+} else {
+    "Python $pythonVersion already installed via pyenv — preserving existing install" | log
+}
 
 "Setting Python $pythonVersion as global version..." | log
 pyenv global $pythonVersion
@@ -585,9 +593,42 @@ if ($currentPythonVersion -like "*$expectedVersionPattern*") {
     Exit 1
 }
 
+# --- Create per-scenario venv ---
+# Packages live in this scenario's private venv directory, NOT in the shared pyenv
+# site-packages. This isolates pytorch_inf's packages from any future `pyenv install`
+# (force or otherwise) from other scenarios, and from `pyenv global` switches.
+$venvDir = "$scriptDrive\hobl_bin\pytorch_inf_resources\.venv"
+$pyenvPythonRaw = (pyenv which python 2>$null)
+if (-not $pyenvPythonRaw) {
+    " ERROR - pyenv which python returned no path; pyenv install may have failed" | log
+    Exit 1
+}
+$pyenvPython = $pyenvPythonRaw.Trim()
+if (-not (Test-Path $pyenvPython)) {
+    " ERROR - pyenv python not found at: $pyenvPython" | log
+    Exit 1
+}
+"Base pyenv python: $pyenvPython" | log
+
+if (Test-Path $venvDir) {
+    "Removing existing venv to ensure clean rebuild: $venvDir" | log
+    Remove-Item -Recurse -Force $venvDir
+}
+"Creating venv at: $venvDir" | log
+& $pyenvPython -m venv $venvDir
+check($lastexitcode)
+
+$venvPython = Join-Path $venvDir "Scripts\python.exe"
+$venvPip = Join-Path $venvDir "Scripts\pip.exe"
+if (-not (Test-Path $venvPython)) {
+    " ERROR - venv python missing after venv creation: $venvPython" | log
+    Exit 1
+}
+"Venv python: $venvPython" | log
+
 if ($useCustomPyTorchWheel) {
     # --- Custom wheel path: install custom PyTorch wheel + remaining deps ---
-    "-- Installing PyTorch from custom wheel" | log
+    "-- Installing PyTorch from custom wheel into venv" | log
     if (-not $customResourcesPath -or -not (Test-Path $customResourcesPath)) {
         " ERROR - Custom resources path required for custom wheel install: $customResourcesPath" | log
         Exit 1
@@ -599,22 +640,22 @@ if ($useCustomPyTorchWheel) {
         Exit 1
     }
     "Found wheel: $($wheelFile.Name) ($([math]::Round($wheelFile.Length / 1MB, 1)) MB)" | log
-    pip install $wheelFile.FullName
+    & $venvPip install $wheelFile.FullName
     check($lastexitcode)
-    "-- Installing remaining dependencies from requirements_custom.txt" | log
-    pip install -r requirements_custom.txt
+    "-- Installing remaining dependencies from requirements_custom.txt into venv" | log
+    & $venvPip install -r requirements_custom.txt
     check($lastexitcode)
 } else {
     # --- Standard path: x64 (cu128) or Arm64 CPU ---
     $requirementsFile = if ($isARM64) { "requirements_win_arm64.txt" } else { "requirements_win.txt" }
-    "-- Installing Python packages from $requirementsFile" | log
-    pip install -r $requirementsFile
+    "-- Installing Python packages from $requirementsFile into venv" | log
+    & $venvPip install -r $requirementsFile
     check($lastexitcode)
 }
 
-# --- Download model ---
+# --- Download model (using venv python so torch is available) ---
 "-- Setup LLM Phi-4-mini inferencing" | log
-python inference.py --setup
+& $venvPython inference.py --setup
 check($lastexitcode)
 
 "-- pytorch_inf prep completed ($logSuffix version)" | log

@@ -14,18 +14,18 @@ from datetime import datetime
 class PytorchInf(core.app_scenario.Scenario):
 
     module = __module__.split('.')[-1]
-    prep_version = "13"
+    prep_version = "14"
     # prep_scenarios = [(module, prep_version)]
     resources = module + "_resources"
 
 
     # Set default parameters
     Params.setDefault(module, 'loops', '2')
-    Params.setDefault(module, 'use_custom_pytorch_wheel', 'false')
-    Params.setDefault(module, 'install_cuda', 'false')
-    Params.setDefault(module, 'install_cudnn', 'false')
+    Params.setDefault(module, 'use_custom_pytorch_wheel', 'false', valOptions=["true", "false"])
+    Params.setDefault(module, 'install_cuda', 'false', valOptions=["true", "false"])
+    Params.setDefault(module, 'install_cudnn', 'false', valOptions=["true", "false"])
     Params.setDefault(module, 'custom_resources_path', '')
-    Params.setDefault(module, 'use_gpu', 'true')
+    Params.setDefault(module, 'use_gpu', 'true', valOptions=["true", "false"])
 
 
     def setUp(self):
