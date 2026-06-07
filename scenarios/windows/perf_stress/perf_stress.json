@@ -133,7 +133,7 @@
     {
         "children": [],
         "delay": "0.0",
-        "description": "1 = launch collect_5min_traces.ps1 in the background on the DUT alongside the core trace. Uses a named WPR instance (perfStressHeavy). Saves rolling ETLs to C:\\hobl_data\\perf_stress\\<RunName>\\WPR_<timestamp>.etl. WARNING: dual-session WPR perturbs metrics - debug use only.",
+        "description": "1 = launch collect_5min_traces.ps1 in the background on the DUT alongside the core trace. Uses a named WPR instance (perfStressHeavy). Saves rolling ETLs to C:\\hobl_bin\\perf_stress_heavy\\<RunName>\\WPR_<timestamp>.etl. WARNING: dual-session WPR perturbs metrics - debug use only.",
         "enabled": true,
         "id": "1KTY6FE",
         "name": "[bg_heavy_capture]",
@@ -144,24 +144,24 @@
     {
         "children": [],
         "delay": "0.0",
-        "description": "Rolling ETL segment length in minutes for bg_heavy_capture (default 5).",
+        "description": "Rolling ETL segment length in minutes for bg_heavy_capture (default 5). A 15-20 min run at 5 min should produce ~3 segments; shorten if wpr -stop flush eats into the next interval.",
         "enabled": true,
         "id": "1KTY7YM",
         "name": "[bg_heavy_capture_interval]",
         "type": "Set Default",
-        "val_options": "2,3,4,5",
+        "val_options": "3,4,5,6",
         "value": "5"
     },
     {
         "children": [],
         "delay": "0.0",
-        "description": "1 = open background Edge tabs to increase memory pressure and CPU stress.",
+        "description": "1 = open 30 background Edge tabs (Setup) as the web load and SKIP the replay web workload (web_setup/web_run_12/web_check/web_close_tabs) so the bg tabs survive the whole run (web_setup's _web_replay_start would otherwise kill all browsers). 0 (default) = no bg tabs; run the normal replay web workload. Mutually exclusive with the replay web phase.",
         "enabled": true,
         "id": "1KTY8CY",
         "name": "[bg_edge_tabs]",
         "type": "Set Default",
         "val_options": "0,1",
-        "value": "1"
+        "value": "0"
     },
     {
         "children": [],
@@ -855,63 +855,90 @@
                 "type": "End If"
             },
             {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1A4W5AL",
-                "include_path": "scenarios\\windows\\_library\\web\\web_setup",
-                "params": [
+                "children": [
                     {
-                        "name": "[disable_delay]",
-                        "val_options": "0,1",
-                        "value": "1"
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1A4W5AL",
+                        "include_path": "scenarios\\windows\\_library\\web\\web_setup",
+                        "params": [
+                            {
+                                "name": "[disable_delay]",
+                                "val_options": "0,1",
+                                "value": "1"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "10",
+                        "description": "Extra delay for Edge startup under CPU stress",
+                        "enabled": true,
+                        "id": "PSECWDLY",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "19K57MP",
+                        "include_path": "scenarios\\windows\\_library\\web\\web_run_12",
+                        "params": [
+                            {
+                                "name": "[load_only]",
+                                "val_options": "0,1",
+                                "value": "0"
+                            }
+                        ],
+                        "type": "Include"
                     }
                 ],
-                "type": "Include"
+                "description": "Replay web workload. web_setup -> _web_replay_start kills all browsers, then web_run_12 loads 12 replay sites in a clean Edge. Gated on bg_edge_tabs==0 so when bg_edge_tabs=1 the 30 background tabs opened in Setup are NOT killed and serve as the web load instead.",
+                "enabled": true,
+                "eval_method": "==",
+                "id": "PSECWRBIF",
+                "left_term": "[bg_edge_tabs]",
+                "right_term": "0",
+                "type": "If"
             },
             {
                 "children": [],
-                "delay": "10",
-                "description": "Extra delay for Edge startup under CPU stress",
-                "enabled": true,
-                "id": "PSECWDLY",
-                "type": "Delay"
-            },
-            {
-                "children": [],
-                "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "19K57MP",
-                "include_path": "scenarios\\windows\\_library\\web\\web_run_12",
-                "params": [
-                    {
-                        "name": "[load_only]",
-                        "val_options": "0,1",
-                        "value": "0"
-                    }
-                ],
-                "type": "Include"
+                "id": "PSECWRBEN",
+                "type": "End If"
             },
             {
                 "children": [
                     {
                         "children": [],
-                        "command": "cmd /c taskkill /IM EXCEL.EXE /IM OUTLOOK.EXE /IM olk.exe /IM WINWORD.EXE /IM POWERPNT.EXE /IM ONENOTE.EXE /F > nul 2>&1 & exit /b 0",
+                        "command": "cmd /c taskkill /IM EXCEL.EXE /IM OUTLOOK.EXE /IM olk.exe /IM WINWORD.EXE /IM POWERPNT.EXE /IM ONENOTE.EXE > nul 2>&1 & exit /b 0",
                         "delay": "0",
-                        "description": "Kill all Office apps so the next launches are real cold starts (otherwise file-association launches just focus existing windows and no metrics are emitted).",
+                        "description": "Pre-launch defense: graceful close (WM_CLOSE, NO /F) of any Office app left running by a prior iteration. /F was removed because Stop-Process/taskkill /F on Word with an open doc plants a session-restore hint that auto-reopens that doc on the next Start-menu launch (repro confirmed). WM_CLOSE = same as clicking the red X = no recovery dialog. Idempotent: returns immediately if nothing is running, so it's safe as a no-op when Office was already closed gracefully by the previous iteration.",
                         "enabled": true,
                         "id": "PSECSMK0",
                         "type": "Command"
                     },
                     {
                         "children": [],
-                        "delay": "3",
-                        "description": "Settle after Office kill",
+                        "delay": "5",
+                        "description": "Settle after graceful Office close (WM_CLOSE needs longer than /F)",
                         "enabled": true,
                         "id": "PSECSMK0D",
                         "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c for %A in (PowerPoint Word Excel Outlook) do (reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\%A\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\%A\\Resiliency\\DisabledItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\%A\\Resiliency\\DocumentRecovery\" /f > nul 2>&1) & exit /b 0",
+                        "delay": "0",
+                        "description": "Defense-in-depth pop-up suppression: clear Office resiliency markers (StartupItems / DisabledItems = 'couldn't start last time / Safe Mode' prompt; DocumentRecovery = the auto-reopen list that taskkill /F used to populate). Should be a no-op now that PSECSMK0 uses graceful WM_CLOSE, but kept as a safety net in case a prior run crashed the app.",
+                        "enabled": true,
+                        "id": "PSECSMK0R",
+                        "type": "Command"
                     },
                     {
                         "children": [],
@@ -962,17 +989,17 @@
                     },
                     {
                         "children": [],
-                        "command": "cmd /c taskkill /IM EXCEL.EXE /F > nul 2>&1 & exit /b 0",
                         "delay": "0",
-                        "description": "Close Excel",
+                        "description": "Close Excel by clicking the red X (productivity library). Avoids taskkill /F which plants a session-restore hint that auto-reopens the doc on the next launch and trips Document Recovery / 'started last time in Safe Mode' pop-ups.",
                         "enabled": true,
                         "id": "PSECSM04",
-                        "type": "Command"
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_close",
+                        "type": "Include"
                     },
                     {
                         "children": [],
-                        "delay": "2",
-                        "description": "Settle before Word launch",
+                        "delay": "3",
+                        "description": "Settle before Word launch (graceful close takes slightly longer than /F)",
                         "enabled": true,
                         "id": "PSECSM04D",
                         "type": "Delay"
@@ -1026,17 +1053,17 @@
                     },
                     {
                         "children": [],
-                        "command": "cmd /c taskkill /IM WINWORD.EXE /F > nul 2>&1 & exit /b 0",
                         "delay": "0",
-                        "description": "Close Word",
+                        "description": "Close Word by clicking the red X (productivity library). Fixes the Word-reopens-prior-doc bug Varun reported: taskkill /F left a session-restore hint, so the next Start-menu launch came up with the previous document; clicking X (WM_CLOSE) does not.",
                         "enabled": true,
                         "id": "PSECSM12",
-                        "type": "Command"
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_close",
+                        "type": "Include"
                     },
                     {
                         "children": [],
-                        "delay": "2",
-                        "description": "Settle before PowerPoint launch",
+                        "delay": "3",
+                        "description": "Settle before PowerPoint launch (graceful close takes slightly longer than /F)",
                         "enabled": true,
                         "id": "PSECSM12D",
                         "type": "Delay"
@@ -1090,17 +1117,17 @@
                     },
                     {
                         "children": [],
-                        "command": "cmd /c taskkill /IM POWERPNT.EXE /F > nul 2>&1 & exit /b 0",
                         "delay": "0",
-                        "description": "Close PowerPoint",
+                        "description": "Close PowerPoint by clicking the red X (productivity library) instead of taskkill /F to avoid Document Recovery / session-restore pop-ups on the next iteration.",
                         "enabled": true,
                         "id": "PSECSM16",
-                        "type": "Command"
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_close",
+                        "type": "Include"
                     },
                     {
                         "children": [],
-                        "delay": "2",
-                        "description": "Settle before OneNote launch",
+                        "delay": "3",
+                        "description": "Settle before OneNote launch (graceful close takes slightly longer than /F)",
                         "enabled": true,
                         "id": "PSECSM16D",
                         "type": "Delay"
@@ -1165,17 +1192,17 @@
                     },
                     {
                         "children": [],
-                        "command": "cmd /c taskkill /IM ONENOTE.EXE /IM onenoteim.exe /F > nul 2>&1 & exit /b 0",
                         "delay": "0",
-                        "description": "Close OneNote",
+                        "description": "Close OneNote by clicking the red X (productivity library) instead of taskkill /F.",
                         "enabled": true,
                         "id": "PSECSM20",
-                        "type": "Command"
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_onenote_close",
+                        "type": "Include"
                     },
                     {
                         "children": [],
-                        "delay": "2",
-                        "description": "Settle before Outlook launch",
+                        "delay": "3",
+                        "description": "Settle before Outlook launch (graceful close takes slightly longer than /F)",
                         "enabled": true,
                         "id": "PSECSM20D",
                         "type": "Delay"
@@ -1240,17 +1267,17 @@
                     },
                     {
                         "children": [],
-                        "command": "cmd /c taskkill /IM OUTLOOK.EXE /IM olk.exe /F > nul 2>&1 & exit /b 0",
                         "delay": "0",
-                        "description": "Close Outlook",
+                        "description": "Close Outlook by clicking the red X (productivity library) instead of taskkill /F. Outlook new (olk.exe) and classic (OUTLOOK.EXE) both honor WM_CLOSE from the X button.",
                         "enabled": true,
                         "id": "PSECSM08",
-                        "type": "Command"
+                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_close",
+                        "type": "Include"
                     },
                     {
                         "children": [],
-                        "delay": "2",
-                        "description": "Settle before Start Menu probe",
+                        "delay": "3",
+                        "description": "Settle before Start Menu probe (graceful close takes slightly longer than /F)",
                         "enabled": true,
                         "id": "PSECSM08D",
                         "type": "Delay"
@@ -1676,6 +1703,15 @@
                     },
                     {
                         "children": [],
+                        "command": "cmd /c reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\PowerPoint\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Word\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Excel\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Outlook\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\PowerPoint\\Resiliency\\DisabledItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Word\\Resiliency\\DisabledItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Excel\\Resiliency\\DisabledItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Outlook\\Resiliency\\DisabledItems\" /f > nul 2>&1 & exit /b 0",
+                        "delay": "0",
+                        "description": "Clear Office resiliency markers left by the shell_probes cold-boot taskkill /F, so prod_open/prod_run launches don't hit the 'couldn't start last time / Safe Mode' dialog (which steals focus and breaks PowerPoint/Word image matches).",
+                        "enabled": true,
+                        "id": "PSECPRD0R",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
                         "delay": "3",
                         "description": "Settle before opening Office apps under stress (avoid DPI/race image mismatches)",
                         "enabled": true,
@@ -1878,36 +1914,54 @@
                 "type": "End If"
             },
             {
-                "children": [],
-                "delay": "0",
-                "description": "",
-                "enabled": true,
-                "id": "1A7H7A8",
-                "include_path": "scenarios\\windows\\_library\\web\\web_check",
-                "params": [
+                "children": [
                     {
-                        "name": "[youtube_duration]",
-                        "val_options": "",
-                        "value": "90"
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "1A7H7A8",
+                        "include_path": "scenarios\\windows\\_library\\web\\web_check",
+                        "params": [
+                            {
+                                "name": "[youtube_duration]",
+                                "val_options": "",
+                                "value": "90"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "19K59KV",
+                        "include_path": "scenarios\\windows\\_library\\web\\web_close_tabs",
+                        "params": [
+                            {
+                                "name": "[num_tabs_to_close]",
+                                "val_options": "",
+                                "value": "12"
+                            }
+                        ],
+                        "type": "Include"
                     }
                 ],
-                "type": "Include"
+                "description": "web_check + web_close_tabs(12) belong to the replay web workload. Gated on bg_edge_tabs==0 so when bg_edge_tabs=1 we neither validate replay tabs that were never loaded nor close 12 of the 30 background tabs.",
+                "enabled": true,
+                "eval_method": "==",
+                "id": "PSECWCKIF",
+                "left_term": "[bg_edge_tabs]",
+                "right_term": "0",
+                "type": "If"
             },
             {
                 "children": [],
-                "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "19K59KV",
-                "include_path": "scenarios\\windows\\_library\\web\\web_close_tabs",
-                "params": [
-                    {
-                        "name": "[num_tabs_to_close]",
-                        "val_options": "",
-                        "value": "12"
-                    }
-                ],
-                "type": "Include"
+                "id": "PSECWCKEN",
+                "type": "End If"
             },
             {
                 "children": [

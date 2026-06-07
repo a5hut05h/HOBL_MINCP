@@ -9,11 +9,13 @@
 #   3. The script runs rolling WPR captures on a NAMED instance (perfStressHeavy)
 #      so it does NOT collide with HOBL's core unnamed WPR session.
 #
-# Output ETLs land at C:\hobl_data\perf_stress\<runname>\WPR_<timestamp>.etl on
-# the DUT. Because that path is under C:\hobl_data (= scenario.dut_data_path on
-# Windows), HOBL's base tearDown copies the heavy ETLs back to the host result_dir
-# automatically - no extra pull step required. Important for unattended back-to-back
-# runs where leaving heavy ETLs on the DUT would fill the disk.
+# Output ETLs land at C:\hobl_bin\perf_stress_heavy\<runname>\WPR_<timestamp>.etl on
+# the DUT - deliberately OUTSIDE C:\hobl_data (= scenario.dut_data_path). The heavy,
+# often-locked/growing rolling .etl files must NOT enter HOBL's base
+# _copy_data_from_remote(C:\hobl_data) teardown tar: a segment still being written by
+# an (orphaned) wpr.exe truncated the streamed result tar (tarfile.ReadError: unexpected
+# end of data) and failed otherwise-good runs (287/290/293). perf_stress.tearDown()
+# pulls this folder separately, best-effort, AFTER the core result copy completes.
 #
 # CAVEAT: two concurrent WPR sessions perturb perf numbers ~10-30%.
 # The PT CSV from this run is for debug use only.
@@ -53,10 +55,12 @@ def run(scenario):
     collect_ps = rf"{dut_bin_dir}\collect_5min_traces.ps1"
     run_name = scenario.testname  # e.g. perf_stress_050
 
-    # Land rolling ETLs under C:\hobl_data\perf_stress\<run_name>\ so that
-    # base scenario._copy_data_from_remote(self.result_dir) at tearDown sweeps
-    # them back to the host result_dir automatically.
-    out_dir = r"C:\hobl_data\perf_stress"
+    # Land rolling ETLs under C:\hobl_bin\perf_stress_heavy\<run_name>\ - deliberately
+    # OUTSIDE C:\hobl_data so these heavy, often-locked .etl files never enter the base
+    # _copy_data_from_remote(C:\hobl_data) teardown tar (a growing/locked segment there
+    # truncated the streamed result tar and failed runs 287/290/293).
+    # perf_stress.tearDown() pulls this folder separately, best-effort, after the core copy.
+    out_dir = r"C:\hobl_bin\perf_stress_heavy"
 
     interval = Params.get('perf_stress', 'bg_heavy_capture_interval') or '5'
     logging.info(

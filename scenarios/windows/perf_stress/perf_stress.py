@@ -113,8 +113,38 @@ class PerfStress(scenarios.app_scenario.Scenario):
 
 
     def tearDown(self):
+        # Stop the background stress workers AND the optional heavy WPR rolling capture
+        # (bg_heavy_capture=1) BEFORE the base class copies data back. The base tearDown()
+        # runs _copy_data_from_remote() which tars C:\hobl_data; if the named perfStressHeavy
+        # WPR session is still live, its in-progress .etl truncates the tar
+        # (tarfile.ReadError: unexpected end of data) and the whole DUT->host download aborts.
+        # The JSON "Teardown" phase runs AFTER the base copy, so the failure path (Run Test
+        # aborts mid-iteration) must be covered here.
+        if Params.get(self.module, 'stress_run') == '1':
+            try:
+                stop_script = os.path.join(self.dut_exec_path, "stop_perfStress_background.ps1")
+                self._call([
+                    "cmd.exe",
+                    f"/C powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"{stop_script}\""
+                ], expected_exit_code="")
+            except Exception as ex:
+                logging.warning(f"Failed to stop background capture before base tearDown copy: {ex}")
+
         # Call base class tearDown() to stop measurment, copy back data from DUT, and call tool callbacks
         scenarios.app_scenario.Scenario.tearDown(self)
+
+        # Best-effort: pull the optional heavy rolling WPR captures (bg_heavy_capture=1).
+        # These live under C:\hobl_bin\perf_stress_heavy (NOT C:\hobl_data) so they never
+        # participate in the core result copy above - that keeps the core ETL transfer
+        # reliable even if a heavy segment is still locked/being written. Retrieve them
+        # here separately and NEVER let a failure fail the run (debug-only ETLs).
+        if Params.get(self.module, 'bg_heavy_capture') == '1':
+            try:
+                heavy_src = rf"C:\hobl_bin\perf_stress_heavy\{self.testname}"
+                if self._check_remote_file_exists(heavy_src):
+                    self._copy_data_from_remote(self.result_dir, source=heavy_src)
+            except Exception as ex:
+                logging.warning(f"Best-effort heavy WPR capture pull failed (debug-only, ignoring): {ex}")
 
         # Execute Teardown actions, if they exist
         teardown_action = self._find_next_type("Teardown", json=self.actions)
