@@ -116,14 +116,14 @@ class CommCheck(core.app_scenario.Scenario):
             self.fail("At least one communication check failed")
 
         # Calculate roundtrip time for how long it takes for a screenshot to be sent back to host.
-        start_time = time.time()
-        screen_data = rpc.plugin_screenshot(self.dut_ip, self.rpc_port, "InputInject")
-        img_array = qoi.decode(screen_data)
-        image = Image.fromarray(img_array)
-        image.save(self.result_dir + "/screenshot.png")
-        end_time = time.time()
-        roundtrip_time = end_time - start_time
-        logging.info(f"Screenshot roundtrip time: {roundtrip_time:.2f} seconds")
+        # start_time = time.time()
+        # screen_data = rpc.plugin_screenshot(self.dut_ip, self.rpc_port, "InputInject")
+        # img_array = qoi.decode(screen_data)
+        # image = Image.fromarray(img_array)
+        # image.save(self.result_dir + "/screenshot.png")
+        # end_time = time.time()
+        # roundtrip_time = end_time - start_time
+        # logging.info(f"Screenshot roundtrip time: {roundtrip_time:.2f} seconds")
 
 
 

@@ -212,7 +212,6 @@ class ThermalRecordThread(threading.Thread):
                 data = self.get_latest_data(self.tool.channels)
                 if data:
                     timestamp = int(time.time() - start_time)
-                    print(data)
                     log_line = f"{timestamp}," + ",".join(f"{value:.2f}" for value in data) + "\n"
                     # # Flatten the list of data values and format each value individually
                     # formatted_values = [f"{value:.2f}" for sublist in data for value in sublist]
