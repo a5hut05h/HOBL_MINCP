@@ -168,7 +168,7 @@ class TeamsInstall(core.app_scenario.Scenario):
                         # Press Windows key, type "Microsoft Teams", and hit Enter to launch.
                         # Safe to do here because we've already confirmed the package is installed,
                         # so search will surface the app rather than a Bing/Store web suggestion.
-                        ActionChains(desktop).send_keys(Keys.META).perform()
+                        ActionChains(desktop).key_down(Keys.META).key_up(Keys.META).perform()
                         time.sleep(2)
                         ActionChains(desktop).send_keys("Microsoft Teams").perform()
                         time.sleep(2)
