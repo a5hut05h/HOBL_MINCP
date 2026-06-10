@@ -25,16 +25,23 @@ class Discharge(core.app_scenario.Scenario):
     Params.setDefault(module, 'resume_threshold', '100', desc="Percent battery level to discharge to")
     Params.setDefault(module, 'poll_period', '30', desc="How often to check battery level (default 30s)")
     Params.setDefault(module, 'run_scenario', '', desc="Run LVP, FishBowl, or GPU stress in the background", valOptions=["lvp", "fishbowl", "stress"])
-
-    Params.setOverride('global', 'tools', '')
-    Params.setOverride('global', 'prep_tools', '')
-    Params.setOverride('global', 'collection_enabled', '0')
+    Params.setDefault(module, 'leave_on_dc', '1', desc="Leave on DC power after discharge scenario (default 1 - keep charger off)") 
+    Params.setDefault(module, 'taper_workload', '0', desc="Stop workload to cool down device. resume_threshold + taper_workload. (default 0)")
 
     # Get parameters
     resume_threshold = int(Params.get(module, 'resume_threshold'))
     charge_off_call  = Params.get('global', 'charge_off_call')
+    charge_on_call   = Params.get('global', 'charge_on_call')
     poll_period      = int(Params.get(module, 'poll_period'))
     run_scenario     = Params.get(module, 'run_scenario')
+    leave_on_dc      = Params.get(module, 'leave_on_dc') 
+    taper_workload    = int(Params.get(module, 'taper_workload'))
+
+    Params.setOverride('global', 'tools', '')
+    Params.setOverride('global', 'collection_enabled', '0')
+
+    if not run_scenario:
+        Params.setOverride('global', 'prep_tools', '')
 
     run_dir     = Params.getCalculated('run_dir')
     params_file = Params.getCalculated('params_file')
@@ -42,20 +49,25 @@ class Discharge(core.app_scenario.Scenario):
     is_prep = True
 
 
-    def is_discharge_done(self):
+    def is_discharge_done(self, battery_level=None):
+        if battery_level is None:
+            battery_level = self.resume_threshold
         batt_level = self.getBattLevel()
-        logging.info(f"Battery level: {str(batt_level)} Expected Level: {str(self.resume_threshold)}")
+        logging.info(f"Battery level: {str(batt_level)} Expected Level: {str(battery_level)}")
 
-        if batt_level <= self.resume_threshold:
+        if batt_level <= battery_level:
             logging.info("Discharging complete")
             return True
         return False
 
-
-    def runTest(self):
+    def setup(self):
         logging.info("Discharging...")
         self._host_call(self.charge_off_call)
 
+        # Call base class setUp() to dump config, call tool callbacks, and start measurment
+        core.app_scenario.Scenario.setUp(self)
+
+    def runTest(self):
         if self.is_discharge_done():
             return
 
@@ -107,17 +119,25 @@ class Discharge(core.app_scenario.Scenario):
             time.sleep(30)
 
         while True:
-            if self.is_discharge_done():
+            if self.is_discharge_done(self.resume_threshold + self.taper_workload):
                 break
             else:
                 time.sleep(int(self.poll_period))
 
-        if p:
-            logging.info(f"Stopping {self.run_scenario.lower()}")
+        logging.info(f"Stopping {self.run_scenario.lower()}")
 
-            p.stdin.write(b"teardown\n")
-            p.stdin.flush()
-            p.wait()
+        p.stdin.write(b"teardown\n")
+        p.stdin.flush()
+        p.wait()
+
+        # Check if workload has been tapered if so then we need to finish discharing to resume_threshold
+        if self.taper_workload > 0:
+            logging.info("Workload tapered to cool down device. Now finishing discharging to resume_threshold.")
+            while True:
+                if self.is_discharge_done(self.resume_threshold):
+                    break
+                else:
+                    time.sleep(int(self.poll_period))
 
 
     def getBattLevel(self):
@@ -127,6 +147,13 @@ class Discharge(core.app_scenario.Scenario):
 
         return int(batt_level)
 
+    def tearDown(self):
+        # Call base class tearDown() to stop measurment and call tool callbacks
+        core.app_scenario.Scenario.tearDown(self)
+
+        if self.leave_on_dc == '0':
+            logging.info("Re-enabling charging...")
+            self._host_call(self.charge_on_call)
 
     def kill(self):
         if self.run_scenario.lower() == "lvp":

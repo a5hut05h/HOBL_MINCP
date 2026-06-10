@@ -83,3 +83,11 @@ class Cinebench(core.app_scenario.Scenario):
             logging.info(f"Cinebench Single Core score: {score}")
         else:
             logging.info(f"Cinebench Multi Core score: {score}")
+
+    def kill(self):
+        # In case of scenario failure or termination, kill any applications left open here:
+        try:
+            self._kill("cinebench.exe")
+        except:
+            pass
+        return
