@@ -71,6 +71,21 @@ else
     fi
 fi
 
+# Installing Rosetta 2
+# The Aspire build invokes grpc.tools' protoc, which Homebrew/NuGet ship only as
+# an x86_64 binary (tools/macosx_x64/protoc). On Apple Silicon without Rosetta 2
+# this fails with "Bad CPU type in executable" (Win32Exception 86) during the
+# ConfigurationSchema regeneration build. Rosetta lets the x86_64 protoc run
+# under emulation; protoc is a build-time codegen tool only and is not part of
+# the timed workload, so this does not affect benchmark results.
+log "-- Installing Rosetta 2"
+if /usr/bin/pgrep -q oahd; then
+    log "✓ Rosetta 2 already installed"
+else
+    sudo -A softwareupdate --install-rosetta --agree-to-license
+    check_status "Rosetta 2 installation"
+fi
+
 cd $BIN_DIR || {
     log " ERROR - Failed to change to $BIN_DIR"
     exit 1
