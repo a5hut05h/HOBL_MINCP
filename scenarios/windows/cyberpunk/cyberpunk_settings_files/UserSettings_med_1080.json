@@ -417,14 +417,14 @@
                     "type": "string_list",
                     "is_dynamic": true,
                     "value": "Medium",
-                    "index": 0
+                    "index": 2
                 },
                 {
                     "name": "ResolutionScaling",
                     "type": "string_list",
                     "is_dynamic": true,
-                    "value": "Off",
-                    "index": 0
+                    "value": "FSR2",
+                    "index": 2
                 },
                 {
                     "name": "DLSS_UNSUPPORTED",
