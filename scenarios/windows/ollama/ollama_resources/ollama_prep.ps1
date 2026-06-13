@@ -2,7 +2,9 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 param(
-    [string]$logFile = ""
+    [string]$logFile = "",
+    [string]$customResourcesPath = "",
+    [switch]$useCustomOllama = $false
 )
 
 $scriptDrive = Split-Path -Qualifier $PSScriptRoot
@@ -15,6 +17,12 @@ if (-not (Test-Path "$scriptDrive\hobl_bin")) {
     Exit 1
 }
 if (-not $logFile) { $logFile = "$scriptDrive\hobl_data\ollama_prep.log" }
+
+# Set execution policy for current process (required for Expand-Archive on fresh installs)
+$executionPolicy = Get-ExecutionPolicy -Scope Process
+if ($executionPolicy -eq "Restricted" -or $executionPolicy -eq "Undefined") {
+    Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process -Force -ErrorAction Stop
+}
 
 # Require PowerShell > 7
 $required = [version]"7.0"
@@ -39,14 +47,14 @@ if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
     $isARM64 = $false
     $vsArchParam = "x64"
     $vsHostArchParam = "x64"
-    $logSuffix = "x64"
+    $logSuffix = if ($useCustomOllama) { "x64_Custom" } else { "x64" }
     $vsInstallPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022"
     $vsProduct = "BuildTools"
 } elseif ($arch -match "ARM" -or $processorArch -match "ARM") {
     $isARM64 = $true
     $vsArchParam = "arm64"
     $vsHostArchParam = "arm64"
-    $logSuffix = "ARM64"
+    $logSuffix = if ($useCustomOllama) { "ARM64_Custom" } else { "ARM64" }
     $vsInstallPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022"
     $vsProduct = "Community"
 } else {
@@ -403,6 +411,127 @@ set
 Set-Content -Path $logFile -encoding utf8 "-- ollama prep started ($logSuffix version)"
 
 "Detected architecture: $arch (Processor: $processorArch)" | log
+if ($useCustomOllama) { "Mode: CUSTOM (use pre-built ollama.exe from zip; skip Go/VS/CMake/LLVM/git build chain)" | log }
+if ($customResourcesPath) { "Custom resources path: $customResourcesPath" | log }
+
+# ============================================================================
+# Validate custom-resources inputs early so we fail fast with a clear message
+# instead of part-way through download / install steps.
+# ============================================================================
+if ($useCustomOllama) {
+    if (-not $customResourcesPath) {
+        " ERROR - -useCustomOllama requires -customResourcesPath to be supplied." | log
+        Exit 1
+    }
+    if (-not (Test-Path $customResourcesPath)) {
+        " ERROR - customResourcesPath does not exist on the DUT: $customResourcesPath" | log
+        Exit 1
+    }
+    "Contents of customResourcesPath ($customResourcesPath):" | log
+    Get-ChildItem -Path $customResourcesPath -File | ForEach-Object {
+        "  $($_.Name) ($([math]::Round($_.Length / 1MB, 1)) MB)" | log
+    }
+}
+
+# ============================================================================
+# Custom-Ollama path: extract pre-built ollama-windows-*.zip into $scriptDrive\hobl_bin\ollama.
+# No Go, no Visual Studio, no CMake, no LLVM-MinGW, no git clone, no compile.
+# ============================================================================
+if ($useCustomOllama) {
+    "-- Custom Ollama path: extracting pre-built binary" | log
+
+    $expectedZipPattern = if ($isARM64) { "ollama-windows-arm64*.zip" } else { "ollama-windows-amd64*.zip" }
+    $ollamaZip = Get-ChildItem -Path $customResourcesPath -Filter $expectedZipPattern | Select-Object -First 1
+    if (-not $ollamaZip) {
+        # Fall back to any ollama-windows-*.zip so a generically-named zip still works,
+        # but log which one we picked.
+        $ollamaZip = Get-ChildItem -Path $customResourcesPath -Filter "ollama-windows-*.zip" | Select-Object -First 1
+        if ($ollamaZip) {
+            " WARNING - No $expectedZipPattern found; falling back to $($ollamaZip.Name). Verify it matches the DUT architecture ($logSuffix)." | log
+        }
+    }
+    if (-not $ollamaZip) {
+        " ERROR - No ollama-windows-*.zip found in: $customResourcesPath" | log
+        " ERROR - Expected file name pattern: $expectedZipPattern" | log
+        Exit 1
+    }
+    "Found ollama zip: $($ollamaZip.Name) ($([math]::Round($ollamaZip.Length / 1MB, 1)) MB)" | log
+
+    $ollamaInstallDir = "$scriptDrive\hobl_bin\ollama"
+    if (Test-Path $ollamaInstallDir) {
+        "Removing existing $ollamaInstallDir to ensure clean extraction..." | log
+        try {
+            Remove-Item -Recurse -Force $ollamaInstallDir -ErrorAction Stop
+        } catch {
+            " ERROR - Failed to clean $ollamaInstallDir : $($_.Exception.Message)" | log
+            " ERROR - Close any process holding files in that directory (ollama.exe?) and retry." | log
+            Exit 1
+        }
+    }
+    New-Item -ItemType Directory -Path $ollamaInstallDir -Force | Out-Null
+
+    "Extracting $($ollamaZip.FullName) -> $ollamaInstallDir ..." | log
+    try {
+        Expand-Archive -Path $ollamaZip.FullName -DestinationPath $ollamaInstallDir -Force -ErrorAction Stop
+    } catch {
+        " ERROR - Failed to extract ollama zip: $($_.Exception.Message)" | log
+        Exit 1
+    }
+
+    # Zip layouts vary:
+    #   - flat:    ollama.exe at root, libs in lib\ollama\
+    #   - nested:  ollama-windows-amd64\ollama.exe (older releases, single top-level folder)
+    #   - app/:    app\ollama.exe alongside its DLLs (current Windows release layout)
+    # Promote a single top-level folder, but leave the app\ subfolder intact since
+    # ollama.exe depends on the DLLs that ship next to it there.
+    $ollamaExePath = Join-Path $ollamaInstallDir "ollama.exe"
+    $ollamaExeAppPath = Join-Path $ollamaInstallDir "app\ollama.exe"
+    if (-not (Test-Path $ollamaExePath) -and -not (Test-Path $ollamaExeAppPath)) {
+        $nested = Get-ChildItem -Path $ollamaInstallDir -Directory | Where-Object {
+            (Test-Path (Join-Path $_.FullName "ollama.exe")) -or
+            (Test-Path (Join-Path $_.FullName "app\ollama.exe"))
+        } | Select-Object -First 1
+        if ($nested) {
+            "Zip contained a top-level folder ($($nested.Name)); flattening..." | log
+            Get-ChildItem -Path $nested.FullName -Force | ForEach-Object {
+                Move-Item -Path $_.FullName -Destination $ollamaInstallDir -Force
+            }
+            Remove-Item -Recurse -Force $nested.FullName -ErrorAction SilentlyContinue
+        }
+    }
+
+    if (Test-Path $ollamaExeAppPath) {
+        $ollamaExePath = $ollamaExeAppPath
+    }
+
+    if (-not (Test-Path $ollamaExePath)) {
+        " ERROR - ollama.exe not found at $ollamaInstallDir (checked root and app\) after extraction." | log
+        "Extracted contents:" | log
+        Get-ChildItem -Path $ollamaInstallDir -Recurse -Depth 2 | ForEach-Object {
+            "  $($_.FullName)" | log
+        }
+        Exit 1
+    }
+    "ollama.exe present at: $ollamaExePath" | log
+
+    # Verify the binary actually runs and report version into the log so future
+    # failure triage knows exactly which build was used.
+    "-- Verifying ollama.exe --version" | log
+    $ollamaVersionOutput = & $ollamaExePath --version 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        " ERROR - 'ollama.exe --version' exited $LASTEXITCODE" | log
+        $ollamaVersionOutput | ForEach-Object { "  $_" | log }
+        Exit 1
+    }
+    $ollamaVersionOutput | ForEach-Object { "ollama: $_" | log }
+
+    "-- ollama prep completed ($logSuffix version - custom binary)" | log
+    Exit 0
+}
+
+# ============================================================================
+# Default path below: install Go + VS + CMake + LLVM-MinGW, clone, and build.
+# ============================================================================
 "Using Visual Studio $vsProduct for $logSuffix" | log
 
 "-- Installing GoLang 1.25.1" | log
@@ -533,22 +662,22 @@ if (Test-Path $llvmZipPath) {
 }
 
 "-- Cloning git repo" | log
-checkSetLocation "$scriptDrive\"
+checkSetLocation "$scriptDrive\hobl_bin\"
 git clone https://github.com/ollama/ollama.git
-checkGitClone $lastexitcode "$scriptDrive\ollama"
+checkGitClone $lastexitcode "$scriptDrive\hobl_bin\ollama"
 
 "-- Checkout" | log
-checkSetLocation "$scriptDrive\ollama"
-git checkout v0.12.1
+checkSetLocation "$scriptDrive\hobl_bin\ollama"
+git checkout v0.20.8-rc0
 check($lastexitcode)
 
 if (-not $isARM64) {
-    "-- Configuring Ollama (x64 only)" | log
-    checkSetLocation "$scriptDrive\ollama"
+    "-- Configuring discrete-GPU runners (x64 only)" | log
+    checkSetLocation "$scriptDrive\hobl_bin\ollama"
     cmake -B build
     check($lastexitcode)
 } else {
-    "-- Skipping Ollama configuration (not supported on ARM64)" | log
+    "-- Skipping cmake configure on ARM64 (no discrete-GPU runners; CPU/Vulkan inference is built into ollama.exe by go build + MinGW)" | log
 }
 
 "-- Download modules" | log
@@ -556,12 +685,23 @@ go mod tidy
 check($lastexitcode)
 
 if (-not $isARM64) {
-    "-- Building Ollama (x64 only)" | log
+    "-- Building discrete-GPU runners (x64 only)" | log
     cmake --build build
     check($lastexitcode)
 } else {
-    "-- Skipping Ollama build (not supported on ARM64)" | log
+    "-- Skipping cmake build on ARM64 (no discrete-GPU runners; CPU/Vulkan inference is built into ollama.exe by go build + MinGW)" | log
 }
+
+"-- Building ollama.exe" | log
+checkSetLocation "$scriptDrive\hobl_bin\ollama"
+go build -o ollama.exe .
+check($lastexitcode)
+if (-not (Test-Path "$scriptDrive\hobl_bin\ollama\ollama.exe")) {
+    " ERROR - go build completed but $scriptDrive\hobl_bin\ollama\ollama.exe was not produced." | log
+    Exit 1
+}
+"Built ollama.exe at: $scriptDrive\hobl_bin\ollama\ollama.exe" | log
+& "$scriptDrive\hobl_bin\ollama\ollama.exe" --version 2>&1 | ForEach-Object { "ollama: $_" | log }
 
 "-- ollama prep completed ($logSuffix version)" | log
 Exit 0

@@ -20,12 +20,16 @@ class Ollama(core.app_scenario.Scenario):
 
     # Set default parameters
     Params.setDefault(module, 'loops', '1')
+    Params.setDefault(module, 'use_custom_ollama', 'false', valOptions=["true", "false"])
+    Params.setDefault(module, 'custom_resources_path', '')
 
 
     def setUp(self):
         # Get parameters
         self.platform = Params.get('global', 'platform')
         self.loops = Params.get(self.module, 'loops')
+        self.use_custom_ollama = Params.get(self.module, 'use_custom_ollama').lower() == 'true'
+        self.custom_resources_path = Params.get(self.module, 'custom_resources_path')
 
         self.target = f"{self.dut_exec_path}\\{self.resources}"
 
@@ -37,10 +41,31 @@ class Ollama(core.app_scenario.Scenario):
             logging.info(f"Uploading test files to {self.target}")
             self._upload(f"scenarios\\windows\\{self.module}\\{self.resources}", self.dut_exec_path)
 
+            # Upload custom resources (ollama zip) to the DUT
+            if self.custom_resources_path:
+                if not os.path.isdir(self.custom_resources_path):
+                    logging.error(f"Custom resources path not found: {self.custom_resources_path}")
+                    raise FileNotFoundError(f"Custom resources path not found: {self.custom_resources_path}")
+                logging.info(f"Uploading custom resources from {self.custom_resources_path} to {self.dut_exec_path}")
+                self._upload(self.custom_resources_path, self.dut_exec_path)
+                folder_name = os.path.basename(self.custom_resources_path)
+                self.custom_resources_dut_path = f"{self.dut_exec_path}\\{folder_name}"
+            else:
+                self.custom_resources_dut_path = ""
+
+            # Validate combinations on host before invoking prep on the DUT
+            if self.use_custom_ollama and not self.custom_resources_dut_path:
+                raise ValueError("use_custom_ollama=true requires custom_resources_path to point to a folder containing the ollama-windows-*.zip")
+
             # Excute prep script
             logging.info("Executing prep, this make take 10-15 minutes...")
+            prep_cmd = f"{self.target}\\{self.module}_prep.ps1"
+            if self.custom_resources_dut_path:
+                prep_cmd += f' -customResourcesPath "{self.custom_resources_dut_path}"'
+            if self.use_custom_ollama:
+                prep_cmd += " -useCustomOllama"
             try:
-                self._call(["pwsh", f"{self.target}\\{self.module}_prep.ps1"], timeout=3600)
+                self._call(["pwsh", prep_cmd], timeout=3600)
             finally:
                 self._copy_data_from_remote(self.result_dir)
             self.createPrepStatusControlFile(self.prep_version)
@@ -74,9 +99,10 @@ class Ollama(core.app_scenario.Scenario):
 
     def kill(self):
         try:
-            logging.debug("Killing powershell and go")
+            logging.debug("Killing powershell, go, and ollama")
             self._kill("pwsh.exe")
             self._kill("go.exe")
+            self._kill("ollama.exe")
         except:
             pass
 

@@ -112,20 +112,21 @@ Write-RunPhaseMarker "phase.run_prep.start"
 
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
-# Verify required commands are findable on PATH after refresh.
-# Fail fast with a clear diagnostic instead of a chain of "term not recognized" errors.
-foreach ($cmd in @('go')) {
-    $resolved = Get-Command $cmd -ErrorAction SilentlyContinue
-    if (-not $resolved) {
-        " ERROR - Required command '$cmd' not found on PATH after refresh." | log
-        " ERROR - Prep may not have completed, or the RPC service has a stale PATH." | log
-        " ERROR - PATH: $env:Path" | log
+# Source-built ollama lives at ollama\ollama.exe; custom-zip releases ship it at ollama\app\ollama.exe.
+$ollamaExe = "$scriptDrive\hobl_bin\ollama\ollama.exe"
+if (-not (Test-Path $ollamaExe)) {
+    $ollamaExeApp = "$scriptDrive\hobl_bin\ollama\app\ollama.exe"
+    if (Test-Path $ollamaExeApp) {
+        $ollamaExe = $ollamaExeApp
+    } else {
+        " ERROR - ollama.exe missing at both $ollamaExe and $ollamaExeApp. Prep did not complete." | log
+        " ERROR - Re-prep required: delete $scriptDrive\hobl_bin\prep_status\ollama<version> on the DUT and re-run." | log
         Exit 1
     }
-    "Found ${cmd}: $($resolved.Source)" | log
 }
+"Using ollama binary: $ollamaExe" | log
 
-Set-Location "$scriptDrive\ollama"
+Set-Location "$scriptDrive\hobl_bin\ollama"
 
 # Disable Progress indicator
 $env:NO_COLOR = "1"
@@ -138,7 +139,7 @@ $verboseLog = Join-Path (Split-Path $logFile -Parent) "ollama_verbose_$($logSuff
 "-- Verbose output: $verboseLog" | log
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
-go run . run $model "what is the meaning of life?" --verbose > $verboseLog 2>&1
+& $ollamaExe run $model "what is the meaning of life?" --verbose > $verboseLog 2>&1
 check($lastexitcode)
 Write-RunPhaseMarker "phase.run_build.end"
 Write-RunPhaseMarker "phase.run_results.start"
