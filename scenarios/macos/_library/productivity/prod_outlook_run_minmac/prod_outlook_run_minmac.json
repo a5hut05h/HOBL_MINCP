@@ -30,47 +30,31 @@
     },
     {
         "children": [],
-        "delay": "1",
-        "description": "New Email",
-        "enabled": true,
-        "file_name": [
-            "image_VKCEX4.png"
-        ],
-        "h": "0.168",
-        "id": "VKCEX4",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.165",
-        "x": "0.000",
-        "y": "0.000"
-    },
-    {
-        "children": [],
         "delay": "0.5",
-        "description": "New Email Region",
+        "description": "caputre new email image",
         "enabled": true,
         "file_name": [
-            "image_1MCC6XX.png"
+            "image_1M9W5NT.png"
         ],
-        "h": "0.243",
-        "id": "1MCC6XX",
+        "h": "0.466",
+        "id": "1M9W5NT",
         "recapture": false,
         "type": "Capture",
-        "w": "0.259",
-        "x": "0.002",
-        "y": "0.002"
+        "w": "0.489",
+        "x": "0.011",
+        "y": "0.038"
     },
     {
-        "capture_id": "1MCC6XX",
+        "capture_id": "1M9W5NT",
         "children": [],
         "delay": "2",
-        "description": "New Email",
+        "description": "new email",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_1MCC7XM.png"
+            "image_1M9W5V0.png"
         ],
-        "id": "1MCC7XM",
+        "id": "1M9W5V0",
         "match_threshold": "",
         "primary": true,
         "scale": "",
@@ -80,8 +64,16 @@
     },
     {
         "children": [],
+        "delay": "5",
+        "description": "",
+        "enabled": true,
+        "id": "1M9X3KN",
+        "type": "Delay"
+    },
+    {
+        "children": [],
         "delay": "4",
-        "description": "Recipient",
+        "description": "recipient",
         "enabled": true,
         "id": "1L7AK4K",
         "text": "bogus@outlook.com",
@@ -165,7 +157,7 @@
     {
         "children": [],
         "delay": "2",
-        "description": "Paste snapshot from clipboard",
+        "description": "paste already copied picture",
         "enabled": true,
         "id": "1LP1NYF",
         "text": "\ue03dv",
@@ -191,30 +183,30 @@
     {
         "children": [],
         "delay": "0.5",
-        "description": "Discard Region",
+        "description": "capture email screen",
         "enabled": true,
         "file_name": [
-            "image_1MCC9H0.png"
+            "image_1L8AUFM.png"
         ],
-        "h": "0.274",
-        "id": "1MCC9H0",
+        "h": "1",
+        "id": "1L8AUFM",
         "recapture": false,
         "type": "Capture",
-        "w": "0.602",
-        "x": "0.288",
-        "y": "0.001"
+        "w": "1",
+        "x": "0",
+        "y": "0"
     },
     {
-        "capture_id": "1MCC9H0",
+        "capture_id": "1L8AUFM",
         "children": [],
         "delay": "2",
-        "description": "Discard Button",
+        "description": "click top Discard button",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_1MCC9VA.png"
+            "image_1L8AUFN.png"
         ],
-        "id": "1MCC9VA",
+        "id": "1L8AUFN",
         "match_threshold": "",
         "primary": true,
         "scale": "",
@@ -224,31 +216,81 @@
     },
     {
         "children": [],
-        "delay": "0.5",
-        "description": "Discard pop-up window",
+        "delay": "2",
+        "description": "",
         "enabled": true,
-        "file_name": [
-            "image_1MCCA74.png"
-        ],
-        "h": "0.427",
-        "id": "1MCCA74",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.385",
-        "x": "0.315",
-        "y": "0.287"
+        "id": "1MRRLA8",
+        "type": "Delay"
     },
     {
-        "capture_id": "1MCCA74",
+        "children": [],
+        "delay": "0.5",
+        "description": "popup discard",
+        "enabled": true,
+        "file_name": [
+            "image_1M9VNFJ.png"
+        ],
+        "h": "0.363",
+        "id": "1M9VNFJ",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.299",
+        "x": "0.389",
+        "y": "0.292"
+    },
+    {
+        "capture_id": "1M9VNFJ",
+        "children": [],
+        "delay": "2",
+        "description": "discard",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1M9VNLR.png"
+        ],
+        "id": "1M9VNLR",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
         "children": [],
         "delay": "2",
         "description": "",
         "enabled": true,
+        "id": "1MRRLEX",
+        "type": "Delay"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "Discard from top ",
+        "enabled": true,
+        "file_name": [
+            "image_1M34JC1.png"
+        ],
+        "h": "0.165",
+        "id": "1M34JC1",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.658",
+        "x": "0.246",
+        "y": "0.029"
+    },
+    {
+        "capture_id": "1M34JC1",
+        "children": [],
+        "delay": "2",
+        "description": "discard again",
+        "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_1MCCC2Y.png"
+            "image_1M34JK0.png"
         ],
-        "id": "1MCCC2Y",
+        "id": "1M34JK0",
         "match_threshold": "",
         "primary": true,
         "scale": "",
