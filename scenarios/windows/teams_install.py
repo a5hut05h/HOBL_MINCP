@@ -136,9 +136,9 @@ class TeamsInstall(core.app_scenario.Scenario):
         # Try to finish setup for built in teams.
         else:
             # First confirm the MSTeams Appx package is actually installed before
-            # we go poking at the taskbar / search bar. Without this check, typing
+            # checking the taskbar / search bar. Without this check, typing
             # "Microsoft Teams" into search on a device where Teams isn't installed
-            # would surface web suggestions and could launch Edge.
+            # could launch Edge search.
             teams_pkg = self._call(
                 ["powershell.exe", "(Get-AppxPackage -Name MSTeams).PackageFullName"],
                 expected_exit_code=""
@@ -162,6 +162,7 @@ class TeamsInstall(core.app_scenario.Scenario):
                     finish_setup_btn.click()
                     logging.info("Clicked 'Finish setup'.")
                     time.sleep(180)
+                    ActionChains(desktop).send_keys(Keys.ENTER).perform() # Incase canera permissions pop up need to dismiss it.
                 except:
                     logging.info("Teams not found in taskbar, trying to launch via start menu search.")
                     try:
@@ -178,6 +179,7 @@ class TeamsInstall(core.app_scenario.Scenario):
                         finish_setup_btn.click()
                         logging.info("Clicked 'Finish setup'.")
                         time.sleep(180)
+                        ActionChains(desktop).send_keys(Keys.ENTER).perform() # Incase canera permissions pop up need to dismiss it.
                     except:
                         try:
                             logging.debug("Killing msedge in case it was launched because teams isn't installed.")
