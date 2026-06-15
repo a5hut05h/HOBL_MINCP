@@ -182,6 +182,13 @@ fi
 log "✓ libavcodec version resolved via pkg-config: $FFMPEG_VERSION"
 
 log "-- Creating build directory"
+# Force a clean CMake configuration. A stale CMakeCache.txt from a previous prep
+# (e.g. one generated before ffmpeg@6 pinning) caches the resolved FFmpeg paths,
+# so re-running cmake silently keeps the old ffmpeg (8.x) and breaks the
+# OpenCV 4.10 videoio compile with removed APIs like avcodec_close and
+# av_stream_get_side_data. Removing the build dir guarantees ffmpeg@6 is picked
+# up fresh via PKG_CONFIG_PATH below.
+rm -rf $BIN_DIR/build_opencv
 mkdir -p $BIN_DIR/build_opencv
 cd $BIN_DIR/build_opencv || {
     log " ERROR - Failed to change to build_opencv directory"
