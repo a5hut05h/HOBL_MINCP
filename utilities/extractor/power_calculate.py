@@ -4,6 +4,7 @@ These are computed from already-parsed data (power_light.csv rails and hobl.log)
 following the "Real world consistency workloads" dashboard spec.
 """
 
+import csv
 import logging
 import re
 from datetime import datetime
@@ -94,10 +95,10 @@ def _return_memory_power(rails: dict, dut_type: Optional[str]) -> Optional[float
         return get("pm_emi_memory_vdd2h")
     
     if dt == "heracles":
-        return get("pm_emi_vddq") + get("pm_emi_memory") + get("pm_emi_vdd2h")
+        return get("pm_emi_vddq") + get("pm_emi_vdd2h")
     
     if dt == "hp chiharu":
-        return get("pm_emi_memory_vdd2h") + get("pm_emi_memory_vddq")
+        return get("pm_emi_mem_vdd2h") + get("pm_emi_mem_vddq")
     
     if dt == "cadmus denali":
         return get("pm_emi_memory_vdd2h")
@@ -190,7 +191,7 @@ def _return_display_light_power(rails: dict, dut_type: Optional[str]) -> Optiona
         return get("pm_emi_bklt_in")
     
     if dt == "hp chiharu":
-        return 0.0
+        return get("pm_emi_display_panel_bl")
     
     if dt == "cadmus denali":
         return get("pm_emi_display_bklt") + get("pm_emi_display_panel_3p3v")
@@ -204,6 +205,98 @@ def _return_display_light_power(rails: dict, dut_type: Optional[str]) -> Optiona
     logger.warning("Unknown dut_type %r; display_light_power not computed", dut_type)
     return None
 
+def _return_storage_power(rails: dict, dut_type: Optional[str]) -> Optional[float]:
+    """Storage power metric varies by platform."""
+    if not dut_type:
+        return None
+
+    def get(name):
+        return rails.get(name)
+
+    dt = dut_type.strip().lower()
+
+    if dt == "pantherlake/lunarlake surface":
+        return get("pm_emi_storage_3p3v_ssd")
+    
+    if dt == "heracles":
+        return get("pm_emi_3p3v_ssd")
+    
+    if dt == "hp chiharu":
+        return get("pm_emi_storage_ssd")
+    
+    if dt == "cadmus denali":
+        return get("pm_emi_storage")
+
+    if dt == "cadmus romulus":
+        return get("pm_emi_storage")
+    
+    if dt == "purwa":
+        return get("pm_emi_storage")
+
+    logger.warning("Unknown dut_type %r; storage_power not computed", dut_type)
+    return None
+
+def _return_rop_power(rails: dict, dut_type: Optional[str]) -> Optional[float]:
+    """ROP power metric varies by platform."""
+    if not dut_type:
+        return None
+
+    def get(name):
+        return rails.get(name)
+
+    dt = dut_type.strip().lower()
+
+    if dt == "pantherlake/lunarlake surface":
+        return get("pm_emi_vsys_rop")
+    
+    if dt == "heracles":
+        return get("pm_emi_vsys_rop")
+    
+    if dt == "hp chiharu":
+        return get("pm_emi_vsys_rop")
+    
+    if dt == "cadmus denali":
+        return get("pm_emi_sys_rop_left") + get("pm_emi_sys_rop_right")
+
+    if dt == "cadmus romulus":
+        return get("pm_emi_sys_rop_left") + get("pm_emi_sys_rop_right")
+    
+    if dt == "purwa":
+        return get("pm_emi_sys_rop_left") + get("pm_emi_sys_rop_right")
+
+    logger.warning("Unknown dut_type %r; rop_power not computed", dut_type)
+    return None
+
+def _return_wifi_power(rails: dict, dut_type: Optional[str]) -> Optional[float]:
+    """WiFi power metric varies by platform."""
+    if not dut_type:
+        return None
+
+    def get(name):
+        return rails.get(name)
+
+    dt = dut_type.strip().lower()
+
+    if dt == "pantherlake/lunarlake surface":
+        return get("pm_emi_wifi_3p3v_wlan")
+    
+    if dt == "heracles":
+        return get("pm_emi_3p86v_wifi")
+    
+    if dt == "hp chiharu":
+        return get("pm_emi_wifi_3v")
+    
+    if dt == "cadmus denali":
+        return 0.0
+
+    if dt == "cadmus romulus":
+        return get("pm_emi_wifi_3p86v")
+    
+    if dt == "purwa":
+        return get("pm_emi_wifi_3p3v_wlan")
+
+    logger.warning("Unknown dut_type %r; wifi_power not computed", dut_type)
+    return None
 
 def calculate_power_metrics(power_metrics: list[dict], dut_type: Optional[str] = None) -> list[dict]:
     """Calculate aggregate power metrics from raw pm_emi_* rails.
@@ -229,24 +322,24 @@ def calculate_power_metrics(power_metrics: list[dict], dut_type: Optional[str] =
         return sum(vals) if vals else None
 
     definitions = [
+        ("system_power",            _return_system_power(rails, dut_type)),
+        ("soc_power",               _calculate_soc_power(rails, dut_type)),
         ("memory_power",            _return_memory_power(rails, dut_type)),
         ("display_power",           _return_display_power(rails, dut_type)),
         ("display_logic_power",     _return_display_logic_power(rails, dut_type)),
         ("display_light_power",     _return_display_light_power(rails, dut_type)),
         ("audio_power",             sum_prefix("pm_emi_audio_")),
         ("touch_power",             sum_present("pm_emi_trackpad_3p3v", "pm_emi_trackpad_5v")),
-        ("storage_power",           get("pm_emi_storage_3p3v_ssd")),
+        ("storage_power",           _return_storage_power(rails, dut_type)),
         ("camera_power",            0.0),
-        ("rop_power",               get("pm_emi_vsys_rop")),
+        ("rop_power",               _return_rop_power(rails, dut_type)),
         ("sam_power",               0.0),
-        ("wifi_bt_power",           get("pm_emi_wifi_3p3v_wlan")),
+        ("wifi_bt_power",           _return_wifi_power(rails, dut_type)),
         ("keyboard_trackpad_power", sum_present("pm_emi_trackpad_3p3v", "pm_emi_trackpad_5v")),
         ("cpu_power",               sum_prefix("pm_emi_cpu")),
         ("gpu_power",               sum_prefix("pm_emi_gpu")),
         ("npu_power",               sum_prefix("pm_emi_npu")),
         ("multimedia_power",        sum_present("pm_emi_multimedia", "pm_emi_mm")),
-        ("system_power",            _return_system_power(rails, dut_type)),
-        ("soc_power",               _calculate_soc_power(rails, dut_type)),
     ]
 
     result = []
@@ -264,6 +357,51 @@ def calculate_power_metrics(power_metrics: list[dict], dut_type: Optional[str] =
 # ---------------------------------------------------------------------------
 
 _LOG_TS_RE = re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),(\d{3})")
+
+
+# ---------------------------------------------------------------------------
+# Battery life from battery_fcc.csv and system_power
+# ---------------------------------------------------------------------------
+
+def calculate_battery_life_hr(run_dir: Path, system_power_w: Optional[float]) -> Optional[float]:
+    """Compute battery life in hours = (full_charge_capacity_mwh / 1000) / system_power_w.
+
+    Reads `full_charge_capacity_mwh` from `<run_dir>/battery_fcc.csv` (key,value rows).
+    Returns None if the CSV is missing, the value can't be parsed, or `system_power_w`
+    is missing/zero.
+    """
+    if system_power_w is None or system_power_w <= 0:
+        logger.warning("system_power missing or non-positive; battery_life not computed")
+        return None
+
+    fcc_path = run_dir / "battery_fcc.csv"
+    if not fcc_path.exists():
+        logger.warning("battery_fcc.csv not found in %s", run_dir)
+        return None
+
+    fcc_mwh = None
+    try:
+        with open(fcc_path, "r", encoding="utf-8-sig") as f:
+            for row in csv.reader(f):
+                if len(row) >= 2 and row[0].strip() == "full_charge_capacity_mwh":
+                    try:
+                        fcc_mwh = float(row[1].strip())
+                    except ValueError:
+                        logger.warning("Invalid full_charge_capacity_mwh value: %s", row[1])
+                    break
+    except OSError as e:
+        logger.error("Failed to read %s: %s", fcc_path, e)
+        return None
+
+    if fcc_mwh is None:
+        logger.warning("full_charge_capacity_mwh row not found in %s", fcc_path)
+        return None
+
+    fcc_wh = fcc_mwh / 1000.0
+    battery_life_hr = fcc_wh / system_power_w
+    logger.info("Battery life: %.3f hr (FCC=%.3f Wh, system_power=%.3f W)",
+                battery_life_hr, fcc_wh, system_power_w)
+    return battery_life_hr
 
 
 def _parse_log_timestamp(line: str) -> Optional[datetime]:

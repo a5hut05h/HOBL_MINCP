@@ -39,7 +39,7 @@ param (
     [string]$TierDefinitionKey,
 
     [Parameter(Mandatory=$false)]
-    [string]$RoutingTag = "winperf",
+    [string]$RoutingTag = "hobl",
 
     [Parameter(Mandatory=$false)]
     [string]$GateName = "Hobl",
@@ -69,7 +69,13 @@ param (
     [string]$MachineMake = "",
 
     [Parameter(Mandatory=$false)]
-    [string]$MachineModel = ""
+    [string]$MachineModel = "",
+
+    [Parameter(Mandatory=$false)]
+    [string]$DeviceName = "",
+
+    [Parameter(Mandatory=$false)]
+    [string]$MemorySizeGB = ""
 
 )
 
@@ -101,9 +107,55 @@ if ([string]::IsNullOrWhiteSpace($BuildDate)) {
 }
 
 
-# Generate TierDefinitionKey
+# Resolve DeviceName and MemorySizeGB: prefer caller-supplied values, otherwise
+# read "Device Name" and "Memory Size (GB)" from the DUT's Config.csv in the
+# run/output directory. Fall back to the host computer name only if Config.csv
+# is missing or unreadable.
+if ([string]::IsNullOrWhiteSpace($DeviceName) -or [string]::IsNullOrWhiteSpace($MemorySizeGB)) {
+    $configCsv = Join-Path -Path $OutputDirectory -ChildPath "Config.csv"
+    if (Test-Path $configCsv) {
+        try {
+            foreach ($line in Get-Content -Path $configCsv -Encoding UTF8) {
+                $parts = $line -split ",", 2
+                if ($parts.Count -lt 2) { continue }
+                $key = $parts[0].Trim()
+                $value = $parts[1].Trim()
+                if ([string]::IsNullOrWhiteSpace($DeviceName) -and $key -eq "Device Name") {
+                    $DeviceName = $value
+                }
+                elseif ([string]::IsNullOrWhiteSpace($MemorySizeGB) -and $key -eq "Memory Size (GB)") {
+                    $MemorySizeGB = $value
+                }
+            }
+        } catch {
+            Write-Host " ERROR - Failed to read DUT fields from $configCsv : $_"
+        }
+    } else {
+        Write-Host " ERROR - Config.csv not found in $OutputDirectory; falling back to host name for DeviceName"
+    }
+
+    if ([string]::IsNullOrWhiteSpace($DeviceName)) {
+        $DeviceName = $computerInfo.CsName
+        if ([string]::IsNullOrWhiteSpace($DeviceName)) {
+            $DeviceName = $env:COMPUTERNAME
+        }
+    }
+}
+
+# Generate TierDefinitionKey: <DeviceName>_<MemorySizeGB>
+# Both values come from the DUT's Config.csv (resolved above). Using memory
+# size instead of scenario name keeps the tier count bounded per device while
+# still separating runs that use different RAM configurations.
 if ([string]::IsNullOrWhiteSpace($TierDefinitionKey)) {
-    $TierDefinitionKey = "${GateName}"
+    # Replace whitespace in device name so the key has no spaces.
+    $deviceToken = ($DeviceName -replace '\s+', '_').Trim('_')
+    if ([string]::IsNullOrWhiteSpace($MemorySizeGB)) {
+        Write-Host " ERROR - Memory Size (GB) not found in Config.csv; TierDefinitionKey will omit memory size"
+        $TierDefinitionKey = $deviceToken
+    } else {
+        $memoryToken = ($MemorySizeGB -replace '\s+', '').Trim()
+        $TierDefinitionKey = "{0}_{1}" -f $deviceToken, $memoryToken
+    }
 }
 
 $metadata = @{
