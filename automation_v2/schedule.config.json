@@ -1,0 +1,47 @@
+﻿{
+    "_comment":  "HOBL automation v2 schedule. Each job points at a HOBL testplan .ps1 file (the same file lab developers run locally with hobl.cmd). daily_run.ps1 parses that testplan and POSTs it to HOBLweb\u0027s /plan/Create as a brand-new plan with AutoResubmit set so it cycles \u0027runsPerDay\u0027 times. There is no template plan in HOBLweb\u0027s DB — the .ps1 in git is the source of truth.",
+    "hoblwebBaseUrl":  "http://localhost",
+    "logDir":  "",
+    "logRetentionDays":  30,
+    "overlap":  "skip",
+    "submit":  {
+                   "timeoutSec":  30,
+                   "maxAttempts":  5,
+                   "backoffSec":  [
+                                      5,
+                                      15,
+                                      60,
+                                      180,
+                                      600
+                                  ]
+               },
+    "monitor":  {
+                    "_comment":  "After submitting, daily_run.ps1 stays attached and polls HOBLweb every \u0027intervalSec\u0027 seconds, logging the current PlanID / cycle / scenario / status until the AutoResubmit chain finishes or \u0027maxHours\u0027 elapses. Set \u0027enabled\u0027 to false to revert to fire-and-forget.",
+                    "enabled":  true,
+                    "intervalSec":  45,
+                    "maxHours":  8
+                },
+    "email":  {
+                  "_comment":  "Weekly report email via send_report_email.ps1 (Outlook COM, logged-in account). \u0027to\u0027 is the recipient list (;-separated). Register the weekly task with: send_report_email.ps1 -Register -Day <day> -Time <HH:MM>.",
+                  "enabled":  true,
+                  "to":  "t-sharmaadit@microsoft.com",
+                  "sendDay":  "Friday",
+                  "sendTime":  "17:00"
+              },
+    "jobs":  [
+                 {
+                     "name":  "Pantherlake08_7workloads_Pan",
+                     "enabled":  true,
+                     "profile":  "Pantherlake08",
+                     "testplan":  "testplans/7workloads_Pan.ps1",
+                     "runsPerDay":  3
+                 },
+                 {
+                     "name":  "Cadmus25_7workloads",
+                     "enabled":  true,
+                     "profile":  "Cadmus25",
+                     "testplan":  "testplans/7workloads.ps1",
+                     "runsPerDay":  3
+                 }
+             ]
+}
