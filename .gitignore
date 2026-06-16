@@ -6,3 +6,5 @@
 __pycache__
 /downloads/**
 /scenarios/windows/enterprise_collab/resources/large/**
+
+*.bak
