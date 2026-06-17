@@ -14,7 +14,7 @@ import time
 class MacNodejs(core.app_scenario.Scenario):
 
     module = __module__.split('.')[-1]
-    prep_version = "5"
+    prep_version = "7"
     resources = module + "_resources"
 
 
