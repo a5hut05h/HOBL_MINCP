@@ -18,18 +18,19 @@ def _upload_large_files(scenario):
             # iCloud Drive path on macOS (equivalent to OneDrive on Windows)
             icloud_base = f"{home_dir}/Library/Mobile Documents/com~apple~CloudDocs"
             download_dir = f"{icloud_base}/onedrivetest"  # Using same subfolder name as Windows example        
+            logging.info(f"Started uploadeding files to {download_dir}")
             scenario._upload("scenarios/MacOS/mac_enterprise_collab/resources/large", download_dir)
             logging.info(f"Successfully uploaded files to {download_dir}")
             
             # Verify upload - check if directory exists and count files
-            result = scenario._call(["bash", "-c", f"ls -lh '{download_dir}'"])
-            logging.info(f"Directory contents:\n{result}")
+            #result = scenario._call(["bash", "-c", f"ls -lh '{download_dir}'"])
+            #logging.info(f"Directory contents:\n{result}")
             
             upload_successful = True
             break
         except Exception as e:
             last_exception = e
-            logging.error(f"Could not copy large files to onedrive (attempt {i+1}/12): {e}")
+            logging.warning(f"copy large files to onedrive (attempt {i+1}/12): {e} failed. Retrying...  ")
             time.sleep(1)  # Wait between retries
     if not upload_successful:
         logging.error("Could not copy large files to onedrive in 12 tries.")
