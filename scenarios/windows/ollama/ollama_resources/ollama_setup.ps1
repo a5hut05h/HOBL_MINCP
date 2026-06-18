@@ -1,26 +1,36 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+# Initialize logging IMMEDIATELY (before anything else) so we catch all failures
+$scriptDrive = Split-Path -Qualifier $PSScriptRoot
+$logFile = "$scriptDrive\hobl_data\ollama_setup.log"
+$logDir = Split-Path $logFile -Parent
+
+# Create log directory and write first marker
+if (-not (Test-Path $logDir)) { 
+    New-Item -ItemType Directory -Path $logDir -Force | Out-Null 
+}
+Add-Content -Path $logFile -encoding utf8 "=== ollama_setup.ps1 execution started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff') ==="
+Add-Content -Path $logFile -encoding utf8 "Script location: $PSCommandPath"
+Add-Content -Path $logFile -encoding utf8 "PowerShell version: $($PSVersionTable.PSVersion)"
+
 # Require PowerShell > 7
 $required = [version]"7.0"
 if (-not $PSVersionTable.PSVersion) {
+    Add-Content -Path $logFile -encoding utf8 " ERROR - Cannot determine PowerShell version; aborting."
     Write-Host "Cannot determine PowerShell version; aborting." -ForegroundColor Red
     Exit 1
 }
 if ([version]$PSVersionTable.PSVersion -le $required) {
+    Add-Content -Path $logFile -encoding utf8 " ERROR - PowerShell version $($PSVersionTable.PSVersion) is less than required $required"
     Write-Host "This script requires PowerShell greater than $required. Current: $($PSVersionTable.PSVersion)" -ForegroundColor Yellow
     Write-Host "Please install PowerShell 7 or later from https://aka.ms/powershell" -ForegroundColor Yellow
     Exit 1
 }
+Add-Content -Path $logFile -encoding utf8 "PowerShell version check passed."
+
 
 # [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-
-$scriptDrive = Split-Path -Qualifier $PSScriptRoot
-$logFile = "$scriptDrive\hobl_data\ollama_setup.log"
-
-# Ensure log directory exists
-$logDir = Split-Path $logFile -Parent
-if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
 
 function log {
     [CmdletBinding()] Param([Parameter(ValueFromPipeline)] $msg)
@@ -53,10 +63,8 @@ function checkSetLocation {
     }
 }
 
-Set-Content -Path $logFile -encoding utf8 "-- ollama setup started"
-"-- ollama setup started" | log
-
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+"-- ollama setup starting execution phase" | log
 
 checkSetLocation "$scriptDrive\hobl_bin\ollama"
 
@@ -150,7 +158,49 @@ if (-not $serverReady) {
 }
 
 "-- Pulling gemma3" | log
-& $ollamaExe pull gemma3
-check($lastexitcode)
+$pullStdOut = Join-Path $logDir "ollama_pull_stdout.log"
+$pullStdErr = Join-Path $logDir "ollama_pull_stderr.log"
+$pullTimeoutSec = 5400
+$pullHeartbeatSec = 30
+"-- Pull stdout redirected to: $pullStdOut" | log
+"-- Pull stderr redirected to: $pullStdErr" | log
+"-- Starting model pull with timeout: $pullTimeoutSec seconds" | log
+
+$pullProc = Start-Process -FilePath $ollamaExe `
+    -ArgumentList "pull", "gemma3" `
+    -WindowStyle Hidden `
+    -RedirectStandardOutput $pullStdOut `
+    -RedirectStandardError $pullStdErr `
+    -PassThru
+
+$elapsedSec = 0
+while (-not $pullProc.HasExited -and $elapsedSec -lt $pullTimeoutSec) {
+    Start-Sleep -Seconds 1
+    $elapsedSec++
+
+    if (($elapsedSec % $pullHeartbeatSec) -eq 0) {
+        "-- Pull in progress... elapsed=${elapsedSec}s pid=$($pullProc.Id)" | log
+    }
+}
+
+if (-not $pullProc.HasExited) {
+    " ERROR - Model pull timed out after $pullTimeoutSec seconds" | log
+    " ERROR - Terminating pull process (pid=$($pullProc.Id))" | log
+    Stop-Process -Id $pullProc.Id -Force -ErrorAction SilentlyContinue
+    Exit 1
+}
+
+if ($pullProc.ExitCode -ne 0) {
+    " ERROR - Model pull failed with exit code $($pullProc.ExitCode)" | log
+    " ERROR - See $pullStdOut and $pullStdErr for full details." | log
+
+    if (Test-Path $pullStdErr) {
+        Get-Content -Path $pullStdErr -Tail 20 -ErrorAction SilentlyContinue | ForEach-Object { "pull-stderr: $_" | log }
+    }
+
+    Exit $pullProc.ExitCode
+}
+
+"-- Model pull completed successfully in ${elapsedSec}s" | log
 
 Exit 0

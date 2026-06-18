@@ -14,7 +14,7 @@ from datetime import datetime
 class Ollama(core.app_scenario.Scenario):
 
     module = __module__.split('.')[-1]
-    prep_version = "6"
+    prep_version = "7"
     resources = module + "_resources"
 
 
@@ -73,7 +73,7 @@ class Ollama(core.app_scenario.Scenario):
         # Start server in background
         logging.info("Starting server")
         try:
-            self._call(["pwsh", f"{self.target}\\{self.module}_setup.ps1"])
+            self._call(["pwsh", f"{self.target}\\{self.module}_setup.ps1"], timeout=7200)
         finally:
             self._copy_data_from_remote(self.result_dir)
 
