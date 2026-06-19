@@ -107,14 +107,6 @@ if ($llamaProcesses) {
 
 Start-Sleep -Seconds 2
 
-# Capture the server's stdout/stderr to a file so server-side failures (model
-# load errors, GPU runner crashes, port-in-use, etc.) are diagnosable after
-# the scenario finishes.
-$serverStdOut = Join-Path $logDir "ollama_server_stdout.log"
-$serverStdErr = Join-Path $logDir "ollama_server_stderr.log"
-"-- Server stdout redirected to: $serverStdOut" | log
-"-- Server stderr redirected to: $serverStdErr" | log
-
 "-- Verifying ollama.exe --version" | log
 $ollamaVersionOutput = & $ollamaExe --version 2>&1
 if ($LASTEXITCODE -ne 0) {
@@ -127,9 +119,7 @@ $ollamaVersionOutput | ForEach-Object { "ollama: $_" | log }
 "-- Launching ollama server in background ($ollamaExe serve)" | log
 Start-Process -FilePath $ollamaExe `
     -ArgumentList "serve" `
-    -WindowStyle Hidden `
-    -RedirectStandardOutput $serverStdOut `
-    -RedirectStandardError $serverStdErr
+    -WindowStyle Hidden
 
 "-- Waiting for server to be ready..." | log
 $maxAttempts = 30
@@ -153,7 +143,7 @@ while ($attempt -lt $maxAttempts -and -not $serverReady) {
 
 if (-not $serverReady) {
     " ERROR - Server did not start within $maxAttempts seconds" | log
-    " ERROR - See $serverStdOut / $serverStdErr for the server's own output." | log
+    " ERROR - See hobl.log for the server's own output." | log
     Exit 1
 }
 
