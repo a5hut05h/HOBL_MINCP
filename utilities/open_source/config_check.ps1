@@ -1120,6 +1120,9 @@ else {
     Write-KeyVal "Product" $Win32_ComputerSystem.Model
     Write-KeyVal "Product Mfg" $Win32_ComputerSystem.Manufacturer
 
+    # DUT Type (hardware platform; populated from profile via OverrideString to select SOC power formula)
+    Write-KeyVal "DUT Type" ""
+    
     # Get Wi-Fi vs LTE
     GetLTEStatus -shortVersion
 
@@ -1286,6 +1289,15 @@ else {
     get-ciminstance -class "cim_physicalmemory" | % { $capacity += $_.Capacity }
     $memsize = (($capacity / 1MB) / 1kB)
     Write-KeyVal "Memory Size (GB)" $memsize
+
+    # Usable RAM (GB) - memory visible to the OS, reflects any bcdedit removememory
+    # limit (e.g. 'bcdedit /set {current} removememory <MB>') and hardware-reserved memory.
+    # Rounded UP to the nearest whole GB (e.g. 7.61 -> 8) to report the nominal size.
+    $usableKB = (Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue).TotalVisibleMemorySize
+    if ($usableKB) {
+        $usableGB = [Math]::Ceiling($usableKB / 1MB)
+        Write-KeyVal "Usable RAM (GB)" $usableGB
+    }
 
     $drive = ""
     Get-WmiObject -Class win32_diskdrive | % { if ($_.DeviceID -like "*PHYSICALDRIVE0") { $drive = $_ } }
