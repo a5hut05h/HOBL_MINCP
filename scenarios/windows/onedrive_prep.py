@@ -578,7 +578,7 @@ class oneDrivePrep(core.app_scenario.Scenario):
         self._kill("WinAppDriver.exe")
 
         # Reboot for improved robustness
-        logging.info("Rebooting after Office installation.")
+        logging.info("Rebooting after Onedrive setup.")
         self._dut_reboot()
 
 

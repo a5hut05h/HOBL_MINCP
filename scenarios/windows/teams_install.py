@@ -76,6 +76,14 @@ class TeamsInstall(core.app_scenario.Scenario):
             logging.info("Uploading movie file " + "ppt.mp4" + " to " + dest)
             self._upload(source, dest)
 
+        # Get desktop driver
+        logging.debug("Launching WinAppDriver.exe on DUT.")
+        self._call([self.dut_exec_path + "\\WindowsApplicationDriver\\WinAppDriver.exe", self.dut_resolved_ip + " " + self.app_port + " /forcequit"], blocking=False)
+        logging.info("Creating Desktop Driver")
+        desired_caps = {}
+        desired_caps["app"] = "Root"
+        desktop = self._launchApp(desired_caps, track_driver=False)
+        desktop.implicitly_wait(10)
 
         # Run Install if install_teams is set to 1
         if self.install_teams == "1":
@@ -125,14 +133,60 @@ class TeamsInstall(core.app_scenario.Scenario):
             self._call(['cmd.exe', r'/C reg.exe Add "HKCU\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone\MSTeams_8wekyb3d8bbwe" /v Value /t REG_SZ /d Allow /f'], expected_exit_code="")
             self._call(['cmd.exe', r'/C reg.exe Add "HKCU\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam\MSTeams_8wekyb3d8bbwe" /v Value /t REG_SZ /d Allow /f'], expected_exit_code="")
 
-        # Get desktop driver
-        logging.debug("Launching WinAppDriver.exe on DUT.")
-        self._call([self.dut_exec_path + "\\WindowsApplicationDriver\\WinAppDriver.exe", self.dut_resolved_ip + " " + self.app_port + " /forcequit"], blocking=False)
-        logging.info("Creating Desktop Driver")
-        desired_caps = {}
-        desired_caps["app"] = "Root"
-        desktop = self._launchApp(desired_caps, track_driver=False)
-        desktop.implicitly_wait(10)
+        # Try to finish setup for built in teams.
+        else:
+            # First confirm the MSTeams Appx package is actually installed before
+            # checking the taskbar / search bar. Without this check, typing
+            # "Microsoft Teams" into search on a device where Teams isn't installed
+            # could launch Edge search.
+            teams_pkg = self._call(
+                ["powershell.exe", "(Get-AppxPackage -Name MSTeams).PackageFullName"],
+                expected_exit_code=""
+            ).strip()
+
+            if not teams_pkg:
+                logging.info("MSTeams Appx package not installed on DUT, skipping built-in Teams launch.")
+            else:
+                logging.info(f"Found MSTeams Appx package: {teams_pkg}")
+                try:
+                    self.active_driver = desktop
+                    apps_elem = self._get_app_tray(desktop)
+
+                    id = "MSTeams"
+                    # Match any element whose AutomationId contains "MSTeams" so we
+                    # don't have to track the exact (and long/changing) full id.
+                    app_button = apps_elem.find_element_by_xpath(f"//*[contains(@AutomationId, '{id}')]")
+                    app_button.click()
+                    logging.info("Waiting for 'Finish setup' button...")
+                    finish_setup_btn = WebDriverWait(desktop, 60).until(EC.presence_of_element_located((By.XPATH, "//Button[contains(@Name, 'Finish setup')]")))
+                    finish_setup_btn.click()
+                    logging.info("Clicked 'Finish setup'.")
+                    time.sleep(180)
+                    ActionChains(desktop).send_keys(Keys.ENTER).perform() # Incase canera permissions pop up need to dismiss it.
+                except:
+                    logging.info("Teams not found in taskbar, trying to launch via start menu search.")
+                    try:
+                        # Press Windows key, type "Microsoft Teams", and hit Enter to launch.
+                        # Safe to do here because we've already confirmed the package is installed,
+                        # so search will surface the app rather than a Bing/Store web suggestion.
+                        ActionChains(desktop).key_down(Keys.META).key_up(Keys.META).perform()
+                        time.sleep(2)
+                        ActionChains(desktop).send_keys("Microsoft Teams").perform()
+                        time.sleep(2)
+                        ActionChains(desktop).send_keys(Keys.ENTER).perform()
+                        logging.info("Waiting for 'Finish setup' button...")
+                        finish_setup_btn = WebDriverWait(desktop, 60).until(EC.presence_of_element_located((By.XPATH, "//Button[contains(@Name, 'Finish setup')]")))
+                        finish_setup_btn.click()
+                        logging.info("Clicked 'Finish setup'.")
+                        time.sleep(180)
+                        ActionChains(desktop).send_keys(Keys.ENTER).perform() # Incase canera permissions pop up need to dismiss it.
+                    except:
+                        try:
+                            logging.debug("Killing msedge in case it was launched because teams isn't installed.")
+                            self._kill("msedge.exe")
+                        except:
+                            pass
+                        logging.info("Failed to see 'Finish setup' button after launching Teams. Built in teams is already set up or needs to be installed. Will try to proceed with setup.")
 
         # Launch Settings to microphone/camera/location set permissions to teams true
         logging.info("Setting Permissions for Teams")

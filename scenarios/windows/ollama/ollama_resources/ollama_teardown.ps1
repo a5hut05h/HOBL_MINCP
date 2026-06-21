@@ -42,7 +42,7 @@ if ($arch -eq "64-bit" -and $processorArch -eq "AMD64") {
 $logFile = $logFile -replace "\.log$", "_$($logSuffix.ToLower()).log"
 
 # Ollama source directory
-$ollamaDir = "$scriptDrive\ollama"
+$ollamaDir = "$scriptDrive\hobl_bin\ollama"
 
 function log {
     [CmdletBinding()] Param([Parameter(ValueFromPipeline)] $msg)
@@ -56,32 +56,30 @@ function log {
     }
 }
 
-# Refresh PATH to ensure go is available
+# Refresh PATH so ollama is findable
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
+"-- ollama teardown started (arch=$logSuffix)" | log
+
+$ollamaExe = "$ollamaDir\ollama.exe"
+
 # ============================================================================
-# Step 1: Remove the gemma3 model using go run
+# Step 1: Remove the gemma3 model via ollama.exe
 # ============================================================================
 "Step 1: Removing gemma3 model..." | log
 
 try {
-    if (Test-Path $ollamaDir) {
-        Push-Location $ollamaDir
-        
-        # List current models before removal
+    if (Test-Path $ollamaExe) {
         "Current models:" | log
-        $models = & go run . list 2>&1
+        $models = & $ollamaExe list 2>&1
         $models | ForEach-Object { "  $_" | log }
-        
-        # Remove gemma3 model
-        "Removing gemma3 model via 'go run . rm gemma3'..." | log
-        $result = & go run . rm gemma3 2>&1
+
+        "Removing gemma3 model via '$ollamaExe rm gemma3'..." | log
+        $result = & $ollamaExe rm gemma3 2>&1
         $result | ForEach-Object { "  $_" | log }
         "gemma3 model removal attempted" | log
-        
-        Pop-Location
     } else {
-        "Ollama source directory not found at $ollamaDir, skipping model removal" | log
+        "$ollamaExe missing; skipping model removal (data dir will still be deleted below)" | log
     }
 } catch {
     "Warning: Failed to remove gemma3 model: $_" | log
@@ -116,31 +114,11 @@ try {
     "Warning: Failed to kill ollama processes: $_" | log
 }
 
-# ============================================================================
-# Step 3: Kill go.exe process (started the ollama server)
-# ============================================================================
-"Step 3: Killing go.exe process..." | log
-
-try {
-    $goProcesses = Get-Process -Name "go" -ErrorAction SilentlyContinue
-    if ($goProcesses) {
-        $goProcesses | ForEach-Object {
-            "Killing go.exe process (PID: $($_.Id))" | log
-            Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
-        }
-        "go.exe processes terminated" | log
-    } else {
-        "No go.exe processes found" | log
-    }
-} catch {
-    "Warning: Failed to kill go.exe: $_" | log
-}
-
 # Give processes time to terminate
 Start-Sleep -Seconds 2
 
 # ============================================================================
-# Step 4: Full cleanup - remove all Ollama data and build artifacts
+# Step 4: Full cleanup - remove Ollama data and (build-mode) dist artifacts
 # ============================================================================
 "Step 4: Performing full cleanup of Ollama data and build artifacts..." | log
 
@@ -159,29 +137,24 @@ if (Test-Path $ollamaModelsPath) {
     "Ollama data directory not found at $ollamaModelsPath" | log
 }
 
-# Clean only dist directory (keeps the repo, build artifacts, and Go can still `go run .`)
-# Note: We preserve the cmake `build` directory because `go run . serve` may depend on
-# native llama.cpp libraries compiled there
+# Remove the build-mode dist directory if present (preserves the repo, cmake
+# build, ollama.exe, and Go module cache so the next iteration can reuse them).
 if (Test-Path $ollamaDir) {
-    try {
-        Push-Location $ollamaDir
-        
-        # Remove dist directory if it exists (standalone binary output, not needed for go run)
-        $distDir = Join-Path $ollamaDir "dist"
-        if (Test-Path $distDir) {
+    $distDir = Join-Path $ollamaDir "dist"
+    if (Test-Path $distDir) {
+        try {
             $dirSize = (Get-ChildItem $distDir -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum / 1MB
             "Removing dist directory: $distDir (size: ~$([math]::Round($dirSize, 2)) MB)" | log
             Remove-Item -Recurse -Force $distDir -ErrorAction Stop
             "dist directory removed successfully" | log
+        } catch {
+            " ERROR - Failed to clean dist directory: $_" | log
         }
-        
-        Pop-Location
-        "Ollama cleanup completed (repo, build artifacts, and Go modules preserved for next run)" | log
-    } catch {
-        " ERROR - Failed to clean Ollama artifacts: $_" | log
+    } else {
+        "No dist directory present (custom-zip prep or already cleaned)" | log
     }
 } else {
-    "Ollama source directory not found at $ollamaDir" | log
+    "Ollama directory not found at $ollamaDir" | log
 }
 
 # ============================================================================

@@ -342,258 +342,261 @@ class ProductivityPrep(core.app_scenario.Scenario):
         # Outlook
         ##############################
 
+        self.launchOrSwitchApp(self.desktop, "Outlook")
+        logging.info("Waiting 20s for Outlook to fully open.")
+        time.sleep(20)
+        self.desktop = self._launchApp(desired_caps)
+        # self.desktop.implicitly_wait(5)
+
+        max_loops = 30
+        for x in range(max_loops):
+            open_windows = 0
+
+            try:
+                logging.info("Checking reopen item prompt")
+                self.desktop.find_element_by_name('No').click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for Theme popup")
+                self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
+                self.desktop.find_element_by_name('OK').click()
+                logging.info("Clicked OK on Theme popup.")
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for Got it")
+                self.desktop.find_element_by_name('Got it').click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for 'Microsoft respects your privacy'")
+                win = self.desktop.find_element_by_name('Microsoft respects your privacy')
+                win.find_element_by_name("Next").click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for privacy pop up")
+                self.desktop.find_element_by_name('Getting better together')
+            except:
+                pass
+            else:
+                # Click "Don't send optional data"
+                # self.desktop.find_element_by_name("Don't send").click()
+                self.desktop.find_element_by_xpath('//Button[contains(@Name, "t send")]').click()
+                time.sleep(2)
+
+            try:
+                logging.info("Checking for 'Powering your experiences'")
+                self.desktop.find_element_by_name('Powering your experiences')
+            except:
+                pass
+            else:
+                self.desktop.find_element_by_name("Done").click()
+                time.sleep(2)
+
+
+            try:
+                logging.info("Checking for Privacy option")
+                win = self.desktop.find_element_by_name('Your privacy option')
+                win.find_element_by_name("Close").click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for Privacy matters")
+                win = self.desktop.find_element_by_name('Your privacy matters')
+                win.find_element_by_name("Close").click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for Privacy Settings Applied")
+                win = self.desktop.find_element_by_name('Privacy Settings Applied')
+                win.find_element_by_name("OK").click()
+            except:
+                pass
+
+            try:
+                logging.info("Checking for safe mode pop up")
+                self.desktop.find_element_by_xpath('//*[contains(@Name, "safe mode")]')
+            except:
+                pass
+            else:
+                logging.info("Safe mode window is present")
+                open_windows += 1
+                self.desktop.find_element_by_name("No").click()
+                time.sleep(3)
+
+            try:
+                logging.info("Checking for 'Don't personalize' button")
+                self.desktop.find_element_by_name("Don't personalize").click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for 'cutting edge' pop up")
+                cutting_edge = self.desktop.find_element_by_name("You're on the cutting edge")
+            except:
+                pass
+            else:
+                logging.info("'Cutting edge' window is present")
+                open_windows += 1
+                cutting_edge.find_element_by_name("Close").click()
+                time.sleep(3)
+
+            try:
+                logging.info("Checking for 'Get started' pop up")
+                get_started = self.desktop.find_element_by_name("Get started")
+            except:
+                pass
+            else:
+                logging.info("'Get started' window is present")
+                open_windows += 1
+                get_started.find_element_by_name("Get started").click()
+                time.sleep(3)
+
+            if self.fast_mode != '0':
+                break
+
+            try:
+                logging.info("Checking if we need to setup the account")
+                self.desktop.find_element_by_name("Outlook")
+                self.desktop.find_element_by_name("Advanced options collapsed")
+                self.desktop.find_element_by_name("Connect")
+            except:
+                pass
+            else:
+                logging.info("Account setup window is present")
+                open_windows += 1
+                ActionChains(self.desktop).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
+                # ActionChains(self.desktop).send_keys(Keys.TAB).send_keys(Keys.TAB).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
+                self.desktop.find_element_by_name("Connect").click()
+                time.sleep(10)
+                ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
+                time.sleep(5)
+                ActionChains(self.desktop).send_keys(Keys.ENTER).perform()
+                time.sleep(10)
+            
+            try:
+                logging.info("Checking problem with account")
+                self.desktop.find_element_by_name("Retry").click()
+                logging.info("Problem with account is present")
+                time.sleep(10)
+            except:
+                pass
+
+            try:
+                # If Retry, probably need to enter email again
+                logging.info("Checking Sign in")
+                self.desktop.find_element_by_name("Sign in")
+            except:
+                pass
+            else:
+                logging.info("Sign in window is present")
+                open_windows += 1
+                ActionChains(self.desktop).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
+                # ActionChains(self.desktop).send_keys(Keys.TAB).send_keys(Keys.TAB).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
+                self.desktop.find_element_by_name("Next").click()
+                time.sleep(7)
+                ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
+                time.sleep(5)
+                ActionChains(self.desktop).send_keys(Keys.ENTER).perform()
+                time.sleep(10)
+
+            try:
+                logging.info("Checking for Windows Security")
+                self.desktop.find_element_by_name('Windows Security')
+            except:
+                pass
+            else:
+                logging.info("Security window is present")
+                open_windows += 1
+                password_field = self.desktop.find_element_by_name("Password")
+                password_field.click()
+                password_field.send_keys(self.email_password)
+                time.sleep(1)
+                self.desktop.find_element_by_name("Remember my credentials").click()
+                time.sleep(1)
+                self.desktop.find_element_by_name("OK").click()
+                time.sleep(1)
+
+            try:
+                logging.info("Checking for Enter Password")
+                self.desktop.find_element_by_name('Enter Password')
+            except:
+                pass
+            else:
+                logging.info("Password window is present")
+                open_windows += 1
+                password_field = self.desktop.find_element_by_name("Password")
+                password_field.click()
+                password_field.send_keys(self.email_password)
+                time.sleep(1)
+                self.desktop.find_element_by_name("Remember my credentials").click()
+                time.sleep(1)
+                self.desktop.find_element_by_name("OK").click()
+                time.sleep(1)
+
+            try:
+                logging.info("Checking for Advanced Setup")
+                WebDriverWait(self.desktop, 20).until(EC.presence_of_element_located((By.NAME,'Advanced setup')))
+            except:
+                pass
+            else:
+                logging.info("Advanced setup is present")
+                open_windows += 1
+                self.desktop.find_element_by_name("Microsoft 365").click()
+                time.sleep(5)
+
+            try:
+                logging.info("Checking for Account is added window")
+                # Uncheck setup outlook mobile
+                phone_elem = WebDriverWait(self.desktop, 20).until(EC.presence_of_element_located((By.NAME,"Set up Outlook Mobile on my phone, too")))
+                if phone_elem.is_selected():
+                    phone_elem.click()
+                    time.sleep(1)
+                else:
+                    logging.info("Set up Outlook Mobile is already unchecked")
+            except:
+                pass
+            else:
+                logging.info("Account is added window is present")
+                open_windows += 1
+                self.desktop.find_element_by_name("Done").click()
+            
+            # Check for Theme popup
+            try:
+                logging.info("Checking for Theme popup")
+                self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
+                self.desktop.find_element_by_name('OK').click()
+                logging.info("Clicked OK on Theme popup.")
+                time.sleep(3)
+            except:
+                pass
+            else:
+                open_windows += 1
+
+            if open_windows == 0:
+                break
+
+        # fail the test if it gets to the end of the last iteration without meeting the conditions to break out
+        if x >= max_loops-1:
+            logging.error(f"Unable to dismiss all popups in {max_loops} iterations.  Check video or failedscreen.png for something that needs to be manually dismissed.")
+            self.fail()
+
         if self.fast_mode == '0':
-            self.launchOrSwitchApp(self.desktop, "Outlook")
-            logging.info("Waiting 20s for Outlook to fully open.")
-            time.sleep(20)
-            self.desktop = self._launchApp(desired_caps)
-            # self.desktop.implicitly_wait(5)
-
-            max_loops = 30
-            for x in range(max_loops):
-                open_windows = 0
-
-                try:
-                    logging.info("Checking reopen item prompt")
-                    self.desktop.find_element_by_name('No').click()
-                    time.sleep(3)
-                except:
-                    pass
-
-                try:
-                    logging.info("Checking for Theme popup")
-                    self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
-                    self.desktop.find_element_by_name('OK').click()
-                    logging.info("Clicked OK on Theme popup.")
-                    time.sleep(3)
-                except:
-                    pass
-
-                try:
-                    logging.info("Checking for Got it")
-                    self.desktop.find_element_by_name('Got it').click()
-                    time.sleep(3)
-                except:
-                    pass
-
-                try:
-                    logging.info("Checking for 'Microsoft respects your privacy'")
-                    win = self.desktop.find_element_by_name('Microsoft respects your privacy')
-                    win.find_element_by_name("Next").click()
-                    time.sleep(3)
-                except:
-                    pass
-
-                try:
-                    logging.info("Checking for privacy pop up")
-                    self.desktop.find_element_by_name('Getting better together')
-                except:
-                    pass
-                else:
-                    # Click "Don't send optional data"
-                    # self.desktop.find_element_by_name("Don't send").click()
-                    self.desktop.find_element_by_xpath('//Button[contains(@Name, "t send")]').click()
-                    time.sleep(2)
-
-                try:
-                    logging.info("Checking for 'Powering your experiences'")
-                    self.desktop.find_element_by_name('Powering your experiences')
-                except:
-                    pass
-                else:
-                    self.desktop.find_element_by_name("Done").click()
-                    time.sleep(2)
-
-
-                try:
-                    logging.info("Checking for Privacy option")
-                    win = self.desktop.find_element_by_name('Your privacy option')
-                    win.find_element_by_name("Close").click()
-                    time.sleep(3)
-                except:
-                    pass
-
-                try:
-                    logging.info("Checking for Privacy matters")
-                    win = self.desktop.find_element_by_name('Your privacy matters')
-                    win.find_element_by_name("Close").click()
-                    time.sleep(3)
-                except:
-                    pass
-
-                try:
-                    logging.info("Checking for Privacy Settings Applied")
-                    win = self.desktop.find_element_by_name('Privacy Settings Applied')
-                    win.find_element_by_name("OK").click()
-                except:
-                    pass
-
-                try:
-                    logging.info("Checking for safe mode pop up")
-                    self.desktop.find_element_by_xpath('//*[contains(@Name, "safe mode")]')
-                except:
-                    pass
-                else:
-                    logging.info("Safe mode window is present")
-                    open_windows += 1
-                    self.desktop.find_element_by_name("No").click()
-                    time.sleep(3)
-
-                try:
-                    logging.info("Checking for 'Don't personalize' button")
-                    self.desktop.find_element_by_name("Don't personalize").click()
-                    time.sleep(3)
-                except:
-                    pass
-
-                try:
-                    logging.info("Checking for 'cutting edge' pop up")
-                    cutting_edge = self.desktop.find_element_by_name("You're on the cutting edge")
-                except:
-                    pass
-                else:
-                    logging.info("'Cutting edge' window is present")
-                    open_windows += 1
-                    cutting_edge.find_element_by_name("Close").click()
-                    time.sleep(3)
-
-                try:
-                    logging.info("Checking for 'Get started' pop up")
-                    get_started = self.desktop.find_element_by_name("Get started")
-                except:
-                    pass
-                else:
-                    logging.info("'Get started' window is present")
-                    open_windows += 1
-                    get_started.find_element_by_name("Get started").click()
-                    time.sleep(3)
-
-                try:
-                    logging.info("Checking if we need to setup the account")
-                    self.desktop.find_element_by_name("Outlook")
-                    self.desktop.find_element_by_name("Advanced options collapsed")
-                    self.desktop.find_element_by_name("Connect")
-                except:
-                    pass
-                else:
-                    logging.info("Account setup window is present")
-                    open_windows += 1
-                    ActionChains(self.desktop).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
-                    # ActionChains(self.desktop).send_keys(Keys.TAB).send_keys(Keys.TAB).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
-                    self.desktop.find_element_by_name("Connect").click()
-                    time.sleep(10)
-                    ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
-                    time.sleep(5)
-                    ActionChains(self.desktop).send_keys(Keys.ENTER).perform()
-                    time.sleep(10)
-                
-                try:
-                    logging.info("Checking problem with account")
-                    self.desktop.find_element_by_name("Retry").click()
-                    logging.info("Problem with account is present")
-                    time.sleep(10)
-                except:
-                    pass
-
-                try:
-                    # If Retry, probably need to enter email again
-                    logging.info("Checking Sign in")
-                    self.desktop.find_element_by_name("Sign in")
-                except:
-                    pass
-                else:
-                    logging.info("Sign in window is present")
-                    open_windows += 1
-                    ActionChains(self.desktop).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
-                    # ActionChains(self.desktop).send_keys(Keys.TAB).send_keys(Keys.TAB).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
-                    self.desktop.find_element_by_name("Next").click()
-                    time.sleep(7)
-                    ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
-                    time.sleep(5)
-                    ActionChains(self.desktop).send_keys(Keys.ENTER).perform()
-                    time.sleep(10)
-
-                try:
-                    logging.info("Checking for Windows Security")
-                    self.desktop.find_element_by_name('Windows Security')
-                except:
-                    pass
-                else:
-                    logging.info("Security window is present")
-                    open_windows += 1
-                    password_field = self.desktop.find_element_by_name("Password")
-                    password_field.click()
-                    password_field.send_keys(self.email_password)
-                    time.sleep(1)
-                    self.desktop.find_element_by_name("Remember my credentials").click()
-                    time.sleep(1)
-                    self.desktop.find_element_by_name("OK").click()
-                    time.sleep(1)
-
-                try:
-                    logging.info("Checking for Enter Password")
-                    self.desktop.find_element_by_name('Enter Password')
-                except:
-                    pass
-                else:
-                    logging.info("Password window is present")
-                    open_windows += 1
-                    password_field = self.desktop.find_element_by_name("Password")
-                    password_field.click()
-                    password_field.send_keys(self.email_password)
-                    time.sleep(1)
-                    self.desktop.find_element_by_name("Remember my credentials").click()
-                    time.sleep(1)
-                    self.desktop.find_element_by_name("OK").click()
-                    time.sleep(1)
-
-                try:
-                    logging.info("Checking for Advanced Setup")
-                    WebDriverWait(self.desktop, 20).until(EC.presence_of_element_located((By.NAME,'Advanced setup')))
-                except:
-                    pass
-                else:
-                    logging.info("Advanced setup is present")
-                    open_windows += 1
-                    self.desktop.find_element_by_name("Microsoft 365").click()
-                    time.sleep(5)
-
-                try:
-                    logging.info("Checking for Account is added window")
-                    # Uncheck setup outlook mobile
-                    phone_elem = WebDriverWait(self.desktop, 20).until(EC.presence_of_element_located((By.NAME,"Set up Outlook Mobile on my phone, too")))
-                    if phone_elem.is_selected():
-                        phone_elem.click()
-                        time.sleep(1)
-                    else:
-                        logging.info("Set up Outlook Mobile is already unchecked")
-                except:
-                    pass
-                else:
-                    logging.info("Account is added window is present")
-                    open_windows += 1
-                    self.desktop.find_element_by_name("Done").click()
-                
-                # Check for Theme popup
-                try:
-                    logging.info("Checking for Theme popup")
-                    self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
-                    self.desktop.find_element_by_name('OK').click()
-                    logging.info("Clicked OK on Theme popup.")
-                    time.sleep(3)
-                except:
-                    pass
-                else:
-                    open_windows += 1
-
-                if open_windows == 0:
-                    break
-                
-            # fail the test if it gets to the end of the last iteration without meeting the conditions to break out
-            if x >= max_loops-1:
-                logging.error(f"Unable to dismiss all popups in {max_loops} iterations.  Check video or failedscreen.png for something that needs to be manually dismissed.")
-                self.fail()
-        
             win = WebDriverWait(self.desktop, 120).until(EC.presence_of_element_located((By.CLASS_NAME,'rctrl_renwnd32')))
             self.outlook_driver = self.getDriverFromWin(win)
             # self.outlook_driver.maximize_window()
@@ -1236,7 +1239,10 @@ class ProductivityPrep(core.app_scenario.Scenario):
             time.sleep(1)
         except:
             pass
-        word_driver.maximize_window()
+        try:
+            word_driver.maximize_window()
+        except:
+            logging.info("Unable to maximize Word")
         return word_driver
 
     def launchExcel(self, desktop_driver):
@@ -1251,7 +1257,10 @@ class ProductivityPrep(core.app_scenario.Scenario):
             time.sleep(1)
         except:
             pass
-        excel_driver.maximize_window()
+        try:
+            excel_driver.maximize_window()
+        except:
+            logging.info("Unable to maximize Excel")
         return excel_driver
 
     def launchPowerPoint(self, desktop_driver):
@@ -1266,7 +1275,10 @@ class ProductivityPrep(core.app_scenario.Scenario):
             time.sleep(1)
         except:
             pass
-        ppt_driver.maximize_window()
+        try:
+            ppt_driver.maximize_window()
+        except:
+            logging.info("Unable to maximize PowerPoint")
         return ppt_driver
 
     def recoverUnsavedDocuments(self, app_driver):
