@@ -25,7 +25,7 @@
 #   - Lines starting with `#` or blank lines are skipped.
 #   - PowerShell variables / loops / conditionals are NOT supported — testplans
 #     for HOBLweb must be flat invocation lists (this is the same constraint
-#     HOBLweb's UI enforces; see comment at top of testplans/intern_teams2.ps1).
+#     HOBLweb's UI enforces; see comment at top of testplans/power_workloads.ps1).
 #
 # Row schema (verified against HOBLweb client JS embedded in HOBLweb.dll):
 #   POST /plan/Create body = { profile, planName, planRows, studyType }
@@ -148,7 +148,7 @@ function ConvertFrom-HoblTestplan {
         throw "Testplan ${Path}: no hobl.cmd invocation lines found."
     }
 
-    # PlanName from filename, e.g. intern_teams2.ps1 -> intern_teams2.
+    # PlanName from filename, e.g. power_workloads.ps1 -> power_workloads.
     $planName = [System.IO.Path]::GetFileNameWithoutExtension($Path)
 
     # StudyType: HOBLweb's plan body wants a top-level studyType string. The

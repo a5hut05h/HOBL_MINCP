@@ -81,13 +81,6 @@ class Tool(Scenario):
                         self.chargeOff()
                         break
                     old_batt_level = batt_level
-            try:
-                delay = int(self.post_charge_delay)
-            except:
-                logging.error(f"Invalid post_charge_delay setting: {self.post_charge_delay}.  Make sure it's an integer.")
-            else:
-                logging.info(f"Delaying for {delay} seconds to let device quiesce.")
-                time.sleep(delay)
 
         # Start background thread that polls battery every 60s during the scenario
         self._charge_event = threading.Event()

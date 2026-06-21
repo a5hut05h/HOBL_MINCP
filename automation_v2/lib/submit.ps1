@@ -58,21 +58,6 @@ function Get-HoblScenariosData {
     return ($r.Content | ConvertFrom-Json)
 }
 
-# Returns $true if any plan for $Profile is currently in an "active" state
-# (still running or queued). Used to honour overlap=skip.
-function Test-HoblProfileBusy {
-    param(
-        [Parameter(Mandatory)] [string] $BaseUrl,
-        [Parameter(Mandatory)] [string] $Profile,
-        [int] $TimeoutSec = 30
-    )
-    $plans = Get-HoblPlans -BaseUrl $BaseUrl -TimeoutSec $TimeoutSec
-    $busy  = @($plans | Where-Object {
-        $_.Profile -eq $Profile -and $_.State -eq 'Active'
-    })
-    return ,$busy   # comma keeps it as an array even when 0/1 element
-}
-
 # Mutates $PlanRows in place: sets per-scenario AutoResubmit on the FIRST row
 # (HOBLweb stores the count on Seq 0's Meta object — same shape its UI saves).
 function Set-HoblAutoResubmit {
@@ -94,7 +79,9 @@ function Set-HoblAutoResubmit {
 }
 
 # POST /plan/Create with the JSON body shape HOBLweb's UI uses.
-# Returns the new PlanID parsed from the response's redirectToUrl, or $null on hard failure.
+# Returns the parsed response object (e.g. { redirectToUrl = '/plan/Plans' }), or
+# $null when the response body isn't JSON. The new PlanID is NOT in the response;
+# the caller re-lists plans to discover it (see daily_run.ps1's post-submit verify).
 function Submit-HoblPlan {
     param(
         [Parameter(Mandatory)] [string]   $BaseUrl,

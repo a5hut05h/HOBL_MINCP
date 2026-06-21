@@ -377,7 +377,7 @@ function Import-HoblReportFromLogs {
             $entry = @{
                 type       = 'scenario'
                 recordedAt = $eff.ToString('o')
-                profile    = $profile
+                profile    = $rowProfile
                 job        = $jobName
                 planId     = $planId
                 scenarioId = $scenarioId

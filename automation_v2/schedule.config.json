@@ -22,26 +22,32 @@
                     "maxHours":  8
                 },
     "email":  {
-                  "_comment":  "Weekly report email via send_report_email.ps1 (Outlook COM, logged-in account). \u0027to\u0027 is the recipient list (;-separated). Register the weekly task with: send_report_email.ps1 -Register -Day <day> -Time <HH:MM>.",
+                  "_comment":  "Weekly report email via send_report_email.ps1 (Outlook COM, logged-in account). \u0027to\u0027 is the recipient list (;-separated). Register the weekly task with: send_report_email.ps1 -Register -Day \u003cday\u003e -Time \u003cHH:MM\u003e.",
                   "enabled":  true,
-                  "to":  "t-sharmaadit@microsoft.com",
+                  "to":  "wssi-fun-idc@microsoft.com",
                   "sendDay":  "Friday",
                   "sendTime":  "17:00"
               },
     "jobs":  [
                  {
-                     "name":  "Pantherlake08_7workloads_Pan",
+                     "name":  "Pantherlake07_power_workloads",
                      "enabled":  true,
-                     "profile":  "Pantherlake08",
-                     "testplan":  "testplans/7workloads_Pan.ps1",
+                     "profile":  "Pantherlake07",
+                     "testplan":  "testplans/power_workloads.ps1",
                      "runsPerDay":  3
                  },
                  {
-                     "name":  "Cadmus25_7workloads",
+                     "name":  "Cadmus25_power_workloads",
                      "enabled":  true,
                      "profile":  "Cadmus25",
-                     "testplan":  "testplans/7workloads.ps1",
+                     "testplan":  "testplans/power_workloads.ps1",
                      "runsPerDay":  3
                  }
-             ]
+             ],
+    "schedule":  {
+                     "frequency":  "Daily",
+                     "time":  "21:35",
+                     "dayOfWeek":  "Thursday",
+                     "dayOfMonth":  2
+                 }
 }

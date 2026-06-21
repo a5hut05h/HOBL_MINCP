@@ -274,7 +274,7 @@ try {
 
         # Resolve testplan path: relative paths are taken relative to the repo
         # root (the parent of automation_v2\), so a job can write
-        # "testplans/intern_teams2.ps1" and we find it.
+        # "testplans/power_workloads.ps1" and we find it.
         $testplanPath = $job.testplan
         if (-not [System.IO.Path]::IsPathRooted($testplanPath)) {
             $repoRoot = Split-Path -Parent $PSScriptRoot

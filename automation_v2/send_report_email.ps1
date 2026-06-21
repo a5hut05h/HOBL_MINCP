@@ -9,12 +9,15 @@
 # only work when the attachment is opened in a browser).
 #
 # Two ways to use it — same script:
-#   1. Manual / on-demand:
+#   1. Manual / on-demand (sends the CURRENT week):
 #        powershell -ExecutionPolicy Bypass -File send_report_email.ps1
 #        powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Week 2026-W22
 #        powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -To "a@x.com;b@y.com"
 #   2. Automatic weekly: register a scheduled task that runs this script.
-#        powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Register -Day Friday -Time 17:00
+#        powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Register -Day Monday -Time 09:00
+#      The registered task bakes in -LastWeek, so each Monday it emails the
+#      PREVIOUS week's report (by then every scenario for that week has run).
+#      Manual runs (without -LastWeek) still send the current week.
 #
 # IMPORTANT: the weekly task runs as the LOGGED-IN user (Outlook COM needs an
 # interactive session), NOT as SYSTEM. This suits lab DUTs that auto-login and
@@ -31,10 +34,11 @@ param(
     [string]$To         = "",       # ;-separated recipients; overrides config email.to
     [string]$Week       = "",       # ISO week key (e.g. 2026-W23); default = current week
     [string]$Date       = "",       # any date in the target week (yyyy-MM-dd); -Week wins
+    [switch]$LastWeek,              # target the PREVIOUS week instead of the current one (baked into the registered task)
     [switch]$Refresh,               # re-render the week's HTML from the ledger before sending
     [switch]$Register,              # register the weekly scheduled task instead of sending
-    [string]$Day        = "Friday", # (with -Register) day of week to send
-    [string]$Time       = "17:00",  # (with -Register) HH:MM 24h
+    [string]$Day        = "Monday", # (with -Register) day of week to send
+    [string]$Time       = "09:00",  # (with -Register) HH:MM 24h
     [string]$TaskName   = "HOBL Weekly Report Email"
 )
 
@@ -61,7 +65,9 @@ if ($Register) {
     # Bake -To into the task action when provided, so the weekly run targets
     # exactly the recipient given at registration. When omitted, the task falls
     # back to config email.to at send time.
-    $argLine = "-ExecutionPolicy Bypass -NoProfile -File `"$self`" -Refresh"
+    # -LastWeek is baked in so the registered task always emails the previous
+    # (fully completed) week; manual runs without it send the current week.
+    $argLine = "-ExecutionPolicy Bypass -NoProfile -File `"$self`" -Refresh -LastWeek"
     if ($To) { $argLine += " -To `"$To`"" }
     $action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $argLine
     $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek $Day -At $Time
@@ -77,10 +83,10 @@ if ($Register) {
         -ExecutionTimeLimit (New-TimeSpan -Hours 1)
 
     Register-ScheduledTask -TaskName $TaskName `
-        -Description "HOBL automation: emails the weekly HTML report (Outlook COM) every $Day at $Time." `
+        -Description "HOBL automation: emails the PREVIOUS week's HTML report (Outlook COM) every $Day at $Time." `
         -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
 
-    Write-Host "Registered '$TaskName': every $Day at $Time (runs as $($principal.UserId))." -ForegroundColor Green
+    Write-Host "Registered '$TaskName': every $Day at $Time, emails the previous week's report (runs as $($principal.UserId))." -ForegroundColor Green
     Write-Host "  Test now:  schtasks /run /tn `"$TaskName`""
     Write-Host "  Remove:    schtasks /delete /tn `"$TaskName`" /f"
     Exit 0
@@ -132,6 +138,7 @@ elseif ($Date) {
     if (-not [datetime]::TryParse($Date, [ref]$parsed)) { Write-Host " ERROR - Invalid -Date '$Date'." -ForegroundColor Red; Exit 1 }
     $targetDate = $parsed
 }
+elseif ($LastWeek) { $targetDate = (Get-Date).AddDays(-7) }
 
 # Optionally refresh the HTML from the ledger first (the scheduled task uses
 # this so the emailed report is current).

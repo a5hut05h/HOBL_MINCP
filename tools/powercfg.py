@@ -104,4 +104,29 @@ class Tool(Scenario):
                 writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator="\n")
                 writer.writerow(row1)
                 writer.writerow(row2)
+
+            # Parse battery report XML for capacity stats (design capacity, full charge capacity, cycle count).
+            if self.battery_report == '1':
+                battery_report_path = os.path.join(self.result_dir, 'battery-report.xml')
+                try:
+                    bat_root = ET.parse(battery_report_path).getroot()
+                    bat_ns_prefix = bat_root.tag.split('{')[1].split('}')[0]
+                    bat_ns = {'b': bat_ns_prefix}
+
+                    batteries = bat_root.findall('.//b:Battery', bat_ns)
+                    fcc_csv = os.path.join(self.result_dir, "battery_fcc.csv")
+                    logging.info(fcc_csv)
+                    with open(fcc_csv, 'w') as csvfile:
+                        writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator="\n")
+                        multi = len(batteries) > 1
+                        for idx, battery in enumerate(batteries):
+                            design = battery.findtext('b:DesignCapacity', default='', namespaces=bat_ns)
+                            fcc = battery.findtext('b:FullChargeCapacity', default='', namespaces=bat_ns)
+                            cycles = battery.findtext('b:CycleCount', default='', namespaces=bat_ns)
+                            suffix = ('_' + str(idx)) if multi else ''
+                            writer.writerow(['design_capacity_mwh' + suffix, design])
+                            writer.writerow(['full_charge_capacity_mwh' + suffix, fcc])
+                            writer.writerow(['cycle_count' + suffix, cycles])
+                except Exception as e:
+                    logging.info(" ERROR - Failed to parse battery-report.xml: " + str(e))
         pass

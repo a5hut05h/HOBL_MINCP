@@ -14,7 +14,7 @@ source of truth; HOBLweb just runs what we POST to `/plan/Create`.
 
 You write (or already have) a HOBL testplan `.ps1` under `testplans/` — a flat
 list of `.\hobl.cmd -p $ARGS[0] -s <scenario> <key>=<value> ...` lines.
-[testplans/intern_teams2.ps1](../testplans/intern_teams2.ps1) is the worked
+[testplans/power_workloads.ps1](../testplans/power_workloads.ps1) is the worked
 example.
 
 Add a job to `schedule.config.json` pointing at that file plus a `profile` and
@@ -72,7 +72,7 @@ when running non-elevated against a SYSTEM-owned task), pre-flight logs a
 ```cmd
 :: 1. Use an existing testplan or write one under testplans\<name>.ps1.
 ::    Format: one `.\hobl.cmd -p $ARGS[0] -s <scenario> <k>=<v> ...` line per row.
-::    See testplans\intern_teams2.ps1 for a worked example.
+::    See testplans\power_workloads.ps1 for a worked example.
 
 :: 2. Edit schedule.config.json: set 'profile', 'testplan', 'runsPerDay'.
 
@@ -103,10 +103,10 @@ Append a block to `jobs[]` in `schedule.config.json`:
 
 ```json
 {
-    "name":       "Lunarlake02_intern_teams2",
+    "name":       "Lunarlake02_power_workloads",
     "enabled":    true,
     "profile":    "Lunarlake02",
-    "testplan":   "testplans/intern_teams2.ps1",
+    "testplan":   "testplans/power_workloads.ps1",
     "runsPerDay": 3
 }
 ```
@@ -115,24 +115,44 @@ Two DUTs running the same plan share the **same testplan file** — no copy &
 paste of plan content. If the plan changes, both DUTs pick up the change on
 their next run.
 
-## Changing the trigger time
+## Changing the schedule (daily / weekly / monthly)
 
-Re-run `register_schedule.ps1` with `-Time HH:MM` (default `00:00`):
+Re-run `register_schedule.ps1`. It now **prompts** for the cadence:
+
+```
+How often should the automation run?
+  [1] Daily
+  [2] Weekly   (default day: Monday)
+  [3] Monthly  (default day of month: 1)
+```
+
+- **Daily** — fires every day at the chosen time (default `00:00`).
+- **Weekly** — fires on the chosen weekday (default **Monday**) at the chosen time.
+- **Monthly** — fires on the chosen day of month, `1-28` (default **1**) at the
+  chosen time. Capped at 28 so the day exists in every month.
+
+The chosen cadence is saved into the `schedule` block of
+`schedule.config.json`, so the next registration reuses it as the default.
+
+You can also pass it non-interactively to skip the prompts:
 
 ```powershell
-.\register_schedule.ps1 -Time "02:30"
+.\register_schedule.ps1 -Frequency Daily   -Time "02:30"
+.\register_schedule.ps1 -Frequency Weekly  -DayOfWeek Monday -Time "00:00"
+.\register_schedule.ps1 -Frequency Monthly -DayOfMonth 1     -Time "00:00"
 ```
 
 ## Testplan `.ps1` constraints
 
 The testplan parser handles the same shape HOBLweb's own "Load Plan from .ps1"
 view requires: a flat list of invocations, no PowerShell variables / loops /
-conditionals. From [testplans/intern_teams2.ps1](../testplans/intern_teams2.ps1):
+conditionals. From [testplans/power_workloads.ps1](../testplans/power_workloads.ps1):
 
 ```powershell
-.\hobl.cmd -p $ARGS[0] -s charge_off global:run_type=Misc global:post_run_delay=60 global:charge_off_call="powershell ..."
-.\hobl.cmd -p $ARGS[0] -s teams2_3x3_audio global:iterations=1 global:run_type=Power global:tools="..." display:brightness=56
-.\hobl.cmd -p $ARGS[0] -s charge_on global:run_type=Misc global:charge_on_call="powershell ..."
+.\hobl.cmd -p $ARGS[0] -s charge_off global:run_type=Misc global:post_run_delay=30
+.\hobl.cmd -p $ARGS[0] -s abl_standby global:iterations=1 global:attempts=2 global:run_type=Power global:tools="display auto_recharge power_light powercfg"
+.\hobl.cmd -p $ARGS[0] -s web global:iterations=1 global:attempts=2 global:run_type=Power global:tools="display power_light auto_recharge powercfg"
+.\hobl.cmd -p $ARGS[0] -s charge_on global:run_type=Misc
 ```
 
 Parser rules:
@@ -158,7 +178,7 @@ Parser rules:
 If a testplan does anything fancier than this list of invocations (loops,
 variables, conditionals), the parser will skip non-matching lines and may
 produce wrong output. Keep testplans literal. The comment at the top of
-`testplans/intern_teams2.ps1` —
+`testplans/power_workloads.ps1` —
 *"All args are inlined (no PowerShell variables) so HOBLweb's text parser can
 read tools/parameters correctly"* — applies to v2 too.
 
@@ -248,10 +268,10 @@ the parsed scenario list, and the submit elapsed time, e.g.
 
 ```
 2026-06-03 23:39:35 === run start id=20260603-233935; config=...; log=... ===
-2026-06-03 23:39:38 >>> Job 'Pantherlake08_intern_teams2' profile=Pantherlake08 testplan=testplans/intern_teams2.ps1 runsPerDay=3
-2026-06-03 23:39:38     testplan: C:\hobl\testplans\intern_teams2.ps1
-2026-06-03 23:39:38     parsed: planName=intern_teams2 studyType=Power rows=4; set Seq[0].Meta.AutoResubmit=2
-2026-06-03 23:39:38     scenarios: charge_off, teams2_3x3_audio, teams2_3x3_video, charge_on
+2026-06-03 23:39:38 >>> Job 'Pantherlake08_power_workloads' profile=Pantherlake08 testplan=testplans/power_workloads.ps1 runsPerDay=3
+2026-06-03 23:39:38     testplan: C:\hobl\testplans\power_workloads.ps1
+2026-06-03 23:39:38     parsed: planName=power_workloads studyType=Power rows=9; set Seq[0].Meta.AutoResubmit=2
+2026-06-03 23:39:38     scenarios: charge_off, abl_standby, web, teams2_3x3_audio, teams2_3x3_video, youtube, enterprise_collab, mincp_base, charge_on
 2026-06-03 23:39:39     submit OK; elapsed=0.42s; redirect=/plan/Plans
 2026-06-03 23:39:40     verified: new PlanID=2051 state=Pending AutoResubmit=True
 ```
@@ -271,15 +291,15 @@ currently executing:
 ```
 2026-06-03 23:39:40     verified: new PlanID=2051 state=Pending AutoResubmit=True
 --- monitor: tracking 1 chain(s); intervalSec=45; maxHours=8 ---
-2026-06-03 23:40:25     [Pantherlake08_intern_teams2] PlanID=2051 cycle=1/3 state=Active phase=prep scenario=prep status=RUNNING
-2026-06-03 23:48:53     [Pantherlake08_intern_teams2] PlanID=2051 row=prep RUNNING -> PASS
-2026-06-03 23:48:54     [Pantherlake08_intern_teams2] PlanID=2051 row=charge_off started
-2026-06-03 23:48:54     [Pantherlake08_intern_teams2] PlanID=2051 cycle=1/3 state=Active phase=scenario scenario=charge_off status=RUNNING
-2026-06-03 23:52:53     [Pantherlake08_intern_teams2] PlanID=2051 row=charge_off RUNNING -> PASS
-2026-06-03 23:52:54     [Pantherlake08_intern_teams2] PlanID=2051 row=teams2_3x3_audio started
+2026-06-03 23:40:25     [Pantherlake08_power_workloads] PlanID=2051 cycle=1/3 state=Active phase=prep scenario=prep status=RUNNING
+2026-06-03 23:48:53     [Pantherlake08_power_workloads] PlanID=2051 row=prep RUNNING -> PASS
+2026-06-03 23:48:54     [Pantherlake08_power_workloads] PlanID=2051 row=charge_off started
+2026-06-03 23:48:54     [Pantherlake08_power_workloads] PlanID=2051 cycle=1/3 state=Active phase=scenario scenario=charge_off status=RUNNING
+2026-06-03 23:52:53     [Pantherlake08_power_workloads] PlanID=2051 row=charge_off RUNNING -> PASS
+2026-06-03 23:52:54     [Pantherlake08_power_workloads] PlanID=2051 row=teams2_3x3_audio started
 ...
-2026-06-04 02:48:00     [Pantherlake08_intern_teams2] PlanID=2053 cycle=3/3 state=Complete phase=done
-2026-06-04 02:48:00     [Pantherlake08_intern_teams2] chain complete: 3/3 cycles, last PlanID=2053 state=Complete
+2026-06-04 02:48:00     [Pantherlake08_power_workloads] PlanID=2053 cycle=3/3 state=Complete phase=done
+2026-06-04 02:48:00     [Pantherlake08_power_workloads] chain complete: 3/3 cycles, last PlanID=2053 state=Complete
 --- monitor: all chains finished. ---
 ```
 
