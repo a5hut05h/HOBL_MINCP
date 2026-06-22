@@ -120,43 +120,21 @@
         "y": "0.500"
     },
     {
-        "children": [
-            {
-                "capture_id": "V12EP4",
-                "children": [],
-                "delay": "1",
-                "description": "Slide content",
-                "enabled": true,
-                "exception_on": "No match",
-                "file_name": [
-                    "image_V1JT0A.png"
-                ],
-                "id": "V1JT0A",
-                "match_threshold": "",
-                "primary": true,
-                "type": "Click",
-                "x": "0.500",
-                "y": "0.500"
-            }
+        "capture_id": "V12EP4",
+        "children": [],
+        "delay": "1",
+        "description": "Slide content",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_V1JT0A.png"
         ],
-        "description": "",
-        "enabled": true,
-        "id": "V1JT0A_TRY",
-        "type": "Try"
-    },
-    {
-        "children": [],
-        "description": "",
-        "enabled": true,
-        "id": "V1JT0A_EXCEPT",
-        "type": "Except"
-    },
-    {
-        "children": [],
-        "description": "",
-        "enabled": true,
-        "id": "V1JT0A_ENDTRY",
-        "type": "End Try"
+        "id": "V1JT0A",
+        "match_threshold": "",
+        "primary": true,
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
     },
     {
         "children": [],

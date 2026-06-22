@@ -184,7 +184,7 @@
             {
                 "children": [],
                 "delay": "6",
-                "description": "ALT-np (Insert tab -> Pictures direct button = This Device file picker). Modern Outlook moved 'This Device' out of a sub-menu, so the old trailing 't' landed inside the file picker filename field and corrupted the typed path (or, in narrower-ribbon split-button mode, opened Pictures dropdown and 't' did not match any item, leaving focus to fall into Online Pictures search).",
+                "description": "ALT-np",
                 "enabled": true,
                 "id": "UPVYCM",
                 "text": "\ue00a\ue00anp",

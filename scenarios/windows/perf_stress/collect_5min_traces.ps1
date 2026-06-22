@@ -79,7 +79,17 @@ function Log([string]$msg) {
 if ($script:IsAdmin) {
     Log " INFO - Running as Administrator"
 } else {
-    Log " ERROR - NOT running as Administrator. wpr -start will fail. Configure the DUT remote agent to run elevated."
+    # Fail fast. The heavy CPI profile (general_cpi_collector.wprp) uses SampledProfile
+    # + PMU HardwareCounters, which require SeSystemProfilePrivilege (Administrator).
+    # Without elevation every `wpr -start` returns 0xc5585011 ("Failed to enable the
+    # policy to profile system performance") and the loop would otherwise spin uselessly
+    # for the whole run, producing ZERO ETLs (observed on DUT collect_log 20260623_0140xx,
+    # 16 failed iterations). Aborting now makes the misconfiguration loud and immediate
+    # instead of burying it under dozens of identical retries.
+    Log " ERROR - NOT running as Administrator. The heavy CPI profile requires elevation."
+    Log " ERROR - Configure the DUT remote agent (simple_remote) to run ELEVATED, then re-run."
+    Log " ERROR - Aborting rolling capture - zero segments would be produced until this is fixed."
+    exit 1
 }
 
 # Determine profile argument
@@ -103,6 +113,7 @@ Log " INFO - Output: $OutputDir"
 Log "---------------------------------------"
 
 $iteration = 0
+$script:SavedCount = 0
 
 try {
     while ($true) {
@@ -123,6 +134,17 @@ try {
         $startExit = $LASTEXITCODE
         if ($startExit -ne 0) {
             Log " ERROR - wpr -start failed exit=$startExit (instance=$InstanceName): $($startOut -join ' | ')"
+            # 0xc5585011 (= -984068079) = "Failed to enable the policy to profile system
+            # performance": the SampledProfile/PMU source could not be claimed. This is
+            # NOT transient - it means missing elevation, or another WPR/xperf session
+            # already owns the system profiler/PMU. Retrying every 30s just burns the
+            # whole run with zero output, so abort loudly instead of spinning.
+            if ($startExit -eq -984068079) {
+                Log " ERROR - System profiler/PMU could not be enabled (0xc5585011) - not a transient error."
+                Log " ERROR - Causes: DUT agent not elevated, or another WPR/xperf session owns the CPU profiler/PMU."
+                Log " ERROR - Aborting rolling capture after $script:SavedCount saved segment(s)."
+                exit 1
+            }
             Start-Sleep -Seconds 30
             continue
         }
@@ -136,14 +158,64 @@ try {
         # between "never reached stop" and "stop was killed before completing").
         Log " INFO - Calling wpr -stop -> $etlPath (flush time depends on load and profile)."
 
-        # -compress: shrink the heavy ETL (often 3-5x) so the DUT->host pull stays
-        # manageable for remote / back-to-back runs (matches the core trace's -stop).
-        $stopOut = & wpr -stop $etlPath -compress -instancename $InstanceName 2>&1
-        $stopExit = $LASTEXITCODE
-        if ($stopExit -eq 0) {
-            Log " INFO - Trace saved -> $etlPath"
+        # CRITICAL: run `wpr -stop` (the trace merge) at HIGH priority.
+        #
+        # The merge is CPU-bound, not I/O-bound (a ~1 GB ETL writes to disk in
+        # seconds). The percentile_stress.py workers run at NORMAL priority and
+        # busy-spin to pin the CPU at stress_cpu_target (75-85%). A NORMAL-priority
+        # `wpr -stop` therefore gets starved and a single flush ran 15+ min, consuming
+        # the whole run so only ONE segment ever completed (see perf_stress_321/323:
+        # stop called at 02:16:06, run still flushing when teardown cancelled it at
+        # 02:31:37). Starting wpr.exe and bumping it to High lets the merge preempt the
+        # stress workers and finish in ~1-2 min, restoring the rolling cadence. Full
+        # diagnostic fidelity is preserved (identical profile/providers); -compress is
+        # still omitted so the flush stays as light as possible under load.
+        #
+        # Launch via [System.Diagnostics.Process]::Start(ProcessStartInfo) rather
+        # than Start-Process. Start-Process -PassThru -NoNewWindow combined with
+        # -RedirectStandardOutput/-RedirectStandardError returns a Process object
+        # whose ExitCode is NOT reliably populated after WaitForExit() on PS 5.1:
+        # observed in run perf_stress_351 where every successful flush logged
+        # "exit=" (empty) and was misreported as an ERROR even though stdout
+        # clearly said "The trace was successfully saved." Direct .NET Process.Start
+        # always populates ExitCode and lets us read both streams synchronously
+        # without temp files.
+        $stopExit = $null
+        $stopOutText = ""
+        $stopErrText = ""
+        try {
+            $psi = New-Object System.Diagnostics.ProcessStartInfo
+            $psi.FileName = "wpr.exe"
+            $psi.Arguments = '-stop "' + $etlPath + '" -instancename ' + $InstanceName
+            $psi.UseShellExecute = $false
+            $psi.RedirectStandardOutput = $true
+            $psi.RedirectStandardError = $true
+            $psi.CreateNoWindow = $true
+            $stopProc = [System.Diagnostics.Process]::Start($psi)
+            try { $stopProc.PriorityClass = [System.Diagnostics.ProcessPriorityClass]::High } catch {
+                Log " INFO - Could not raise wpr -stop priority (continuing at default): $_"
+            }
+            # ReadToEnd before WaitForExit on the stdout stream avoids deadlock when
+            # wpr fills its pipe buffer (multi-MB progress output). stderr is small
+            # enough that order does not matter.
+            $stopOutText = $stopProc.StandardOutput.ReadToEnd()
+            $stopErrText = $stopProc.StandardError.ReadToEnd()
+            $stopProc.WaitForExit()
+            $stopExit = $stopProc.ExitCode
+        } catch {
+            Log " ERROR - Failed to launch wpr -stop: $_"
+            $stopExit = -1
+        }
+        $stopMsg = (($stopOutText + "`n" + $stopErrText).Trim())
+        # Treat as success when ExitCode is 0, OR when wpr's stdout confirms the
+        # save (defence-in-depth: if a future shell quirk swallows ExitCode again,
+        # the segment count stays honest as long as wpr printed its success line).
+        $stopSucceeded = ($stopExit -eq 0) -or ($stopMsg -match 'trace was successfully saved')
+        if ($stopSucceeded) {
+            $script:SavedCount++
+            Log " INFO - Trace saved (segment #$script:SavedCount) -> $etlPath"
         } else {
-            Log " ERROR - wpr -stop failed exit=$stopExit (instance=$InstanceName): $($stopOut -join ' | ')"
+            Log " ERROR - wpr -stop failed exit=$stopExit (instance=$InstanceName): $stopMsg"
         }
         Log "---------------------------------------"
     }
@@ -154,5 +226,6 @@ catch {
 finally {
     # Clean up only our named instance
     wpr -cancel -instancename $InstanceName 2>$null | Out-Null
+    Log " INFO - Rolling capture summary: $script:SavedCount ETL segment(s) saved to $OutputDir"
     Log " INFO - Tracing session ended (instance=$InstanceName)"
 }

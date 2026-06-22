@@ -37,8 +37,8 @@
     {
         "capture_id": "TYH95X",
         "children": [],
-        "delay": "5",
-        "description": "PowerPoint (increased from 2.5s to allow load under stress)",
+        "delay": "2.5",
+        "description": "PowerPoint",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [

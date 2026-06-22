@@ -199,7 +199,7 @@
             {
                 "children": [],
                 "delay": "0.0",
-                "description": "Propagate perf_stress:bg_edge_tab_loops -> web_bg_tabs:bg_tab_loops (cross-section setParam not expressible in ScenarioMaker UI). Must run before web_bg_tabs is included.",
+                "description": "Propagate bg_tab_loops",
                 "enabled": true,
                 "file_name": [
                     "code_PSECPROP.py"
@@ -212,7 +212,7 @@
                     {
                         "children": [],
                         "delay": "0.0",
-                        "description": "Background heavy WPR capture via collect_5min_traces.ps1 (named instance perfStressHeavy so it does not collide with core unnamed WPR). Gated by perf_stress:bg_heavy_capture=1 inside code_PSECTRC.py - default skip. Debug only - perturbs metrics.",
+                        "description": "Background heavy WPR capture (debug only)",
                         "enabled": true,
                         "file_name": [
                             "code_PSECTRC.py"
@@ -223,7 +223,7 @@
                     {
                         "children": [],
                         "delay": "0.0",
-                        "description": "Upload Perf Files and start percentile_stress.py BEFORE Teams/web/prod setup so CPU stress runs throughout the workload (not just the tail end).",
+                        "description": "Upload perf files and start CPU stress",
                         "enabled": true,
                         "file_name": [
                             "code_1EN194J.py"
@@ -252,7 +252,7 @@
                     {
                         "children": [],
                         "delay": "0.0",
-                        "description": "2x2 grid (DUT + 3 bots = 4 participants). 3x3 (9 bots) plus 30 Edge tabs plus python stress was unstable; 2x2 keeps real-use Teams pressure while leaving headroom.",
+                        "description": "Set Teams bots = 3 (2x2 grid)",
                         "enabled": true,
                         "id": "19V8920",
                         "name": "[teams:number_of_bots]",
@@ -320,6 +320,15 @@
                         "id": "1HX9T55",
                         "include_path": "scenarios\\windows\\_library\\web\\web_bg_tabs",
                         "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c powershell -NoProfile -ExecutionPolicy Bypass -Command \"Add-Type -Name W -Namespace N -MemberDefinition ('[DllImport(' + [char]34 + 'user32.dll' + [char]34 + ')]public static extern bool ShowWindowAsync(IntPtr h,int n);'); Get-Process msedge -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | ForEach-Object { [void][N.W]::ShowWindowAsync($_.MainWindowHandle, 6) }\" & exit /b 0",
+                        "delay": "2",
+                        "description": "Minimize Edge after bg tabs open",
+                        "enabled": true,
+                        "id": "PSECBGMIN",
+                        "type": "Command"
                     }
                 ],
                 "description": "",
@@ -342,7 +351,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Library-aligned with regular productivity scenario: pass office_theme=System so first-run theme dialog is suppressed identically.",
+                        "description": "Open productivity apps",
                         "enabled": true,
                         "id": "1H2VHHH",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_setup",
@@ -420,444 +429,6 @@
                 "children": [
                     {
                         "children": [],
-                        "command": "cmd /c if not exist \"%USERPROFILE%\\Desktop\" mkdir \"%USERPROFILE%\\Desktop\" > nul 2>&1 & if not exist \"%USERPROFILE%\\Desktop\\test.txt\" echo test > \"%USERPROFILE%\\Desktop\\test.txt\" & exit /b 0",
-                        "delay": "2",
-                        "description": "Create test.txt on Desktop for context menu test",
-                        "enabled": true,
-                        "id": "PSECPTRC1",
-                        "type": "Command"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRB1",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRT1",
-                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
-                        "params": [
-                            {
-                                "name": "[event_tag]",
-                                "val_options": "",
-                                "value": "FileExplorerLaunch"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\" /v SeparateProcess /t REG_DWORD /d 1 /f >nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\" /v LaunchTo /f >nul 2>&1 & powershell -NoProfile -Command \"Get-Process explorer -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -ne '' } | Stop-Process -Force -ErrorAction SilentlyContinue\" & exit /b 0",
-                        "delay": "5",
-                        "description": "Close all File Explorer windows for a fresh launch and ensure FE opens to Home (not This PC).",
-                        "enabled": true,
-                        "id": "PSECPTRKILL",
-                        "type": "Command"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "Launch File Explorer from taskbar (click_file_explorer library)",
-                        "enabled": true,
-                        "id": "PSECPTRK1",
-                        "include_path": "scenarios\\windows\\_library\\misc\\click_file_explorer",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "10",
-                        "description": "Wait for File Explorer XAML Home to fully render",
-                        "enabled": true,
-                        "id": "PSECPTRD1",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRN1",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
-                        "params": [
-                            {
-                                "name": "[phase_category]",
-                                "val_options": "",
-                                "value": "app_launch"
-                            },
-                            {
-                                "name": "[phase_name]",
-                                "val_options": "",
-                                "value": "file_explorer_launch"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c powershell -NoProfile -Command \"$s=New-Object -ComObject Shell.Application; $s.Windows() | ForEach-Object { try { $_.Quit() } catch {} }\"",
-                        "delay": "2",
-                        "description": "Close XAML Home FE via Shell COM (avoids Alt+F4 shutdown dialog risk)",
-                        "enabled": true,
-                        "id": "PSECPTRCFE",
-                        "type": "Command"
-                    },
-                    {
-                        "children": [],
-                        "delay": "1",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRB2",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRT2",
-                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
-                        "params": [
-                            {
-                                "name": "[event_tag]",
-                                "val_options": "",
-                                "value": "ContextMenuOpen"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c start \"\" explorer.exe /select,\"%USERPROFILE%\\Desktop\\test.txt\"",
-                        "delay": "3",
-                        "description": "Open File Explorer with test.txt selected",
-                        "enabled": true,
-                        "id": "PSECPTRC2",
-                        "type": "Command"
-                    },
-                    {
-                        "children": [],
-                        "delay": "3",
-                        "description": "Wait for File Explorer to load Desktop",
-                        "enabled": true,
-                        "id": "PSECPTRD2A",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0.5",
-                        "description": "Capture FE content area for right-click",
-                        "enabled": true,
-                        "file_name": [
-                            "image_fe_content.png"
-                        ],
-                        "h": "0.800",
-                        "id": "PSECPTRCAP",
-                        "recapture": true,
-                        "type": "Capture",
-                        "w": "0.800",
-                        "x": "0.100",
-                        "y": "0.100"
-                    },
-                    {
-                        "capture_id": "PSECPTRCAP",
-                        "children": [],
-                        "delay": "2",
-                        "description": "Right click on test.txt",
-                        "enabled": true,
-                        "exception_on": "No match",
-                        "file_name": [
-                            "image_1J5C9RW.png"
-                        ],
-                        "id": "PSECPTRK2",
-                        "match_threshold": "",
-                        "primary": false,
-                        "scale": "",
-                        "type": "Click",
-                        "x": "0.500",
-                        "y": "0.500"
-                    },
-                    {
-                        "children": [],
-                        "delay": "5",
-                        "description": "Wait for Context Menu to render",
-                        "enabled": true,
-                        "id": "PSECPTRD3",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRN2",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
-                        "params": [
-                            {
-                                "name": "[phase_category]",
-                                "val_options": "",
-                                "value": "app_launch"
-                            },
-                            {
-                                "name": "[phase_name]",
-                                "val_options": "",
-                                "value": "context_menu"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "2",
-                        "description": "Dismiss context menu via Escape",
-                        "enabled": true,
-                        "id": "PSECPTRK3",
-                        "text": "\ue00c",
-                        "type": "Type",
-                        "typing_delay": "[typing_delay]"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c powershell -NoProfile -Command \"$s=New-Object -ComObject Shell.Application; $s.Windows() | ForEach-Object { try { $_.Quit() } catch {} }\"",
-                        "delay": "2",
-                        "description": "Close File Explorer via Shell COM (avoids Alt+F4 shutdown dialog risk)",
-                        "enabled": true,
-                        "id": "PSECPTRK4",
-                        "type": "Command"
-                    },
-                    {
-                        "children": [],
-                        "delay": "1",
-                        "description": "Settle after FE close",
-                        "enabled": true,
-                        "id": "PSECPTRK4E",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "Pre-launch Snipping Tool via Start menu search so the user-click launch path is exercised. The subsequent Win+Shift+S then triggers the overlay. ETW tag is empty here so this Start-launch boot time is not counted in the snipping_tool_launch recording phase below.",
-                        "enabled": true,
-                        "id": "PSECPTRSL",
-                        "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
-                        "params": [
-                            {
-                                "name": "[app_name]",
-                                "val_options": "",
-                                "value": "Snipping Tool"
-                            },
-                            {
-                                "name": "[etw_event_tag]",
-                                "val_options": "",
-                                "value": ""
-                            },
-                            {
-                                "name": "[app_open_delay]",
-                                "val_options": "",
-                                "value": "3"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "3",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRB3",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRT3",
-                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
-                        "params": [
-                            {
-                                "name": "[event_tag]",
-                                "val_options": "",
-                                "value": "SnippingToolLaunch"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "1",
-                        "description": "Trigger Snipping Tool overlay via Win+Shift+S.",
-                        "enabled": true,
-                        "id": "PSECPTRK5",
-                        "text": "\ue03d\ue008s",
-                        "type": "Type",
-                        "typing_delay": "[typing_delay]"
-                    },
-                    {
-                        "children": [],
-                        "delay": "5",
-                        "description": "Wait for Snipping Tool overlay to appear",
-                        "enabled": true,
-                        "id": "PSECPTRD4",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRN3",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
-                        "params": [
-                            {
-                                "name": "[phase_category]",
-                                "val_options": "",
-                                "value": "app_launch"
-                            },
-                            {
-                                "name": "[phase_name]",
-                                "val_options": "",
-                                "value": "snipping_tool_launch"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "2",
-                        "description": "Dismiss Snipping Tool overlay via Escape",
-                        "enabled": true,
-                        "id": "PSECPTRK6",
-                        "text": "\ue00c",
-                        "type": "Type",
-                        "typing_delay": "[typing_delay]"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c taskkill /F /T /IM ScreenClippingHost.exe > nul 2>&1 & taskkill /F /T /IM SnippingTool.exe > nul 2>&1 & exit /b 0",
-                        "delay": "1",
-                        "description": "Close Snipping Tool main window + ScreenClipping host so the next phase (Settings launch) is not focus-stolen.",
-                        "enabled": true,
-                        "id": "PSECPTRKL",
-                        "type": "Command"
-                    },
-                    {
-                        "children": [],
-                        "delay": "3",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRB4",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRT4",
-                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
-                        "params": [
-                            {
-                                "name": "[event_tag]",
-                                "val_options": "",
-                                "value": "SettingsLaunch"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c start \"\" ms-settings:home",
-                        "delay": "0",
-                        "description": "Launch Settings app to Home",
-                        "enabled": true,
-                        "id": "PSECPTRC3",
-                        "type": "Command"
-                    },
-                    {
-                        "children": [],
-                        "delay": "5",
-                        "description": "Wait for Settings to fully render",
-                        "enabled": true,
-                        "id": "PSECPTRD5",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "PSECPTRN4",
-                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
-                        "params": [
-                            {
-                                "name": "[phase_category]",
-                                "val_options": "",
-                                "value": "app_launch"
-                            },
-                            {
-                                "name": "[phase_name]",
-                                "val_options": "",
-                                "value": "settings_launch"
-                            }
-                        ],
-                        "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c taskkill /IM SystemSettings.exe /F > nul 2>&1 & exit /b 0",
-                        "delay": "2",
-                        "description": "Close Settings via taskkill (avoids Alt+F4 shutdown dialog risk)",
-                        "enabled": true,
-                        "id": "PSECPTRK7",
-                        "type": "Command"
-                    },
-                    {
-                        "children": [],
-                        "delay": "1",
-                        "description": "Settle after Settings close",
-                        "enabled": true,
-                        "id": "PSECPTRK7E",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c del /f \"%USERPROFILE%\\Desktop\\test.txt\" > nul 2>&1 & exit /b 0",
-                        "delay": "2",
-                        "description": "Delete test.txt from Desktop",
-                        "enabled": true,
-                        "id": "PSECPTRC4",
-                        "type": "Command"
-                    }
-                ],
-                "description": "App-launch probes",
-                "enabled": true,
-                "eval_method": "==",
-                "id": "PSECPTRIF",
-                "left_term": "[perftrack_app_launch]",
-                "right_term": "1",
-                "type": "If"
-            },
-            {
-                "children": [],
-                "description": "",
-                "enabled": true,
-                "id": "PSECPTRIE",
-                "type": "End If"
-            },
-            {
-                "children": [
-                    {
-                        "children": [],
                         "delay": "0",
                         "description": "",
                         "enabled": true,
@@ -897,7 +468,7 @@
                         "type": "Include"
                     }
                 ],
-                "description": "Replay web workload. web_setup -> _web_replay_start kills all browsers, then web_run_12 loads 12 replay sites in a clean Edge. Gated on bg_edge_tabs==0 so when bg_edge_tabs=1 the 30 background tabs opened in Setup are NOT killed and serve as the web load instead.",
+                "description": "Replay web workload",
                 "enabled": true,
                 "eval_method": "==",
                 "id": "PSECWRBIF",
@@ -918,7 +489,7 @@
                         "children": [],
                         "command": "cmd /c taskkill /IM EXCEL.EXE /IM OUTLOOK.EXE /IM olk.exe /IM WINWORD.EXE /IM POWERPNT.EXE /IM ONENOTE.EXE > nul 2>&1 & exit /b 0",
                         "delay": "0",
-                        "description": "Pre-launch defense: graceful close (WM_CLOSE, NO /F) of any Office app left running by a prior iteration. /F was removed because Stop-Process/taskkill /F on Word with an open doc plants a session-restore hint that auto-reopens that doc on the next Start-menu launch (repro confirmed). WM_CLOSE = same as clicking the red X = no recovery dialog. Idempotent: returns immediately if nothing is running, so it's safe as a no-op when Office was already closed gracefully by the previous iteration.",
+                        "description": "Close leftover Office apps",
                         "enabled": true,
                         "id": "PSECSMK0",
                         "type": "Command"
@@ -926,7 +497,7 @@
                     {
                         "children": [],
                         "delay": "5",
-                        "description": "Settle after graceful Office close (WM_CLOSE needs longer than /F)",
+                        "description": "Settle after Office close",
                         "enabled": true,
                         "id": "PSECSMK0D",
                         "type": "Delay"
@@ -935,7 +506,7 @@
                         "children": [],
                         "command": "cmd /c for %A in (PowerPoint Word Excel Outlook) do (reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\%A\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\%A\\Resiliency\\DisabledItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\%A\\Resiliency\\DocumentRecovery\" /f > nul 2>&1) & exit /b 0",
                         "delay": "0",
-                        "description": "Defense-in-depth pop-up suppression: clear Office resiliency markers (StartupItems / DisabledItems = 'couldn't start last time / Safe Mode' prompt; DocumentRecovery = the auto-reopen list that taskkill /F used to populate). Should be a no-op now that PSECSMK0 uses graceful WM_CLOSE, but kept as a safety net in case a prior run crashed the app.",
+                        "description": "Clear Office resiliency markers",
                         "enabled": true,
                         "id": "PSECSMK0R",
                         "type": "Command"
@@ -982,7 +553,7 @@
                     {
                         "children": [],
                         "delay": "12",
-                        "description": "Wait for Excel window (bumped to 12s for stress)",
+                        "description": "Wait for Excel window",
                         "enabled": true,
                         "id": "PSECSM03",
                         "type": "Delay"
@@ -990,7 +561,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Close Excel by clicking the red X (productivity library). Avoids taskkill /F which plants a session-restore hint that auto-reopens the doc on the next launch and trips Document Recovery / 'started last time in Safe Mode' pop-ups.",
+                        "description": "Close Excel",
                         "enabled": true,
                         "id": "PSECSM04",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_close",
@@ -999,7 +570,7 @@
                     {
                         "children": [],
                         "delay": "3",
-                        "description": "Settle before Word launch (graceful close takes slightly longer than /F)",
+                        "description": "Settle before Word launch",
                         "enabled": true,
                         "id": "PSECSM04D",
                         "type": "Delay"
@@ -1046,7 +617,7 @@
                     {
                         "children": [],
                         "delay": "12",
-                        "description": "Wait for Word window (bumped to 12s for stress)",
+                        "description": "Wait for Word window",
                         "enabled": true,
                         "id": "PSECSM11",
                         "type": "Delay"
@@ -1054,7 +625,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Close Word by clicking the red X (productivity library). Fixes the Word-reopens-prior-doc bug Varun reported: taskkill /F left a session-restore hint, so the next Start-menu launch came up with the previous document; clicking X (WM_CLOSE) does not.",
+                        "description": "Close Word",
                         "enabled": true,
                         "id": "PSECSM12",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_close",
@@ -1063,7 +634,7 @@
                     {
                         "children": [],
                         "delay": "3",
-                        "description": "Settle before PowerPoint launch (graceful close takes slightly longer than /F)",
+                        "description": "Settle before PowerPoint launch",
                         "enabled": true,
                         "id": "PSECSM12D",
                         "type": "Delay"
@@ -1110,7 +681,7 @@
                     {
                         "children": [],
                         "delay": "12",
-                        "description": "Wait for PowerPoint window (bumped to 12s for stress)",
+                        "description": "Wait for PowerPoint window",
                         "enabled": true,
                         "id": "PSECSM15",
                         "type": "Delay"
@@ -1118,7 +689,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Close PowerPoint by clicking the red X (productivity library) instead of taskkill /F to avoid Document Recovery / session-restore pop-ups on the next iteration.",
+                        "description": "Close PowerPoint",
                         "enabled": true,
                         "id": "PSECSM16",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_close",
@@ -1127,7 +698,7 @@
                     {
                         "children": [],
                         "delay": "3",
-                        "description": "Settle before OneNote launch (graceful close takes slightly longer than /F)",
+                        "description": "Settle before OneNote launch",
                         "enabled": true,
                         "id": "PSECSM16D",
                         "type": "Delay"
@@ -1193,7 +764,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Close OneNote by clicking the red X (productivity library) instead of taskkill /F.",
+                        "description": "Close OneNote",
                         "enabled": true,
                         "id": "PSECSM20",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_onenote_close",
@@ -1202,7 +773,7 @@
                     {
                         "children": [],
                         "delay": "3",
-                        "description": "Settle before Outlook launch (graceful close takes slightly longer than /F)",
+                        "description": "Settle before Outlook launch",
                         "enabled": true,
                         "id": "PSECSM20D",
                         "type": "Delay"
@@ -1268,7 +839,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Close Outlook by clicking the red X (productivity library) instead of taskkill /F. Outlook new (olk.exe) and classic (OUTLOOK.EXE) both honor WM_CLOSE from the X button.",
+                        "description": "Close Outlook",
                         "enabled": true,
                         "id": "PSECSM08",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_close",
@@ -1277,7 +848,7 @@
                     {
                         "children": [],
                         "delay": "3",
-                        "description": "Settle before Start Menu probe (graceful close takes slightly longer than /F)",
+                        "description": "Settle before Start Menu probe",
                         "enabled": true,
                         "id": "PSECSM08D",
                         "type": "Delay"
@@ -1561,7 +1132,7 @@
                     {
                         "children": [],
                         "delay": "0.0",
-                        "description": "Sleep/resume checkpoint before Start Menu launches",
+                        "description": "Sleep/resume checkpoint",
                         "enabled": true,
                         "file_name": [
                             "code_PSECSLP1.py"
@@ -1604,6 +1175,444 @@
                 "description": "",
                 "enabled": true,
                 "id": "PSECSLPEN",
+                "type": "End If"
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "command": "cmd /c if not exist \"%USERPROFILE%\\Desktop\" mkdir \"%USERPROFILE%\\Desktop\" > nul 2>&1 & if not exist \"%USERPROFILE%\\Desktop\\test.txt\" echo test > \"%USERPROFILE%\\Desktop\\test.txt\" & exit /b 0",
+                        "delay": "2",
+                        "description": "Create test.txt on Desktop",
+                        "enabled": true,
+                        "id": "PSECPTRC1",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRB1",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRT1",
+                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
+                        "params": [
+                            {
+                                "name": "[event_tag]",
+                                "val_options": "",
+                                "value": "FileExplorerLaunch"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\" /v SeparateProcess /t REG_DWORD /d 1 /f >nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\" /v LaunchTo /f >nul 2>&1 & powershell -NoProfile -Command \"Get-Process explorer -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -ne '' } | Stop-Process -Force -ErrorAction SilentlyContinue\" & exit /b 0",
+                        "delay": "5",
+                        "description": "Close all File Explorer windows",
+                        "enabled": true,
+                        "id": "PSECPTRKILL",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "Launch File Explorer from taskbar",
+                        "enabled": true,
+                        "id": "PSECPTRK1",
+                        "include_path": "scenarios\\windows\\_library\\misc\\click_file_explorer",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "10",
+                        "description": "Wait for File Explorer",
+                        "enabled": true,
+                        "id": "PSECPTRD1",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRN1",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
+                        "params": [
+                            {
+                                "name": "[phase_category]",
+                                "val_options": "",
+                                "value": "app_launch"
+                            },
+                            {
+                                "name": "[phase_name]",
+                                "val_options": "",
+                                "value": "file_explorer_launch"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c powershell -NoProfile -Command \"$s=New-Object -ComObject Shell.Application; $s.Windows() | ForEach-Object { try { $_.Quit() } catch {} }\"",
+                        "delay": "2",
+                        "description": "Close File Explorer",
+                        "enabled": true,
+                        "id": "PSECPTRCFE",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
+                        "delay": "1",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRB2",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRT2",
+                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
+                        "params": [
+                            {
+                                "name": "[event_tag]",
+                                "val_options": "",
+                                "value": "ContextMenuOpen"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c start \"\" explorer.exe /select,\"%USERPROFILE%\\Desktop\\test.txt\"",
+                        "delay": "3",
+                        "description": "Open File Explorer with test.txt selected",
+                        "enabled": true,
+                        "id": "PSECPTRC2",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
+                        "delay": "3",
+                        "description": "Wait for File Explorer to load Desktop",
+                        "enabled": true,
+                        "id": "PSECPTRD2A",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0.5",
+                        "description": "Capture FE content area for right-click",
+                        "enabled": true,
+                        "file_name": [
+                            "image_fe_content.png"
+                        ],
+                        "h": "0.800",
+                        "id": "PSECPTRCAP",
+                        "recapture": true,
+                        "type": "Capture",
+                        "w": "0.800",
+                        "x": "0.100",
+                        "y": "0.100"
+                    },
+                    {
+                        "capture_id": "PSECPTRCAP",
+                        "children": [],
+                        "delay": "2",
+                        "description": "Right click on test.txt",
+                        "enabled": true,
+                        "exception_on": "No match",
+                        "file_name": [
+                            "image_1J5C9RW.png"
+                        ],
+                        "id": "PSECPTRK2",
+                        "match_threshold": "",
+                        "primary": false,
+                        "scale": "",
+                        "type": "Click",
+                        "x": "0.500",
+                        "y": "0.500"
+                    },
+                    {
+                        "children": [],
+                        "delay": "5",
+                        "description": "Wait for Context Menu to render",
+                        "enabled": true,
+                        "id": "PSECPTRD3",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRN2",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
+                        "params": [
+                            {
+                                "name": "[phase_category]",
+                                "val_options": "",
+                                "value": "app_launch"
+                            },
+                            {
+                                "name": "[phase_name]",
+                                "val_options": "",
+                                "value": "context_menu"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "2",
+                        "description": "Dismiss context menu via Escape",
+                        "enabled": true,
+                        "id": "PSECPTRK3",
+                        "text": "\ue00c",
+                        "type": "Type",
+                        "typing_delay": "[typing_delay]"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c powershell -NoProfile -Command \"$s=New-Object -ComObject Shell.Application; $s.Windows() | ForEach-Object { try { $_.Quit() } catch {} }\"",
+                        "delay": "2",
+                        "description": "Close File Explorer",
+                        "enabled": true,
+                        "id": "PSECPTRK4",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
+                        "delay": "1",
+                        "description": "Settle after FE close",
+                        "enabled": true,
+                        "id": "PSECPTRK4E",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "Pre-launch Snipping Tool",
+                        "enabled": true,
+                        "id": "PSECPTRSL",
+                        "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
+                        "params": [
+                            {
+                                "name": "[app_name]",
+                                "val_options": "",
+                                "value": "Snipping Tool"
+                            },
+                            {
+                                "name": "[etw_event_tag]",
+                                "val_options": "",
+                                "value": ""
+                            },
+                            {
+                                "name": "[app_open_delay]",
+                                "val_options": "",
+                                "value": "3"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "3",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRB3",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRT3",
+                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
+                        "params": [
+                            {
+                                "name": "[event_tag]",
+                                "val_options": "",
+                                "value": "SnippingToolLaunch"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "1",
+                        "description": "Win+Shift+S",
+                        "enabled": true,
+                        "id": "PSECPTRK5",
+                        "text": "\ue03d\ue008s",
+                        "type": "Type",
+                        "typing_delay": "[typing_delay]"
+                    },
+                    {
+                        "children": [],
+                        "delay": "5",
+                        "description": "Wait for Snipping Tool overlay to appear",
+                        "enabled": true,
+                        "id": "PSECPTRD4",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRN3",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
+                        "params": [
+                            {
+                                "name": "[phase_category]",
+                                "val_options": "",
+                                "value": "app_launch"
+                            },
+                            {
+                                "name": "[phase_name]",
+                                "val_options": "",
+                                "value": "snipping_tool_launch"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "2",
+                        "description": "Dismiss Snipping Tool overlay via Escape",
+                        "enabled": true,
+                        "id": "PSECPTRK6",
+                        "text": "\ue00c",
+                        "type": "Type",
+                        "typing_delay": "[typing_delay]"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c taskkill /F /T /IM ScreenClippingHost.exe > nul 2>&1 & taskkill /F /T /IM SnippingTool.exe > nul 2>&1 & exit /b 0",
+                        "delay": "1",
+                        "description": "Close Snipping Tool",
+                        "enabled": true,
+                        "id": "PSECPTRKL",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
+                        "delay": "3",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRB4",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRT4",
+                        "include_path": "scenarios\\windows\\_library\\misc\\etw_event_tag",
+                        "params": [
+                            {
+                                "name": "[event_tag]",
+                                "val_options": "",
+                                "value": "SettingsLaunch"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c start \"\" ms-settings:home",
+                        "delay": "0",
+                        "description": "Launch Settings app to Home",
+                        "enabled": true,
+                        "id": "PSECPTRC3",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
+                        "delay": "5",
+                        "description": "Wait for Settings to fully render",
+                        "enabled": true,
+                        "id": "PSECPTRD5",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "0",
+                        "description": "",
+                        "enabled": true,
+                        "id": "PSECPTRN4",
+                        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
+                        "params": [
+                            {
+                                "name": "[phase_category]",
+                                "val_options": "",
+                                "value": "app_launch"
+                            },
+                            {
+                                "name": "[phase_name]",
+                                "val_options": "",
+                                "value": "settings_launch"
+                            }
+                        ],
+                        "type": "Include"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c taskkill /IM SystemSettings.exe /F > nul 2>&1 & exit /b 0",
+                        "delay": "2",
+                        "description": "Close Settings",
+                        "enabled": true,
+                        "id": "PSECPTRK7",
+                        "type": "Command"
+                    },
+                    {
+                        "children": [],
+                        "delay": "1",
+                        "description": "Settle after Settings close",
+                        "enabled": true,
+                        "id": "PSECPTRK7E",
+                        "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "command": "cmd /c del /f \"%USERPROFILE%\\Desktop\\test.txt\" > nul 2>&1 & exit /b 0",
+                        "delay": "2",
+                        "description": "Delete test.txt from Desktop",
+                        "enabled": true,
+                        "id": "PSECPTRC4",
+                        "type": "Command"
+                    }
+                ],
+                "description": "App-launch probes",
+                "enabled": true,
+                "eval_method": "==",
+                "id": "PSECPTRIF",
+                "left_term": "[perftrack_app_launch]",
+                "right_term": "1",
+                "type": "If"
+            },
+            {
+                "children": [],
+                "description": "",
+                "enabled": true,
+                "id": "PSECPTRIE",
                 "type": "End If"
             },
             {
@@ -1674,7 +1683,7 @@
                         "type": "Command"
                     }
                 ],
-                "description": "Type-to-Search probe (after sleep/resume to ensure Search index is warm)",
+                "description": "Type-to-Search probe",
                 "enabled": true,
                 "eval_method": "==",
                 "id": "PSEC2430IF",
@@ -1694,7 +1703,7 @@
                     {
                         "children": [],
                         "delay": "0.0",
-                        "description": "Enable short typing for perf_stress (keeps prod_*_run keystrokes shorter under stress)",
+                        "description": "Enable short typing",
                         "enabled": true,
                         "id": "PSECST20",
                         "name": "[short_typing]",
@@ -1705,7 +1714,7 @@
                         "children": [],
                         "command": "cmd /c reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\PowerPoint\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Word\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Excel\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Outlook\\Resiliency\\StartupItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\PowerPoint\\Resiliency\\DisabledItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Word\\Resiliency\\DisabledItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Excel\\Resiliency\\DisabledItems\" /f > nul 2>&1 & reg delete \"HKCU\\Software\\Microsoft\\Office\\16.0\\Outlook\\Resiliency\\DisabledItems\" /f > nul 2>&1 & exit /b 0",
                         "delay": "0",
-                        "description": "Clear Office resiliency markers left by the shell_probes cold-boot taskkill /F, so prod_open/prod_run launches don't hit the 'couldn't start last time / Safe Mode' dialog (which steals focus and breaks PowerPoint/Word image matches).",
+                        "description": "Clear Office resiliency markers",
                         "enabled": true,
                         "id": "PSECPRD0R",
                         "type": "Command"
@@ -1713,14 +1722,14 @@
                     {
                         "children": [],
                         "delay": "3",
-                        "description": "Settle before opening Office apps under stress (avoid DPI/race image mismatches)",
+                        "description": "Settle before opening Office apps",
                         "enabled": true,
                         "id": "PSECPRD0",
                         "type": "Delay"
                     },
                     {
                         "children": [],
-                        "description": "Safety net: protect productivity PT collection so a single image-match miss in prod_open or prod_run_no_onenote does not abort prod_close + web_switchto. Only wraps the PT-emitting productivity includes, not the rest of perf_stress.",
+                        "description": "Productivity PT safety net",
                         "enabled": true,
                         "id": "PSECTRYRUN",
                         "type": "Try"
@@ -1728,7 +1737,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Library-aligned: open all 5 apps (gives OneNote boot PT) — same as regular productivity scenario.",
+                        "description": "Open all 5 Office apps",
                         "enabled": true,
                         "id": "PSECPRO_OPEN",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_open",
@@ -1737,7 +1746,7 @@
                     {
                         "children": [],
                         "delay": "3",
-                        "description": "Settle after opening all 5 apps before per-app switchto+run (avoid DPI/race image mismatches under stress)",
+                        "description": "Settle after opening apps",
                         "enabled": true,
                         "id": "PSECPRD1",
                         "type": "Delay"
@@ -1745,7 +1754,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Library-aligned: per-app switchto+run for Outlook/Excel/Word/PowerPoint (OneNote run intentionally skipped; OneNote boot PT still captured by prod_open above).",
+                        "description": "Per-app switchto and run",
                         "enabled": true,
                         "id": "PSECPRO_RUN",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_run_no_onenote",
@@ -1768,7 +1777,7 @@
                     {
                         "children": [],
                         "delay": "2",
-                        "description": "Settle before close/web_switchto (runs even if productivity Try caught a failure above)",
+                        "description": "Settle before close",
                         "enabled": true,
                         "id": "PSECPRD5",
                         "type": "Delay"
@@ -1776,7 +1785,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Cleanup runs even if productivity Try caught a failure",
+                        "description": "Productivity cleanup",
                         "enabled": true,
                         "id": "19K59V7",
                         "include_path": "scenarios\\windows\\_library\\productivity\\prod_close",
@@ -1785,7 +1794,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Switch to Edge runs even if productivity Try caught a failure",
+                        "description": "Switch to Edge",
                         "enabled": true,
                         "id": "1CFNENY",
                         "include_path": "scenarios\\windows\\_library\\web\\web_switchto",
@@ -1837,7 +1846,7 @@
                     {
                         "children": [],
                         "delay": "0",
-                        "description": "Relaunch Edge via Start menu (taskbar icon click in web_setup fails when Edge is already focused). Start-menu launch is reliable when 30 tab Edge is already up.",
+                        "description": "Relaunch Edge via Start menu",
                         "enabled": true,
                         "id": "PSECEK01",
                         "include_path": "scenarios\\windows\\_library\\misc\\start_app_launch",
@@ -1948,7 +1957,7 @@
                         "type": "Include"
                     }
                 ],
-                "description": "web_check + web_close_tabs(12) belong to the replay web workload. Gated on bg_edge_tabs==0 so when bg_edge_tabs=1 we neither validate replay tabs that were never loaded nor close 12 of the 30 background tabs.",
+                "description": "web_check and web_close_tabs",
                 "enabled": true,
                 "eval_method": "==",
                 "id": "PSECWCKIF",
@@ -1995,7 +2004,7 @@
             {
                 "children": [],
                 "delay": "0.0",
-                "description": "LAST job in Run Test (success path). Kill the python percentile_stress workers BEFORE the framework's base-class teardown begins, because the result tar download (_copy_data_from_remote) runs as part of base teardown which executes before the scenario JSON Teardown phase. Killing python here lets the multi-GB DUT->host download complete on an unsaturated CPU, dramatically reducing teardown wall time and preventing tarfile truncation. The duplicate PSECPYK at the top of the Teardown phase covers the failure path where Run Test aborts mid-iteration and never reaches this point.",
+                "description": "Kill python stress workers",
                 "enabled": true,
                 "file_name": [
                     "code_PSECPYK.py"
@@ -2014,7 +2023,7 @@
             {
                 "children": [],
                 "delay": "0.0",
-                "description": "FIRST job in Teardown. Kill the python percentile_stress workers up front so the rest of teardown (web_kill, prod_kill, teams_teardown, DiagTrack restart, trace stop, RPC tar/download) is not contending with a fully pinned CPU. Without this, teardown wall time stretches significantly on multi-iteration unattended runs and the DUT->host result tar can truncate. Placed at the start of Teardown (not end of Run Test) so it always executes even when a Run Test action fails late.",
+                "description": "Kill python stress workers",
                 "enabled": true,
                 "file_name": [
                     "code_PSECPYK.py"
@@ -2026,7 +2035,7 @@
                 "children": [],
                 "command": "cmd /c taskkill /F /T /IM OUTLOOK.EXE > nul 2>&1 & taskkill /F /T /IM WINWORD.EXE > nul 2>&1 & taskkill /F /T /IM EXCEL.EXE > nul 2>&1 & taskkill /F /T /IM POWERPNT.EXE > nul 2>&1 & taskkill /F /T /IM ONENOTE.EXE > nul 2>&1 & taskkill /F /T /IM MSACCESS.EXE > nul 2>&1 & exit /b 0",
                 "delay": "1",
-                "description": "Force-kill any leftover Office apps so iteration N's stuck dialogs / unsaved-changes prompts / recovery panes do not bleed into iteration N+1 and break image-template matching of the next run's productivity phase.",
+                "description": "Force-kill leftover Office apps",
                 "enabled": true,
                 "id": "PSECTDOK",
                 "type": "Command"
@@ -2069,7 +2078,7 @@
             },
             {
                 "children": [],
-                "description": "Try wrapper for teams teardown (195LNFU call health may fail)",
+                "description": "Teams teardown",
                 "enabled": true,
                 "id": "PSECTRYTD",
                 "type": "Try"

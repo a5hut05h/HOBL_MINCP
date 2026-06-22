@@ -49,12 +49,14 @@ function Stop-HeavyWprCapture {
     param(
         [string]$InstanceName = "perfStressHeavy",
         # Grace period (seconds) to let an in-progress `wpr -stop` finish before we
-        # force-kill the collect script. Under heavy load `wpr -stop` for the Verbose
-        # CPI+kernel profile can take 10-15 min, so this grace period will NOT save a
-        # long flush - but when the stop happens to be close to done (light load, end
-        # of iteration), it lets the script return cleanly and log "Trace saved",
-        # turning a forced-kill into a clean exit.
-        [int]$StopGraceSeconds = 60
+        # force-kill the collect script. The rolling capture now stops UNCOMPRESSED
+        # (see collect_5min_traces.ps1), so even under heavy load a flush finishes in
+        # ~1-2 min instead of the old 10-15 min compressed flush. This grace therefore
+        # now genuinely lets the FINAL in-progress segment finish and log "Trace saved"
+        # (turning a discarded partial into a usable ETL) without unduly extending
+        # teardown. If a flush is still running past this window we fall through to the
+        # fast -cancel below.
+        [int]$StopGraceSeconds = 180
     )
 
     # 1. Give an in-progress `wpr -stop` a brief grace period to finalize. We look
