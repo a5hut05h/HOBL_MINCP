@@ -12,6 +12,7 @@ class Cinebench(core.app_scenario.Scenario):
     The Cinebench benchmark.
     """
     module = __module__.split('.')[-1]
+    is_benchmark = True
 
     Params.setDefault(module, 'duration', '60', desc="Minimum run time in seconds")
     Params.setDefault(module, 'workload', 'multi_core', desc="Workload type: single_core or multi_core", valOptions=["single_core", "multi_core"])
