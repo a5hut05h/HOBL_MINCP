@@ -502,6 +502,7 @@ class Scenario(unittest.TestCase):
             override_dict['HOBL Version'] = hobl_ver.strip()
             override_dict['Study Type'] = Params.get('global', 'study_type', log = False)
             override_dict['Product'] = Params.get('global', 'product', log = False)
+            override_dict['DUT Type'] = Params.get('global', 'dut_type', log = False)
             override_str = json.dumps(override_dict)
             override_str = override_str.replace('"', "'")
             # override_str = override_str.replace(' ', "")

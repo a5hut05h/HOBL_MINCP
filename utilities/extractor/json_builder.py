@@ -10,6 +10,12 @@ from utilities.extractor.parsers import (
     parse_perf_metrics,
     parse_power_light,
     parse_run_info,
+    parse_teams_call_health,
+)
+from utilities.extractor.power_calculate import (
+    calculate_battery_life_hr,
+    calculate_power_metrics,
+    calculate_record_time_min,
 )
 
 logger = logging.getLogger(__name__)
@@ -41,13 +47,23 @@ def extract_run(run_dir: Path) -> dict | None:
     # Parse all data sources
     device_config = parse_config(run_dir)
     power = parse_power_light(run_dir)
+    power_calc = calculate_power_metrics(power, dut_type=device_config.get("dut_type"))
+    record_time = calculate_record_time_min(run_dir)
+    if record_time is not None:
+        power_calc.append({"name": "record_time", "value": round(record_time, 6), "unit": "min"})
+    sys_power = next((m["value"] for m in power_calc if m["name"] == "system_power"), None)
+    battery_life = calculate_battery_life_hr(run_dir, sys_power)
+    if battery_life is not None:
+        power_calc.append({"name": "battery_life", "value": round(battery_life, 6), "unit": "hour"})
     perf = parse_perf_metrics(run_dir)
+    perf.extend(parse_teams_call_health(run_dir))
     etl = parse_etl_files(run_dir)
 
     result = {
         "run_info": ri,
         "device_config": device_config,
         "power_metrics": power,
+        "power_calculation": power_calc,
         "perf_metrics": perf,
         "etl_files": etl,
     }
