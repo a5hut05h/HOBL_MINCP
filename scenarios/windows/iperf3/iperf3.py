@@ -222,7 +222,7 @@ class Iperf3(core.app_scenario.Scenario):
         Both are captured; keys not present for a given protocol are simply omitted.
         """
         metrics = {
-            'test_type' : self.test_type,
+            'iperf3_test_type' : self.test_type,
             'server_ip' : self.server_ip,
             'duration_s': self.duration,
         }
