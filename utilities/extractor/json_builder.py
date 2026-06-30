@@ -10,6 +10,7 @@ from utilities.extractor.parsers import (
     parse_perf_metrics,
     parse_power_light,
     parse_run_info,
+    parse_teams_call_health,
 )
 from utilities.extractor.power_calculate import (
     calculate_battery_life_hr,
@@ -55,6 +56,7 @@ def extract_run(run_dir: Path) -> dict | None:
     if battery_life is not None:
         power_calc.append({"name": "battery_life", "value": round(battery_life, 6), "unit": "hour"})
     perf = parse_perf_metrics(run_dir)
+    perf.extend(parse_teams_call_health(run_dir))
     etl = parse_etl_files(run_dir)
 
     result = {

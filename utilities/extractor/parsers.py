@@ -5,6 +5,9 @@ Handles: power_light.csv, PerfMetrics.csv, Config.csv, run_info.csv, and ETL/tra
 
 import csv
 import logging
+import re
+import socket
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -47,11 +50,16 @@ _CONFIG_FIELD_MAP = {
     "Capture Time": "capture_time",
     "Mobility": "mobility",
     "Bitlocker State": "bitlocker_state",
+    "DUT Type": "dut_type",
+    "Usable RAM (GB)": "usable_ram_config_gb",
+    "Boot Image Version": "LKG",
+    "Hardware Version": "HWVersion",
 }
 
 _CONFIG_INT_FIELDS = {"memory_size_gb", "storage_size_gb", "battery_cycles",
                       "battery_capacity_wh", "battery_full_charge_mwh",
-                      "battery_charge_pct", "screen_brightness_pct"}
+                      "battery_charge_pct", "screen_brightness_pct", "usable_ram_config_gb"}
+
 
 _RUN_INFO_FIELD_MAP = {
     "Run Path": "run_path",
@@ -90,6 +98,24 @@ def _read_key_value_csv(filepath: Path) -> dict[str, str]:
     return raw
 
 
+def _get_host_name() -> str:
+    """Get host name using OS command with socket fallback."""
+    try:
+        output = subprocess.run(
+            ["hostname"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        host = (output.stdout or "").strip()
+        if host:
+            return host
+    except OSError:
+        pass
+
+    return socket.gethostname()
+
+
 # ---------------------------------------------------------------------------
 # Parsers
 # ---------------------------------------------------------------------------
@@ -97,14 +123,18 @@ def _read_key_value_csv(filepath: Path) -> dict[str, str]:
 def parse_power_light(run_dir: Path) -> list[dict]:
     """Parse *_power_light.csv -- power rail readings in Watts.
 
-    Returns list of {"name": str, "value": float, "unit": "W"}
+    Returns list of {"name": str, "value": float, "unit": "W"}. When the same
+    rail name appears more than once in a run, a 1-based ordering suffix is
+    appended to every occurrence ("<name>_1", "<name>_2", ...) so the metric
+    names stay unique (mirrors parse_perf_metrics). Names that appear only once
+    are left unchanged.
     """
     filepath = _find_file(run_dir, "*_power_light.csv")
     if filepath is None:
         logger.warning("No *_power_light.csv found in %s", run_dir)
         return []
 
-    metrics = []
+    rows = []
     try:
         with open(filepath, "r", encoding="utf-8-sig") as f:
             for row in csv.reader(f):
@@ -116,10 +146,27 @@ def parse_power_light(run_dir: Path) -> list[dict]:
                 except ValueError:
                     logger.warning("Invalid value for metric %s: %s", name, row[1])
                     continue
-                metrics.append({"name": name, "value": value, "unit": "W"})
+                rows.append((name, value))
     except OSError as e:
         logger.error("Failed to read %s: %s", filepath, e)
         return []
+
+    # Count occurrences first so unique names stay clean and only duplicated
+    # names get a "_<ordering>" suffix.
+    name_totals: dict[str, int] = {}
+    for name, _ in rows:
+        name_totals[name] = name_totals.get(name, 0) + 1
+
+    metrics = []
+    order_counts: dict[str, int] = {}
+    for name, value in rows:
+        if name_totals[name] > 1:
+            order = order_counts.get(name, 0) + 1
+            order_counts[name] = order
+            out_name = f"{name}_{order}"
+        else:
+            out_name = name
+        metrics.append({"name": out_name, "value": value, "unit": "W"})
 
     logger.info("Parsed %d power metrics from %s", len(metrics), filepath.name)
     return metrics
@@ -128,7 +175,10 @@ def parse_power_light(run_dir: Path) -> list[dict]:
 def parse_perf_metrics(run_dir: Path) -> list[dict]:
     """Parse *_PerfMetrics.csv -- app launch durations.
 
-    Returns list of {"pt": int, "metric": str, "duration_ms": int}
+    Returns list of {"name": str, "value": int, "unit": "ms"} to match the
+    power_metrics shape. The name is "<metric>_<pt>_<ordering>", where ordering
+    is a 1-based counter that increments for each repeated (metric, pt) pair
+    within the run, since a single run can report the same metric multiple times.
     """
     filepath = _find_file(run_dir, "*_PerfMetrics.csv")
     if filepath is None:
@@ -136,6 +186,7 @@ def parse_perf_metrics(run_dir: Path) -> list[dict]:
         return []
 
     metrics = []
+    order_counts: dict[tuple[str, int], int] = {}
     try:
         with open(filepath, "r", encoding="utf-8-sig") as f:
             for row in csv.DictReader(f):
@@ -147,7 +198,11 @@ def parse_perf_metrics(run_dir: Path) -> list[dict]:
                     logger.warning("Skipping invalid perf row: %s (%s)", row, e)
                     continue
                 if metric:
-                    metrics.append({"pt": pt, "metric": metric, "duration_ms": duration})
+                    key = (metric, pt)
+                    order = order_counts.get(key, 0) + 1
+                    order_counts[key] = order
+                    name = f"{metric}_{pt}_{order}"
+                    metrics.append({"name": name, "value": duration, "unit": "ms"})
     except OSError as e:
         logger.error("Failed to read %s: %s", filepath, e)
         return []
@@ -156,9 +211,61 @@ def parse_perf_metrics(run_dir: Path) -> list[dict]:
     return metrics
 
 
+def parse_teams_call_health(run_dir: Path) -> list[dict]:
+    """Parse teams_call_health_info_rollup.csv -- Teams call quality metrics.
+
+    Extracts values for the perf_metrics section:
+      - teams_fps from the "Video Sent frame rate" row (unit "fps")
+      - teams_video_resolution_width / teams_video_resolution_height from the
+        "Video Sent Resolution" row (unit "px"), split from a "<width> x <height>"
+        string.
+
+    Returns list of {"name": str, "value": float|int, "unit": str}. Returns an
+    empty list when the file is missing or empty.
+    """
+    filepath = _find_file(run_dir, "teams_call_health_info_rollup.csv")
+    if filepath is None:
+        logger.info("No teams_call_health_info_rollup.csv found in %s", run_dir)
+        return []
+
+    raw = _read_key_value_csv(filepath)
+    if not raw:
+        logger.info("teams_call_health_info_rollup.csv is empty in %s", run_dir)
+        return []
+
+    # Case-insensitive lookup of the rows we care about.
+    lookup = {k.strip().lower(): v.strip() for k, v in raw.items()}
+    metrics = []
+
+    fps_raw = lookup.get("video sent frame rate")
+    if fps_raw:
+        match = re.search(r"[-+]?\d*\.?\d+", fps_raw)
+        if match:
+            metrics.append({"name": "teams_fps", "value": float(match.group()), "unit": "fps"})
+        else:
+            logger.warning("Could not parse Teams FPS from %r", fps_raw)
+
+    res_raw = lookup.get("video sent resolution")
+    if res_raw:
+        # Split a "<width> x <height>" string (e.g. "424 x 240", optionally with a
+        # trailing "px") into separate width and height metrics.
+        match = re.search(r"(\d+)\s*[x*×]\s*(\d+)", res_raw, flags=re.IGNORECASE)
+        if match:
+            width, height = int(match.group(1)), int(match.group(2))
+            metrics.append({"name": "teams_video_resolution_width", "value": width, "unit": "px"})
+            metrics.append({"name": "teams_video_resolution_height", "value": height, "unit": "px"})
+        else:
+            logger.warning("Could not parse Teams Video Resolution from %r", res_raw)
+
+    logger.info("Parsed %d Teams call health metrics from %s", len(metrics), filepath.name)
+    return metrics
+
+
 def parse_config(run_dir: Path) -> dict:
     """Parse Config.csv -- device configuration (31 fields)."""
     filepath = run_dir / "Config.csv"
+    if not filepath.exists():
+        filepath = run_dir / "config.csv"
     if not filepath.exists():
         logger.warning("Config.csv not found in %s", run_dir)
         return {}
@@ -175,6 +282,11 @@ def parse_config(run_dir: Path) -> dict:
                     pass
             config[json_key] = value
 
+    # OEM is derived from the same "DUT Type" column as dut_type. They can't both
+    # live in _CONFIG_FIELD_MAP because a duplicate dict key would drop one of them.
+    if "dut_type" in config:
+        config["OEM"] = config["dut_type"]
+
     logger.info("Parsed %d config fields from Config.csv", len(config))
     return config
 
@@ -190,7 +302,7 @@ def parse_run_info(run_dir: Path) -> dict:
     else:
         status = "UNKNOWN"
 
-    info = {"status": status}
+    info = {"status": status, "HostName": _get_host_name()}
 
     filepath = run_dir / "run_info.csv"
     if not filepath.exists():

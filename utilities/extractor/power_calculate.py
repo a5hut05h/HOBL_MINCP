@@ -383,18 +383,18 @@ def calculate_battery_life_hr(run_dir: Path, system_power_w: Optional[float]) ->
     try:
         with open(fcc_path, "r", encoding="utf-8-sig") as f:
             for row in csv.reader(f):
-                if len(row) >= 2 and row[0].strip() == "full_charge_capacity_mwh":
+                if len(row) >= 2 and row[0].strip() == "design_capacity_mwh":
                     try:
                         fcc_mwh = float(row[1].strip())
                     except ValueError:
-                        logger.warning("Invalid full_charge_capacity_mwh value: %s", row[1])
+                        logger.warning("Invalid design_capacity_mwh value: %s", row[1])
                     break
     except OSError as e:
         logger.error("Failed to read %s: %s", fcc_path, e)
         return None
 
     if fcc_mwh is None:
-        logger.warning("full_charge_capacity_mwh row not found in %s", fcc_path)
+        logger.warning("design_capacity_mwh row not found in %s", fcc_path)
         return None
 
     fcc_wh = fcc_mwh / 1000.0

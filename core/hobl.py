@@ -54,7 +54,7 @@ if "-d" not in sys.argv and "-dv" not in sys.argv:
 params = Params
 
 # Set default global parameters
-params.setDefault('global', 'hardware_version', '', desc="Optional information to pass to reporting.")
+params.setDefault('global', 'hardware_version', '', desc="Optional information to pass to reporting.", valOptions=["EV", "DV","Pre EV","PV"])
 params.setDefault('global', 'accessories', '', desc="Optional information to pass to reporting.")
 params.setDefault('global', 'result_dir', 'c:\\hobl_results', desc="Base file path for storing test results.")
 params.setDefault('global', 'goals', '', desc="Path to a CSV file that has goals for each scenario to compare results with.")
@@ -71,6 +71,7 @@ params.setDefault('global', 'dut_password', '', desc="The password for the test 
 params.setDefault('global', 'dut_ip', '127.0.0.1', desc="IP address of the Device Under Test (name can be used if DNS is supported).")
 params.setDefault('global', 'dut_name', '', desc="Name of the Device Under Test.  Every DUT on the lab netowrk needs to have a unique name.")
 params.setDefault('global', 'dut_architecture', 'x64', desc="The CPU architecture of the DUT, used for running apps and tools that are optimized for that architecture.", valOptions=["x64", "arm64"])
+
 params.setDefault('global', 'dut_wifi_name', '', desc="Name of the Wi-Fi netowrk SSID that this device should connect to.")
 params.setDefault('global', 'dut_wifi_password', '', desc="Password of the Wi-Fi netowrk SSID that this device should connect to.")
 params.setDefault('global', 'dut_wifi_authentication', 'WPA2PSK', desc="Wi-Fi authentication type.", valOptions=["WPA2PSK", "WPA3SAE"]) # WPA3SAE for Wi-Fi 6E+
@@ -147,7 +148,7 @@ params.setDefault('global', 'prep_run_only', '0', desc="Run prep only for scenar
 params.setDefault('global', 'result_dir_complete', '', desc="Completed file path for storing test results (already including study type, study variables, and run type).")
 params.setDefault('global', 'fungates_upload_enabled', '0', desc="Auto-extract results and upload ETL files to Fungates after each PASS run.", valOptions=["1", "0"])
 params.setDefault('global', 'fungates_cse_uploader_path', '', desc="Full path to CSEUploader.exe. Leave blank to use the bundled one in utilities/fungates_uploader.")
-
+params.setDefault('global', 'dut_type', '', desc="Hardware platform of the DUT, used to select the correct SOC power formula in reporting. Leave blank if unknown.", valOptions=["", "Pantherlake/LunarLake surface", "HP chiharu", "Cadmus Romulus", "Cadmus Denali", "Heracles", "Purwa"])
 
 # Command line arguments
 core.arguments.Arguments()
