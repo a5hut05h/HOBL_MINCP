@@ -102,9 +102,33 @@ param (
     [string]$LKG = "",
 
     [Parameter(Mandatory=$false)]
-    [string]$ScenarioName = ""
+    [string]$ScenarioName = "",
+
+    [Parameter(Mandatory=$false)]
+    [string]$TestRunId = "",
+
+    [Parameter(Mandatory=$false)]
+    [string]$IterationNumber = ""
 
 )
+
+# Strip a trailing "_<number>" suffix (e.g. "mincp_base_014" -> "mincp_base") from the
+# test name so every iteration of a scenario shares one logical TestName in Fungates
+# instead of producing a separate dropdown entry per run. The stripped run number is
+# preserved and emitted separately as the IterationNumber metadata field.
+if ($TestName -match '_(\d+)$') {
+    if ([string]::IsNullOrWhiteSpace($IterationNumber)) {
+        $IterationNumber = ([int]$matches[1]).ToString()
+    }
+    $TestName = $TestName -replace '_\d+$', ''
+}
+
+# Generate a unique TestRunId (GUID) when one is not supplied. Because the numeric
+# suffix is removed from TestName, all iterations would otherwise collide under the
+# same TestName; a fresh TestRunId keeps each upload distinct in Fungates.
+if ([string]::IsNullOrWhiteSpace($TestRunId)) {
+    $TestRunId = [guid]::NewGuid().ToString()
+}
 
 Write-Host "Creating metadata file for $TraceFileName"
 Write-Host "Output directory: $OutputDirectory"
@@ -294,11 +318,13 @@ $metadata = @{
     GateName           = $GateName.Trim()
     IterationsPerRun   = $IterationsPerRun.Trim()
     Iteration          = $Iteration.Trim()
+    IterationNumber    = $IterationNumber.Trim()
     TierDefinitionKey  = $TierDefinitionKey.Trim()
     BuildNum           = $BuildNum.Trim()
     BuildLab           = $BuildLab.Trim()
     IsOfficial         = $IsOfficial
     TestRunIdSource    = $TestRunIdSource.Trim()
+    TestRunId          = $TestRunId.Trim()
     RunDate            = $runDate.Trim()
     BuildSku           = $BuildSku.Trim()
     Edition            = $Edition.Trim()
