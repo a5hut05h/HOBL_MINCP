@@ -98,13 +98,13 @@ class StorePrep(core.app_scenario.Scenario):
             except:
                 try:
                     # Find by Automation ID (accessibility_id) instead of name because sometimes name has additional words, like "Updates available".
-                    # self.driver.find_element_by_accessibility_id("MyLibraryButton").click()
                     # Moved to Downloads
                     self.driver.find_element_by_accessibility_id("DownloadsAndUpdatesButton").click()
                     self.new_store = True
-                    logging.info("New store detected.")
+                    # logging.info("New store detected.")
                 except:
-                    pass
+                    self.driver.find_element_by_accessibility_id("MyLibraryButton").click()
+                    self.new_store = True
 
             # Handle a download error that prompts for Retry
             try:
