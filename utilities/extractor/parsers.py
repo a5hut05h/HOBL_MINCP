@@ -47,7 +47,6 @@ _CONFIG_FIELD_MAP = {
     "Teams Version": "teams_version",
     "Office Version": "office_version",
     "UEFI Version": "uefi_version",
-    "Capture Time": "capture_time",
     "Mobility": "mobility",
     "Bitlocker State": "bitlocker_state",
     "DUT Type": "dut_type",
@@ -303,6 +302,16 @@ def parse_run_info(run_dir: Path) -> dict:
         status = "UNKNOWN"
 
     info = {"status": status, "HostName": _get_host_name()}
+
+    # Config.csv's "Capture Time" is stamped during scenario setUp, so it marks when the
+    # run started. Surface it under run_info as run_start_time.
+    config_path = run_dir / "Config.csv"
+    if not config_path.exists():
+        config_path = run_dir / "config.csv"
+    if config_path.exists():
+        config_raw = _read_key_value_csv(config_path)
+        if "Capture Time" in config_raw:
+            info["run_start_time"] = config_raw["Capture Time"]
 
     filepath = run_dir / "run_info.csv"
     if not filepath.exists():
