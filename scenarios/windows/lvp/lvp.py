@@ -15,6 +15,7 @@ import core.app_scenario
 from core.parameters import Params
 import time
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 import selenium.common.exceptions as exceptions
 from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchElementException
 
@@ -151,11 +152,14 @@ class LVP(core.app_scenario.Scenario):
             self.driver.find_element_by_xpath(f"//*[contains(@Name, '{self.title}')]").click()
             time.sleep(2)
 
-            ActionChains(self.driver).move_to_element(
-                self.driver.find_element_by_class_name("LandmarkTarget")
-            ).perform()
+            # Inject space to pause video using ActionChains
+            ActionChains(self.driver).send_keys(Keys.SPACE).perform()
+            
+            # ActionChains(self.driver).move_to_element(
+            #     self.driver.find_element_by_class_name("LandmarkTarget")
+            # ).perform()
 
-            time.sleep(5)
+            time.sleep(2)
 
             logging.info("Selecting repeat button on DUT.")
 
@@ -174,6 +178,9 @@ class LVP(core.app_scenario.Scenario):
             self.driver.find_element_by_xpath(
                 f"//*[contains(@Name, 'Full screen') and @ClassName = 'AppBarButton']"
             ).click()
+
+            # Inject space to resume
+            ActionChains(self.driver).send_keys(Keys.SPACE).perform()
 
             ActionChains(self.driver).move_by_offset(-200, -200).perform()
         except:
