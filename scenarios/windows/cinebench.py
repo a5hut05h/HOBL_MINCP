@@ -12,11 +12,14 @@ class Cinebench(core.app_scenario.Scenario):
     The Cinebench benchmark.
     """
     module = __module__.split('.')[-1]
+    is_benchmark = True
 
     Params.setDefault(module, 'duration', '60', desc="Minimum run time in seconds")
     Params.setDefault(module, 'workload', 'multi_core', desc="Workload type: single_core or multi_core", valOptions=["single_core", "multi_core"])
     Params.setDefault(module, 'installer_path', '', desc="Path to Cinebench installer on host machine. This should be the directory for your device architecture, containing the extracted Cinebench files, including cinebench.exe")
     prep_version = "1"
+
+    prep_run_only = Params.get('global', 'prep_run_only') == "1"
 
     def setUp(self):
         self.toolCallBacks("testBeginEarlyCallback")
@@ -25,20 +28,22 @@ class Cinebench(core.app_scenario.Scenario):
         self.workload = Params.get(self.module, 'workload')
         self.dut_arch = Params.get('global', 'dut_architecture')
 
-        installer_path = Params.get(self.module, 'installer_path')
+        self.installer_path = Params.get(self.module, 'installer_path')
 
         # Get the name of the folder that was uploaded to the device, which should be the same as the last part of the installer path
-        self.folder_name = installer_path.split('\\')[-1]
+        self.folder_name = self.installer_path.split('\\')[-1]
         
         self.cinebench_path = f"{self.dut_exec_path}\\Cinebench\\{self.folder_name}\\cinebench.exe"
         self.out_filename = "cinebench_output.txt"
 
-        # Test if already set up
-        if self.checkPrepStatus([self.module + self.prep_version]):
-            self._upload(f"{installer_path}", f"{self.dut_exec_path}\\Cinebench")
-            self.createPrepStatusControlFile(self.prep_version)
+        self.prep()
+
         super().setUp()
 
+    def prep(self):
+        if self.checkPrepStatus([self.module + self.prep_version]):
+            self._upload(f"{self.installer_path}", f"{self.dut_exec_path}\\Cinebench")
+            self.createPrepStatusControlFile(self.prep_version)
 
     def runTest(self):
         if self.workload == 'single_core':
@@ -46,11 +51,13 @@ class Cinebench(core.app_scenario.Scenario):
         else:
             workload_arg = 'g_CinebenchCpuXTest=true'
         logging.info("Cinebench started.")
-        self._call(["cmd.exe", f'/c start /B /wait "parent" {self.cinebench_path} {workload_arg} g_CinebenchMinimumTestDuration={self.duration} > {self.dut_data_path}\\{self.out_filename}"'], timeout=self.duration + 1200)
+        self._call(["cmd.exe", f'/c start /B /wait "parent" {self.cinebench_path} {workload_arg} g_CinebenchMinimumTestDuration={self.duration} > {self.dut_data_path}\\{self.out_filename}"'], timeout=self.duration + 2700)
         logging.info("Cinebench completed.")
 
-
     def tearDown(self):
+        if self.prep_run_only:
+            return
+
         logging.info("Tearing down Cinebench scenario.")
         # Baseclass test end callback to stop tools
         self._callback(Params.get('global', 'callback_test_end'))
@@ -83,3 +90,11 @@ class Cinebench(core.app_scenario.Scenario):
             logging.info(f"Cinebench Single Core score: {score}")
         else:
             logging.info(f"Cinebench Multi Core score: {score}")
+
+    def kill(self):
+        # In case of scenario failure or termination, kill any applications left open here:
+        try:
+            self._kill("cinebench.exe")
+        except:
+            pass
+        return

@@ -482,8 +482,12 @@ class Params(object):
                 val = date.isoformat(date.today())
                 continue
 
-            # print(f" INFO resolveVars - calling get_raw(None, {name})")
-            val = Params.get_raw(None, name, log = False, recurse_init = False)
+            section_raw = None
+            name_raw    = name
+            if ":" in name:
+                section_raw, name_raw = (name.split(':', 1) + [""])[:2]
+
+            val = Params.get_raw(section_raw, name_raw, log = False, recurse_init = False)
 
             if val == None: 
                 # new key value
@@ -492,7 +496,7 @@ class Params(object):
                 # either 
                 # print (f"Key Name: {name}")
                 # print(f" INFO resolveVars2 - calling get(None, {name})")
-                val_new = Params.get(None, name, log = False, recurse_init = False)
+                val_new = Params.get(section_raw, name_raw, log = False, recurse_init = False)
                 if val_new != None:
                     reg_write(name, val_new)
                     val = val_new

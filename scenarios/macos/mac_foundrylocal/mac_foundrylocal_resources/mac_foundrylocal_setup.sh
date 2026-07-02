@@ -51,8 +51,16 @@ export PATH="$HOME/bin:$PATH"
 # ============================================================================
 log "Step 1: Starting Foundry service..."
 
-log "Running: foundry service start (in background)"
-foundry service start &
+# Spawn the foundry service fully detached: redirect its stdio away from the
+# inherited RPC pipes and disown it so the parent shell's exit isn't blocked
+# on the daemon and the RPC layer (SimpleRemote) gets EOF on stdout/stderr
+# immediately when this script returns. A bare `foundry service start &`
+# leaves the daemon owning the script's stdout fd; SimpleRemote then waits
+# for EOF and times out at 30 minutes even though setup completed.
+FOUNDRY_SERVICE_LOG="$LOG_DIR/mac_foundrylocal_foundry_service.log"
+log "Running: foundry service start (background, logs -> $FOUNDRY_SERVICE_LOG)"
+nohup foundry service start </dev/null >>"$FOUNDRY_SERVICE_LOG" 2>&1 &
+disown 2>/dev/null || true
 
 # Wait for service to be ready
 log "Waiting for Foundry service to be ready..."

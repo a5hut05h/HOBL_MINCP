@@ -43,6 +43,13 @@ eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
 
 cd $BIN_DIR/ollama
 
+OLLAMA_BIN="$BIN_DIR/ollama/ollama"
+if [ ! -x "$OLLAMA_BIN" ]; then
+    log " ERROR - $OLLAMA_BIN missing or not executable. Prep did not complete."
+    log " ERROR - Re-prep required: delete the prep_status file for mac_ollama on the DUT and re-run."
+    exit 1
+fi
+
 # Disable progress indicator
 export NO_COLOR=1
 
@@ -52,7 +59,7 @@ VERBOSE_LOG="$LOG_DIR/mac_ollama_verbose.log"
 log "-- Run $MODEL model with prompt"
 log "-- Script log: $LOG_FILE"
 log "-- Verbose output: $VERBOSE_LOG"
-go run . run $MODEL "what is the meaning of life?" --verbose > $VERBOSE_LOG 2>&1
+"$OLLAMA_BIN" run $MODEL "what is the meaning of life?" --verbose > $VERBOSE_LOG 2>&1
 check $?
 
 log "-- Parsing metrics from verbose log file"

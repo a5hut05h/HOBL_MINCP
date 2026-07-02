@@ -57,12 +57,17 @@ class StorePrep(core.app_scenario.Scenario):
             self.driver.find_element_by_accessibility_id("nav_downloadsandupdates").click()
             # logging.info("New store detected.")
         except:
-            # self.driver.find_element_by_accessibility_id("MyLibraryButton").click()
-            self.driver.find_element_by_accessibility_id("DownloadsAndUpdatesButton").click()
-            # WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.NAME, 'See More'))).click()
-            # WebDriverWait(self.driver, 2).until(EC.presence_of_element_located((By.XPATH, '//*[contains(@Name, "Downloads and updates")]'))).click()
-            self.new_store = False
-            # logging.info("Old store detected.")
+            try:
+                # self.driver.find_element_by_accessibility_id("MyLibraryButton").click()
+                self.driver.find_element_by_accessibility_id("DownloadsAndUpdatesButton").click()
+                # WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.NAME, 'See More'))).click()
+                # WebDriverWait(self.driver, 2).until(EC.presence_of_element_located((By.XPATH, '//*[contains(@Name, "Downloads and updates")]'))).click()
+                self.new_store = False
+                # logging.info("Old store detected.")
+            except:
+                self.driver.find_element_by_accessibility_id("MyLibraryButton").click()
+                self.new_store = False
+
 
 
 
@@ -98,13 +103,13 @@ class StorePrep(core.app_scenario.Scenario):
             except:
                 try:
                     # Find by Automation ID (accessibility_id) instead of name because sometimes name has additional words, like "Updates available".
-                    # self.driver.find_element_by_accessibility_id("MyLibraryButton").click()
                     # Moved to Downloads
                     self.driver.find_element_by_accessibility_id("DownloadsAndUpdatesButton").click()
                     self.new_store = True
-                    logging.info("New store detected.")
+                    # logging.info("New store detected.")
                 except:
-                    pass
+                    self.driver.find_element_by_accessibility_id("MyLibraryButton").click()
+                    self.new_store = True
 
             # Handle a download error that prompts for Retry
             try:

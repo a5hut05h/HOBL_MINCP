@@ -22,7 +22,7 @@ class Recharge(core.app_scenario.Scenario):
     module = __module__.split('.')[-1]
     # Set default parameters
     Params.setDefault(module, 'resume_threshold', '100')  # Percent battery level to charge to
-    Params.setDefault(module, 'post_charge_delay', '7200', desc="How many seconds to wait after reaching the resume_threshold before disconnecting charger.")  # Adding time here can help sensure the device is maximally charged.
+    Params.setDefault(module, 'post_charge_delay', '0', desc="How many seconds to wait after reaching the resume_threshold before disconnecting charger.")  # Adding time here can help sensure the device is maximally charged.
     Params.setDefault(module, 'leave_on_ac', '0', valOptions=["0", "1"])
     Params.setDefault(module, 'monitor_only', '0', valOptions=["0", "1"])  # Do not turn on charger, just monitor battery level
     Params.setDefault(module, 'check_smart_charge', '1', valOptions=["0", "1"])
