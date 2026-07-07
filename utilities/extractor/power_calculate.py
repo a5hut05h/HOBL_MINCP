@@ -360,47 +360,48 @@ _LOG_TS_RE = re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),(\d{3})")
 
 
 # ---------------------------------------------------------------------------
-# Battery life from battery_fcc.csv and system_power
+# Battery life from Config.csv and system_power
 # ---------------------------------------------------------------------------
 
 def calculate_battery_life_hr(run_dir: Path, system_power_w: Optional[float]) -> Optional[float]:
-    """Compute battery life in hours = (full_charge_capacity_mwh / 1000) / system_power_w.
+    """Compute battery life in hours = design_capacity_wh / system_power_w.
 
-    Reads `full_charge_capacity_mwh` from `<run_dir>/battery_fcc.csv` (key,value rows).
-    Returns None if the CSV is missing, the value can't be parsed, or `system_power_w`
-    is missing/zero.
+    Reads `Battery Total Designed Capacity (Wh)` from `<run_dir>/Config.csv` (key,value
+    rows). The value is already in Wh, so no unit conversion is needed. Returns None if
+    the CSV is missing, the value can't be parsed, or `system_power_w` is missing/zero.
     """
     if system_power_w is None or system_power_w <= 0:
         logger.warning("system_power missing or non-positive; battery_life not computed")
         return None
 
-    fcc_path = run_dir / "battery_fcc.csv"
-    if not fcc_path.exists():
-        logger.warning("battery_fcc.csv not found in %s", run_dir)
+    config_path = run_dir / "Config.csv"
+    if not config_path.exists():
+        config_path = run_dir / "config.csv"
+    if not config_path.exists():
+        logger.warning("Config.csv not found in %s", run_dir)
         return None
 
-    fcc_mwh = None
+    design_wh = None
     try:
-        with open(fcc_path, "r", encoding="utf-8-sig") as f:
+        with open(config_path, "r", encoding="utf-8-sig") as f:
             for row in csv.reader(f):
-                if len(row) >= 2 and row[0].strip() == "design_capacity_mwh":
+                if len(row) >= 2 and row[0].strip() == "Battery Total Designed Capacity (Wh)":
                     try:
-                        fcc_mwh = float(row[1].strip())
+                        design_wh = float(row[1].strip())
                     except ValueError:
-                        logger.warning("Invalid design_capacity_mwh value: %s", row[1])
+                        logger.warning("Invalid Battery Total Designed Capacity (Wh) value: %s", row[1])
                     break
     except OSError as e:
-        logger.error("Failed to read %s: %s", fcc_path, e)
+        logger.error("Failed to read %s: %s", config_path, e)
         return None
 
-    if fcc_mwh is None:
-        logger.warning("design_capacity_mwh row not found in %s", fcc_path)
+    if design_wh is None:
+        logger.warning("Battery Total Designed Capacity (Wh) row not found in %s", config_path)
         return None
 
-    fcc_wh = fcc_mwh / 1000.0
-    battery_life_hr = fcc_wh / system_power_w
-    logger.info("Battery life: %.3f hr (FCC=%.3f Wh, system_power=%.3f W)",
-                battery_life_hr, fcc_wh, system_power_w)
+    battery_life_hr = design_wh / system_power_w
+    logger.info("Battery life: %.3f hr (design_capacity=%.3f Wh, system_power=%.3f W)",
+                battery_life_hr, design_wh, system_power_w)
     return battery_life_hr
 
 
