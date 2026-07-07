@@ -10,11 +10,16 @@
 # resolution, diagnostics, and Start-Process happen here so the host side does
 # not have to escape nested quotes through cmd->powershell.
 #
+# Launches python.exe via Shell.Application::ShellExecute so the child runs
+# outside our elevated PowerShell token chain and inherits normal user-mode
+# QoS (instead of the HOBL command handler's Important/HighQoS band, which
+# previously pinned the stress spinner to P-cores at Pri-8).
+#
 # Diagnostics tee to $LogFile on the DUT for post-mortem.
 # Exit codes:
-#   0 = python.exe launched successfully and still alive after 1.5s
+#   0 = at least one new python.exe appeared within 1.5s of ShellExecute
 #   1 = pyenv-win not installed / wrong path - re-run perf_stress_prep.ps1
-#   2 = python.exe died within 1.5s of launch (check log + percentile_stress.py)
+#   2 = ShellExecute threw, or no new python.exe appeared (check log + percentile_stress.py)
 
 param(
     [Parameter(Mandatory=$true)]
@@ -73,48 +78,42 @@ if (-not (Test-Path $ScriptPath)) {
 }
 
 # --- Launch ---
-# Use Win32_Process::Create via CIM/WMI rather than Start-Process or Start-Job.
-# Why: every prior approach hung the launcher PowerShell because PS held some
-# handle/job reference to the child:
-#   - Start-Process -RedirectStandardOutput inherits handles -> PS won't exit
-#   - Start-Job + Start-Process redirects has the same handle issue inside the job
-#   - PS's own background operator (&) keeps the runspace alive
-# Win32_Process::Create spawns through WmiPrvSE.exe with no inherited handles
-# from our shell. The launcher returns immediately, python.exe survives as an
-# orphan owned by WmiPrvSE.
-# Cost: we cannot redirect python's stdout/stderr through this path. That's
-# acceptable - the script's argparse choices are now fixed, and the post-launch
-# liveness probe still catches any crash within 1.5s.
-Write-Step (' launching via Win32_Process::Create')
+# Launch via Shell.Application::ShellExecute. This routes through Explorer.exe
+# (the shell), which spawns python.exe outside our elevated PowerShell token
+# chain. Net effect: python.exe and its mp.Process children come up with normal
+# user-mode QoS instead of inheriting the HOBL command handler's Important/
+# HighQoS band (which previously pinned the stress spinner to P-cores at Pri-8
+# and contended with foreground Word/Edge boots).
+# Same pattern used for the EC SimpleTimer fix.
+# Cost: ShellExecute returns void (no PID), so the post-launch liveness probe
+# snapshots python.exe PIDs before/after and reports the delta.
+Write-Step (' launching via Shell.Application::ShellExecute (de-elevates QoS)')
 Write-Step (' command: ' + $py + ' ' + $ScriptPath + ' --target-cpu ' + $TargetCpu)
 
-# Quote both paths in case of spaces; CommandLine is a single string.
-$cmdLine = '"' + $py + '" "' + $ScriptPath + '" --target-cpu ' + $TargetCpu
+$beforePids = @(Get-Process -Name python -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
+Write-Step (' python PIDs before launch: ' + ($beforePids -join ','))
+
+# ShellExecute args: file, parameters, dir, verb, showCmd (0 = SW_HIDE).
+$shellArgs = '"' + $ScriptPath + '" --target-cpu ' + $TargetCpu
 try {
-    $result = Invoke-CimMethod -ClassName Win32_Process -MethodName Create `
-                               -Arguments @{ CommandLine = $cmdLine } `
-                               -ErrorAction Stop
+    $shell = New-Object -ComObject Shell.Application
+    $shell.ShellExecute($py, $shellArgs, $null, 'open', 0)
 } catch {
-    Write-Step (' ERROR - Win32_Process::Create threw: ' + $_.Exception.Message)
+    Write-Step (' ERROR - Shell.Application::ShellExecute threw: ' + $_.Exception.Message)
     exit 2
 }
-
-# ReturnValue 0 = success per WMI docs.
-if ($result.ReturnValue -ne 0) {
-    Write-Step (' ERROR - Win32_Process::Create ReturnValue=' + $result.ReturnValue)
-    exit 2
-}
-
-$childPid = $result.ProcessId
-Write-Step (' python PID=' + $childPid)
 
 Start-Sleep -Milliseconds 1500
-$alive = Get-Process -Id ([int]$childPid) -ErrorAction SilentlyContinue
-if ($alive) {
-    Write-Step (' PERCENTILE_STRESS_RUNNING pid=' + $childPid)
+$afterPids = @(Get-Process -Name python -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
+$newPids   = $afterPids | Where-Object { $beforePids -notcontains $_ }
+Write-Step (' python PIDs after launch:  ' + ($afterPids -join ','))
+Write-Step (' new python PIDs:           ' + ($newPids   -join ','))
+
+if ($newPids.Count -gt 0) {
+    Write-Step (' PERCENTILE_STRESS_RUNNING pid=' + ($newPids -join ','))
     exit 0
 } else {
-    Write-Step (' ERROR - python.exe died within 1.5s of launch')
+    Write-Step (' ERROR - no new python.exe appeared within 1.5s of ShellExecute')
     Write-Step ('   To capture stderr for debugging, manually run on the DUT:')
     Write-Step ('   & "' + $py + '" "' + $ScriptPath + '" --target-cpu ' + $TargetCpu)
     exit 2
