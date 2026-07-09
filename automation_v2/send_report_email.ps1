@@ -1,45 +1,51 @@
-# HOBL Daily Automation v2 — weekly report emailer (Outlook COM).
+# HOBL automation v2 — report email helper (Outlook COM, on-demand + logon).
 #
-# Sends the weekly HTML report to a configurable recipient list using the
-# DUT's already-signed-in Outlook desktop account. No SMTP, no stored password
-# — Outlook sends as the logged-in user, so internal distribution lists accept
-# it. The email body is an email-safe static summary (pass rate, failures,
-# per-DUT); the full interactive .html report is ATTACHED (email clients strip
-# the JavaScript that powers the in-report sort/filter, so the live controls
-# only work when the attachment is opened in a browser).
+# Sends the per-run HTML report to the configured recipients using the Host's
+# already-signed-in Outlook desktop account. No SMTP, no stored password —
+# Outlook sends as the logged-in user, so internal distribution lists accept it.
+# The email body is an email-safe static summary (pass rate, failures, per-DUT);
+# the full interactive .html report is ATTACHED (email clients strip the
+# JavaScript that powers the in-report sort/filter, so the live controls only
+# work when the attachment is opened in a browser).
 #
-# Two ways to use it — same script:
-#   1. Manual / on-demand (sends the CURRENT week):
+# HOW IT FITS THE PIPELINE:
+#   daily_run.ps1 runs as SYSTEM and can't drive Outlook COM. When a run
+#   finishes it writes a marker under <reportDir>\pending_email\ and pokes the
+#   "HOBL Report Email" scheduled task, which runs THIS script (as the logged-in
+#   user) in -Drain mode. -Drain sends every pending marker's report and deletes
+#   each marker on success. The task also has a logon trigger, so any markers
+#   left while logged off are drained automatically at next sign-in.
+#
+# MODES (same script):
+#   1. Drain (default; what the helper task runs):
 #        powershell -ExecutionPolicy Bypass -File send_report_email.ps1
-#        powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Week 2026-W22
-#        powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -To "a@x.com;b@y.com"
-#   2. Automatic weekly: register a scheduled task that runs this script.
-#        powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Register -Day Monday -Time 09:00
-#      The registered task bakes in -LastWeek, so each Monday it emails the
-#      PREVIOUS week's report (by then every scenario for that week has run).
-#      Manual runs (without -LastWeek) still send the current week.
+#        powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Drain
+#   2. Register the on-demand + logon helper task (runs as the interactive user):
+#        powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Register
+#   3. Manual send of a specific period's report NOW (re-send / ad-hoc):
+#        ... -Send -Frequency Daily   -Date 2026-07-06
+#        ... -Send -Frequency Weekly  -Week 2026-W27
+#        ... -Send -Frequency Monthly -Date 2026-07-15 -To "a@x.com;b@y.com"
 #
-# IMPORTANT: the weekly task runs as the LOGGED-IN user (Outlook COM needs an
-# interactive session), NOT as SYSTEM. This suits lab DUTs that auto-login and
-# stay awake. If no one is logged in at trigger time, the task waits until a
-# session is available.
+# IMPORTANT: the helper task runs as the LOGGED-IN Host user (Outlook COM needs
+# an interactive session), NOT as SYSTEM. On a Host that stays signed in this
+# sends within seconds of a run finishing.
 #
-# Recipient comes from (in priority order): -To param, then config email.to,
-# else it errors. Configure the default in schedule.config.json:
-#   "email": { "enabled": true, "to": "wssi-fun-idc@microsoft.com",
-#              "sendDay": "Friday", "sendTime": "17:00" }
+# Recipients: -To wins (manual send), else the marker's recipients (drain), else
+# config email.to. Configure the default in schedule.config.json:
+#   "email": { "enabled": true, "to": "wssi-fun-idc@microsoft.com" }
 
 param(
     [string]$ConfigPath = "",
-    [string]$To         = "",       # ;-separated recipients; overrides config email.to
-    [string]$Week       = "",       # ISO week key (e.g. 2026-W23); default = current week
-    [string]$Date       = "",       # any date in the target week (yyyy-MM-dd); -Week wins
-    [switch]$LastWeek,              # target the PREVIOUS week instead of the current one (baked into the registered task)
-    [switch]$Refresh,               # re-render the week's HTML from the ledger before sending
-    [switch]$Register,              # register the weekly scheduled task instead of sending
-    [string]$Day        = "Monday", # (with -Register) day of week to send
-    [string]$Time       = "09:00",  # (with -Register) HH:MM 24h
-    [string]$TaskName   = "HOBL Weekly Report Email"
+    [switch]$Drain,                 # send all pending markers (default when no mode given)
+    [switch]$Send,                  # manual: build + send a specific period's report now
+    [switch]$Register,              # register the on-demand + logon helper task
+    [string]$To         = "",       # ;-separated recipients; overrides config email.to (manual -Send)
+    [string]$Frequency  = "",       # Daily|Weekly|Monthly (manual -Send); default from config schedule
+    [string]$Week       = "",       # ISO week key e.g. 2026-W27 (manual weekly -Send)
+    [string]$Date       = "",       # any date in the target period (manual -Send); -Week wins
+    [switch]$LastPeriod,            # manual -Send: target the PREVIOUS period instead of the current one
+    [string]$TaskName   = "HOBL Report Email"
 )
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -49,33 +55,22 @@ $scriptDrive = Split-Path -Qualifier $PSScriptRoot
 if (-not $ConfigPath) { $ConfigPath = Join-Path $PSScriptRoot "schedule.config.json" }
 
 # ---------------------------------------------------------------------------
-# -Register: create the weekly scheduled task (runs as the interactive user).
+# -Register: create the on-demand + logon helper task (runs as the interactive
+# user). No time trigger — daily_run.ps1 starts it when a run finishes, and the
+# logon trigger drains any markers left while the Host was logged off.
 # ---------------------------------------------------------------------------
 if ($Register) {
-    if ($Time -notmatch '^([01]\d|2[0-3]):[0-5]\d$') {
-        Write-Host " ERROR - -Time must be HH:MM (00:00 - 23:59)." -ForegroundColor Red
-        Exit 1
-    }
-    $validDays = 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'
-    if ($validDays -notcontains $Day) {
-        Write-Host " ERROR - -Day must be one of: $($validDays -join ', ')." -ForegroundColor Red
-        Exit 1
-    }
     $self = Join-Path $PSScriptRoot "send_report_email.ps1"
-    # Bake -To into the task action when provided, so the weekly run targets
-    # exactly the recipient given at registration. When omitted, the task falls
-    # back to config email.to at send time.
-    # -LastWeek is baked in so the registered task always emails the previous
-    # (fully completed) week; manual runs without it send the current week.
-    $argLine = "-ExecutionPolicy Bypass -NoProfile -File `"$self`" -Refresh -LastWeek"
-    if ($To) { $argLine += " -To `"$To`"" }
+    $argLine = "-ExecutionPolicy Bypass -NoProfile -File `"$self`" -Drain"
     $action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $argLine
-    $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek $Day -At $Time
+
     # Run as the current INTERACTIVE user (Outlook COM needs a logged-in
     # session). Limited run level is sufficient — no admin needed to send mail.
-    $principal = New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) `
-        -LogonType Interactive -RunLevel Limited
-    $settings = New-ScheduledTaskSettingsSet `
+    $userId    = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+    $principal = New-ScheduledTaskPrincipal -UserId $userId -LogonType Interactive -RunLevel Limited
+    # Logon trigger so a backlog of markers is drained automatically at sign-in.
+    $trigger   = New-ScheduledTaskTrigger -AtLogOn -User $userId
+    $settings  = New-ScheduledTaskSettingsSet `
         -StartWhenAvailable `
         -DontStopIfGoingOnBatteries `
         -AllowStartIfOnBatteries `
@@ -83,17 +78,17 @@ if ($Register) {
         -ExecutionTimeLimit (New-TimeSpan -Hours 1)
 
     Register-ScheduledTask -TaskName $TaskName `
-        -Description "HOBL automation: emails the PREVIOUS week's HTML report (Outlook COM) every $Day at $Time." `
+        -Description "HOBL automation: sends the per-run HTML report (Outlook COM). Started on-demand by daily_run.ps1 at run end; also drains pending reports at logon. Runs as the interactive user." `
         -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
 
-    Write-Host "Registered '$TaskName': every $Day at $Time, emails the previous week's report (runs as $($principal.UserId))." -ForegroundColor Green
+    Write-Host "Registered '$TaskName': on-demand + at-logon, sends pending run reports (runs as $userId)." -ForegroundColor Green
     Write-Host "  Test now:  schtasks /run /tn `"$TaskName`""
     Write-Host "  Remove:    schtasks /delete /tn `"$TaskName`" /f"
     Exit 0
 }
 
 # ---------------------------------------------------------------------------
-# Normal path: build + send the email.
+# Load config (for reportDir + default recipients + default frequency).
 # ---------------------------------------------------------------------------
 if (-not (Test-Path $ConfigPath)) {
     Write-Host " ERROR - Config not found: $ConfigPath" -ForegroundColor Red
@@ -110,81 +105,79 @@ $logDir    = if ($cfg.logDir) { $cfg.logDir } else { "$scriptDrive\hobl_results\
 $reportDir = $logDir
 if ($cfg.report -and $cfg.report.dir) { $reportDir = [string]$cfg.report.dir }
 
-# Resolve recipients: -To wins, else config email.to.
-$recipients = $To
-if (-not $recipients -and $cfg.email -and $cfg.email.to) { $recipients = [string]$cfg.email.to }
-if (-not $recipients) {
-    Write-Host " ERROR - No recipient. Pass -To or set email.to in schedule.config.json." -ForegroundColor Red
-    Exit 1
-}
-# Normalise separators (comma or semicolon) to ';' for Outlook.
-$recipients = ($recipients -split '[;,]' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) -join ';'
-
 . (Join-Path $PSScriptRoot "lib\report.ps1")
+. (Join-Path $PSScriptRoot "lib\email.ps1")
 
-# Resolve target week date.
-function Resolve-WeekDate {
-    param([string]$WeekKey)
-    if ($WeekKey -notmatch '^(\d{4})-?W(\d{1,2})$') { throw "Invalid -Week '$WeekKey'. Use YYYY-Www." }
-    $y = [int]$Matches[1]; $w = [int]$Matches[2]
-    $jan4 = [datetime]::new($y, 1, 4)
-    $dow  = [int]$jan4.DayOfWeek; if ($dow -eq 0) { $dow = 7 }
-    return $jan4.AddDays(1 - $dow).AddDays(($w - 1) * 7)
-}
-$targetDate = Get-Date
-if ($Week) { $targetDate = Resolve-WeekDate -WeekKey $Week }
-elseif ($Date) {
-    $parsed = [datetime]::MinValue
-    if (-not [datetime]::TryParse($Date, [ref]$parsed)) { Write-Host " ERROR - Invalid -Date '$Date'." -ForegroundColor Red; Exit 1 }
-    $targetDate = $parsed
-}
-elseif ($LastWeek) { $targetDate = (Get-Date).AddDays(-7) }
-
-# Optionally refresh the HTML from the ledger first (the scheduled task uses
-# this so the emailed report is current).
-if ($Refresh) {
-    try { Write-HoblReportHtml -ReportDir $reportDir -Date $targetDate | Out-Null }
-    catch { Write-Host " WARN - could not refresh report HTML: $($_.Exception.Message)" -ForegroundColor Yellow }
+$logger = { param($s)
+    if ("$s" -match ' ERROR - ')    { Write-Host $s -ForegroundColor Red }
+    elseif ("$s" -match ' WARN - ') { Write-Host $s -ForegroundColor Yellow }
+    else                            { Write-Host $s }
 }
 
-$paths = Get-HoblReportPaths -ReportDir $reportDir -Date $targetDate
-if (-not (Test-Path $paths.Html)) {
-    Write-Host " ERROR - Report HTML not found for week $($paths.Iso.Key): $($paths.Html)" -ForegroundColor Red
-    Write-Host "         Run with -Refresh, or generate_report.ps1 first." -ForegroundColor Red
+# ---------------------------------------------------------------------------
+# -Send (manual): build + send one period's report immediately (no marker).
+# ---------------------------------------------------------------------------
+if ($Send) {
+    # Recipients: -To wins, else config email.to.
+    $recipients = $To
+    if (-not $recipients -and $cfg.email -and $cfg.email.to) { $recipients = [string]$cfg.email.to }
+    if (-not $recipients) {
+        Write-Host " ERROR - No recipient. Pass -To or set email.to in schedule.config.json." -ForegroundColor Red
+        Exit 1
+    }
+
+    # Frequency: -Frequency wins, else config schedule.frequency, else Weekly.
+    $freq = $Frequency
+    if (-not $freq -and $cfg.schedule -and $cfg.schedule.frequency) { $freq = [string]$cfg.schedule.frequency }
+    $freq = Get-HoblReportFrequency $freq
+
+    # Resolve the target period date: -Week wins, else -Date, else today; then
+    # -LastPeriod shifts back one whole period.
+    function Resolve-WeekDate {
+        param([string]$WeekKey)
+        if ($WeekKey -notmatch '^(\d{4})-?W(\d{1,2})$') { throw "Invalid -Week '$WeekKey'. Use YYYY-Www." }
+        $y = [int]$Matches[1]; $w = [int]$Matches[2]
+        $jan4 = [datetime]::new($y, 1, 4)
+        $dow  = [int]$jan4.DayOfWeek; if ($dow -eq 0) { $dow = 7 }
+        return $jan4.AddDays(1 - $dow).AddDays(($w - 1) * 7)
+    }
+    $targetDate = Get-Date
+    if ($Week) { $targetDate = Resolve-WeekDate -WeekKey $Week }
+    elseif ($Date) {
+        $parsed = [datetime]::MinValue
+        if (-not [datetime]::TryParse($Date, [ref]$parsed)) { Write-Host " ERROR - Invalid -Date '$Date'." -ForegroundColor Red; Exit 1 }
+        $targetDate = $parsed
+    }
+    if ($LastPeriod) {
+        switch ($freq) {
+            'Daily'   { $targetDate = $targetDate.AddDays(-1) }
+            'Monthly' { $targetDate = $targetDate.AddMonths(-1) }
+            default   { $targetDate = $targetDate.AddDays(-7) }
+        }
+    }
+
+    # Reuse the shared send path via a synthetic marker so manual and automated
+    # sends build the email identically.
+    $marker = [pscustomobject]@{
+        runId      = 'manual'
+        createdAt  = (Get-Date).ToString('o')
+        reportDir  = $reportDir
+        frequency  = $freq
+        date       = $targetDate.ToString('o')
+        recipients = $recipients
+        incomplete = $false
+        note       = ''
+    }
+    $ok = Send-HoblReportEmail -Marker $marker -Log $logger
+    if ($ok) { Write-Host "Email sent." -ForegroundColor Green; Exit 0 }
+    Write-Host " ERROR - Email was not sent (see messages above)." -ForegroundColor Red
     Exit 1
 }
 
-$summary = Get-HoblReportSummary -ReportDir $reportDir -Date $targetDate
-$attName = [System.IO.Path]::GetFileName($paths.Html)
-$body    = ConvertTo-HoblEmailBodyHtml -Summary $summary -AttachmentName $attName
-$rateTxt = if ($null -ne $summary.PassRate) { "$($summary.PassRate)%" } else { 'n/a' }
-$subject = "HOBL Weekly Report $($summary.Iso.Key) - $rateTxt pass, $($summary.Counts.Failed) failed, $($summary.Counts.Terminated) terminated"
-
-Write-Host "Week:       $($summary.Iso.Key)"
-Write-Host "Recipients: $recipients"
-Write-Host "Attachment: $($paths.Html)"
-
-# ---- Send via Outlook COM ----
-$outlook = $null
-try {
-    $outlook = New-Object -ComObject Outlook.Application
-} catch {
-    Write-Host " ERROR - Could not start Outlook COM. Is Outlook installed and signed in, and is a user logged on? $($_.Exception.Message)" -ForegroundColor Red
-    Exit 1
-}
-try {
-    $mail = $outlook.CreateItem(0)   # 0 = olMailItem
-    $mail.To       = $recipients
-    $mail.Subject  = $subject
-    $mail.HTMLBody = $body
-    $mail.Attachments.Add($paths.Html) | Out-Null
-    $mail.Send()
-    Write-Host "Email sent." -ForegroundColor Green
-} catch {
-    Write-Host " ERROR - Outlook failed to send: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "         If a security prompt appeared, the Outlook 'programmatic access' guard is active." -ForegroundColor Red
-    Exit 1
-} finally {
-    if ($outlook) { [System.Runtime.InteropServices.Marshal]::ReleaseComObject($outlook) | Out-Null }
-}
+# ---------------------------------------------------------------------------
+# Default / -Drain: send every pending marker, delete each on success.
+# ---------------------------------------------------------------------------
+$res = Invoke-HoblEmailDrain -ReportDir $reportDir -Log $logger
+Write-Host "Drain complete: sent=$($res.Sent) kept=$($res.Kept) bad=$($res.Bad)"
+if ($res.Kept -gt 0) { Exit 1 }
 Exit 0

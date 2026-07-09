@@ -34,6 +34,8 @@
 #       LastState   = <string>      # bookkeeping: last logged plan state (dedup)
 #       LastRow     = <string>      # bookkeeping: "<phase>|<row>|<status>" (dedup)
 #       Done        = <bool>        # set true when the chain is finished
+#       Completed   = <bool>        # set true ONLY on a clean full-cycle finish
+#                                   #   (hard-stop leaves it false -> run "incomplete")
 #   }
 #
 # The monitor lazily attaches one more field per tracker:
@@ -259,6 +261,12 @@ function Invoke-HoblMonitor {
             } elseif ($isTerminal -and $cycleIndex -ge $cycleTotal) {
                 & $Log "    [$($mj.Name)] chain complete: $cycleIndex/$cycleTotal cycles, last PlanID=$currentId state=$planState"
                 $mj.Done = $true
+                # Only a clean, full-cycle finish sets Completed. Hard-stops
+                # above leave it false so daily_run can flag the run "incomplete"
+                # in the emailed report. (Set defensively in case the tracker
+                # predates the property.)
+                if ($mj.PSObject.Properties['Completed']) { $mj.Completed = $true }
+                else { $mj | Add-Member -NotePropertyName 'Completed' -NotePropertyValue $true -Force }
             }
         }
 

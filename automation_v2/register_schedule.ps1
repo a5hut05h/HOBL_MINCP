@@ -377,28 +377,26 @@ Write-Host "  schtasks /change /tn `"$TaskName`" /disable     # pause"
 Write-Host "  schtasks /delete /tn `"$TaskName`" /f           # remove"
 
 # ---------------------------------------------------------------------------
-# Optional: also register the weekly report-email task in the same run, so the
-# operator doesn't have to invoke send_report_email.ps1 -Register separately.
+# Optional: also register the run-end report-email helper task in the same run,
+# so the operator doesn't have to invoke send_report_email.ps1 -Register
+# separately.
 #
-# The two stay as SEPARATE scheduled tasks on purpose: the daily run is SYSTEM,
-# but the email task must run as the LOGGED-IN user (Outlook COM needs an
-# interactive session). We just drive both registrations from one prompt here.
-# Defaults (recipient / day / time) come from the config's "email" block.
+# The two stay as SEPARATE scheduled tasks on purpose: the daily run is SYSTEM
+# (headless, wakes from sleep), but the email helper must run as the LOGGED-IN
+# user (Outlook COM needs an interactive session). daily_run.ps1 starts the
+# helper at run end; the helper also has a logon trigger to drain any backlog.
+# The recipient default comes from the config's "email" block.
 # ---------------------------------------------------------------------------
 $emailScript = Join-Path $PSScriptRoot "send_report_email.ps1"
 if (Test-Path $emailScript) {
     # Pull defaults from schedule.config.json's email block, if present.
     $emailTo   = ""
-    $emailDay  = "Friday"
-    $emailTime = "17:00"
     $emailDefaultEnabled = $true
     if (Test-Path $configPath) {
         try {
             $cfgForEmail = Get-Content -Path $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
             if ($cfgForEmail.email) {
-                if ($cfgForEmail.email.to)       { $emailTo   = [string]$cfgForEmail.email.to }
-                if ($cfgForEmail.email.sendDay)  { $emailDay  = [string]$cfgForEmail.email.sendDay }
-                if ($cfgForEmail.email.sendTime) { $emailTime = [string]$cfgForEmail.email.sendTime }
+                if ($cfgForEmail.email.to) { $emailTo = [string]$cfgForEmail.email.to }
                 if ($null -ne $cfgForEmail.email.enabled) { $emailDefaultEnabled = [bool]$cfgForEmail.email.enabled }
             }
         } catch { }
@@ -406,10 +404,11 @@ if (Test-Path $emailScript) {
 
     Write-Host ""
     $defHint = if ($emailDefaultEnabled) { "Y" } else { "N" }
-    $wantEmail = Read-Host "Also register the weekly report email task? (Y/N) [$defHint]"
+    $wantEmail = Read-Host "Also register the run-end report email task? (Y/N) [$defHint]"
     if (-not $wantEmail) { $wantEmail = $defHint }
     if ($wantEmail -match '^[Yy]') {
-        # Recipient: use config default if present, else prompt (required).
+        # Recipient (required): daily_run.ps1 stamps it onto each run's email
+        # marker, and the helper sends there. Stored in config email.to.
         if (-not $emailTo) {
             $emailTo = Read-Host "  Recipient email (;-separated for multiple)"
         } else {
@@ -419,25 +418,31 @@ if (Test-Path $emailScript) {
         if (-not $emailTo) {
             Write-Host " WARN - No recipient given; skipping email task registration." -ForegroundColor Yellow
         } else {
-            # Day of week.
-            $dayIn = Read-Host "  Send day [$emailDay] (Enter to keep)"
-            if ($dayIn) { $emailDay = $dayIn }
-            # Time HH:MM.
-            $timeIn = Read-Host "  Send time HH:MM [$emailTime] (Enter to keep)"
-            if ($timeIn) { $emailTime = $timeIn }
+            # Persist recipient + enabled into config so daily_run picks it up.
+            if (Test-Path $configPath) {
+                try {
+                    $cfgE = Get-Content -Path $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+                    $emailObj = [pscustomobject]@{ enabled = $true; to = $emailTo }
+                    $cfgE | Add-Member -NotePropertyName email -NotePropertyValue $emailObj -Force
+                    $cfgE | ConvertTo-Json -Depth 12 | Set-Content -Path $configPath -Encoding UTF8
+                    Write-Host "  Saved email recipient to $configPath"
+                } catch {
+                    Write-Host " WARN - Could not persist email settings to config: $($_.Exception.Message)" -ForegroundColor Yellow
+                }
+            }
 
-            Write-Host "Registering weekly email task (day=$emailDay time=$emailTime to=$emailTo)..."
+            Write-Host "Registering run-end email helper task (to=$emailTo)..."
             # Delegate to send_report_email.ps1 -Register so there's ONE source
-            # of truth for how the email task is built. It registers as the
-            # current interactive user (required for Outlook COM).
-            & powershell.exe -ExecutionPolicy Bypass -NoProfile -File $emailScript `
-                -Register -Day $emailDay -Time $emailTime -To $emailTo
+            # of truth for how the helper task is built. It registers as the
+            # current interactive user (required for Outlook COM), on-demand +
+            # at-logon (no fixed time — daily_run.ps1 starts it at run end).
+            & powershell.exe -ExecutionPolicy Bypass -NoProfile -File $emailScript -Register
             if ($LASTEXITCODE -ne 0) {
                 Write-Host " WARN - Email task registration returned exit code $LASTEXITCODE." -ForegroundColor Yellow
             }
         }
     } else {
-        Write-Host "Skipped weekly email task. Register later with:"
-        Write-Host "  send_report_email.ps1 -Register -Day $emailDay -Time $emailTime"
+        Write-Host "Skipped run-end email task. Register later with:"
+        Write-Host "  send_report_email.ps1 -Register"
     }
 }

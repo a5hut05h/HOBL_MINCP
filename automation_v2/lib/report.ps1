@@ -1,10 +1,17 @@
-# HOBL automation v2 — weekly HTML report (scenario pass/fail/terminated).
+# HOBL automation v2 — per-run HTML report (scenario pass/fail/terminated).
 #
 # Dot-sourced by daily_run.ps1 (live updates) and generate_report.ps1
-# (on-demand rebuild / backfill). Produces, per ISO calendar week:
+# (on-demand rebuild / backfill). The report PERIOD follows the automation's
+# schedule frequency (schedule.frequency in schedule.config.json), and each
+# period's files live in a frequency subfolder under <reportDir>:
 #
-#   <reportDir>\weekly_report_<YYYY>-W<WW>.jsonl   append-only data ledger
-#   <reportDir>\weekly_report_<YYYY>-W<WW>.html    rendered report
+#   Daily    <reportDir>\daily\daily_report_<YYYY-MM-DD>.jsonl / .html
+#   Weekly   <reportDir>\weekly\weekly_report_<YYYY>-W<WW>.jsonl / .html
+#   Monthly  <reportDir>\monthly\monthly_report_<YYYY-MM>.jsonl / .html
+#
+# Because the schedule fires exactly once per period (one run per day / week /
+# month), a period's ledger maps 1:1 to the run that produced it — so the
+# report the run emails at the end contains only that run's scenarios.
 #
 # Design:
 #   - The ledger is the source of truth. Each finished scenario the monitor
@@ -14,9 +21,10 @@
 #   - Scope is "plans the automation submitted": daily_run also writes a
 #     type=plan marker per submitted PlanID, so a later -Backfill knows which
 #     plans are ours without scraping unrelated manual submissions.
-#   - Weeks are ISO (Mon-Sun). An entry is binned by the scenario's own
-#     StartTime when known (so a Sun 23:50 scenario lands in that week even if
-#     observed Mon 00:05), else by when it was recorded.
+#   - Entries are binned into the period the RUN belongs to. daily_run passes
+#     the run's start (-Date) so all cycles of an AutoResubmit chain land in one
+#     file even when the chain crosses a day/week/month boundary; backfill and
+#     log-import bin by the scenario's own StartTime when no -Date is forced.
 #
 # Status buckets (prep rows are EXCLUDED from the headline counts):
 #   Passed     = PASS / PASSED
@@ -62,17 +70,84 @@ function Get-HoblIsoWeek {
     }
 }
 
+# Normalise a caller-supplied frequency to one of Daily/Weekly/Monthly.
+# Anything unrecognised (or empty) falls back to Weekly so a mis-typed config
+# still produces a report rather than throwing mid-run.
+function Get-HoblReportFrequency {
+    param([string]$Frequency)
+    switch (("$Frequency").Trim().ToLower()) {
+        'daily'   { return 'Daily' }
+        'weekly'  { return 'Weekly' }
+        'monthly' { return 'Monthly' }
+        default   { return 'Weekly' }
+    }
+}
+
+# Resolve the reporting PERIOD that a given date falls into for a frequency.
+# Returns everything the rest of the module needs to name, bin, and title a
+# report: the period Key, its inclusive Start/End dates, the frequency
+# subfolder, the file stem, and pre-formatted Range/Title strings.
+function Get-HoblReportPeriod {
+    param(
+        [datetime] $Date = (Get-Date),
+        [string]   $Frequency = 'Weekly'
+    )
+    $freq = Get-HoblReportFrequency $Frequency
+    switch ($freq) {
+        'Daily' {
+            $start = $Date.Date
+            $end   = $start
+            $key   = $start.ToString('yyyy-MM-dd')
+            $sub   = 'daily'
+            $stem  = "daily_report_$key"
+            $range = '{0:ddd dd MMM yyyy}' -f $start
+        }
+        'Monthly' {
+            $start = [datetime]::new($Date.Year, $Date.Month, 1)
+            $end   = $start.AddMonths(1).AddDays(-1)
+            $key   = $start.ToString('yyyy-MM')
+            $sub   = 'monthly'
+            $stem  = "monthly_report_$key"
+            $range = '{0:dd MMM} - {1:dd MMM yyyy}' -f $start, $end
+        }
+        default {   # Weekly
+            $iso   = Get-HoblIsoWeek -Date $Date
+            $start = $iso.Monday
+            $end   = $iso.Sunday
+            $key   = $iso.Key
+            $sub   = 'weekly'
+            $stem  = "weekly_report_$key"
+            $range = '{0:ddd dd MMM} - {1:ddd dd MMM yyyy}' -f $start, $end
+        }
+    }
+    [pscustomobject]@{
+        Frequency = $freq
+        Key       = $key
+        Start     = $start
+        End       = $end
+        SubFolder = $sub
+        Stem      = $stem
+        Range     = $range
+        Title     = $freq
+    }
+}
+
+# Resolve the ledger + HTML paths (and their containing frequency subfolder)
+# for the period a date belongs to. The subfolder keeps daily/weekly/monthly
+# reports from colliding and makes the layout self-describing on disk.
 function Get-HoblReportPaths {
     param(
-        [Parameter(Mandatory)] [string]   $ReportDir,
-        [datetime] $Date = (Get-Date)
+        [Parameter(Mandatory)] [string] $ReportDir,
+        [datetime] $Date = (Get-Date),
+        [string]   $Frequency = 'Weekly'
     )
-    $iso  = Get-HoblIsoWeek -Date $Date
-    $stem = "weekly_report_$($iso.Key)"
+    $period = Get-HoblReportPeriod -Date $Date -Frequency $Frequency
+    $dir    = Join-Path $ReportDir $period.SubFolder
     [pscustomobject]@{
-        Iso    = $iso
-        Ledger = Join-Path $ReportDir "$stem.jsonl"
-        Html   = Join-Path $ReportDir "$stem.html"
+        Period = $period
+        Dir    = $dir
+        Ledger = Join-Path $dir "$($period.Stem).jsonl"
+        Html   = Join-Path $dir "$($period.Stem).html"
     }
 }
 
@@ -80,14 +155,17 @@ function Get-HoblReportPaths {
 # Ledger I/O
 # ---------------------------------------------------------------------------
 
-# Append one entry (a hashtable or object) to the appropriate weekly ledger.
-# Pass -Date to force the target week (used by backfill); otherwise the week is
-# derived from the entry's startTime, then recordedAt, then now.
+# Append one entry (a hashtable or object) to the appropriate period ledger.
+# Pass -Date to force the target period (used by daily_run so every scenario of
+# a run bins to the run's period, and by backfill); otherwise the period is
+# derived from the entry's startTime, then recordedAt, then now. -Frequency
+# selects daily/weekly/monthly binning (default weekly).
 function Add-HoblReportEntry {
     param(
         [Parameter(Mandatory)] [string] $ReportDir,
         [Parameter(Mandatory)] $Entry,
-        [datetime] $Date
+        [datetime] $Date,
+        [string]   $Frequency = 'Weekly'
     )
     # Normalise to a hashtable so we can guarantee recordedAt.
     if ($Entry -is [hashtable]) {
@@ -112,7 +190,10 @@ function Add-HoblReportEntry {
     if (-not (Test-Path $ReportDir)) {
         New-Item -ItemType Directory -Path $ReportDir -Force | Out-Null
     }
-    $paths = Get-HoblReportPaths -ReportDir $ReportDir -Date $bin
+    $paths = Get-HoblReportPaths -ReportDir $ReportDir -Date $bin -Frequency $Frequency
+    if (-not (Test-Path $paths.Dir)) {
+        New-Item -ItemType Directory -Path $paths.Dir -Force | Out-Null
+    }
     ($h | ConvertTo-Json -Depth 6 -Compress) | Add-Content -Path $paths.Ledger -Encoding utf8
     return $paths.Ledger
 }
@@ -159,6 +240,7 @@ function Invoke-HoblReportBackfill {
         [Parameter(Mandatory)] [string]   $ReportDir,
         [Parameter(Mandatory)] [string]   $BaseUrl,
         [datetime] $Date = (Get-Date),
+        [string]   $Frequency = 'Weekly',
         [int] $TimeoutSec = 30,
         [scriptblock] $Log
     )
@@ -166,10 +248,10 @@ function Invoke-HoblReportBackfill {
         if ($Log) { & $Log " WARN - report backfill: submit.ps1 not loaded; skipping." }
         return
     }
-    $paths = Get-HoblReportPaths -ReportDir $ReportDir -Date $Date
-    $iso   = $paths.Iso
-    $weekStart = $iso.Monday
-    $weekEnd   = $iso.Sunday.AddDays(1)   # exclusive
+    $paths  = Get-HoblReportPaths -ReportDir $ReportDir -Date $Date -Frequency $Frequency
+    $period = $paths.Period
+    $weekStart = $period.Start
+    $weekEnd   = $period.End.AddDays(1)   # exclusive
 
     $existing = Read-HoblReportLedger -Path $paths.Ledger
     $recorded = @{}                       # "<planId>|<scenarioId>" already in ledger
@@ -236,7 +318,7 @@ function Invoke-HoblReportBackfill {
                 isPrep     = ($name -eq 'prep')
                 source     = 'backfill'
             }
-            Add-HoblReportEntry -ReportDir $ReportDir -Entry $entry -Date $Date | Out-Null
+            Add-HoblReportEntry -ReportDir $ReportDir -Entry $entry -Date $Date -Frequency $Frequency | Out-Null
             $recorded[$key] = $true
             $added++
         }
@@ -285,6 +367,7 @@ function Import-HoblReportFromLogs {
     param(
         [Parameter(Mandatory)] [string] $ReportDir,
         [string] $LogDir = $ReportDir,
+        [string] $Frequency = 'Weekly',
         [scriptblock] $Log
     )
     $logFiles = @(Get-ChildItem -Path $LogDir -Filter '*_daily.log' -File -ErrorAction SilentlyContinue | Sort-Object Name)
@@ -324,9 +407,9 @@ function Import-HoblReportFromLogs {
     # import (synthetic scenarioId). Without this, importing logs for a week the
     # monitor already covered would double-count every row.
     $seenByWeek = @{}
-    function Get-WeekSeen {
-        param($WeekKey, $LedgerPath)
-        if (-not $seenByWeek.ContainsKey($WeekKey)) {
+    function Get-PeriodSeen {
+        param($PeriodKey, $LedgerPath)
+        if (-not $seenByWeek.ContainsKey($PeriodKey)) {
             $set = @{}
             foreach ($e in (Read-HoblReportLedger -Path $LedgerPath)) {
                 if ("$($e.type)" -eq 'plan') { continue }
@@ -334,9 +417,9 @@ function Import-HoblReportFromLogs {
                     $set["$([int]$e.planId)|$("$($e.scenario)".ToLower())"] = $true
                 }
             }
-            $seenByWeek[$WeekKey] = $set
+            $seenByWeek[$PeriodKey] = $set
         }
-        return $seenByWeek[$WeekKey]
+        return $seenByWeek[$PeriodKey]
     }
 
     $added        = 0
@@ -359,9 +442,9 @@ function Import-HoblReportFromLogs {
                 $eff = [datetime]::ParseExact($effStr, 'yyyy-MM-dd HH:mm:ss', [System.Globalization.CultureInfo]::InvariantCulture)
             } catch { continue }
 
-            $iso = Get-HoblIsoWeek -Date $eff
-            $paths = Get-HoblReportPaths -ReportDir $ReportDir -Date $eff
-            $seen  = Get-WeekSeen -WeekKey $iso.Key -LedgerPath $paths.Ledger
+            $iso = Get-HoblReportPeriod -Date $eff -Frequency $Frequency
+            $paths = Get-HoblReportPaths -ReportDir $ReportDir -Date $eff -Frequency $Frequency
+            $seen  = Get-PeriodSeen -PeriodKey $iso.Key -LedgerPath $paths.Ledger
 
             $dedupKey = "$planId|$($row.ToLower())"
             if ($seen.ContainsKey($dedupKey)) { continue }   # already recorded (monitor or prior import)
@@ -389,7 +472,7 @@ function Import-HoblReportFromLogs {
                 isPrep     = ($row -eq 'prep')
                 source     = 'logimport'
             }
-            Add-HoblReportEntry -ReportDir $ReportDir -Entry $entry -Date $eff | Out-Null
+            Add-HoblReportEntry -ReportDir $ReportDir -Entry $entry -Date $eff -Frequency $Frequency | Out-Null
             $seen[$dedupKey] = $true
             $weeksTouched[$iso.Key] = $eff
             $added++
@@ -397,7 +480,7 @@ function Import-HoblReportFromLogs {
     }
 
     $weeks = @($weeksTouched.GetEnumerator() | ForEach-Object { [pscustomobject]@{ Key = $_.Key; Date = $_.Value } } | Sort-Object Key)
-    if ($Log) { & $Log "    report import: added $added scenario row(s) from $($logFiles.Count) log file(s) across $($weeks.Count) week(s)." }
+    if ($Log) { & $Log "    report import: added $added scenario row(s) from $($logFiles.Count) log file(s) across $($weeks.Count) period(s)." }
     return [pscustomobject]@{ Added = $added; Weeks = $weeks }
 }
 
@@ -409,12 +492,13 @@ function ConvertTo-HoblHtmlText {
     return [System.Net.WebUtility]::HtmlEncode("$Text")
 }
 
-# Read the week's ledger, optionally backfill from HOBLweb, then (re)write the
-# weekly HTML report. Returns the HTML path.
+# Read the period's ledger, optionally backfill from HOBLweb, then (re)write the
+# period HTML report. Returns the HTML path.
 function Write-HoblReportHtml {
     param(
         [Parameter(Mandatory)] [string] $ReportDir,
         [datetime] $Date = (Get-Date),
+        [string]   $Frequency = 'Weekly',
         [string]   $BaseUrl = '',
         [switch]   $Backfill,
         [int]      $TimeoutSec = 30,
@@ -424,11 +508,14 @@ function Write-HoblReportHtml {
         New-Item -ItemType Directory -Path $ReportDir -Force | Out-Null
     }
     if ($Backfill -and $BaseUrl) {
-        Invoke-HoblReportBackfill -ReportDir $ReportDir -BaseUrl $BaseUrl -Date $Date -TimeoutSec $TimeoutSec -Log $Log | Out-Null
+        Invoke-HoblReportBackfill -ReportDir $ReportDir -BaseUrl $BaseUrl -Date $Date -Frequency $Frequency -TimeoutSec $TimeoutSec -Log $Log | Out-Null
     }
 
-    $paths = Get-HoblReportPaths -ReportDir $ReportDir -Date $Date
-    $iso   = $paths.Iso
+    $paths = Get-HoblReportPaths -ReportDir $ReportDir -Date $Date -Frequency $Frequency
+    $iso   = $paths.Period
+    if (-not (Test-Path $paths.Dir)) {
+        New-Item -ItemType Directory -Path $paths.Dir -Force | Out-Null
+    }
     $entries = Read-HoblReportLedger -Path $paths.Ledger
 
     # Dedup scenario rows by planId|scenarioId, keeping the latest recordedAt.
@@ -487,20 +574,22 @@ function Write-HoblReportHtml {
         -not $_.isPrep -and ((Get-HoblStatusBucket -Status ([string]$_.status)) -in @('Failed','Terminated'))
     })
 
-    # Local helper: percent bar class from a pass-rate value.
+    # Local helper: percent bar class. The bar renders pass% in green with the
+    # remaining (fail/term) portion in red, so the only distinction needed is
+    # whether there is data at all ('na' = no runs -> rendered as a grey track).
     $barClassOf = {
         param($rate)
-        if ($null -eq $rate) { 'na' } elseif ($rate -ge 90) { 'good' } elseif ($rate -ge 70) { 'warn' } else { 'bad' }
+        if ($null -eq $rate) { 'na' } else { 'val' }
     }
 
-    $rangeText = '{0:ddd dd MMM} - {1:ddd dd MMM yyyy}' -f $iso.Monday, $iso.Sunday
+    $rangeText = $iso.Range
     $genText   = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
 
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.AppendLine('<!DOCTYPE html>')
     [void]$sb.AppendLine('<html lang="en"><head><meta charset="utf-8">')
     [void]$sb.AppendLine('<meta name="viewport" content="width=device-width, initial-scale=1">')
-    [void]$sb.AppendLine("<title>HOBL Weekly Report $($iso.Key)</title>")
+    [void]$sb.AppendLine("<title>HOBL $($iso.Title) Report $($iso.Key)</title>")
     [void]$sb.AppendLine(@'
 <style>
   :root { --pass:#1a7f37; --fail:#cf222e; --term:#bc4c00; --other:#57606a; --ink:#1f2328; --line:#d0d7de; --good:#1a7f37; --warn:#bc4c00; --bad:#cf222e; }
@@ -536,9 +625,9 @@ function Write-HoblReportHtml {
   .mono { font-variant-numeric: tabular-nums; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   @media (max-width: 820px) { .grid2 { grid-template-columns: 1fr; } }
-  .bar { background: #eaeef2; border-radius: 999px; height: 8px; width: 84px; display: inline-block; overflow: hidden; vertical-align: middle; margin-right: 8px; }
-  .bar > span { display: block; height: 100%; }
-  .bar.good > span { background: var(--good); } .bar.warn > span { background: var(--warn); } .bar.bad > span { background: var(--bad); } .bar.na > span { background: var(--other); }
+  .bar { background: var(--fail); border-radius: 999px; height: 8px; width: 84px; display: inline-block; overflow: hidden; vertical-align: middle; margin-right: 8px; }
+  .bar > span { display: block; height: 100%; background: var(--pass); }
+  .bar.na { background: var(--other); } .bar.na > span { background: var(--other); }
   .rate-cell { white-space: nowrap; }
   .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
   .controls label { font-size: 12px; color: var(--other); }
@@ -550,8 +639,8 @@ function Write-HoblReportHtml {
 </style>
 '@)
     [void]$sb.AppendLine('</head><body>')
-    [void]$sb.AppendLine("<h1>HOBL Weekly Automation Report</h1>")
-    [void]$sb.AppendLine("<div class=""sub"">Week $($iso.Key) &nbsp;&middot;&nbsp; $rangeText &nbsp;&middot;&nbsp; generated $genText</div>")
+    [void]$sb.AppendLine("<h1>HOBL $($iso.Title) Automation Report</h1>")
+    [void]$sb.AppendLine("<div class=""sub"">$($iso.Title) $($iso.Key) &nbsp;&middot;&nbsp; $rangeText &nbsp;&middot;&nbsp; generated $genText</div>")
 
     # Summary cards (pass rate first).
     [void]$sb.AppendLine('<div class="cards">')
@@ -567,12 +656,12 @@ function Write-HoblReportHtml {
     [void]$sb.AppendLine("<div class=""sub"">$rateNote</div>")
 
     if ($sorted.Count -eq 0) {
-        [void]$sb.AppendLine('<div class="empty">No scenario results recorded for this week yet.</div>')
+        [void]$sb.AppendLine('<div class="empty">No scenario results recorded for this period yet.</div>')
     } else {
         # ---- Needs attention ----
         [void]$sb.AppendLine('<h2>Needs attention</h2>')
         if ($problems.Count -eq 0) {
-            [void]$sb.AppendLine('<div class="ok-banner">No failures or terminations recorded this week.</div>')
+            [void]$sb.AppendLine('<div class="ok-banner">No failures or terminations recorded this period.</div>')
         } else {
             [void]$sb.AppendLine('<table><thead><tr>')
             foreach ($h in @('Scenario','DUT / Profile','PlanID','Cycle','Started','Status')) { [void]$sb.AppendLine("<th>$h</th>") }
@@ -744,10 +833,11 @@ function Write-HoblReportHtml {
 function Get-HoblReportSummary {
     param(
         [Parameter(Mandatory)] [string] $ReportDir,
-        [datetime] $Date = (Get-Date)
+        [datetime] $Date = (Get-Date),
+        [string]   $Frequency = 'Weekly'
     )
-    $paths   = Get-HoblReportPaths -ReportDir $ReportDir -Date $Date
-    $iso     = $paths.Iso
+    $paths   = Get-HoblReportPaths -ReportDir $ReportDir -Date $Date -Frequency $Frequency
+    $iso     = $paths.Period
     $entries = Read-HoblReportLedger -Path $paths.Ledger
 
     $byKey = @{}
@@ -787,7 +877,7 @@ function Get-HoblReportSummary {
         @{ Expression = { [int]$_.scenarioId }; Descending = $false })
 
     [pscustomobject]@{
-        Iso        = $iso
+        Period     = $iso
         Counts     = $counts
         Total      = $total
         PassRate   = $rate
@@ -804,19 +894,19 @@ function ConvertTo-HoblEmailBodyHtml {
         [Parameter(Mandatory)] $Summary,
         [string] $AttachmentName = ''
     )
-    $iso   = $Summary.Iso
+    $iso   = $Summary.Period
     $c     = $Summary.Counts
     $rate  = if ($null -ne $Summary.PassRate) { "$($Summary.PassRate)%" } else { '&mdash;' }
     $rateColor = if ($null -eq $Summary.PassRate) { '#57606a' } elseif ($Summary.PassRate -ge 90) { '#1a7f37' } elseif ($Summary.PassRate -ge 70) { '#bc4c00' } else { '#cf222e' }
-    $range = '{0:ddd dd MMM} - {1:ddd dd MMM yyyy}' -f $iso.Monday, $iso.Sunday
+    $range = $iso.Range
 
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.AppendLine('<div style="font-family:Segoe UI,Arial,sans-serif;color:#1f2328;font-size:14px;">')
-    [void]$sb.AppendLine("<h2 style=""margin:0 0 2px;"">HOBL Weekly Automation Report</h2>")
-    [void]$sb.AppendLine("<div style=""color:#57606a;font-size:13px;margin-bottom:16px;"">Week $($iso.Key) &middot; $range</div>")
+    [void]$sb.AppendLine("<h2 style=""margin:0 0 2px;"">HOBL $($iso.Title) Automation Report</h2>")
+    [void]$sb.AppendLine("<div style=""color:#57606a;font-size:13px;margin-bottom:16px;"">$($iso.Title) $($iso.Key) &middot; $range</div>")
 
     if (-not $Summary.HasData) {
-        [void]$sb.AppendLine('<p>No scenario results were recorded for this week.</p>')
+        [void]$sb.AppendLine('<p>No scenario results were recorded for this period.</p>')
     } else {
         # Headline numbers as a simple table (email-safe).
         [void]$sb.AppendLine('<table cellpadding="8" cellspacing="0" style="border-collapse:collapse;margin-bottom:16px;">')
@@ -830,7 +920,7 @@ function ConvertTo-HoblEmailBodyHtml {
 
         # Needs attention.
         if ($Summary.Problems.Count -eq 0) {
-            [void]$sb.AppendLine('<p style="background:#dafbe1;border:1px solid #a7e3b6;color:#1a7f37;padding:10px 14px;border-radius:6px;">No failures or terminations this week.</p>')
+            [void]$sb.AppendLine('<p style="background:#dafbe1;border:1px solid #a7e3b6;color:#1a7f37;padding:10px 14px;border-radius:6px;">No failures or terminations this period.</p>')
         } else {
             [void]$sb.AppendLine("<h3 style=""margin:16px 0 6px;"">Needs attention ($($Summary.Problems.Count))</h3>")
             [void]$sb.AppendLine('<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:13px;">')

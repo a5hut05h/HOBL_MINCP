@@ -1,21 +1,24 @@
-# HOBL Daily Automation v2 — standalone weekly report builder.
+# HOBL Daily Automation v2 — standalone report builder.
 #
-# Rebuilds (or backfills) the weekly HTML report from the ledger that
-# daily_run.ps1 / the monitor append to. Useful when you want to regenerate a
-# report on demand, view a past week, or recover scenario rows the live
+# Rebuilds (or backfills) an HTML report from the ledger that daily_run.ps1 /
+# the monitor append to. The report PERIOD follows -Frequency (Daily / Weekly /
+# Monthly), defaulting to the config's schedule.frequency. Useful to regenerate
+# a report on demand, view a past period, or recover scenario rows the live
 # monitor missed (e.g. it was disabled, or detached after monitor.maxHours).
 #
-#   # Rebuild THIS week's HTML from the ledger:
+#   # Rebuild THIS period's HTML from the ledger (period = config schedule):
 #   powershell -ExecutionPolicy Bypass -File generate_report.ps1
 #
 #   # Rebuild and ALSO pull anything the monitor missed from HOBLweb:
 #   powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Backfill
 #
-#   # A specific past week, then open it in the browser:
-#   powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Week 2026-W22 -Open
+#   # A specific past period, then open it in the browser:
+#   powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Frequency Weekly  -Week 2026-W22 -Open
+#   powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Frequency Daily   -Date 2026-07-06 -Open
+#   powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Frequency Monthly -Date 2026-07-15 -Open
 #
 #   # Import results from daily logs (incl. logs copied from other hosts) into
-#   # the matching weekly ledgers, then rebuild every affected week's HTML:
+#   # the matching period ledgers, then rebuild every affected period's HTML:
 #   powershell -ExecutionPolicy Bypass -File generate_report.ps1 -ImportLogs
 #
 # Scope matches the automation: backfill only touches PlanIDs the ledger
@@ -24,10 +27,11 @@
 
 param(
     [string]$ConfigPath = "",
-    [string]$Date       = "",       # any date in the target week (yyyy-MM-dd); default = today
-    [string]$Week       = "",       # OR an ISO week key, e.g. 2026-W23 (overrides -Date)
+    [string]$Frequency  = "",       # Daily|Weekly|Monthly; default = config schedule.frequency (else Weekly)
+    [string]$Date       = "",       # any date in the target period (yyyy-MM-dd); default = today
+    [string]$Week       = "",       # OR an ISO week key, e.g. 2026-W23 (overrides -Date; implies Weekly)
     [switch]$Backfill,              # merge missing scenario rows from HOBLweb
-    [switch]$ImportLogs,            # reconstruct results from *_daily.log files and rebuild affected weeks
+    [switch]$ImportLogs,            # reconstruct results from *_daily.log files and rebuild affected periods
     [string]$LogDir     = "",       # where the *_daily.log files live (default: report dir / logDir)
     [switch]$Open                   # open the rendered HTML when done
 )
@@ -62,6 +66,13 @@ if ($cfg.submit -and $cfg.submit.timeoutSec) { $timeout = [int]$cfg.submit.timeo
 
 $logger = { param($s) Write-Host $s }
 
+# Report period follows -Frequency, else config schedule.frequency, else Weekly.
+# -Week implies Weekly (an ISO week key only makes sense for a weekly report).
+$reportFrequency = $Frequency
+if (-not $reportFrequency -and $Week) { $reportFrequency = 'Weekly' }
+if (-not $reportFrequency -and $cfg.schedule -and $cfg.schedule.frequency) { $reportFrequency = [string]$cfg.schedule.frequency }
+$reportFrequency = Get-HoblReportFrequency $reportFrequency
+
 # ---- Import-from-logs mode: parse *_daily.log into the weekly ledgers, then
 # rebuild the HTML for every week the import touched, and exit. ----
 if ($ImportLogs) {
@@ -72,7 +83,7 @@ if ($ImportLogs) {
     }
     Write-Host "Importing daily logs from: $srcLogDir"
     try {
-        $res = Import-HoblReportFromLogs -ReportDir $reportDir -LogDir $srcLogDir -Log $logger
+        $res = Import-HoblReportFromLogs -ReportDir $reportDir -LogDir $srcLogDir -Frequency $reportFrequency -Log $logger
     } catch {
         Write-Host " ERROR - Log import failed: $($_.Exception.Message)" -ForegroundColor Red
         Exit 1
@@ -84,7 +95,7 @@ if ($ImportLogs) {
     $lastHtml = $null
     foreach ($w in $res.Weeks) {
         try {
-            $lastHtml = Write-HoblReportHtml -ReportDir $reportDir -Date $w.Date -Log $logger
+            $lastHtml = Write-HoblReportHtml -ReportDir $reportDir -Date $w.Date -Frequency $reportFrequency -Log $logger
             Write-Host "  rebuilt $($w.Key): $lastHtml" -ForegroundColor Green
         } catch {
             Write-Host " ERROR - Render failed for week $($w.Key): $($_.Exception.Message)" -ForegroundColor Red
@@ -120,16 +131,16 @@ if ($Week) {
     $targetDate = $parsed
 }
 
-$iso = Get-HoblIsoWeek -Date $targetDate
-Write-Host "Building report for week $($iso.Key) ($('{0:yyyy-MM-dd}' -f $iso.Monday) - $('{0:yyyy-MM-dd}' -f $iso.Sunday))"
+$period = Get-HoblReportPeriod -Date $targetDate -Frequency $reportFrequency
+Write-Host "Building $($period.Title) report for $($period.Key) ($($period.Range))"
 Write-Host "  reportDir: $reportDir"
 if ($Backfill) { Write-Host "  backfill:  ON (HOBLweb $baseUrl)" }
 
 try {
     if ($Backfill) {
-        $html = Write-HoblReportHtml -ReportDir $reportDir -Date $targetDate -BaseUrl $baseUrl -Backfill -TimeoutSec $timeout -Log $logger
+        $html = Write-HoblReportHtml -ReportDir $reportDir -Date $targetDate -Frequency $reportFrequency -BaseUrl $baseUrl -Backfill -TimeoutSec $timeout -Log $logger
     } else {
-        $html = Write-HoblReportHtml -ReportDir $reportDir -Date $targetDate -Log $logger
+        $html = Write-HoblReportHtml -ReportDir $reportDir -Date $targetDate -Frequency $reportFrequency -Log $logger
     }
 } catch {
     Write-Host " ERROR - Report render failed: $($_.Exception.Message)" -ForegroundColor Red
