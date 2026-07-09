@@ -19,35 +19,32 @@
                     "_comment":  "After submitting, daily_run.ps1 stays attached and polls HOBLweb every \u0027intervalSec\u0027 seconds, logging the current PlanID / cycle / scenario / status until the AutoResubmit chain finishes or \u0027maxHours\u0027 elapses. Set \u0027enabled\u0027 to false to revert to fire-and-forget.",
                     "enabled":  true,
                     "intervalSec":  45,
-                    "maxHours":  8
+                    "maxHours":  24
                 },
-    "email":  {
-                  "_comment":  "Weekly report email via send_report_email.ps1 (Outlook COM, logged-in account). \u0027to\u0027 is the recipient list (;-separated). Register the weekly task with: send_report_email.ps1 -Register -Day \u003cday\u003e -Time \u003cHH:MM\u003e.",
-                  "enabled":  true,
-                  "to":  "wssi-fun-idc@microsoft.com",
-                  "sendDay":  "Friday",
-                  "sendTime":  "17:00"
-              },
     "jobs":  [
                  {
-                     "name":  "Pantherlake07_power_workloads",
+                     "name":  "Pantherlake07_mincp_only",
                      "enabled":  true,
                      "profile":  "Pantherlake07",
-                     "testplan":  "testplans/power_workloads.ps1",
-                     "runsPerDay":  3
+                     "testplan":  "testplans/mincp_only.ps1",
+                     "runsPerDay":  2
                  },
                  {
-                     "name":  "Cadmus25_power_workloads",
+                     "name":  "Cadmus25_mincp_only",
                      "enabled":  true,
                      "profile":  "Cadmus25",
-                     "testplan":  "testplans/power_workloads.ps1",
-                     "runsPerDay":  3
+                     "testplan":  "testplans/mincp_only.ps1",
+                     "runsPerDay":  2
                  }
              ],
     "schedule":  {
                      "frequency":  "Daily",
-                     "time":  "21:35",
+                     "time":  "11:15",
                      "dayOfWeek":  "Thursday",
                      "dayOfMonth":  2
-                 }
+                 },
+    "email":  {
+                  "enabled":  true,
+                  "to":  "t-sharmaadit@microsoft.com"
+              }
 }

@@ -77,14 +77,35 @@ if ($cfg.monitor) {
     if ($cfg.monitor.maxHours)              { $monitorMaxHours = [int]$cfg.monitor.maxHours }
 }
 
-# Report config: a weekly HTML report (scenario pass/fail/terminated) is built
-# from a per-week ledger the monitor appends to. Disable with report.enabled =
-# false. report.dir defaults to logDir so it sits next to the daily logs.
+# Report config: an HTML report (scenario pass/fail/terminated) is built from a
+# per-period ledger the monitor appends to. The report PERIOD follows the
+# schedule cadence (schedule.frequency): Daily -> per-day, Weekly -> per-ISO-week,
+# Monthly -> per-month, filed under <reportDir>\<daily|weekly|monthly>\. Disable
+# with report.enabled = false. report.dir defaults to logDir.
 $reportEnabled = $true
 $reportDir     = $logDir
 if ($cfg.report) {
     if ($null -ne $cfg.report.enabled) { $reportEnabled = [bool]$cfg.report.enabled }
     if ($cfg.report.dir)               { $reportDir     = [string]$cfg.report.dir }
+}
+
+# Report period = schedule cadence. Stored raw here (config is parsed before the
+# report lib is dot-sourced); normalised to Daily/Weekly/Monthly once the lib is
+# available (see below). Defaults to Weekly when no schedule block is present.
+$reportFrequency = if ($cfg.schedule -and $cfg.schedule.frequency) { [string]$cfg.schedule.frequency } else { "Weekly" }
+
+# Email config: at run end, ONE combined report email is sent for the whole run
+# via the "HOBL Report Email" helper task (Outlook COM, run as the logged-in Host
+# user). daily_run runs as SYSTEM and cannot drive Outlook, so it drops a marker
+# in <reportDir>\pending_email\ and pokes that task. Disable with email.enabled =
+# false. Recipient(s) come from email.to (;-separated).
+$emailEnabled    = $true
+$emailRecipients = ''
+$emailTaskName   = 'HOBL Report Email'
+if ($cfg.email) {
+    if ($null -ne $cfg.email.enabled) { $emailEnabled    = [bool]$cfg.email.enabled }
+    if ($cfg.email.to)                { $emailRecipients = [string]$cfg.email.to }
+    if ($cfg.email.taskName)          { $emailTaskName   = [string]$cfg.email.taskName }
 }
 
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
@@ -170,12 +191,17 @@ function Test-PokeTask {
     " WARN - schtasks query unclear (exit=$code, msg=$errText); assuming present." | log
     return $true
 }
-
+#Importing the Lib files
 # --- Helper libs -------------------------------------------------------------
 . (Join-Path $PSScriptRoot "lib\submit.ps1")
 . (Join-Path $PSScriptRoot "lib\monitor.ps1")
 . (Join-Path $PSScriptRoot "lib\testplan.ps1")
 . (Join-Path $PSScriptRoot "lib\report.ps1")
+. (Join-Path $PSScriptRoot "lib\email.ps1")
+
+# Now that report.ps1 is loaded, normalise the schedule cadence to a canonical
+# Daily/Weekly/Monthly value (a mis-typed config falls back to Weekly).
+$reportFrequency = Get-HoblReportFrequency $reportFrequency
 
 # --- Log retention -----------------------------------------------------------
 function Invoke-LogRetention {
@@ -197,7 +223,7 @@ function Invoke-LogRetention {
 $runId    = (Get-Date).ToString('yyyyMMdd-HHmmss')
 $runStart = Get-Date
 "=== run start id=$runId; config=$configPath; log=$logFile ===" | log
-"hoblwebBaseUrl=$baseUrl; overlap=$overlap; logRetentionDays=$retainDays" | log
+"hoblwebBaseUrl=$baseUrl; overlap=$overlap; logRetentionDays=$retainDays; reportFrequency=$reportFrequency" | log
 
 if (-not (Lock-DailyRun)) { Exit 3 }
 try {
@@ -365,7 +391,7 @@ try {
                 # later -Backfill) knows this PlanID is one the automation owns.
                 if ($reportEnabled) {
                     try {
-                        Add-HoblReportEntry -ReportDir $reportDir -Entry @{
+                        Add-HoblReportEntry -ReportDir $reportDir -Frequency $reportFrequency -Date $runStart -Entry @{
                             type       = 'plan'
                             recordedAt = (Get-Date).ToString('o')
                             profile    = $job.profile
@@ -389,6 +415,7 @@ try {
                     LastState   = ''
                     LastRow     = ''
                     Done        = $false
+                    Completed   = $false
                 }
             } else {
                 " WARN - Could not locate the freshly-submitted plan in HOBLweb's plan list." | log
@@ -414,8 +441,8 @@ try {
             $onResult = {
                 param($entry)
                 try {
-                    Add-HoblReportEntry -ReportDir $reportDir -Entry $entry | Out-Null
-                    Write-HoblReportHtml -ReportDir $reportDir | Out-Null
+                    Add-HoblReportEntry -ReportDir $reportDir -Entry $entry -Frequency $reportFrequency -Date $runStart | Out-Null
+                    Write-HoblReportHtml -ReportDir $reportDir -Frequency $reportFrequency -Date $runStart | Out-Null
                 } catch {
                     " WARN - report: $($_.Exception.Message)" | log
                 }
@@ -430,15 +457,81 @@ try {
                            -OnResult    $onResult
     }
 
+    # ---- Determine run completion (for the email note) ----
+    # A chain that finished all its cycles cleanly has Done=true, Completed=true.
+    # A chain that hard-stopped (Errored/Terminated) has Done=true, Completed=false.
+    # A chain still running when the monitor hit maxHours has Done=false. Any of
+    # the latter two make the run "incomplete" -> the email carries a note.
+    $runIncomplete = $false
+    $runNote       = ''
+    if ($monitorEnabled -and -not $DryRun -and $monitorJobs.Count -gt 0) {
+        $notDone     = @($monitorJobs | Where-Object { -not $_.Done })
+        $hardStopped = @($monitorJobs | Where-Object { $_.Done -and -not $_.Completed })
+        $reasons = @()
+        if ($notDone.Count -gt 0) {
+            $reasons += "monitoring detached after monitor.maxHours=$monitorMaxHours h with $($notDone.Count) chain(s) still running"
+        }
+        if ($hardStopped.Count -gt 0) {
+            $reasons += "$($hardStopped.Count) chain(s) stopped early (errored/terminated)"
+        }
+        if ($reasons.Count -gt 0) {
+            $runIncomplete = $true
+            $runNote = ($reasons -join '; ') + '. Results may be partial.'
+            " WARN - run incomplete: $runNote" | log
+        }
+    }
+
     # ---- Final report render ----
-    # Ensure the week's HTML reflects the latest ledger even if the monitor was
+    # Ensure the period HTML reflects the latest ledger even if the monitor was
     # disabled or detached early. Safe no-op when reporting is off / DryRun.
     if ($reportEnabled -and -not $DryRun) {
         try {
-            $htmlPath = Write-HoblReportHtml -ReportDir $reportDir
+            $htmlPath = Write-HoblReportHtml -ReportDir $reportDir -Frequency $reportFrequency -Date $runStart
             if ($htmlPath) { "Report updated: $htmlPath" | log }
         } catch {
             " WARN - report: final render failed: $($_.Exception.Message)" | log
+        }
+    }
+
+    # ---- Run-end report email ----
+    # Send ONE combined report email covering the whole run. daily_run runs as
+    # SYSTEM and can't drive Outlook COM, so it writes a marker and pokes the
+    # "HOBL Report Email" helper task (which runs as the logged-in Host user).
+    # Gated on the monitor having run, so "run finished" is actually known.
+    if ($emailEnabled -and -not $DryRun -and $monitorEnabled -and $monitorJobs.Count -gt 0) {
+        if (-not $emailRecipients) {
+            " WARN - email: enabled but no recipient (email.to). Skipping run-end email." | log
+        } else {
+            try {
+                $markerPath = Write-HoblPendingEmail -ReportDir  $reportDir `
+                                                     -Frequency  $reportFrequency `
+                                                     -Date       $runStart `
+                                                     -Recipients $emailRecipients `
+                                                     -RunId      $runId `
+                                                     -Incomplete $runIncomplete `
+                                                     -Note       $runNote
+                "email: wrote pending marker $markerPath (freq=$reportFrequency incomplete=$runIncomplete)" | log
+
+                # Poke the helper task. SYSTEM can start a task that runs as the
+                # interactive user. Fail-soft: if the task isn't registered, the
+                # marker persists and a later logon-trigger / manual drain sends it.
+                $started = $false
+                try {
+                    Get-ScheduledTask -TaskName $emailTaskName -ErrorAction Stop | Out-Null
+                    Start-ScheduledTask -TaskName $emailTaskName -ErrorAction Stop
+                    $started = $true
+                } catch {
+                    " WARN - email: could not start '$emailTaskName' task: $($_.Exception.Message)" | log
+                }
+                if ($started) {
+                    "email: triggered helper task '$emailTaskName'; it sends from the logged-in session." | log
+                } else {
+                    " WARN - email: helper task '$emailTaskName' not started; marker will drain at next logon or manual run." | log
+                    " WARN - email:   register it with: powershell -File send_report_email.ps1 -Register" | log
+                }
+            } catch {
+                " WARN - email: failed to queue run-end email: $($_.Exception.Message)" | log
+            }
         }
     }
 

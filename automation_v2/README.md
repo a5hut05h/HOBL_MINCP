@@ -61,9 +61,10 @@ when running non-elevated against a SYSTEM-owned task), pre-flight logs a
 | [lib/testplan.ps1](lib/testplan.ps1)           | Turns a HOBL `.ps1` testplan into the JSON shape `/plan/Create` expects. |
 | [lib/submit.ps1](lib/submit.ps1)               | Talks to HOBLweb (list plans, submit, retry on 5xx). |
 | [lib/monitor.ps1](lib/monitor.ps1)             | After submit, polls HOBLweb and logs live progress until the chain finishes. |
-| [lib/report.ps1](lib/report.ps1)               | Builds the weekly HTML report (scenario pass/fail/terminated) from a per-week ledger the monitor appends to. |
-| [generate_report.ps1](generate_report.ps1)     | Rebuild or backfill a week's HTML report on demand (`-Week`, `-Backfill`, `-Open`, `-ImportLogs`). |
-| [send_report_email.ps1](send_report_email.ps1) | Email the weekly report via Outlook (configurable recipient). Manual, or `-Register` for a weekly task. |
+| [lib/report.ps1](lib/report.ps1)               | Builds the HTML report (scenario pass/fail/terminated) from a period ledger the monitor appends to. The report period follows `schedule.frequency` (daily/weekly/monthly). |
+| [lib/email.ps1](lib/email.ps1)                 | Shared report-email helpers: the pending-email marker contract and the Outlook COM send. |
+| [generate_report.ps1](generate_report.ps1)     | Rebuild or backfill a period's HTML report on demand (`-Frequency`, `-Week`, `-Date`, `-Backfill`, `-Open`, `-ImportLogs`). |
+| [send_report_email.ps1](send_report_email.ps1) | Sends the per-run report via Outlook. Default drains pending markers (what the helper task runs); `-Register` sets up the on-demand + logon task; `-Send` re-sends a period manually. |
 | [register_schedule.ps1](register_schedule.ps1)| Run once. Registers `daily_run.ps1` as a Windows scheduled task under SYSTEM. |
 | [tools/dump_plan.ps1](tools/dump_plan.ps1)     | Diagnostic. Dumps a real HOBLweb plan's JSON so you can compare shapes if `/plan/Create` ever starts rejecting rows. |
 
@@ -242,12 +243,10 @@ changes.
 | `monitor.enabled`   | `true` | After submit, stay attached and poll HOBLweb until the chain finishes. Set `false` for fire-and-forget. Skipped automatically under `-DryRun`. |
 | `monitor.intervalSec` | `45` | Poll cadence in seconds. |
 | `monitor.maxHours`  | `8` | Hard cap on monitor lifetime; logs a `WARN` and detaches if exceeded. |
-| `report.enabled`    | `true` | Build the weekly HTML report as scenarios finish. Set `false` to disable. |
-| `report.dir`        | `logDir` | Where the weekly `.jsonl` ledger + `.html` report are written. Defaults to `logDir`. |
-| `email.enabled`     | `true` | Allow the weekly report email. Set `false` to disable. |
-| `email.to`          | required for email | Recipient list (`;`-separated). Overridden by `send_report_email.ps1 -To`. |
-| `email.sendDay`     | `Friday` | Day of week the registered weekly email task fires. |
-| `email.sendTime`    | `17:00` | Time (HH:MM, 24h) the registered weekly email task fires. |
+| `report.enabled`    | `true` | Build the HTML report as scenarios finish. Set `false` to disable. |
+| `report.dir`        | `logDir` | Where the period `.jsonl` ledger + `.html` report subfolders (`daily\`, `weekly\`, `monthly\`) are written. Defaults to `logDir`. |
+| `email.enabled`     | `true` | Send the run-end report email. Set `false` to disable. |
+| `email.to`          | required for email | Recipient list (`;`-separated). Overridden by `send_report_email.ps1 -Send -To`. |
 | `jobs[].name`       | required | Free-text label used in logs. |
 | `jobs[].profile`    | required | HOBLweb profile name (the DUT). |
 | `jobs[].testplan`   | required | Path to a HOBL testplan `.ps1` file. Relative paths resolve to the repo root (the parent of `automation_v2\`). |
@@ -344,15 +343,21 @@ changed (e.g. a long prep phase).
 Set `monitor.enabled = false` to revert to fire-and-forget behavior (useful
 for fast manual smoke tests).
 
-## Weekly HTML report
+## HTML report (per run)
 
-As plans run, the monitor records every finished scenario into a **per-week
-ledger**, and a matching **HTML report** is re-rendered from it. Both live in
-`logDir` (next to the daily logs), one pair per ISO week (Mon–Sun):
+As plans run, the monitor records every finished scenario into a **period
+ledger**, and a matching **HTML report** is re-rendered from it. The period
+follows the schedule cadence (`schedule.frequency`): a **Daily** schedule
+produces a per-day report, **Weekly** a per-ISO-week (Mon–Sun) report, **Monthly**
+a per-month report. Because the schedule fires once per period, each report maps
+1:1 to the run that produced it. Files live under `report.dir` (defaults to
+`logDir`) in a frequency subfolder:
 
 ```
-<logDir>\weekly_report_2026-W24.jsonl   append-only data (source of truth)
-<logDir>\weekly_report_2026-W24.html    the rendered report
+<reportDir>\daily\daily_report_2026-07-06.jsonl     append-only data (source of truth)
+<reportDir>\daily\daily_report_2026-07-06.html      the rendered report
+<reportDir>\weekly\weekly_report_2026-W24.jsonl  / .html
+<reportDir>\monthly\monthly_report_2026-07.jsonl / .html
 ```
 
 The HTML shows a headline summary — **Pass rate %, Passed / Failed /
@@ -378,32 +383,36 @@ the `.html` stays a single portable file.
 
 - **Live, during a run.** When `monitor.enabled = true`, each scenario is
   appended to the ledger the moment it reaches a terminal status, and the HTML
-  is regenerated. The current week's report is always up to date while
-  `daily_run.ps1` is attached.
+  is regenerated. The report is always up to date while `daily_run.ps1` is
+  attached.
 - **The HTML is never edited in place** — it's a fresh render of the ledger
   every time, so a crash mid-write can't corrupt it.
 - **Scope is the automation's own plans.** `daily_run.ps1` writes a `plan`
   marker per submitted PlanID, so the report (and any backfill) only counts
   plans this automation submitted — not manual UI submissions on the same DUT.
-- **Binned by start time.** A scenario that starts Sun 23:50 lands in that
-  week even if it finishes after midnight.
+- **Binned by the run.** All scenarios of a run — including every AutoResubmit
+  cycle — bin into the run's period, even a cycle that crosses midnight or a
+  week/month boundary (`daily_run.ps1` passes the run's start date).
 
 ### Rebuilding / backfilling on demand
 
 If `monitor.enabled = false`, or the monitor detached early (`monitor.maxHours`),
-some scenario rows won't have been captured live. Rebuild any week from the
+some scenario rows won't have been captured live. Rebuild any period from the
 ledger — and optionally pull the gaps from HOBLweb — with
-[generate_report.ps1](generate_report.ps1):
+[generate_report.ps1](generate_report.ps1). The period follows `-Frequency`
+(default = the config's `schedule.frequency`):
 
 ```cmd
-:: Rebuild THIS week's HTML from the ledger:
+:: Rebuild THIS period's HTML from the ledger (period = config schedule):
 powershell -ExecutionPolicy Bypass -File generate_report.ps1
 
 :: Rebuild and also pull anything the monitor missed from HOBLweb:
 powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Backfill
 
-:: A specific past week, then open it in the browser:
-powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Week 2026-W22 -Open
+:: A specific past period, then open it in the browser:
+powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Frequency Weekly  -Week 2026-W22 -Open
+powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Frequency Daily   -Date 2026-07-06 -Open
+powershell -ExecutionPolicy Bypass -File generate_report.ps1 -Frequency Monthly -Date 2026-07-15 -Open
 ```
 
 Backfill is scoped: it only fetches PlanIDs already known to be the
@@ -416,79 +425,92 @@ When HOBLweb no longer has the plans (its DB was reset, or the runs happened on
 a **different host** whose `*_daily.log` files you've copied in), HOBLweb
 backfill can't help — but the daily logs still contain every scenario result.
 `-ImportLogs` reconstructs results from those logs and writes them into the
-matching weekly ledgers, then rebuilds every affected week's HTML:
+matching period ledgers, then rebuilds every affected period's HTML:
 
 ```cmd
-:: Import all *_daily.log in the report dir, rebuild affected weeks:
+:: Import all *_daily.log in the report dir, rebuild affected periods:
 powershell -ExecutionPolicy Bypass -File generate_report.ps1 -ImportLogs
 
 :: Import logs from a different folder (e.g. copied from another host):
 powershell -ExecutionPolicy Bypass -File generate_report.ps1 -ImportLogs -LogDir D:\incoming_logs
 ```
 
-Each result is binned into its ISO week by the scenario's start time, so a run
-spanning two weeks lands in the right reports. The import is **idempotent and
-safe to mix with live data**: it de-duplicates by `PlanID + scenario name`, so
-a scenario already recorded by the live monitor is never double-counted — the
-import only fills genuine gaps (plans or rows the monitor never saw). Imported
-rows are tagged `source=logimport` in the ledger.
+Each result is binned into its period (per `-Frequency`) by the scenario's start
+time. The import is **idempotent and safe to mix with live data**: it
+de-duplicates by `PlanID + scenario name`, so a scenario already recorded by the
+live monitor is never double-counted — the import only fills genuine gaps (plans
+or rows the monitor never saw). Imported rows are tagged `source=logimport` in
+the ledger.
 
 Disable reporting entirely with `report.enabled = false`.
 
-## Weekly report email
+## Run-end report email
 
-[send_report_email.ps1](send_report_email.ps1) emails the weekly report using
-the DUT's **already-signed-in Outlook desktop account** — no SMTP, no stored
-password. Because Outlook sends as the logged-in user, internal distribution
-lists accept the mail. The email **body** is an email-safe static summary (pass
-rate, the failures list, per-DUT breakdown); the full interactive `.html`
-report is **attached** (email clients strip the JavaScript that powers the
-in-report sort/filter, so those controls only work when the attachment is
-opened in a browser).
+When a run finishes, `daily_run.ps1` sends **one combined report email** for the
+whole run (all DUTs/jobs in the config) via
+[send_report_email.ps1](send_report_email.ps1), using the Host's
+**already-signed-in Outlook desktop account** — no SMTP, no stored password.
+Because Outlook sends as the logged-in user, internal distribution lists accept
+the mail. The email **body** is an email-safe static summary (pass rate, the
+failures list, per-DUT breakdown); the full interactive `.html` report is
+**attached** (email clients strip the JavaScript that powers the in-report
+sort/filter, so those controls only work when the attachment is opened in a
+browser). If the run didn't finish cleanly (detached at `monitor.maxHours`, or a
+chain errored/terminated), the subject is tagged `[INCOMPLETE]` and the body
+carries a note that the numbers may be partial.
 
-Recipient and schedule come from the `email` block in
+### How it sends without a logged-in SYSTEM Outlook
+
+`daily_run.ps1` runs as **SYSTEM** (headless, wakes from sleep) and can't drive
+Outlook COM. So at run end it writes a small **marker** under
+`<reportDir>\pending_email\` describing the report it just built, and pokes the
+**`HOBL Report Email`** scheduled task. That task runs as the **logged-in Host
+user** (Outlook available), reads the marker, sends the email, and deletes the
+marker on success. The task also has a **logon trigger**, so if the Host was
+logged off when a run finished, the pending email is drained automatically at
+next sign-in — nothing is lost, no human step required.
+
+Recipient comes from the `email` block in
 [schedule.config.json](schedule.config.json):
 
 ```json
 "email": {
-    "enabled":  true,
-    "to":       "wssi-fun-idc@microsoft.com",
-    "sendDay":  "Friday",
-    "sendTime": "17:00"
+    "enabled": true,
+    "to":      "wssi-fun-idc@microsoft.com"
 }
 ```
 
-Send on demand, or register the weekly task:
+You normally don't invoke it by hand — `register_schedule.ps1` offers to set up
+the `HOBL Report Email` helper task in the same pass (after registering the run
+task it asks *"Also register the run-end report email task?"*, defaulting to the
+config's `email` block). But it can be driven directly:
 
 ```cmd
-:: Send THIS week's report now (refreshes the HTML first):
-powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Refresh
+:: Register the on-demand + logon helper task (runs as the logged-in user):
+powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Register
 
-:: Override the recipient ad-hoc (;-separated):
-powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -To "a@x.com;b@y.com"
+:: Drain any pending report emails now (what the helper task runs):
+powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Drain
 
-:: Email a specific past week:
-powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Week 2026-W22
-
-:: Register the recurring weekly email (runs as the logged-in user):
-powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Register -Day Friday -Time 17:00
+:: Manually (re-)send a specific period's report now:
+powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Send -Frequency Weekly  -Week 2026-W22
+powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Send -Frequency Daily   -Date 2026-07-06
+powershell -ExecutionPolicy Bypass -File send_report_email.ps1 -Send -To "a@x.com;b@y.com"
 ```
 
-You usually don't need to register it separately: **`register_schedule.ps1`
-offers to set up the weekly email task in the same run** (after registering the
-daily task it asks *"Also register the weekly report email task?"*, defaulting
-to the config's `email` block). The two remain **separate** scheduled tasks
-because the daily run is SYSTEM while the email task must run as the logged-in
-user — but you only do one registration pass.
+The run task and the email task stay **separate** on purpose: the run is SYSTEM,
+but the email must run as the logged-in user — `register_schedule.ps1` just
+drives both registrations from one prompt.
 
-Important: the weekly email task runs **as the logged-in user**, not SYSTEM —
-Outlook COM needs an interactive session. This suits lab DUTs that auto-login
-and stay awake. (This is different from the SYSTEM-run `daily_run` task.)
+Important: the `HOBL Report Email` task runs **as the logged-in Host user**, not
+SYSTEM — Outlook COM needs an interactive session. This suits a Host that stays
+signed in; the email then sends within seconds of a run finishing.
 
 One environment caveat: Outlook's "programmatic access" guard *can* prompt
-before an unattended `.Send()`. On a managed DUT with healthy, current Defender
-it stays silent (verified on this host). If it ever blocks sending, the
-supported fix is Group Policy → *Configure programmatic access* → **Never warn**.
+before an unattended `.Send()`. On a managed Host with healthy, current Defender
+it stays silent (verified on this host). If it ever blocks sending, the marker
+is **kept** (not lost) and retried at the next drain/logon; the supported fix is
+Group Policy → *Configure programmatic access* → **Never warn**.
 
 Disable the email entirely with `email.enabled = false` (or just don't register
 the task).
