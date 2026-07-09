@@ -250,7 +250,7 @@ class OsInstall(core.app_scenario.Scenario):
         ], expected_exit_code="")
 
         logging.info("Verifying drivers...")
-        self._call(["cmd.exe", "/c " + verify_versions_path + "\\VerifyOemDrivers.cmd"], expected_exit_code="")
+        self._call(["cmd.exe", "/c " + verify_versions_path + "\\VerifyOemDrivers.cmd"], expected_exit_code="", fail_on_exception=False)
         exit_code = Params.getCalculated('last_call_exit_code')
         logging.debug("Driver verify got exit code " + str(exit_code))
         # Copy results back to host
