@@ -16,4 +16,4 @@ def run(scenario):
     except:
         pass
     scenario._call(["cmd.exe", "/C \"C:\\Program Files (x86)\\Minecraft Launcher\\MinecraftLauncher.exe\""], blocking=False)
-    time.sleep(90)
+    time.sleep(30)

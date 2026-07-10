@@ -38,9 +38,20 @@
                 "command": "start steam://run/252950",
                 "delay": "0",
                 "description": "Start Rocket League",
-                "enabled": true,
+                "enabled": false,
                 "id": "1KC0KV9",
                 "type": "Command"
+            },
+            {
+                "children": [],
+                "delay": "5.0",
+                "description": "Launch Rocket League",
+                "enabled": true,
+                "file_name": [
+                    "code_1PKMLM8.py"
+                ],
+                "id": "1PKMLM8",
+                "type": "Code"
             },
             {
                 "children": [],

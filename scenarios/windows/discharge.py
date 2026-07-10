@@ -60,7 +60,7 @@ class Discharge(core.app_scenario.Scenario):
             return True
         return False
 
-    def setup(self):
+    def setUp(self):
         logging.info("Discharging...")
         self._host_call(self.charge_off_call)
 
