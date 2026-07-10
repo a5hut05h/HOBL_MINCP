@@ -161,7 +161,7 @@ class TeamsInstall(core.app_scenario.Scenario):
                     finish_setup_btn = WebDriverWait(desktop, 60).until(EC.presence_of_element_located((By.XPATH, "//Button[contains(@Name, 'Finish setup')]")))
                     finish_setup_btn.click()
                     logging.info("Clicked 'Finish setup'.")
-                    time.sleep(300)
+                    time.sleep(420)
                     ActionChains(desktop).send_keys(Keys.ENTER).perform() # Incase canera permissions pop up need to dismiss it.
                 except:
                     logging.info("Teams not found in taskbar, trying to launch via start menu search.")
@@ -178,7 +178,7 @@ class TeamsInstall(core.app_scenario.Scenario):
                         finish_setup_btn = WebDriverWait(desktop, 60).until(EC.presence_of_element_located((By.XPATH, "//Button[contains(@Name, 'Finish setup')]")))
                         finish_setup_btn.click()
                         logging.info("Clicked 'Finish setup'.")
-                        time.sleep(300)
+                        time.sleep(420)
                         ActionChains(desktop).send_keys(Keys.ENTER).perform() # Incase canera permissions pop up need to dismiss it.
                     except:
                         try:
