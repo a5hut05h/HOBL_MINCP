@@ -62,6 +62,7 @@ params.setDefault('global', 'charge_on_call', '', desc="A shell command to turn 
 params.setDefault('global', 'charge_off_call', '', desc="A shell command to turn off an attached charger.") 
 params.setDefault('global', 'browser', 'Edge', desc="Web browser to use.", valOptions=["Edge", "Edge Beta", "Edge Dev", "Edge Canary", "Chrome"])
 params.setDefault('global', 'host_ip', '', desc="Option to override IP address of host computer, if it doesn't get automatically determined properly.")  # Will try to determine automatically if blank
+params.setDefault('global', 'aux_host', '', desc="IP address or hostname of an auxiliary host computer, such as a DAQ system, thermal chamber, etc.  Referenced parameters are not supported here.")
 params.setDefault('global', 'run_type', '', desc="A results sub-folde to indicate the type of run it is, such as 'Power', 'ETL', 'Misc', etc.")
 params.setDefault('global', 'iterations', '1', desc="How many time to repeat the scenario.")
 params.setDefault('global', 'training_mode', '0', desc="Specify if this is a training run (1) or not (0).", valOptions=["0", "1"])

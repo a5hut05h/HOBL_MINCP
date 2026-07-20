@@ -2298,6 +2298,9 @@ class Scenario(unittest.TestCase):
             start_time = datetime.now()
             # Adjust the scale of the template to match the device Windows scaling
             template_dpi = int(Image.open(os.path.join(self.json_parent_dir, template)).info['dpi'][0])
+            if (template_dpi == 0):
+                logging.warning(f"Template DPI is 0, defaulting to 96")
+                template_dpi = 96
             factor = round(template_dpi / 24)
             template_dpi = factor * 24
             device_dpi = int(self._get_screen_scale(self.current_screen) * 96)

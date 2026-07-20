@@ -517,7 +517,8 @@
                         "enabled": true,
                         "exception_on": "No match",
                         "file_name": [
-                            "image_16XF4U5.png"
+                            "image_16XF4U5.png",
+                            "image_1R2VUV9.png"
                         ],
                         "id": "16XF4U5",
                         "match_threshold": "",
@@ -525,24 +526,6 @@
                         "scale": "",
                         "type": "Click",
                         "x": "0.800",
-                        "y": "0.500"
-                    },
-                    {
-                        "capture_id": "16XAM0X",
-                        "children": [],
-                        "delay": "2",
-                        "description": "Turn On Camera",
-                        "enabled": false,
-                        "exception_on": "No match",
-                        "file_name": [
-                            "image_16XAN7U.png"
-                        ],
-                        "id": "16XAN7U",
-                        "match_threshold": "",
-                        "primary": true,
-                        "scale": "",
-                        "type": "Click",
-                        "x": "0.814",
                         "y": "0.500"
                     }
                 ],
@@ -561,7 +544,8 @@
                         "enabled": true,
                         "exception_on": "No match",
                         "file_name": [
-                            "image_16XF5AK.png"
+                            "image_16XF5AK.png",
+                            "image_1R34CMK.png"
                         ],
                         "h": "0.051",
                         "id": "16XF5AK",
@@ -667,7 +651,8 @@
                         "enabled": true,
                         "exception_on": "No match",
                         "file_name": [
-                            "image_16XF5AK.png"
+                            "image_16XF5AK.png",
+                            "image_1R34CMK.png"
                         ],
                         "id": "16XANVJ",
                         "match_threshold": "",
@@ -693,11 +678,12 @@
                         "enabled": true,
                         "exception_on": "No match",
                         "file_name": [
-                            "image_16XF4U5.png"
+                            "image_16XF4U5.png",
+                            "image_1R2VUV9.png"
                         ],
                         "h": "0.032",
                         "id": "16XAP3N",
-                        "match_threshold": "",
+                        "match_threshold": "0.8",
                         "scale": "",
                         "type": "Check",
                         "w": "0.073",
