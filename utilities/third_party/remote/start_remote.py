@@ -14,6 +14,7 @@ import core.call_rpc as rpc
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-profile', '-p')
+    arg_parser.add_argument('-target', '-t') # 'aux' or 'dut'
     arg_parser.add_argument('overrides', nargs=argparse.REMAINDER)
 
     args = arg_parser.parse_args()
@@ -21,6 +22,15 @@ def main():
     if args.profile is None:
         print('Missing profile')
         return
+
+    target = "dut"
+    if args.target is not None:
+        target = args.target.lower()
+
+    print(f"Starting remote for target: {target}")
+
+    # This prevents the Params parsing from contacting the DUT to resolve special parameters.
+    Params.setCalculated("dut_alive", '0')
 
     Params(args.profile)
     Params.setOverrides(args.overrides)
@@ -31,10 +41,14 @@ def main():
     Params.setDefault('global', 'remote_share_password', '')
 
     dut_ip   = Params.get('global', 'dut_ip')
+    aux_ip   = Params.get('global', 'aux_host')
     platform = Params.get('global', 'platform')
 
     def call(cmd):
-        rpc.call_rpc(dut_ip, 8000, 'Run', cmd)
+        if target == "dut":
+            rpc.call_rpc(dut_ip, 8000, 'Run', cmd)
+        else:
+            rpc.call_rpc(aux_ip, 8000, 'Run', cmd)
 
     share_path     = Params.get('global', 'remote_share_path')
     share_username = Params.get('global', 'remote_share_username')
