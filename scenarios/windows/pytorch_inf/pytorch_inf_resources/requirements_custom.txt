@@ -1,3 +1,6 @@
+# Microsoft-managed devices block direct PyPI access (CISO Central Feed Services policy);
+# resolve dependencies through the approved Microsoft feed proxy.
+--index-url https://packagefeedproxy.microsoft.io/pypi/simple
 # Dependencies for custom wheel path (torch wheel installed separately from local file)
 tokenizers==0.22.2
 transformers==4.56.1

@@ -626,6 +626,13 @@ if (-not (Test-Path $venvPython)) {
 }
 "Venv python: $venvPython" | log
 
+# Microsoft-managed devices block direct access to public PyPI (CISO Central Feed
+# Services policy). Resolve pip installs through the approved Microsoft feed proxy.
+# The requirements_*.txt files also pin this index; it is defined here for the
+# custom-wheel path, where the wheel's transitive deps are pulled without a
+# requirements file. Same pinned versions => no functional or performance change.
+$pypiIndexUrl = "https://packagefeedproxy.microsoft.io/pypi/simple"
+
 if ($useCustomPyTorchWheel) {
     # --- Custom wheel path: install custom PyTorch wheel + remaining deps ---
     "-- Installing PyTorch from custom wheel into venv" | log
@@ -640,7 +647,9 @@ if ($useCustomPyTorchWheel) {
         Exit 1
     }
     "Found wheel: $($wheelFile.Name) ($([math]::Round($wheelFile.Length / 1MB, 1)) MB)" | log
-    & $venvPip install $wheelFile.FullName
+    # Install through the approved Microsoft PyPI feed proxy so the wheel's transitive
+    # dependencies resolve under the CISO Central Feed Services block on public PyPI.
+    & $venvPip install --index-url $pypiIndexUrl $wheelFile.FullName
     check($lastexitcode)
     "-- Installing remaining dependencies from requirements_custom.txt into venv" | log
     & $venvPip install -r requirements_custom.txt
