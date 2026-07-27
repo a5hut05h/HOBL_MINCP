@@ -91,27 +91,6 @@ log "-- Checkout version 9.4.2"
 git checkout v9.4.2
 check_status "Git checkout v9.4.2"
 
-# -------------------------------------------------------------------
-# Redirect NuGet to the approved Microsoft package feed proxy
-# -------------------------------------------------------------------
-# Microsoft-managed devices block direct access to public NuGet (nuget.org) per the
-# CISO Central Feed Services policy. Swap the public nuget.org source in the Aspire
-# repo's NuGet.config for the approved Microsoft feed proxy (a nuget.org mirror) so
-# 'build.sh --restore' resolves the same packages through an allowed endpoint. Internal
-# dnceng feeds are left untouched. This persists on disk for the run phase too.
-NUGET_PROXY="https://packagefeedproxy.microsoft.io/nuget/v3/index.json"
-NUGET_CONFIG="$BIN_DIR/aspire/NuGet.config"
-if [ -f "$NUGET_CONFIG" ]; then
-    if grep -q "https://api.nuget.org/v3/index.json" "$NUGET_CONFIG"; then
-        sed -i '' "s#https://api.nuget.org/v3/index.json#$NUGET_PROXY#g" "$NUGET_CONFIG"
-        log "-- Redirected nuget.org source to approved feed proxy in $NUGET_CONFIG"
-    else
-        log "-- WARNING: nuget.org source not found in $NUGET_CONFIG; leaving unchanged"
-    fi
-else
-    log "-- WARNING: NuGet.config not found at $NUGET_CONFIG; restore will use default sources"
-fi
-
 # Install Brew (or verify it exists at default location)
 log "-- Installing Brew"
 if [ -x /opt/homebrew/bin/brew ]; then

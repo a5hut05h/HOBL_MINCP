@@ -214,29 +214,6 @@ $env:PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT = "300000"
 "-- Set PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT=300000 (5 minutes)" | log
 
 # -------------------------------------------------------------------
-# Redirect NuGet to the approved Microsoft package feed proxy
-# -------------------------------------------------------------------
-# Microsoft-managed devices block direct access to public NuGet (nuget.org) per the
-# CISO Central Feed Services policy. Swap the public nuget.org source in the Aspire
-# repo's NuGet.config for the approved Microsoft feed proxy (a nuget.org mirror) so
-# 'dotnet restore' resolves the same packages through an allowed endpoint. Internal
-# dnceng feeds are left untouched. This persists on disk for the run phase too.
-$nugetProxy = "https://packagefeedproxy.microsoft.io/nuget/v3/index.json"
-$nugetConfigPath = Join-Path "$scriptDrive\aspire" "NuGet.config"
-if (Test-Path $nugetConfigPath) {
-    $nugetConfig = Get-Content -Path $nugetConfigPath -Raw
-    if ($nugetConfig -match [regex]::Escape("https://api.nuget.org/v3/index.json")) {
-        $nugetConfig = $nugetConfig -replace [regex]::Escape("https://api.nuget.org/v3/index.json"), $nugetProxy
-        Set-Content -Path $nugetConfigPath -Value $nugetConfig -Encoding utf8
-        "-- Redirected nuget.org source to approved feed proxy in $nugetConfigPath" | log
-    } else {
-        "-- WARNING: nuget.org source not found in $nugetConfigPath; leaving unchanged" | log
-    }
-} else {
-    "-- WARNING: NuGet.config not found at $nugetConfigPath; restore will use default sources" | log
-}
-
-# -------------------------------------------------------------------
 # Initial restore (so run iterations only need build)
 # -------------------------------------------------------------------
 "-- Running initial dotnet restore" | log
