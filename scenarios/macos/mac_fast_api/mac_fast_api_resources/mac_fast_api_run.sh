@@ -154,6 +154,15 @@ if [ $? -ne 0 ]; then
 fi
 log "✓ Build module is available"
 
+# Route PEP 517 build isolation (and any pip invoked by scripts/test.sh) through the
+# approved Microsoft PyPI feed proxy. `python -m build` spins up its own isolated
+# environment and pip-installs the build backend (pdm-backend) on every run; that
+# isolated pip honors PIP_INDEX_URL. Without this it targets public PyPI, which is
+# blocked/SSL-inspected on Microsoft-managed devices (CISO Central Feed Services
+# policy) and injects network variability into build time.
+export PIP_INDEX_URL="https://packagefeedproxy.microsoft.io/pypi/simple"
+log "-- Set PIP_INDEX_URL for build isolation: $PIP_INDEX_URL"
+
 log "-- fast_api build started"
 
 # Redirect output to a per-phase log so it is preserved in the results share.
