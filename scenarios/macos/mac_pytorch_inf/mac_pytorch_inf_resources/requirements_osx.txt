@@ -1,3 +1,7 @@
+# Microsoft-managed devices block direct PyPI access (CISO Central Feed Services policy);
+# resolve base packages through the approved Microsoft feed proxy. torch wheels still come
+# from download.pytorch.org (not covered by the block).
+--index-url https://packagefeedproxy.microsoft.io/pypi/simple
 # PyTorch on macOS includes Metal support by default
 --extra-index-url https://download.pytorch.org/whl/nightly/cpu
 torch==2.8.0

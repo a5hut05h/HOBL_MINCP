@@ -883,12 +883,18 @@ if (-not (Test-Path $venvPython)) {
 }
 "Venv python: $venvPython" | log
 
+# Microsoft-managed devices block direct access to public PyPI (CISO Central Feed
+# Services policy). Install through the approved Microsoft package feed proxy instead.
+# Same pinned versions are served, so there is no functional or performance change.
+$pypiIndexUrl = "https://packagefeedproxy.microsoft.io/pypi/simple"
+"Using approved PyPI feed proxy: $pypiIndexUrl" | log
+
 "Installing requirements.txt into venv..." | log
-& $venvPip install -r requirements.txt
+& $venvPip install --index-url $pypiIndexUrl -r requirements.txt
 check($lastexitcode)
 
 "Installing build tool into venv..." | log
-& $venvPip install build
+& $venvPip install --index-url $pypiIndexUrl build
 check($lastexitcode)
 
 "-- FastAPI prep completed ($logSuffix version)" | log

@@ -328,6 +328,15 @@ if ($LASTEXITCODE -ne 0) {
     Exit 1
 }
 
+# Route PEP 517 build isolation through the approved Microsoft PyPI feed proxy.
+# `python -m build` spins up its own isolated environment and pip-installs the build
+# backend (pdm-backend) on every run; that isolated pip honors PIP_INDEX_URL. Without
+# this it targets public PyPI, which is blocked/SSL-inspected on Microsoft-managed
+# devices (CISO Central Feed Services policy) and injects network variability into
+# build_time. Setting it here keeps the timed build off the non-approved feed.
+$env:PIP_INDEX_URL = "https://packagefeedproxy.microsoft.io/pypi/simple"
+"Set PIP_INDEX_URL for build isolation: $env:PIP_INDEX_URL" | log
+
 "Building FastAPI..." | log
 Write-RunPhaseMarker "phase.run_prep.end"
 Write-RunPhaseMarker "phase.run_build.start"
