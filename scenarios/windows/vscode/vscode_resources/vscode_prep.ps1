@@ -160,8 +160,20 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
 # -------------------------------------------------------------------
 # Install Git
 # -------------------------------------------------------------------
+# --- Remove the msstore source before any winget install so a broken pinned
+# certificate on that source cannot fail the command (winget 0x8a15005e /
+# -1978335138) behind an SSL-inspecting proxy. All needed packages are on 'winget'. ---
+try {
+    if ((winget source list 2>$null) -match "msstore") {
+        "Removing msstore winget source to avoid pinned-certificate failures (0x8a15005e)" | log
+        winget source remove msstore 2>&1 | log
+    }
+} catch {
+    "Could not remove msstore source (continuing): $($_.Exception.Message)" | log
+}
+
 "-- Installing Git" | log
-winget install --id Git.Git --accept-source-agreements --accept-package-agreements
+winget install --id Git.Git --source winget --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
@@ -174,9 +186,9 @@ check($lastexitcode)
 # -------------------------------------------------------------------
 "-- Installing Node.js 22.20.0 ($logSuffix)" | log
 if ($isARM64) {
-    winget install --id OpenJS.NodeJS.22 --version 22.20.0 --architecture arm64 --accept-source-agreements --accept-package-agreements
+    winget install --id OpenJS.NodeJS.22 --version 22.20.0 --architecture arm64 --source winget --accept-source-agreements --accept-package-agreements
 } else {
-    winget install --id OpenJS.NodeJS.22 --version 22.20.0 --architecture x64 --accept-source-agreements --accept-package-agreements
+    winget install --id OpenJS.NodeJS.22 --version 22.20.0 --architecture x64 --source winget --accept-source-agreements --accept-package-agreements
 }
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
