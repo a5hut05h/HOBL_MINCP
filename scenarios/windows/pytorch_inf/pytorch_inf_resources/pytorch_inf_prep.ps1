@@ -137,8 +137,20 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
 # Rust has no LTS — we pin a known stable version for reproducibility.
 $rustVersion = "1.85.0"
 if ($isARM64) {
+    # --- Remove the msstore source before any winget install so a broken pinned
+    # certificate on that source cannot fail the command (winget 0x8a15005e /
+    # -1978335138) behind an SSL-inspecting proxy. All needed packages are on 'winget'. ---
+    try {
+        if ((winget source list 2>$null) -match "msstore") {
+            "Removing msstore winget source to avoid pinned-certificate failures (0x8a15005e)" | log
+            winget source remove msstore 2>&1 | log
+        }
+    } catch {
+        "Could not remove msstore source (continuing): $($_.Exception.Message)" | log
+    }
+
     "-- Installing Rust toolchain $rustVersion (required for Arm64 native package compilation)" | log
-    winget install --id Rustlang.Rustup --accept-source-agreements --accept-package-agreements
+    winget install --id Rustlang.Rustup --source winget --accept-source-agreements --accept-package-agreements
     if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne -1978335189) {
         " ERROR - Rust installation failed with exit code: $LASTEXITCODE" | log
     } else {
