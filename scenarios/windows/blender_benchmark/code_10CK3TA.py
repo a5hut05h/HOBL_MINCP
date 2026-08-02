@@ -10,14 +10,14 @@ def run(scenario):
     logging.debug('Checking if benchmark-launcher-cli.exe is already on the DUT')
 
     # Define paths
-    zip_file = os.path.join("scenarios", "blender_resources", "benchmark-launcher-cli.zip")
-    extract_dir = os.path.join("scenarios", "blender_resources", "windows")
+    zip_file = os.path.join("scenarios","windows", "blender_benchmark", "blender_benchmark_resources", "benchmark-launcher-cli.zip")
+    extract_dir = os.path.join("scenarios", "windows", "blender_benchmark", "blender_benchmark_resources", "windows")
     if not os.path.exists(extract_dir):
         os.makedirs(extract_dir)
     exe_file = os.path.join(extract_dir, "benchmark-launcher-cli.exe")
 
     # Download the zip file if not already present
-    scenario._check_and_download('benchmark-launcher-cli.zip', "scenarios\\blender_resources", url='https://download.blender.org/release/BlenderBenchmark2.0/launcher/benchmark-launcher-cli-3.3.0-windows.zip')
+    scenario._check_and_download('benchmark-launcher-cli.zip', "scenarios\\windows\\blender_benchmark\\blender_benchmark_resources", url='https://download.blender.org/release/BlenderBenchmark2.0/launcher/benchmark-launcher-cli-3.3.0-windows.zip')
     
     try:
         # Extract the zip file
