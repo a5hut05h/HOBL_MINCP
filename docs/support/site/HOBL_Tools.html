@@ -413,6 +413,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#hard_reboot_prior" class="md-nav__link">
+    hard_reboot_prior
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#kill_teams" class="md-nav__link">
     kill_teams
   </a>
@@ -422,6 +429,13 @@
         <li class="md-nav__item">
   <a href="#kill_widgets" class="md-nav__link">
     kill_widgets
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mac_powermetrics" class="md-nav__link">
+    mac_powermetrics
   </a>
   
 </li>
@@ -841,6 +855,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#hard_reboot_prior" class="md-nav__link">
+    hard_reboot_prior
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#kill_teams" class="md-nav__link">
     kill_teams
   </a>
@@ -850,6 +871,13 @@
         <li class="md-nav__item">
   <a href="#kill_widgets" class="md-nav__link">
     kill_widgets
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mac_powermetrics" class="md-nav__link">
+    mac_powermetrics
   </a>
   
 </li>
@@ -1145,7 +1173,7 @@
 <h2 id="custom_trace">custom_trace</h2>
 <p>Periodically start ETL traces.</p>
 <p><u>Parameters:</u></p>
-<p><code>providers</code> - ETL provider files to use <strong>Default:</strong> <code>power_light.wprp</code>  <strong>Options:</strong> <code>abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp</code></p>
+<p><code>providers</code> - ETL provider files to use <strong>Default:</strong> <code>power_light.wprp</code>  <strong>Options:</strong> <code>abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, GTPLight_CustomMemHardFaults.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp</code></p>
 <p><code>trace_duration</code> - The duration of the trace in seconds <strong>Default:</strong> <code>300</code> </p>
 <p><code>start_delay</code> - The start delay before the trace starts in seconds <strong>Default:</strong> <code>0</code> </p>
 <p><code>enable_check</code> - Check the result of the trace. 0 = no check, 1 = check <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
@@ -1195,15 +1223,26 @@ are ignored, so the tool can be called for any subset of operations.</p>
 <h2 id="etl_trace">etl_trace</h2>
 <p>Collect ETL trace from specified [providers].</p>
 <p><u>Parameters:</u></p>
-<p><code>providers</code> - ETL provider files to use <strong>Default:</strong> <code>`  **Options:**</code>abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`</p>
+<p><code>providers</code> - ETL provider files to use <strong>Default:</strong> <code>`  **Options:**</code>abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, GTPLight_CustomMemHardFaults.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`</p>
 <h2 id="frame_data">frame_data</h2>
 <p>Collect and parse framerate and timing data.  Does not have a significant impact on power consumption.</p>
+<h2 id="hard_reboot_prior">hard_reboot_prior</h2>
+<p>Initiate a hard reboot (long press power button) before each scenario.
+Make sure this tool is listed first in the tool list so that it doesn't interrupt tracing or recording initiated by other tools.</p>
+<p><u>Parameters:</u></p>
+<p><code>post_reboot_delay</code> - How many seconds to wait after reboot to let the system settle before continuing with the scenario. <strong>Default:</strong> <code>120</code> </p>
 <h2 id="kill_teams">kill_teams</h2>
 <p>Kill all instances of Teams processes.</p>
 <p><u>Parameters:</u></p>
 <p><code>restart</code> -  <strong>Default:</strong> <code>0</code> </p>
 <h2 id="kill_widgets">kill_widgets</h2>
 <p>Stops the Windows Widgets from running.</p>
+<h2 id="mac_powermetrics">mac_powermetrics</h2>
+<p>macOS-only lightweight power measurement tool based on powermetrics.</p>
+<p><u>Parameters:</u></p>
+<p><code>interval_ms</code> - powermetrics sample interval in ms. <strong>Default:</strong> <code>1000</code> </p>
+<p><code>samplers</code> - powermetrics -s sampler list. <strong>Default:</strong> <code>battery,cpu_power,gpu_power,ane_power</code> </p>
+<p><code>output_file</code> - Output filename written in dut_data_path. <strong>Default:</strong> <code>powertrace.plist</code> </p>
 <h2 id="media_perf">media_perf</h2>
 <p>Deprecated.</p>
 <p><u>Parameters:</u></p>
@@ -1242,7 +1281,11 @@ are ignored, so the tool can be called for any subset of operations.</p>
 <h2 id="perfmon_util">perfmon_util</h2>
 <p>Trace specified performance counters that report utilization.</p>
 <p><u>Parameters:</u></p>
-<p><code>processor_counter</code> - Processor counter to use <strong>Default:</strong> <code>\Processor(_Total)\% Processor Time</code> </p>
+<p><code>include_processes</code> - Include counters for individual processes <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>process_id_counter</code> - Process ID counter to use (per process) <strong>Default:</strong> <code>\Process(*)\ID Process</code> </p>
+<p><code>process_cpu_counter</code> - Process CPU counter to use (per process) <strong>Default:</strong> <code>\Process(*)\% Processor Time</code> </p>
+<p><code>process_mem_counter</code> - Process memory counter to use (per process) <strong>Default:</strong> <code>\Process(*)\Working Set</code> </p>
+<p><code>cpu_counter</code> - CPU counter to use <strong>Default:</strong> <code>\Processor(_Total)\% Processor Time</code> </p>
 <p><code>memory_counter</code> - Memory counter to use <strong>Default:</strong> <code>\Memory\Available Bytes</code> </p>
 <p><code>gpu_counter</code> - GPU counter to use (per process, per instance) <strong>Default:</strong> <code>\GPU Engine(*engtype_3D)\Utilization Percentage</code> </p>
 <p><code>npu_counter</code> - NPU counter to use (per process, per instance) <strong>Default:</strong> <code>\GPU Engine(*engtype_Compute)\Utilization Percentage</code> </p>
@@ -1251,7 +1294,7 @@ are ignored, so the tool can be called for any subset of operations.</p>
 <h2 id="perf_utc">perf_utc</h2>
 <p>Collects and processes UTC Perftrack scenarios</p>
 <p><u>Parameters:</u></p>
-<p><code>provider</code> - WPRP file to use for UTC Perftrack traces. <strong>Default:</strong> <code>perf_utc.wprp</code>  <strong>Options:</strong> <code>abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp</code></p>
+<p><code>provider</code> - WPRP file to use for UTC Perftrack traces. <strong>Default:</strong> <code>perf_utc.wprp</code>  <strong>Options:</strong> <code>abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, GTPLight_CustomMemHardFaults.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp</code></p>
 <h2 id="phm">phm</h2>
 <p>Run Intel's Power House Mountain tool.</p>
 <p><u>Parameters:</u></p>
@@ -1342,10 +1385,10 @@ are ignored, so the tool can be called for any subset of operations.</p>
 <p><code>delay</code> -  <strong>Default:</strong> <code>0</code> </p>
 <p><code>additional_args</code> -  <strong>Default:</strong> <code>-f cpu-pkgc-dbg -f pcie -f platform-ltr -f panel-srr -f cpu-cstate -f cpu-pstate -f gfx-cstate -f gfx-pstate -f acpi-dstate -f sstate -f ddr-bw -f timer-resolution -f cpu-gpu-concurrency -f pch-slps0 -f pcie-lpm -f hw-gfx-pstate -f ddr-bw -f pch-ip-active-all -f pch-ip-status -f sys -f sa-freq -f pch-all</code> </p>
 <h2 id="stress_utc">stress_utc</h2>
-<p>Collects and processes UTC Perftrack scenarios for stress workloads.
-Outputs a CSV with PT number instead of Scenario name.</p>
+<p>Collects and processes UTC performance metrics for stress workloads.
+Outputs a CSV with manifest id instead of Scenario name.</p>
 <p><u>Parameters:</u></p>
-<p><code>provider</code> - WPRP file to use for UTC Perftrack traces. <strong>Default:</strong> <code>perf_utc.wprp</code>  <strong>Options:</strong> <code>abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp</code></p>
+<p><code>provider</code> - WPRP file to use for UTC traces. <strong>Default:</strong> <code>GTPLight_CustomMemHardFaults.wprp</code>  <strong>Options:</strong> <code>abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, GTPLight_CustomMemHardFaults.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp</code></p>
 <h2 id="study_report">study_report</h2>
 <p>Generate a report for the study (all runs in the same study directory).</p>
 <p><u>Parameters:</u></p>
