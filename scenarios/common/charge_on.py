@@ -14,6 +14,7 @@
 import logging
 import core.app_scenario
 from core.parameters import Params
+from utilities.open_source.widgets import Widgets
 
 
 class ChargeOn(core.app_scenario.Scenario):
@@ -27,22 +28,22 @@ class ChargeOn(core.app_scenario.Scenario):
     # Get parameters
     charge_on_call = Params.get('global', 'charge_on_call')
 
+    widgets = Widgets()
+
     is_prep = True
 
     def setUp(self):
         # Don't call base setUp so that we don't interact with DUT.
         return
 
-    def runTest(self):    
+    def runTest(self):
         logging.info("Attempting to turn on charger...")
         if self.charge_on_call == '':      
-            logging.warning("No charge_on_call specified.")             
+            logging.warning("No charge_on_call specified.  Manually turn on charger to continue.")
+            self.widgets.about("Connect Charger", "Manually connect charger.")
         else:
-            self._host_call(self.charge_on_call)            
+            self._host_call(self.charge_on_call)
             logging.info("Charger turned on.")
-        if Params.get('global', 'local_execution') == '1':
-            self._host_call('utilities\\MsgPrompt.exe -WaitForAC')
-            logging.info("Charger plugged in.")
 
     def tearDown(self):
         # Don't call base tearDown so that we don't interact with DUT.

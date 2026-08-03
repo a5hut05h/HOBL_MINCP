@@ -25,21 +25,21 @@ import ntpath
 import binascii
 import tempfile
 
-args = core.arguments.args
-params_file = args.profile if args else ""
-these_params = params_file
+# args = core.arguments.args
+# params_file = args.profile if args else ""
+# these_params = params_file
 
 class DutSetup(core.app_scenario.Scenario):
 
     # get parameters from ini file and setup dut (dutname, password, msa configuration, wifi)
     module = __module__.split('.')[-1]
     Params.setDefault(module, 'upload_path', '')
-    Params.setDefault(module, 'reboot_prompt', '1')
+    Params.setDefault(module, 'reboot_prompt', '0')
     Params.setDefault(module, 'local_setup', '0')
-    Params.setDefault(module, 'reboot', '1')
+    Params.setDefault(module, 'reboot', '0')
     Params.setDefault(module, "target_path", '')
     Params.setDefault(module, 'test_signing', 'None')
-    Params.setDefault(module, 'run_cmd', '0', desc="Run setup after uploading to DUT", valOptions=["1", "0"])
+    Params.setDefault(module, 'run_cmd', '1', desc="Run setup after uploading to DUT", valOptions=["1", "0"])
 
     # Override collection of config data, traces, and execution of callbacks 
     Params.setOverride("global", "attempts", "1")
@@ -47,19 +47,6 @@ class DutSetup(core.app_scenario.Scenario):
 
     Params.setOverride('global', 'web_replay_action', 'record')
 
-    # Set default parameters
-    upload_path = Params.get(module, 'upload_path')
-    local_setup = Params.get(module, 'local_setup')
-    target_path = Params.get(module, 'target_path')
-
-    dut_name = Params.get('global', 'dut_name')
-    dut_password = Params.get('global', 'dut_password')
-    dut_wifi_name = Params.get('global', 'dut_wifi_name')
-    dut_wifi_password = Params.get('global', 'dut_wifi_password')
-    dut_wifi_authentication = Params.get('global', 'dut_wifi_authentication')
-    msa_account = Params.get('global', 'msa_account')
-    test_signing = Params.get(module, 'test_signing')
-    run_cmd = Params.get(module, 'run_cmd') == "1"
     is_prep = True
 
     def setUp(self):
@@ -67,10 +54,21 @@ class DutSetup(core.app_scenario.Scenario):
         return
 
     def runTest(self):
-
+        # Get parameters
         self.upload_path = Params.get(self.module, 'upload_path')
+        self.target_path = Params.get(self.module, 'target_path')
 
-        if self.run_cmd:
+        self.dut_name = Params.get('global', 'dut_name')
+        self.dut_password = Params.get('global', 'dut_password')
+        self.dut_wifi_name = Params.get('global', 'dut_wifi_name')
+        self.dut_wifi_password = Params.get('global', 'dut_wifi_password')
+        self.dut_wifi_authentication = Params.get('global', 'dut_wifi_authentication')
+        self.msa_account = Params.get('global', 'msa_account')
+        self.test_signing = Params.get(self.module, 'test_signing')
+        self.run_cmd = Params.get(self.module, 'run_cmd') == "1"
+        self.local_setup = Params.get(self.module, 'local_setup') == "1"
+
+        if self.run_cmd and not self.local_setup:
             self.reboot_prompt = "0"
             if self.upload_path == "": self.upload_path = "C:\\dut_setup_files"
         else:
@@ -80,7 +78,7 @@ class DutSetup(core.app_scenario.Scenario):
                 
         # app = QtWidgets.QApplication(sys.argv)
         # Open window to query operator for usb drive selection
-        if self.upload_path == "" and self.local_setup == "0" and self.target_path == "":
+        if self.upload_path == "" and not self.local_setup and self.target_path == "":
             print("target_path = " + self.target_path)
             self.fail("Unsupported set of parameters.")
             # usb_path = QtWidgets.QFileDialog.getExistingDirectory(None, "Enter USB drive letter to use to setup " + self.dut_name + ":", 'c:\\', QtWidgets.QFileDialog.ShowDirsOnly)
@@ -94,8 +92,8 @@ class DutSetup(core.app_scenario.Scenario):
             if self.upload_path != "":
                 self.tempdir_obj = tempfile.TemporaryDirectory()
                 usb_path =  self.tempdir_obj.name + '\\dut_setup_files'
-            self._call(["cmd.exe", "/c if exist C:\\dut_setup_files rmdir /Q /S C:\\dut_setup_files"])
-            self._call(["cmd.exe", "/c if not exist C:\\dut_setup_files mkdir C:\\dut_setup_files"])
+            # self._call(["cmd.exe", "/c if exist C:\\dut_setup_files rmdir /Q /S C:\\dut_setup_files"])
+            # self._call(["cmd.exe", "/c if not exist C:\\dut_setup_files mkdir C:\\dut_setup_files"])
 
         # Get current working directory name
         source_path = os.getcwd()
@@ -110,46 +108,45 @@ class DutSetup(core.app_scenario.Scenario):
             time.sleep(2)
 
         # Copy dotnet runtime
-        self._check_and_download("windowsdesktop-runtime-8.0.23-win-x64.exe", source_path + "\\downloads\\setup\\assets", "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%RUNTIME_VERSION%/windowsdesktop-runtime-%RUNTIME_VERSION%-win-x64.exe".replace("%RUNTIME_VERSION%", "8.0.23"))
-        self._check_and_download("windowsdesktop-runtime-8.0.23-win-arm64.exe", source_path + "\\downloads\\setup\\assets", "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%RUNTIME_VERSION%/windowsdesktop-runtime-%RUNTIME_VERSION%-win-arm64.exe".replace("%RUNTIME_VERSION%", "8.0.23"))
+        self._check_and_download("windowsdesktop-runtime-8.0.29-win-x64.exe", source_path + "\\downloads\\setup\\assets", "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%RUNTIME_VERSION%/windowsdesktop-runtime-%RUNTIME_VERSION%-win-x64.exe".replace("%RUNTIME_VERSION%", "8.0.29"))
+        self._check_and_download("windowsdesktop-runtime-8.0.29-win-arm64.exe", source_path + "\\downloads\\setup\\assets", "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%RUNTIME_VERSION%/windowsdesktop-runtime-%RUNTIME_VERSION%-win-arm64.exe".replace("%RUNTIME_VERSION%", "8.0.29"))
         dotnet_path = os.path.join(usb_hobl_bin, "dotnet")
         if not os.path.exists(dotnet_path):
             os.makedirs(dotnet_path)
-        logging.debug("Source: " + source_path + "\\downloads\\setup\\assets\\windowsdesktop-runtime-8.0.23-win-arm64.exe")
+        logging.debug("Source: " + source_path + "\\downloads\\setup\\assets\\windowsdesktop-runtime-8.0.29-win-arm64.exe")
         logging.debug("Dest  : " + dotnet_path)
-        shutil.copy(source_path + "\\downloads\\setup\\assets\\windowsdesktop-runtime-8.0.23-win-arm64.exe" , dotnet_path)
-        logging.debug("Source: " + source_path + "\\downloads\\setup\\assets\\windowsdesktop-runtime-8.0.23-win-x64.exe")
+        shutil.copy(source_path + "\\downloads\\setup\\assets\\windowsdesktop-runtime-8.0.29-win-arm64.exe" , dotnet_path)
+        logging.debug("Source: " + source_path + "\\downloads\\setup\\assets\\windowsdesktop-runtime-8.0.29-win-x64.exe")
         logging.debug("Dest  : " + dotnet_path)
-        shutil.copy(source_path + "\\downloads\\setup\\assets\\windowsdesktop-runtime-8.0.23-win-x64.exe" , dotnet_path)
+        shutil.copy(source_path + "\\downloads\\setup\\assets\\windowsdesktop-runtime-8.0.29-win-x64.exe" , dotnet_path)
 
         # Copy powershell
-        self._check_and_download("PowerShell-7.5.4-win-x64.msi", source_path + "\\downloads\\setup\\assets", "https://github.com/PowerShell/PowerShell/releases/download/v%POWERSHELL_VERSION%/PowerShell-%POWERSHELL_VERSION%-win-x64.msi".replace("%POWERSHELL_VERSION%", "7.5.4"))
-        self._check_and_download("PowerShell-7.5.4-win-arm64.msi", source_path + "\\downloads\\setup\\assets", "https://github.com/PowerShell/PowerShell/releases/download/v%POWERSHELL_VERSION%/PowerShell-%POWERSHELL_VERSION%-win-arm64.msi".replace("%POWERSHELL_VERSION%", "7.5.4"))
+        self._check_and_download("PowerShell-7.6.4-win-x64.msi", source_path + "\\downloads\\setup\\assets", "https://github.com/PowerShell/PowerShell/releases/download/v%POWERSHELL_VERSION%/PowerShell-%POWERSHELL_VERSION%-win-x64.msi".replace("%POWERSHELL_VERSION%", "7.6.4"))
+        self._check_and_download("PowerShell-7.6.4-win-arm64.msi", source_path + "\\downloads\\setup\\assets", "https://github.com/PowerShell/PowerShell/releases/download/v%POWERSHELL_VERSION%/PowerShell-%POWERSHELL_VERSION%-win-arm64.msi".replace("%POWERSHELL_VERSION%", "7.6.4"))
         pwsh_path = os.path.join(usb_hobl_bin, "pwsh")
         if not os.path.exists(pwsh_path):
             os.makedirs(pwsh_path)
-        logging.debug("Source: " + source_path + "\\downloads\\setup\\assets\\PowerShell-7.5.4-win-arm64.msi")
+        logging.debug("Source: " + source_path + "\\downloads\\setup\\assets\\PowerShell-7.6.4-win-arm64.msi")
         logging.debug("Dest  : " + pwsh_path)
-        shutil.copy(source_path + "\\downloads\\setup\\assets\\PowerShell-7.5.4-win-arm64.msi" , pwsh_path)
-        logging.debug("Source: " + source_path + "\\downloads\\setup\\assets\\PowerShell-7.5.4-win-x64.msi")
+        shutil.copy(source_path + "\\downloads\\setup\\assets\\PowerShell-7.6.4-win-arm64.msi" , pwsh_path)
+        logging.debug("Source: " + source_path + "\\downloads\\setup\\assets\\PowerShell-7.6.4-win-x64.msi")
         logging.debug("Dest  : " + pwsh_path)
-        shutil.copy(source_path + "\\downloads\\setup\\assets\\PowerShell-7.5.4-win-x64.msi" , pwsh_path)
+        shutil.copy(source_path + "\\downloads\\setup\\assets\\PowerShell-7.6.4-win-x64.msi" , pwsh_path)
 
         # Copy SimpleRemote files
         if not os.path.exists(usb_hobl_bin):
             os.makedirs(usb_hobl_bin)
-        if self.local_setup != '1':
-            src_files = ["\\SimpleRemoteServer_win-x64.zip", "\\SimpleRemoteServer_win-arm64.zip"]
-            for src in src_files:
-                dest_dir = usb_hobl_bin + "\\SimpleRemote"
-                dest = dest_dir + src
-                source = "\\setup_src\\src_dut_win" + src
-                if not os.path.exists(dest_dir):
-                    os.makedirs(dest_dir)
-                logging.debug("Source: " + source_path + source)
-                logging.debug("Dest  : " + dest)
-                shutil.copy(source_path + source , dest)
-                time.sleep(1)
+        src_files = ["\\SimpleRemoteServer_win-x64.zip", "\\SimpleRemoteServer_win-arm64.zip"]
+        for src in src_files:
+            dest_dir = usb_hobl_bin + "\\SimpleRemote"
+            dest = dest_dir + src
+            source = "\\setup_src\\src_dut_win" + src
+            if not os.path.exists(dest_dir):
+                os.makedirs(dest_dir)
+            logging.debug("Source: " + source_path + source)
+            logging.debug("Dest  : " + dest)
+            shutil.copy(source_path + source , dest)
+            time.sleep(1)
 
         # Copy PolicyFileEditor folder contents to usb drive
         dest = usb_hobl_bin + "\\PolicyFileEditor"
@@ -168,6 +165,8 @@ class DutSetup(core.app_scenario.Scenario):
         copy_tree(source_path + "\\utilities\\open_source\\DesktopImages" , dest, verbose=0)
 
         # Copy WindowsApplicationDriver folder contents to usb drive
+        if self.local_setup:
+            self._host_call("taskkill /F /IM WinAppDriver.exe", timeout=30, expected_exit_code="")
         dest = usb_hobl_bin + "\\WindowsApplicationDriver"
         if not os.path.exists(dest):
             os.makedirs(dest)
@@ -212,11 +211,11 @@ class DutSetup(core.app_scenario.Scenario):
         logging.debug("Dest  : " + dest)
         copy_tree(source_path + '\\utilities\\proprietary\\RTCWakeCore' , dest, verbose=0)
 
-        # Copy dut ini file to drive
-        params_basename = ntpath.basename(params_file)
-        logging.debug("Device Profile: " + params_file)
-        logging.debug("Copying Device Profile " + params_file + " to " + usb_hobl_bin + "\\" + params_basename)
-        shutil.copy(params_file, usb_hobl_bin + "\\" + params_basename)
+        # # Copy dut ini file to drive
+        # params_basename = ntpath.basename(params_file)
+        # logging.debug("Device Profile: " + params_file)
+        # logging.debug("Copying Device Profile " + params_file + " to " + usb_hobl_bin + "\\" + params_basename)
+        # shutil.copy(params_file, usb_hobl_bin + "\\" + params_basename)
 
         # Copy MonitorPowerEvents.exe to usb drive
         logging.debug("Source: " + source_path + "\\utilities\\proprietary\\MonitorPowerEvents\\MonitorPowerEvents.exe")
@@ -296,18 +295,14 @@ class DutSetup(core.app_scenario.Scenario):
         f = open(source_path + "\\setup_src\\src_dut_win\\dut_setup.cmd")
         f1 = open((usb_path + "\\dut_setup.cmd"), "w")
 
-        f1.write("set \"dut_name=" + self.dut_name + "\"\n\r")
-        f1.write("set \"dut_password=" + self.dut_password + "\"\n\r")
-        f1.write("set \"dut_wifi_name=" + self.dut_wifi_name + "\"\n\r")
-        f1.write("set \"reboot_prompt=" + self.reboot_prompt + "\"\n\r")
-        f1.write("set \"reboot=" + self.reboot + "\"\n\r")
-        f1.write("set \"local_setup=" + self.local_setup + "\"\n\r")
-        if self.local_setup == "0":
-            self.install_simple_remote = "1"
-        else:
-            self.install_simple_remote = "0"
-        f1.write("set \"install_simpleremote=" + self.install_simple_remote + "\"\n\r")
-        f1.write("set \"test_signing=" + self.test_signing + "\"\n\r")
+        f1.write(f"set \"dut_name={self.dut_name}\"\n\r")
+        f1.write(f"set \"dut_password={self.dut_password}\"\n\r")
+        f1.write(f"set \"dut_wifi_name={self.dut_wifi_name}\"\n\r")
+        f1.write(f"set \"reboot_prompt={self.reboot_prompt}\"\n\r")
+        f1.write(f"set \"reboot={self.reboot}\"\n\r")
+        f1.write(f"set \"local_setup={self.local_setup}\"\n\r")
+        f1.write(f"set \"install_simpleremote=1\"\n\r")
+        f1.write(f"set \"test_signing={self.test_signing}\"\n\r")
         f1.write(" " + "\n\r")
         for line in f.readlines():
             f1.write(line)
@@ -352,6 +347,7 @@ class DutSetup(core.app_scenario.Scenario):
             text_file.write(wifi_xml)
 
         if self.upload_path != "":
+            logging.info(f"Uploading dut_setup files to DUT {self.dut_name} at {self.upload_path}")
             # print("Uploading from " + usb_hobl_bin)
             # print("to " + self.upload_path)
             # self._call(["robocopy.exe", usb_path + " " + self.upload_path + " /NDL /NC /BYTES /E /MT:4 /R:3 /W:5 /TBD /NOOFFLOAD /J /ETA /V /log:C:\\DUTSetupRobocopylog.txt"], timeout=1200, expected_exit_code="")
@@ -364,9 +360,9 @@ class DutSetup(core.app_scenario.Scenario):
             rpc.upload(self.dut_ip, self.rpc_port, usb_hobl_bin, self.upload_path)
 
 
-        if self.local_setup == "1":
+        if self.local_setup:
             logging.info("Running dut_setup.cmd")
-            self._call(["cmd.exe", "/c " + usb_path + "\\dut_setup.cmd"])
+            self._host_call(f"cmd.exe /c {usb_path}\\dut_setup.cmd 2>&1 | {usb_path}\\dut_setup\\tee.exe c:\\hobl_bin\\dut_setup.log")
         elif self.run_cmd:
             self.run_dut_setup_cmd()
 

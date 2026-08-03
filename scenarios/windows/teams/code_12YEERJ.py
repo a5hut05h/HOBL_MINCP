@@ -4,11 +4,7 @@
 import logging
 import json
 import requests
-import qoi
-import cv2 as cv
-import core.call_rpc as rpc
 from core.parameters import Params
-import easyocr, io, contextlib
 import time
 
 def run(scenario):

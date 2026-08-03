@@ -39,7 +39,7 @@ class WifiSwitch(core.app_scenario.Scenario):
 
 
     def switch_to_network(self):
-        rpc.upload(self.dut_ip, self.rpc_port, "setup\\src\\schedule_connect_wifi.ps1", self.dut_exec_path)
+        rpc.upload(self.dut_ip, self.rpc_port, "setup_src\\src_dut_win\\schedule_connect_wifi.ps1", self.dut_exec_path)
         result = self._call(["cmd.exe", '/c netsh wlan show interface name="Wi-Fi"' ])
         lines = result.split('\n')
         for line in lines:

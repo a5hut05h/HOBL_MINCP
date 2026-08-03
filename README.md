@@ -10,6 +10,26 @@
 * **Make sure your DUT is a computer that is ONLY logged in with a dedicated test account.**  Files, emails, etc, may be deleted.  A work or personal computer may be used as a "Host", but not a "DUT".
 * For questions or issues, send mail to [HOBLsupport@microsoft.com](mailto:HOBLsupport@microsoft.com).  Attach the hobl.log file and relevant screen shots for any problematic test run.
 
+### Quick Start for Local Web Browsing Battery Life Testing
+* Running locally (meaning HOBL is executing on the device directly with no host) should be limited to short term, one-off testing.  For long-term repeated testing, it's highly recommended to [set up](docs/support/docs/HOBL_Setup.md) a dedicated HOBL Host computer on a private network.
+* For official results, adjust the screen brightness to 150 nits, set Wi-Fi AP to 50 Mbps per client on 5 Ghz, and out-of-box audio volume.  Detailed instructions [here](docs/support/docs/HOBL_Setup.md#lab-setup).
+* Download the [latest release](https://github.com/microsoft/HOBL/releases/latest) to the test device (DUT), unzip it to `c:\`, and rename the folder `hobl`.
+* Run `local_setup.exe`, located in the `c:\hobl` folder.  Select both options.
+* The HOBL UI will open with a `Default` profile that is set up for local rundown testing.
+* With the profile selected, select `Web Rundown` from the Quick Launch menu, which can be found either by right-clicking on the profile, or opening the arrow on the `Launch Job` button on the top-right of the window.
+* The `rundown_web` test plan will execute and does the following:
+  * The `prep` scenario will run some scenarios to prepare the system for web testing.  This includes freshly installing the latest Edge.  Details on system prep can be found [here](docs/support/docs/HOBL_Prep.md).
+  * `charge_on` will turn the charger on if charger automation is set up, or prompt you if not.
+  * `wait_for_dut_comm` will wait for communication with DUT.  In case the device is unresponsive in a hosted setup we don't want to continue with the plan.
+  * `process_idle_taks` will let any currently scheduled Windows background tasks complete.  This puts the device in a consistent state at the beginnning of any study and is particularly crucial for a freshly installed image which triggres a lot of unrepresentative background tasks, such as Defender and Search indexing.  Normal, represntative Defender and Search activity will still occur during the study.  A 2-hour (7200s) timeout is specified, but it shouldn't take more than a few minutes normally.
+  * The `recharge` scenario will turn on the charger, wait until battery reaches 100%, wait an additionaly 30 minutes (1800s), then turn off the charger to start the rundown.  The 30 min delay can be adjusted with the `post_charge_delay` parameter as desired.
+  * The `web` scenario does the actual web browsing, opening 12 different web sites across 7 tabs and interacting with them.  It will loop continually until the device goes into hibernate.  The plan also specifies a screen shot tool that will take screen shots every hour.  This can be helpful to review and make sure pages loaded properly.
+  * `charge_on` will again turn on the charger after the rundown, or prompt you to.
+  * `study_report` will roll up the results of multiple runs into a single Excel report generated from a template.  A basic template is used by default.  The report will be saved to the specified result directory of the study.
+* At the end of the rundown the device will go into hibernate.  Manually reconnect the charger and after about 2 minutes press the power button to bring the device back online.  The device needs to remain in hibernate for at least 2 minutes for it to be detected properly.
+* Let the test execution continue.  After a couple minutes the browser should close and the HOB UI will open showing the plan execution.
+* When the plan is completed, you can view detailed result files of the `web` scenario you by clicking on the blue `RunDir` link on that line.  Or, to view a summmary of all runs click the `Result Summary` button at the top.
+
 ### Quick Start for experienced HOBL users (novice users please read full [Setup](docs/support/docs/HOBL_Setup.md) instructions)
 * Make sure Git for Windows is installed on HOBL Host.
 * Clone repo (preferrably to c:\hobl, to avoid appsettings.json tweaks).
