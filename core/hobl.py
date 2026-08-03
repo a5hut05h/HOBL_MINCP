@@ -157,7 +157,7 @@ if params_file is None or params_file == "":
 elif not os.path.exists(params_file):
     print("ERROR:  Specified device profile path does not exist: " + params_file)
     sys.exit(1)
-# print("Using profile: " + params_file)
+print("Using profile: " + params_file)
 params.setCalculated("params_file", params_file)
 
 cmd_tests = args.scenarios
@@ -411,7 +411,7 @@ def host_call(command, cwd = "."):
 def kill(test_name):
     kill_module_str = get_test_module(test_name, hobl_ext_paths)
     params.setCalculated("kill_mode", "1")
-    print(f"Kill module: {kill_module_str}")
+    # print(f"Kill module: {kill_module_str}")
     kill_module = importlib.import_module(kill_module_str)
     for name, obj in inspect.getmembers(kill_module, lambda member: inspect.isclass(member) and kill_module_str in member.__module__):
         if "Thread" in name:
@@ -419,7 +419,7 @@ def kill(test_name):
         kill_class_str = name
         kill_class = getattr(kill_module, kill_class_str)
         kill_instance = kill_class()
-        print("Calling kill()")
+        # print("Calling kill()")
         kill_instance.kill_wrapper()
 
 
@@ -483,7 +483,7 @@ def get_test_module(test_name, ext_paths=[]):
     for folder_name, display_name in [("macos", "MacOS"), ("windows", "Windows")]:
         if folder_name in test_module.lower() and platform != folder_name:
             test_module = "scenarios.common.scenario_invalid"
-            params.setCalculated("scenario_invalid", f"Invalid platform for {test_name}. Expected platform: {display_name}.")
+            params.setCalculated("scenario_invalid", f"Invalid platform {platform} for {test_name}. Expected platform: {display_name}.")
             break
 
     return test_module
@@ -546,9 +546,15 @@ def _add_python_embed_firewall():
         p = subprocess.Popen(cmd, shell = True, cwd = ".")
         p.communicate()
 
-    call(f"powershell.exe unblock-file -path {firewall_add_cmd}")
-    call(f"powershell.exe Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
-    call(f"powershell.exe -File {firewall_add_cmd}")
+    if params.get('global', 'dut_ip') == "127.0.0.1":
+        call(f"pwsh.exe -Command unblock-file -path {firewall_add_cmd}")
+        call(f"pwsh.exe -Command Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
+        call(f"pwsh.exe -File {firewall_add_cmd}")
+    else:
+        call(f"powershell.exe -Command unblock-file -path {firewall_add_cmd}")
+        call(f"powershell.exe -Command Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
+        call(f"powershell.exe -File {firewall_add_cmd}")
+
 
 
 def send_completion_notification():
@@ -703,6 +709,7 @@ if __name__ == '__main__':
                     set_run_dir(test_case)
                     if params.get('global', 'module_name') == '':
                         params.setDefault('global', 'module_name', test_case)
+                        # print("Setting module_name to: " + test_case)
                     params.setCalculated('scenario_section', test_case)
                     run_dir = params.getCalculated("run_dir")
                     log = os.path.join(run_dir, "hobl.log")
@@ -945,7 +952,7 @@ if __name__ == '__main__':
 
     # Checking if local execution and if running from dashboard if so then we want to relaunch the web ui to help notify user that scenario ran. 
     try:
-        if dashboard_url != '' and dut_ip == "127.0.0.1":
+        if dashboard_url != ''and params.get('global', 'dut_ip') == "127.0.0.1":
             subprocess.call(f'start /MAX "" "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" --app="http://localhost:80/plan/Scenarios?PlanID={dashboard_plan_id}" --start-maximized', shell=True)
     except:
         pass

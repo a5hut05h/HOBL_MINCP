@@ -48,7 +48,7 @@
         "description": "",
         "enabled": true,
         "id": "UE9NMP",
-        "include_path": "..\\..\\..\\misc\\recording_phase_begin",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
         "type": "Include"
     },
     {
@@ -68,7 +68,7 @@
         "description": "",
         "enabled": true,
         "id": "UC5PAR",
-        "include_path": "..\\..\\web_enter_address",
+        "include_path": "scenarios\\windows\\_library\\web\\web_enter_address",
         "params": [
             {
                 "name": "[web_site_address]",
@@ -270,7 +270,7 @@
         "description": "",
         "enabled": true,
         "id": "UE9NRA",
-        "include_path": "..\\..\\..\\misc\\recording_phase_end",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
         "params": [
             {
                 "name": "[phase_category]",

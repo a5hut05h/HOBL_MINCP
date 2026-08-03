@@ -5,15 +5,20 @@
 * The HOBL UI is a web server that can be accessed by multiple users simultaneously, if needed.  For larger labs, it can also be executed with IIS.
 * The Hosts and DUTs should be on a local network that has internet access.
 * The host should be connected with ethernet, but the DUT should be on Wi-Fi, to be representative of a user operating a device on battery.  Ethernet dongles often prevent devices from getting to lower power states.
+### Wi-Fi
 * The Wi-Fi network should be set up to provide each device with **50 Mbps**, again for representativeness.  Significantly more or less BW has power consumption impact.  Not all AP's are good at controlling this, but we have found the HPE Aruba line of access points adept at it.  50 Mbps is also the minimum bandwidth requirement for correct functionality.
 * 5 GHz channels should be used for connecting to DUTs.
 * Do not domain-join the DUTs.
 * Corporate network traffic can be intense, so it is recommended to deploy a firewall between the lab LAN and corporate networks that will filter out corporate traffic but still allow access to the internet.  This will improve representativeness and reduce test variability.
+### Charger Control
 * HOBL supports automatic recharging of DUTs via a variety of mechanisms, as long as they can be controlled by a shell command.  The commands are specified in the charge_on and charge_off sections of the Device Profile.  The most common mechanisms are:
-    1. A Raritan PX-series IP-addressable power strip
-    1. <a href="https://dlidirect.com/products/new-pro-switch" target="_blank">Digital-Loggers Pro Switch</a>
-    1. An iBoot controlled by either ethernet or relay.  
+    1. Any SNMP controllable IP switchable power strip, such as Cyberpower, APC, Raritan PX-series, etc.
+    1. <a href="https://dlidirect.com/products/new-pro-switch" target="_blank">Digital-Loggers Pro Switch</a>.
+    1. An iBoot controlled by either ethernet or relay.
+    1. Shelly Smart Plugs.
+### Display Brigthness
 * A luminance meter should be used to determine the DUT brightness setting that corresponds to 150 nits.  Measure and average all 4 counters plus center of a pure white screen.  All tests are expected to run at this brightness except JEITA-related tests (which are at 200 nits).  A nits map should be specified in the profile to associate the appropriate slider postiions to 150 and 200 nits respectively.  <TODO: Add section on profle setup and tools>
+### Audio Volume
 * Tests are run with audio volume set to the out-of-box default level.  To ensure consistency, once this value is determined, it should also be specified in the device profile.
 
 ## Account Setup

@@ -14,6 +14,7 @@
 import logging
 import core.app_scenario
 from core.parameters import Params
+from utilities.open_source.widgets import Widgets
 
 
 class ChargeOff(core.app_scenario.Scenario):
@@ -27,6 +28,8 @@ class ChargeOff(core.app_scenario.Scenario):
     # Get parameters
     charge_off_call = Params.get('global', 'charge_off_call')
 
+    widgets = Widgets()
+
     is_prep = True
 
     def setUp(self):
@@ -36,13 +39,11 @@ class ChargeOff(core.app_scenario.Scenario):
     def runTest(self):
         logging.info("Attempting to turn off charger...")
         if self.charge_off_call == '':
-            logging.warning("No charge_off_call specified.")
+            logging.warning("No charge_off_call specified.  Manually turn off charger to continue.")
+            self.widgets.about("Disconnect Charger", "Manually disconnect charger.")
         else:
             self._host_call(self.charge_off_call)
             logging.info("Charger turned off.")
-        if Params.get('global', 'local_execution') == '1':
-            self._host_call('utilities\\MsgPrompt.exe -WaitForDC')
-            logging.info("Charger unplugged.")
 
     def tearDown(self):
         # Don't call base tearDown so that we don't interact with DUT.

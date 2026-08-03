@@ -4,7 +4,6 @@
 from PyQt6 import QtWidgets
 import requests
 from urllib.parse import urlparse, urlunparse
-
 from core.parameters import Params
 
 
@@ -43,7 +42,8 @@ class Widgets:
 
     def about(self, title, text):
         if self.dashboard_url == "":
-            QtWidgets.QMessageBox.about(None, title, text)
+            input(f"{text} Press Enter to continue...")
+            # QtWidgets.QMessageBox.about(None, title, text)
         else:
             self._call_widget(
                 "/plan/Widget",

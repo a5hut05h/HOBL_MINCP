@@ -64,6 +64,7 @@ class OsInstall(core.app_scenario.Scenario):
     Params.setOverride("global", "attempts", "1")
     Params.setOverride("dut_setup", "reboot_prompt", "0")
     Params.setOverride("dut_setup", "reboot", "0")
+    Params.setOverride("dut_setup", "run_cmd", "0")
     Params.setOverride("dut_setup", "upload_path", "U:\\dut_setup_files\\")
     Params.setOverride('global', 'dut_ip', Params.get(module, 'install_dut_ip'))
 

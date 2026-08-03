@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "dut_setup"
-#define MyAppVersion "2.1"
+#define MyAppVersion "2.2"
 #define MyAppPublisher "Microsoft"
 
 [Setup]
@@ -21,11 +21,11 @@ SolidCompression=yes
 SetupLogging=yes
 WizardSmallImageFile="H.bmp"
 PrivilegesRequired=admin
-ArchitecturesAllowed=x64 ARM64
-ArchitecturesInstallIn64BitMode=x64 ARM64
+ArchitecturesAllowed=x64compatible arm64
+ArchitecturesInstallIn64BitMode=x64compatible arm64
 LicenseFile=UserWarning.txt
-WizardResizable=yes
 WizardSizePercent=120
+SetupArchitecture=x64
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -36,10 +36,10 @@ Name: "dut_setup_asset_download.cmd"; Flags: abortonerror cmdprompt
 [Files]
 Source: "dut_setup.cmd"; DestDir: "{tmp}"; Flags: ignoreversion 
 Source: "..\..\downloads\setup\assets\vc_redist.x64.exe"; DestDir: "{tmp}\dut_setup"; Flags: ignoreversion 
-Source: "..\..\downloads\setup\assets\windowsdesktop-runtime-8.0.23-win-x64.exe"; DestDir: "{tmp}\dut_setup\dotnet"; Flags: ignoreversion 
-Source: "..\..\downloads\setup\assets\windowsdesktop-runtime-8.0.23-win-arm64.exe"; DestDir: "{tmp}\dut_setup\dotnet"; Flags: ignoreversion 
-Source: "..\..\downloads\setup\assets\PowerShell-7.5.4-win-x64.msi"; DestDir: "{tmp}\dut_setup\pwsh"; Flags: ignoreversion 
-Source: "..\..\downloads\setup\assets\PowerShell-7.5.4-win-arm64.msi"; DestDir: "{tmp}\dut_setup\pwsh"; Flags: ignoreversion 
+Source: "..\..\downloads\setup\assets\windowsdesktop-runtime-8.0.29-win-x64.exe"; DestDir: "{tmp}\dut_setup\dotnet"; Flags: ignoreversion 
+Source: "..\..\downloads\setup\assets\windowsdesktop-runtime-8.0.29-win-arm64.exe"; DestDir: "{tmp}\dut_setup\dotnet"; Flags: ignoreversion 
+Source: "..\..\downloads\setup\assets\PowerShell-7.6.4-win-x64.msi"; DestDir: "{tmp}\dut_setup\pwsh"; Flags: ignoreversion 
+Source: "..\..\downloads\setup\assets\PowerShell-7.6.4-win-arm64.msi"; DestDir: "{tmp}\dut_setup\pwsh"; Flags: ignoreversion 
 Source: "wifi_template.xml"; DestDir: "{tmp}"; Flags: ignoreversion 
 Source: "simple_remote_setup.ps1"; DestDir: "{tmp}\dut_setup"; Flags: ignoreversion 
 Source: "schedule_connect_wifi.ps1"; DestDir: "{tmp}\dut_setup"; Flags: ignoreversion 
