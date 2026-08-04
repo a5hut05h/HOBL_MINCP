@@ -129,9 +129,6 @@ class Scenario(unittest.TestCase):
         self.web_replay_excludes_list = Params.get('global', 'web_replay_excludes_list')
         self.web_replay_ip = Params.get('global', 'web_replay_ip')
 
-        # Output full hobl command to log file
-        logging.debug("Hobl Command: " + " ".join(sys.argv))
-
         if self.platform.lower() == "macos":
             # On MacOS, 300ms tends to be a long press, so we reduce the default click time.
             self.default_click_time = 150  # milliseconds
@@ -165,6 +162,9 @@ class Scenario(unittest.TestCase):
             self.is_prep_tool = False
         if self.is_prep_tool:
             logging.debug("Initializing prep_tool " + self._module)
+
+        if not (self.is_tool or self.is_prep_tool):
+            logging.debug(f"HOBL command: {' '.join(sys.argv)}")
 
         # Resolve IP
         if self.is_tool or self.is_prep_tool:
@@ -2298,6 +2298,9 @@ class Scenario(unittest.TestCase):
             start_time = datetime.now()
             # Adjust the scale of the template to match the device Windows scaling
             template_dpi = int(Image.open(os.path.join(self.json_parent_dir, template)).info['dpi'][0])
+            if (template_dpi == 0):
+                logging.warning(f"Template DPI is 0, defaulting to 96")
+                template_dpi = 96
             factor = round(template_dpi / 24)
             template_dpi = factor * 24
             device_dpi = int(self._get_screen_scale(self.current_screen) * 96)
@@ -3430,6 +3433,7 @@ class Scenario(unittest.TestCase):
             param = str(action['name']).strip("[]")
             inc_value = float(self._resolve_params_in_item(action['value'], component))
             param_section, param_name = self._parse_param_name(param, component)
+            logging.debug(f"Incrementing parameter pre {param_section}:{param_name} to {inc_value}")
             param_value = float(Params.get(param_section, param_name))
             new_value = str(param_value + inc_value)
             logging.debug(f"Incrementing parameter {param_section}:{param_name} to {new_value}")
@@ -3636,7 +3640,7 @@ class Scenario(unittest.TestCase):
                 self._call(["shutdown.exe", "/r /f /t 5"])
         elif self.platform.lower() == "macos":
             logging.info("Rebooting DUT")
-            self._call(["zsh", f'-c "echo {self.dut_password} | sudo -S shutdown -r now"'])
+            self._call(["zsh", f'-c "echo {self.password} | sudo -S shutdown -r now"'])
         else:
             logging.error("Unsupported platform")
         time.sleep(15)

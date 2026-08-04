@@ -22,6 +22,12 @@
     <EventProvider Id="EventProvider_PerfTrack" Name="PerfTrack" NonPagedMemory="true" Level="4" />
     <EventProvider Id="EventProvider_UTC" Name="UTC" NonPagedMemory="true" Level="4" />
     <EventProvider Id="EventProvider_InputInject" Name="150A3791-7792-452D-858C-15D647ECB48F"/>
+    <!-- Microsoft-Windows-Shell-Core: narrow keyword 0x1000000000000 gates events 18583/18584 which feed PT_210 ContextMenu_MenuRendered (see StressUtcPerftrack.xml). Without this provider the PT_210 state machine never advances and no row appears in PerfMetrics. Narrow keyword keeps buffer overhead negligible. -->
+    <EventProvider Id="EventProvider_Microsoft-Windows-Shell-Core" Name="30336ed4-e327-447c-9de0-51b652c86108" NonPagedMemory="true" Level="5">
+      <Keywords>
+        <Keyword Value="0x1000000000000"/>
+      </Keywords>
+    </EventProvider>
 
     <!-- Profiles -->
     <Profile Id="UtcPerf.Verbose.Memory" LoggingMode="Memory" Name="UtcPerf" Description="UTC performance capture" DetailLevel="Verbose" >
@@ -37,6 +43,7 @@
             <EventProviderId Value="EventProvider_PerfTrack"/>
             <EventProviderId Value="EventProvider_UTC"/>
             <EventProviderId Value="EventProvider_InputInject"/>
+            <EventProviderId Value="EventProvider_Microsoft-Windows-Shell-Core"/>
           </EventProviders>
         </EventCollectorId>
       </Collectors>

@@ -1166,6 +1166,8 @@ class Tab(QtWidgets.QWidget):
                     continue
                 if file_extension == ".json":
                     continue
+                if filename == "__pycache__":
+                    continue
                 shutil.copy(os.path.join(copy_from_path, fname), self.working_dir)
 
         # # Delete ScenarioMaker.json in save folder

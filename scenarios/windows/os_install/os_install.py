@@ -217,7 +217,7 @@ class OsInstall(core.app_scenario.Scenario):
         self._upload("scenarios\\windows\\os_install\\os_install_resources", self.dut_exec_path)
 
         # Upload updated VerifyVersions package from utilities.
-        self._upload("utilities\\proprietary\\VerifyVersions", self.dut_exec_path)
+        self._upload("scenarios\\windows\\os_install\\os_install_resources\\VerifyVersions", self.dut_exec_path)
         verify_versions_path = self.dut_exec_path + "\\VerifyVersions"
 
         # copy d:\bin\postdeploy\drivers folder to support folder if c:\support doesn't already exist
@@ -250,7 +250,7 @@ class OsInstall(core.app_scenario.Scenario):
         ], expected_exit_code="")
 
         logging.info("Verifying drivers...")
-        self._call(["cmd.exe", "/c " + verify_versions_path + "\\VerifyOemDrivers.cmd"], expected_exit_code="")
+        self._call(["cmd.exe", "/c " + verify_versions_path + "\\VerifyOemDrivers.cmd"], expected_exit_code="", fail_on_exception=False)
         exit_code = Params.getCalculated('last_call_exit_code')
         logging.debug("Driver verify got exit code " + str(exit_code))
         # Copy results back to host

@@ -18,12 +18,20 @@ log() {
     echo "$1" >> "$LOG_FILE"
 }
 
+check() {
+    if [ $1 -ne 0 ]; then
+        log " ERROR - Last command failed with exit code: $1"
+        exit $1
+    fi
+}
+
 # Initialize log file
 echo "-- ollama prep started" > "$LOG_FILE"
 
 log "-- ollama prep started"
 
 log "-- Installing XCode tools"
+# xcode-select --install returns non-zero when CLT is already present; ignore rc.
 xcode-select --install
 
 if [ ! -d "$BIN_DIR" ]; then
@@ -35,10 +43,21 @@ log "-- Changing to $BIN_DIR"
 cd $BIN_DIR
 
 log "-- Cloning repo"
-git clone https://github.com/ollama/ollama.git
+if [ -d "$BIN_DIR/ollama/.git" ]; then
+    log "-- ollama repo already present at $BIN_DIR/ollama; reusing existing clone"
+else
+    if [ -e "$BIN_DIR/ollama" ]; then
+        log " ERROR - $BIN_DIR/ollama exists but is not a git repo; remove it manually and re-prep"
+        exit 1
+    fi
+    git clone https://github.com/ollama/ollama.git
+    check $?
+fi
 cd $BIN_DIR/ollama
-log "-- Checkout version 0.12.1"
-git checkout v0.12.1
+log "-- Checkout version 0.20.8-rc0"
+git fetch --tags --quiet
+git checkout v0.20.8-rc0
+check $?
 
 log "-- Install Brew"
 export NONINTERACTIVE=1
@@ -47,6 +66,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 log "-- Install go"
 brew install go@1.25
+check $?
 
 # go@1.25 is keg-only and not symlinked into /opt/homebrew, add to PATH
 export PATH="/opt/homebrew/opt/go@1.25/bin:$PATH"
@@ -64,6 +84,18 @@ fi
 log "-- Download modules"
 cd $BIN_DIR/ollama
 go mod tidy
+check $?
+
+log "-- Building ollama binary"
+cd $BIN_DIR/ollama
+go build -o ollama .
+check $?
+if [ ! -x "$BIN_DIR/ollama/ollama" ]; then
+    log " ERROR - go build completed but $BIN_DIR/ollama/ollama was not produced"
+    exit 1
+fi
+log "-- Built ollama at: $BIN_DIR/ollama/ollama"
+./ollama --version 2>&1 | while IFS= read -r line; do log "ollama: $line"; done
 
 log "-- ollama prep completed"
 exit 0

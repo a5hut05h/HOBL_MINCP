@@ -59,8 +59,17 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
+                "id": "1R2YHP5",
+                "include_path": "scenarios\\macos\\_library\\misc\\call_early_callback",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
                 "id": "13LPV69",
-                "include_path": "..\\_library\\Teams\\teams_setup",
+                "include_path": "scenarios\\macos\\_library\\Teams\\teams_setup",
                 "type": "Include"
             }
         ],
@@ -130,7 +139,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "13LPX71",
-                "include_path": "..\\_library\\Teams\\teams_teardown",
+                "include_path": "scenarios\\macos\\_library\\Teams\\teams_teardown",
                 "type": "Include"
             }
         ],

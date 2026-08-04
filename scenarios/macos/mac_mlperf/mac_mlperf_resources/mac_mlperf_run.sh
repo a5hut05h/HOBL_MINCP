@@ -73,11 +73,15 @@ fi
 log "-- Running MLPerf benchmark..."
 log "   Command: $MLPERF_EXE --config $CONFIG_FILE --temp-dir . --output-dir $OUTPUT_DIR --download_behaviour skip_all --pause false"
 
-"$MLPERF_EXE" --config "$CONFIG_FILE" --temp-dir . --output-dir "$OUTPUT_DIR" --download_behaviour skip_all --pause false
+# Redirect output to a per-phase log so it is preserved in the results share.
+# Without redirection, stdout goes only to the RPC buffer and is lost on timeout.
+MLPERF_LOG="$OUTPUT_DIR/mac_mlperf_run_output.log"
+log "-- MLPerf output: $MLPERF_LOG"
+"$MLPERF_EXE" --config "$CONFIG_FILE" --temp-dir . --output-dir "$OUTPUT_DIR" --download_behaviour skip_all --pause false > "$MLPERF_LOG" 2>&1
 
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
-    log " ERROR - MLPerf benchmark failed with exit code: $EXIT_CODE"
+    log " ERROR - MLPerf benchmark failed with exit code: $EXIT_CODE. See $MLPERF_LOG for details."
     exit $EXIT_CODE
 fi
 

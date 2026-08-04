@@ -32,10 +32,31 @@
         "value": "C:\\GOG Games\\Cyberpunk 2077"
     },
     {
+        "children": [],
+        "delay": "0.0",
+        "description": "Different Graphics Presets",
+        "enabled": true,
+        "id": "1MJ5WMP",
+        "name": "[graphics_settings]",
+        "type": "Set Default",
+        "val_options": "med_1080, rt_ultra_1080, rt_low_1440",
+        "value": ""
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Loop Counter for Screenshot Naming",
+        "enabled": true,
+        "id": "1MFL0K9",
+        "name": "[loop_counter]",
+        "type": "Set",
+        "value": "2"
+    },
+    {
         "children": [
             {
                 "children": [],
-                "delay": "3.0",
+                "delay": "10.0",
                 "description": "Launch Cyberpunk",
                 "enabled": true,
                 "file_name": [
@@ -51,6 +72,33 @@
                 "enabled": true,
                 "id": "Y9V1HL",
                 "type": "Delay"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1MJ39Y2",
+                "include_path": "scenarios\\windows\\_library\\misc\\capture_taskbar",
+                "type": "Include"
+            },
+            {
+                "capture_id": "TYH95X",
+                "children": [],
+                "delay": "10",
+                "description": "Try Click Cyberpunk if Game Not Focused",
+                "enabled": true,
+                "exception_on": "Never",
+                "file_name": [
+                    "image_1MJ3EH0.png"
+                ],
+                "id": "1MJ3EH0",
+                "match_threshold": "",
+                "primary": true,
+                "scale": "",
+                "type": "Click",
+                "x": "0.500",
+                "y": "0.500"
             }
         ],
         "description": "",
@@ -72,21 +120,21 @@
             },
             {
                 "children": [],
-                "delay": "5",
-                "description": "Go To Main Menu",
-                "enabled": true,
-                "id": "Y9W6KF",
-                "text": "\ue00d\ue00d\ue00d",
-                "type": "Type",
-                "typing_delay": "[typing_delay]"
-            },
-            {
-                "children": [],
                 "delay": "10",
                 "description": "",
                 "enabled": true,
                 "id": "Y9V2WJ",
                 "type": "Delay"
+            },
+            {
+                "children": [],
+                "delay": "5",
+                "description": "Refuse Data Collection",
+                "enabled": true,
+                "id": "Y9W6KF",
+                "text": "c",
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
             },
             {
                 "children": [],
@@ -110,41 +158,6 @@
             },
             {
                 "children": [],
-                "delay": "5",
-                "description": "Top Part of Screen",
-                "enabled": true,
-                "file_name": [
-                    "image_105VM3P.png"
-                ],
-                "h": "0.230",
-                "id": "105VM3P",
-                "recapture": false,
-                "type": "Capture",
-                "w": "1.000",
-                "x": "0.003",
-                "y": "0.079"
-            },
-            {
-                "capture_id": "105VM3P",
-                "children": [],
-                "delay": "2",
-                "description": "For Run Benchmark",
-                "enabled": true,
-                "exception_on": "No match",
-                "file_name": [
-                    "image_105VMJL.png"
-                ],
-                "h": "0.050",
-                "id": "105VMJL",
-                "match_threshold": "",
-                "scale": "",
-                "type": "Check",
-                "w": "0.105",
-                "x": "0.068",
-                "y": "0.207"
-            },
-            {
-                "children": [],
                 "delay": "2",
                 "description": "Run Benchmark",
                 "enabled": true,
@@ -160,6 +173,17 @@
                 "enabled": true,
                 "id": "105RNHY",
                 "type": "Delay"
+            },
+            {
+                "children": [],
+                "delay": "8.0",
+                "description": "Get Screenshot of Benchmark Result",
+                "enabled": true,
+                "file_name": [
+                    "code_1MFKWM9.py"
+                ],
+                "id": "1MFKWM9",
+                "type": "Code"
             },
             {
                 "children": [
@@ -185,7 +209,7 @@
                         "children": [],
                         "delay": "7",
                         "description": "Go Back to Menu",
-                        "enabled": true,
+                        "enabled": false,
                         "id": "105VPA1",
                         "text": "\ue00d",
                         "type": "Type",
@@ -218,6 +242,17 @@
                         "enabled": true,
                         "id": "1061MCN",
                         "type": "Delay"
+                    },
+                    {
+                        "children": [],
+                        "delay": "8.0",
+                        "description": "Get Screenshot of Benchmark Scores",
+                        "enabled": true,
+                        "file_name": [
+                            "code_1MFKXM4.py"
+                        ],
+                        "id": "1MFKXM4",
+                        "type": "Code"
                     }
                 ],
                 "count": "[benchmark_loops]",
