@@ -431,8 +431,20 @@ Set-Content -Path $logFile -encoding utf8 "-- opencv prep started ($logSuffix ve
 "Detected architecture: $arch (Processor: $processorArch)" | log
 "Using Visual Studio $vsProduct for $logSuffix" | log
 
+# --- Remove the msstore source before any winget install so a broken pinned
+# certificate on that source cannot fail the command (winget 0x8a15005e /
+# -1978335138) behind an SSL-inspecting proxy. All needed packages are on 'winget'. ---
+try {
+    if ((winget source list 2>$null) -match "msstore") {
+        "Removing msstore winget source to avoid pinned-certificate failures (0x8a15005e)" | log
+        winget source remove msstore 2>&1 | log
+    }
+} catch {
+    "Could not remove msstore source (continuing): $($_.Exception.Message)" | log
+}
+
 "-- Installing git" | log
-winget install --id git.git --accept-source-agreements --accept-package-agreements
+winget install --id git.git --source winget --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
@@ -520,7 +532,7 @@ try {
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
 "-- Installing CMake 4.1.1" | log
-winget install --id KitWare.CMake --version 4.1.1 --accept-source-agreements --accept-package-agreements
+winget install --id KitWare.CMake --version 4.1.1 --source winget --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 
 "Refreshing environment variables after cmake installation..." | log

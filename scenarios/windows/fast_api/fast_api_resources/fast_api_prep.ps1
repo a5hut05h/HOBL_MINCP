@@ -441,8 +441,20 @@ Set-Content -Path $logFile -encoding utf8 "-- FastAPI prep started ($logSuffix v
 "Using Visual Studio $vsProduct for $logSuffix" | log
 
 
+# --- Remove the msstore source before any winget install so a broken pinned
+# certificate on that source cannot fail the command (winget 0x8a15005e /
+# -1978335138) behind an SSL-inspecting proxy. All needed packages are on 'winget'. ---
+try {
+    if ((winget source list 2>$null) -match "msstore") {
+        "Removing msstore winget source to avoid pinned-certificate failures (0x8a15005e)" | log
+        winget source remove msstore 2>&1 | log
+    }
+} catch {
+    "Could not remove msstore source (continuing): $($_.Exception.Message)" | log
+}
+
 "-- Installing git" | log
-winget install --id git.git --accept-source-agreements --accept-package-agreements
+winget install --id git.git --source winget --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
@@ -883,12 +895,18 @@ if (-not (Test-Path $venvPython)) {
 }
 "Venv python: $venvPython" | log
 
+# Microsoft-managed devices block direct access to public PyPI (CISO Central Feed
+# Services policy). Install through the approved Microsoft package feed proxy instead.
+# Same pinned versions are served, so there is no functional or performance change.
+$pypiIndexUrl = "https://packagefeedproxy.microsoft.io/pypi/simple"
+"Using approved PyPI feed proxy: $pypiIndexUrl" | log
+
 "Installing requirements.txt into venv..." | log
-& $venvPip install -r requirements.txt
+& $venvPip install --index-url $pypiIndexUrl -r requirements.txt
 check($lastexitcode)
 
 "Installing build tool into venv..." | log
-& $venvPip install build
+& $venvPip install --index-url $pypiIndexUrl build
 check($lastexitcode)
 
 "-- FastAPI prep completed ($logSuffix version)" | log

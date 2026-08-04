@@ -101,8 +101,20 @@ Set-Content -Path $logFile -encoding utf8 "-- MLPerf prep started ($logSuffix ve
 # -------------------------------------------------------------------
 # Install Windows App SDK, required for MLPerf client
 # -------------------------------------------------------------------
+# --- Remove the msstore source before any winget install so a broken pinned
+# certificate on that source cannot fail the command (winget 0x8a15005e /
+# -1978335138) behind an SSL-inspecting proxy. All needed packages are on 'winget'. ---
+try {
+    if ((winget source list 2>$null) -match "msstore") {
+        "Removing msstore winget source to avoid pinned-certificate failures (0x8a15005e)" | log
+        winget source remove msstore 2>&1 | log
+    }
+} catch {
+    "Could not remove msstore source (continuing): $($_.Exception.Message)" | log
+}
+
 "-- Installing Windows App SDK" | log
-winget install --id Microsoft.WindowsAppRuntime.1.8 --accept-source-agreements --accept-package-agreements
+winget install --id Microsoft.WindowsAppRuntime.1.8 --source winget --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 
 # Create mlperf directory if it doesn't exist
