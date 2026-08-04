@@ -175,9 +175,9 @@ def parse_perf_metrics(run_dir: Path) -> list[dict]:
     """Parse *_PerfMetrics.csv -- app launch durations.
 
     Returns list of {"name": str, "value": int, "unit": "ms"} to match the
-    power_metrics shape. The name is "<metric>_<pt>_<ordering>", where ordering
-    is a 1-based counter that increments for each repeated (metric, pt) pair
-    within the run, since a single run can report the same metric multiple times.
+    power_metrics shape. The headerless CSV contains Metric and Duration columns.
+    The name is "<metric>_<ordering>", where ordering is a 1-based counter that
+    increments each time a metric is repeated within the run.
     """
     filepath = _find_file(run_dir, "*_PerfMetrics.csv")
     if filepath is None:
@@ -185,22 +185,24 @@ def parse_perf_metrics(run_dir: Path) -> list[dict]:
         return []
 
     metrics = []
-    order_counts: dict[tuple[str, int], int] = {}
+    order_counts: dict[str, int] = {}
     try:
         with open(filepath, "r", encoding="utf-8-sig") as f:
-            for row in csv.DictReader(f):
+            for row in csv.reader(f):
+                if len(row) < 2:
+                    logger.warning("Skipping invalid perf row: %s", row)
+                    continue
                 try:
-                    pt = int(row.get("PT", "0").strip())
-                    metric = row.get("Metric", "").strip()
-                    duration = int(row.get("Duration", "0").strip())
+                    metric = row[0].strip()
+                    duration = int(row[1].strip())
                 except (ValueError, AttributeError) as e:
                     logger.warning("Skipping invalid perf row: %s (%s)", row, e)
                     continue
                 if metric:
-                    key = (metric, pt)
+                    key = metric
                     order = order_counts.get(key, 0) + 1
                     order_counts[key] = order
-                    name = f"{metric}_{pt}_{order}"
+                    name = f"{metric}_{order}"
                     metrics.append({"name": name, "value": duration, "unit": "ms"})
     except OSError as e:
         logger.error("Failed to read %s: %s", filepath, e)
