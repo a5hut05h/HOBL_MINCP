@@ -219,6 +219,8 @@ class Scenario(unittest.TestCase):
 
         # Checking for local execution and running from web ui. If so then we want to kill web ui.
         if self.dut_ip == "127.0.0.1" and self.dashboard_url != '':
+            # self.widgets.about("Closing UI", "UI is closing to run scenario...")
+            # time.sleep(3)
             self._kill("msedge.exe")
             
         # Set up dut_exec_path and dut_data_path.  Doing it before tools initialized in case they need it.
@@ -714,7 +716,9 @@ class Scenario(unittest.TestCase):
                     self.toolCallBacks("testTimeoutCallback")
                     if self.platform.lower() != 'android':
                         self.dut_conn_timeout = True
-                        self._wait_for_dut_comm()
+                        # If scenario is dut_setup, don't wait for comm_check since SimpleRemote likely not installed at this point.
+                        if (Params.get('global', 'module_name') != "dut_setup"):
+                            self._wait_for_dut_comm()
             self.toolCallBacks("testScenarioFailed")
             logging.debug("Copying data from DUT due to test exception again.")
             self._copy_data_from_remote(self.result_dir)
@@ -778,19 +782,36 @@ class Scenario(unittest.TestCase):
         # Poll DUT to see if it's still responsive, if not, raise timeout exception
         file_path = self.result_dir + os.sep + 'battery_level.txt'
         csv_path = self.result_dir + os.sep + 'battery_level.csv'
+        self.monitor_life_timestamp = time.time()
         while(True):
             try:
                 if self.platform.lower() == 'windows':
-                    if int(self.stop_soc) <= 0:
-                        batt_level = self._call(["powershell.exe", "Add-Type -Assembly System.Windows.Forms; [Math]::round(([System.Windows.Forms.SystemInformation]::PowerStatus.BatteryLifePercent) * 100, 2)"], timeout=30)
-                        logging.info(f"Battery level: {batt_level}")
-                        # rpc.call_rpc(self.dut_ip, self.rpc_port, "GetVersion", [])
-                        # logging.info("DUT is alive")
-                        # Use RTC timer
-                        self._kill("RTCWakeCore.exe")
-                        self._call([os.path.join(self.dut_exec_path, "RTCWakeCore", "RTCWakeCore.exe"), '-duration 1800'], blocking=False, timeout=30)
-                        # logging.info("RTC Wake timer reset")
-                    time.sleep(900)
+                    if Params.get('global', 'dut_ip') == '127.0.0.1':
+                        new_time = time.time()
+                        logging.info("Rundown watchdog, current time: " + str(new_time) + ", last time: " + str(self.monitor_life_timestamp))
+                        if new_time - self.monitor_life_timestamp > 90:
+                            logging.info("Hibernate detected, ending rundown.")
+                            self.toolCallBacks("testTimeoutCallback")
+                            if self.platform.lower() != 'android':
+                                self.dut_conn_timeout = True
+                                self._wait_for_dut_comm()
+                            self.toolCallBacks("testScenarioFailed")
+                            logging.debug("Copying data from DUT due to test exception again.")
+                            self._copy_data_from_remote(self.result_dir)
+                            raise Exception("Device monitor timeout")
+                        self.monitor_life_timestamp = new_time
+                        time.sleep(60)
+                    else:
+                        if int(self.stop_soc) <= 0:
+                            batt_level = self._call(["powershell.exe", "Add-Type -Assembly System.Windows.Forms; [Math]::round(([System.Windows.Forms.SystemInformation]::PowerStatus.BatteryLifePercent) * 100, 2)"], timeout=30)
+                            logging.info(f"Battery level: {batt_level}")
+                            # rpc.call_rpc(self.dut_ip, self.rpc_port, "GetVersion", [])
+                            # logging.info("DUT is alive")
+                            # Use RTC timer
+                            self._kill("RTCWakeCore.exe")
+                            self._call([os.path.join(self.dut_exec_path, "RTCWakeCore", "RTCWakeCore.exe"), '-duration 1800'], blocking=False, timeout=30)
+                            # logging.info("RTC Wake timer reset")
+                        time.sleep(900)
                 elif self.platform.lower() == 'macos':
                     # Get AppleRawCurrentCapacity level via ioreg
                     raw_current_capacity_result = self._call(["bash", '-c "ioreg -r -c AppleSmartBattery -a | plutil -extract 0.AppleRawCurrentCapacity raw -"'], blocking=True)
@@ -924,7 +945,7 @@ class Scenario(unittest.TestCase):
             lifeThread.raise_exception()
             scenarioThread.raise_exception()
 
-            print("Kill Threads")
+            # print("Kill Threads")
             for activeThread in self.activeHostCalls:
                 activeThread.raise_exception()
 
@@ -1031,7 +1052,7 @@ class Scenario(unittest.TestCase):
             if self.enable_tool_threading:
                 toolStatusThread.raise_exception()
 
-            print("Kill Threads")
+            # print("Kill Threads")
             for activeThread in self.activeHostCalls:
                 activeThread.raise_exception()
 
@@ -1336,7 +1357,7 @@ class Scenario(unittest.TestCase):
         else:
             if blocking == True and callback == False and self.async_comm == "1":
                 if log_output:
-                    logging.debug("Call - blocking with callback.  host_ip = " + self.host_ip)
+                    logging.debug(f"Call - blocking with callback.  host_ip = {self.host_ip}")
 
                 # Make socket connection
                 range_low = int(Params.get('global', 'port_range_low'))

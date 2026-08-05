@@ -7,10 +7,8 @@ from utilities.open_source.modules import import_run_user_only
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
-    Params.setDefault('prod_excel_run', 'short_typing', '0', desc='', valOptions=['0', '1'])
+    Params.setDefault('blender_benchmark', 'benchmark_option', 'CPU', desc='Selecting GPU or CPU', valOptions=['CPU', 'OPTIX', 'CUDA', 'HIP', 'METAL', 'ONEAPI'])
     return
 
 def run_user_only():
-    import_run_user_only('scenarios\\windows\\_library\\misc\\recording_phase_begin')
-    import_run_user_only('scenarios\\windows\\_library\\misc\\recording_phase_end')
     return

@@ -14,11 +14,11 @@ if not exist "%DOWNLOADS%" (
 REM Download powershell and dotnet runtime installers, then build dut_setup.exe with InnoSetup
 REM Requirements: InnoSetup installed.
 
-set RUNTIME_VERSION=8.0.23
+set RUNTIME_VERSION=8.0.29
 set RUNTIME_X64_DOWNLOAD_URL="https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%RUNTIME_VERSION%/windowsdesktop-runtime-%RUNTIME_VERSION%-win-x64.exe"
 set RUNTIME_ARM64_DOWNLOAD_URL="https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%RUNTIME_VERSION%/windowsdesktop-runtime-%RUNTIME_VERSION%-win-arm64.exe"
 
-set POWERSHELL_VERSION=7.5.4
+set POWERSHELL_VERSION=7.6.4
 set POWERSHELL_X64_DOWNLOAD_URL="https://github.com/PowerShell/PowerShell/releases/download/v%POWERSHELL_VERSION%/PowerShell-%POWERSHELL_VERSION%-win-x64.msi"
 set POWERSHELL_ARM64_DOWNLOAD_URL="https://github.com/PowerShell/PowerShell/releases/download/v%POWERSHELL_VERSION%/PowerShell-%POWERSHELL_VERSION%-win-arm64.msi"
 
@@ -69,7 +69,7 @@ if not exist "%DOWNLOADS%\PowerShell-%POWERSHELL_VERSION%-win-arm64.msi" (
 
 REM Build the installer using InnoSetup
 echo Building dut_setup.exe with InnoSetup
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" dut_setup.iss
+"C:\Program Files\Inno Setup 7\ISCC.exe" dut_setup.iss
 if %errorlevel% neq 0 goto ERROR
 
 goto END

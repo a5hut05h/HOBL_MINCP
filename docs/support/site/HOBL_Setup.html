@@ -297,6 +297,40 @@
     Lab Setup
   </a>
   
+    <nav class="md-nav" aria-label="Lab Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wi-fi" class="md-nav__link">
+    Wi-Fi
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#charger-control" class="md-nav__link">
+    Charger Control
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-brigthness" class="md-nav__link">
+    Display Brigthness
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audio-volume" class="md-nav__link">
+    Audio Volume
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -411,6 +445,40 @@
     Lab Setup
   </a>
   
+    <nav class="md-nav" aria-label="Lab Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wi-fi" class="md-nav__link">
+    Wi-Fi
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#charger-control" class="md-nav__link">
+    Charger Control
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-brigthness" class="md-nav__link">
+    Display Brigthness
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audio-volume" class="md-nav__link">
+    Audio Volume
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -463,17 +531,30 @@
 <li>The HOBL UI is a web server that can be accessed by multiple users simultaneously, if needed.  For larger labs, it can also be executed with IIS.</li>
 <li>The Hosts and DUTs should be on a local network that has internet access.</li>
 <li>The host should be connected with ethernet, but the DUT should be on Wi-Fi, to be representative of a user operating a device on battery.  Ethernet dongles often prevent devices from getting to lower power states.</li>
+</ul>
+<h3 id="wi-fi">Wi-Fi</h3>
+<ul>
 <li>The Wi-Fi network should be set up to provide each device with <strong>50 Mbps</strong>, again for representativeness.  Significantly more or less BW has power consumption impact.  Not all AP's are good at controlling this, but we have found the HPE Aruba line of access points adept at it.  50 Mbps is also the minimum bandwidth requirement for correct functionality.</li>
 <li>5 GHz channels should be used for connecting to DUTs.</li>
 <li>Do not domain-join the DUTs.</li>
 <li>Corporate network traffic can be intense, so it is recommended to deploy a firewall between the lab LAN and corporate networks that will filter out corporate traffic but still allow access to the internet.  This will improve representativeness and reduce test variability.</li>
+</ul>
+<h3 id="charger-control">Charger Control</h3>
+<ul>
 <li>HOBL supports automatic recharging of DUTs via a variety of mechanisms, as long as they can be controlled by a shell command.  The commands are specified in the charge_on and charge_off sections of the Device Profile.  The most common mechanisms are:<ol>
-<li>A Raritan PX-series IP-addressable power strip</li>
-<li><a href="https://dlidirect.com/products/new-pro-switch" target="_blank">Digital-Loggers Pro Switch</a></li>
-<li>An iBoot controlled by either ethernet or relay.  </li>
+<li>Any SNMP controllable IP switchable power strip, such as Cyberpower, APC, Raritan PX-series, etc.</li>
+<li><a href="https://dlidirect.com/products/new-pro-switch" target="_blank">Digital-Loggers Pro Switch</a>.</li>
+<li>An iBoot controlled by either ethernet or relay.</li>
+<li>Shelly Smart Plugs.</li>
 </ol>
 </li>
+</ul>
+<h3 id="display-brigthness">Display Brigthness</h3>
+<ul>
 <li>A luminance meter should be used to determine the DUT brightness setting that corresponds to 150 nits.  Measure and average all 4 counters plus center of a pure white screen.  All tests are expected to run at this brightness except JEITA-related tests (which are at 200 nits).  A nits map should be specified in the profile to associate the appropriate slider postiions to 150 and 200 nits respectively.  <TODO: Add section on profle setup and tools></li>
+</ul>
+<h3 id="audio-volume">Audio Volume</h3>
+<ul>
 <li>Tests are run with audio volume set to the out-of-box default level.  To ensure consistency, once this value is determined, it should also be specified in the device profile.</li>
 </ul>
 <h2 id="account-setup">Account Setup</h2>

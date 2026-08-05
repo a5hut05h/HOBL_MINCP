@@ -73,14 +73,14 @@ class StorePrep(core.app_scenario.Scenario):
 
     def runTest(self):
         if self.store_prep_enabled == "0":
+            logging.info("Setting reg key to disable Auto Updates")
+            self._call(['cmd.exe', r'/C reg.exe Add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\WindowsStore" /v AutoDownload /t REG_DWORD /d 2 /f'], expected_exit_code="")
             logging.info("Store_prep disabled, skipping.")
+            self.createPrepStatusControlFile()
             return
         
         logging.info("Uninstalling Microsoft Whiteboard app if installed")
         self._call(["powershell.exe", "Get-AppxPackage *Microsoft.Whiteboard* | Remove-AppxPackage"], expected_exit_code="")
-
-        logging.info("Setting reg key to disable Auto Updates")
-        self._call(['cmd.exe', r'/C reg.exe Add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\WindowsStore" /v AutoDownload /t REG_DWORD /d 2 /f'], expected_exit_code="")
 
         start_time = time.time()
         self.driver = self.get_driver()

@@ -109,9 +109,12 @@ class OfficeInstall(core.app_scenario.Scenario):
             #     # Poll for simple remote to determine is DUT setup is complete
             #     time.sleep(15)
             #     self._wait_for_dut_comm()
+            if self.activate == '0':
+                self.createPrepStatusControlFile()
             
         elif self.post_install_call != '':
             self._call(["cmd.exe", "/C " + self.post_install_call])
+            self.createPrepStatusControlFile()
 
         logging.debug("Launching WinAppDriver.exe on DUT.")
         self._call([self.dut_exec_path + "\\WindowsApplicationDriver\\WinAppDriver.exe", self.dut_resolved_ip + " " + self.app_port + " /forcequit"], blocking=False)
@@ -191,6 +194,8 @@ class OfficeInstall(core.app_scenario.Scenario):
                 time.sleep(5)
             except:
                 logging.info("'Microsoft respects your privacy' dialog not found")
+
+            self.createPrepStatusControlFile()
 
 
 
@@ -296,7 +301,6 @@ class OfficeInstall(core.app_scenario.Scenario):
         logging.info("Rebooting after Office installation.")
         self._dut_reboot()
 
-        self.createPrepStatusControlFile()
         self._kill("Winword.exe WinAppDriver.exe")
 
 

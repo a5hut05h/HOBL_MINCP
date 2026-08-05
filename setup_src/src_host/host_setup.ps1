@@ -4,11 +4,12 @@
 param(
     [string]$logFile = "c:\temp\host_setup.log",
     [switch]$framework,
+    [switch]$local,
     [switch]$ui
 )
 
 # HOBL UI and Dut Setup versions
-$hobl_ui_version = "1.2"
+$hobl_ui_version = "1.3"
 # Set $dut_setup_version to value at top of setup_src\src_dut_win\dut_setup.cmd
 $dut_setup_cmd = "$PSScriptRoot\..\src_dut_win\dut_setup.cmd"
 if (Test-Path $dut_setup_cmd) {
@@ -74,7 +75,7 @@ if ($framework -eq $false -and $ui -eq $false) {
 
 if ($framework) {
 
-    $runtimeVersion = "8.0.23"
+    $runtimeVersion = "8.0.29"
     $runtimeX64DownloadUrl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/$runtimeVersion/windowsdesktop-runtime-$runtimeVersion-win-x86.exe"
     $vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.x86.exe"
 
@@ -169,6 +170,19 @@ if ($framework) {
     # Disable error reporting UI
     "-- Disabling Windows Error Reporting UI" | log
     reg add "HKLM\Software\Microsoft\Windows\Windows Error Reporting" /f /v DontShowUI /t REG_DWORD /d 1 2>&1 | log
+    check($lastexitcode)
+}
+
+##
+## Local
+##
+
+if ($local) {
+    "-- Installing DUT setup" | log
+    # create c:\hobl_data if it doesn't exist
+    New-Item -ItemType Directory -Force -Path c:\hobl_data > $null
+    # run dut_setup.cmd with local_setup=1
+    & "$PSScriptRoot\..\..\hobl.cmd" -s dut_setup local_setup=1 2>&1 | log
     check($lastexitcode)
 }
 

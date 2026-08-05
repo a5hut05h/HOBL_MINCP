@@ -579,7 +579,13 @@ class ActionDialog(QDialog):
                 h_layout.addWidget(edit_button)
                 layout.addRow(QLabel("File Name"), h_layout)
             else:
-                layout.addRow(QLabel("File Name"), self.fileNameEdit)
+                h_layout_fn = QHBoxLayout()
+                h_layout_fn.addWidget(self.fileNameEdit)
+                add_image_button = QPushButton("+")
+                add_image_button.setFixedWidth(30)
+                add_image_button.clicked.connect(self.addImageCheck)
+                h_layout_fn.addWidget(add_image_button)
+                layout.addRow(QLabel("File Name"), h_layout_fn)
                 h_layout = QHBoxLayout()
                 for file_name in file_names:
                     image_path = os.path.join(working_dir, file_name)
@@ -659,6 +665,18 @@ class ActionDialog(QDialog):
         self.editor = CodeEditorWindow(None, file_path)
         self.editor.show()
         self.save()
+    
+    def addImageCheck(self):
+        # hide the edit window so it can modify the imageLabel
+        self.hide()
+        tab = self.actionModel.main_win
+        tab.mode_select = True
+        tab.selection_cx_frac = 0.5
+        tab.selection_cy_frac = 0.5
+        tab.pending_dialog = self          # Tab remembers the dialog
+        # tab.pending_action = self.action   # Tab knows which action to update
+        tab.action_type = "AddImage" #Add image to list of templates to check against the screen capture
+        tab.main_win.ui.cancelButton.show()
 
     def save(self):
         self.action[u'id'] = self.idEdit.text()

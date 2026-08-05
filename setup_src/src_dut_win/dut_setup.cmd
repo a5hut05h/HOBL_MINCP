@@ -1,4 +1,4 @@
-set dut_setup_version=2.1
+set dut_setup_version=2.2
 
 REM Copyright (c) Microsoft. All rights reserved.
 REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
@@ -55,10 +55,10 @@ echo Dut Architecture: !dut_architecture!
 @REM Install pwsh
 if "!dut_architecture!" EQU "arm64" (
     echo Installing PowerShell arm64
-    msiexec.exe /package %usb_drive%\%dut_setup_folder%\pwsh\PowerShell-7.5.4-win-arm64.msi /passive
+    msiexec.exe /package %usb_drive%\%dut_setup_folder%\pwsh\PowerShell-7.6.4-win-arm64.msi /passive
 ) else (
     echo Installing PowerShell x64
-    msiexec.exe /package %usb_drive%\%dut_setup_folder%\pwsh\PowerShell-7.5.4-win-x64.msi /passive
+    msiexec.exe /package %usb_drive%\%dut_setup_folder%\pwsh\PowerShell-7.6.4-win-x64.msi /passive
 )
 set PATH=%PATH%;C:\Program Files\PowerShell\7;C:\Program Files\PowerShell\7\Modules
 
@@ -138,9 +138,9 @@ Powercfg -setactive scheme_current
 
 rem  Set screen brightness
 rem AC Brightness Level
-powercfg -SETACVALUEINDEX scheme_balanced SUB_VIDEO VIDEONORMALLEVEL 100
+rem powercfg -SETACVALUEINDEX scheme_balanced SUB_VIDEO VIDEONORMALLEVEL 100
 rem DC Brightness Level
-powercfg -SETDCVALUEINDEX scheme_balanced SUB_VIDEO VIDEONORMALLEVEL 65
+rem powercfg -SETDCVALUEINDEX scheme_balanced SUB_VIDEO VIDEONORMALLEVEL 65
 rem Select Correct Profile
 powercfg -SETACTIVE scheme_balanced
 
@@ -174,7 +174,6 @@ reg add HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Sy
 rem if simpleremote is running, kill it
 taskkill /IM SimpleRemoteConsole.exe /f > null 2>&1
 
-
 rem Attempt UI automation to enable location services
 echo Attempting UI automation for location services...
 pwsh.exe -ExecutionPolicy Bypass -NoProfile -Command "try { Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes; Start-Process 'ms-settings:privacy-location'; Start-Sleep 8; $w = [System.Windows.Automation.AutomationElement]::RootElement.FindFirst(4, (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::NameProperty, 'Settings'))); if ($w) { $toggles = @('DialogToggle', 'SystemSettings_CapabilityAccess_Location_UserGlobal_ToggleSwitch'); foreach ($toggleId in $toggles) { $t = $w.FindFirst(4, (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::AutomationIdProperty, $toggleId))); if ($t) { $p = $t.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern); if ($p.Current.ToggleState -eq 'Off') { $p.Toggle(); Write-Host \"Enabled toggle: $toggleId\" } else { Write-Host \"Already enabled: $toggleId\" } } else { Write-Host \"Not found: $toggleId\" } } } else { Write-Host 'Settings window not found' }; Start-Sleep 2; Get-Process SystemSettings -EA 0 | Stop-Process -Force } catch { Write-Host 'UI automation failed, continuing setup' }"
@@ -185,18 +184,19 @@ net stop lfsvc >nul 2>&1
 ping 127.0.0.1 -n 3 >nul
 net start lfsvc >nul 2>&1
 
-
 rem Rename computer if dut_name variable is set
 if "%dut_name%" NEQ "" (
+    echo Renaming computer to %dut_name%...
     pwsh -Command rename-computer -NewName "%dut_name%" -ErrorAction SilentlyContinue
     pwsh -ExecutionPolicy Bypass -NoProfile %usb_drive%\%dut_setup_folder%\rename.ps1 -ComputerName "%dut_name%"
 )
 
 @REM Install dotnet
+echo Installing .NET Windows Desktop Runtime
 if "!dut_architecture!" EQU "arm64" (
-    %usb_drive%\%dut_setup_folder%\dotnet\windowsdesktop-runtime-8.0.23-win-arm64.exe /quiet
+    %usb_drive%\%dut_setup_folder%\dotnet\windowsdesktop-runtime-8.0.29-win-arm64.exe /quiet
 ) else (
-    %usb_drive%\%dut_setup_folder%\dotnet\windowsdesktop-runtime-8.0.23-win-x64.exe /quiet
+    %usb_drive%\%dut_setup_folder%\dotnet\windowsdesktop-runtime-8.0.29-win-x64.exe /quiet
 )
 
 rem Scheduled task to minimize apps 60s after reboot.  This is particular for the Teams window that pops up after reboot.
@@ -210,14 +210,17 @@ REM     reg add %this_reg% /v DefaultPassword /t REG_SZ /d %dut_password% /f > n
 REM )
 REM reg add %this_reg% /v AutoAdminlogon /t REG_SZ /d 1 /f > null 2>&1
 
-rem Copy DeskTopImages, WindowsApplicationDrivers, and InputInject folders to dut hobl_bin folder
+echo Copy DeskTopImages to dut hobl_bin folder
 robocopy %usb_drive%\%dut_setup_folder%\DeskTopImages %hobl_bin_path%\DesktopImages /S /E
+echo Copy WindowsApplicationDrivers to dut hobl_bin folder
 robocopy %usb_drive%\%dut_setup_folder%\WindowsApplicationDriver %hobl_bin_path%\WindowsApplicationDriver /S /E
 @REM if "!dut_architecture!" EQU "arm64" (
 @REM     robocopy %usb_drive%\%dut_setup_folder%\InputInject\ARM64\Release\net6 %hobl_bin_path%\InputInject /S /E
 @REM ) else (
 @REM     robocopy %usb_drive%\%dut_setup_folder%\InputInject\x64\Release\net6 %hobl_bin_path%\InputInject /S /E
 @REM )
+
+echo Copy InputInject and ScreenServer folders to dut hobl_bin folder
 if not exist "%hobl_bin_path%\InputInject" (
     mkdir %hobl_bin_path%\InputInject
 )
@@ -230,6 +233,8 @@ if "!dut_architecture!" EQU "arm64" (
     tar -xf %hobl_bin_path%\InputInject\InputInject_win-x64.zip -C %hobl_bin_path%\InputInject
     del %hobl_bin_path%\InputInject\InputInject_win-x64.zip
 )
+
+echo Copy ScreenServer folder to dut hobl_bin folder
 if not exist "%hobl_bin_path%\ScreenServer" (
     mkdir %hobl_bin_path%\ScreenServer
 )
@@ -243,40 +248,44 @@ if "!dut_architecture!" EQU "arm64" (
     del %hobl_bin_path%\ScreenServer\ScreenServer_win-x64.zip
 )
 
-rem Copy PolicyFileEditor folder from dut_setup folder to dut Program Files folder
+echo Copy PolicyFileEditor folder from dut_setup folder to dut Program Files folder
 robocopy %usb_drive%\%dut_setup_folder%\PolicyFileEditor "C:\Program Files\WindowsPowerShell\Modules\PolicyFileEditor" /S /E
 robocopy %usb_drive%\%dut_setup_folder%\PolicyFileEditor "C:\Program Files (x86)\WindowsPowerShell\Modules\PolicyFileEditor" /S /E
 
 rem Copy dut ini file from dut_setup folder to dut desktop
-set desktop_path=%UserProfile%\desktop
-copy %usb_drive%\%dut_setup_folder%\*.ini %desktop_path% /v /Y
+rem set desktop_path=%UserProfile%\desktop
+rem copy %usb_drive%\%dut_setup_folder%\*.ini %desktop_path% /v /Y
 
-rem Copy MonitorPowerEvents.exe file from dut_setup folder to dut utilities folder
+echo Copy MonitorPowerEvents.exe file from dut_setup folder to dut hobl_bin folder
 copy %usb_drive%\%dut_setup_folder%\MonitorPowerEvents.exe %hobl_bin_path% /v /Y
 
-rem Copy RTCWakeCore from dut_setup folder to dut utilities folder
+echo Copy RTCWakeCore from dut_setup folder to dut hobl_bin folder
 robocopy %usb_drive%\%dut_setup_folder%\RTCWakeCore %hobl_bin_path%\RTCWakeCore /S /E
 
-rem Copy ScreenShot.exe file from dut_setup folder to dut utilities folder
+echo Copy ScreenShot.exe file from dut_setup folder to dut hobl_bin folder
 if "!dut_architecture!" EQU "arm64" (
     copy %usb_drive%\%dut_setup_folder%\ScreenShot\ARM64\Release\ScreenShot.exe %hobl_bin_path% /v /Y
 ) else (
     copy %usb_drive%\%dut_setup_folder%\ScreenShot\x64\Release\ScreenShot.exe %hobl_bin_path% /v /Y
 )
 
-rem Copy charge_status.ps1 file from dut_setup folder to dut utilities folder
+echo Copy charge_status.ps1 file from dut_setup folder to dut hobl_bin folder
 copy %usb_drive%\%dut_setup_folder%\charge_status.ps1 %hobl_bin_path% /v /Y
 
-rem Copy web_replay helper files from dut_setup folder to dut utilities folder
-mkdir %hobl_bin_path%\web_replay
+echo Copy web_replay helper files from dut_setup folder to dut hobl_bin folder
+if not exist %hobl_bin_path%\web_replay (
+    mkdir %hobl_bin_path%\web_replay
+)
 copy %usb_drive%\%dut_setup_folder%\web_replay\set_args.ps1 %hobl_bin_path%\web_replay /v /Y
 copy %usb_drive%\%dut_setup_folder%\web_replay\remove_args.ps1 %hobl_bin_path%\web_replay /v /Y
 
-rem Install web_replay certs
+echo Install web_replay certs
 pwsh.exe -ExecutionPolicy Bypass -NoProfile %usb_drive%\%dut_setup_folder%\web_replay\install_certs.ps1
 
-rem Copy remote to dut utilities folder
-mkdir %hobl_bin_path%\remote
+rem Copy remote to dut hobl_bin folder
+if not exist %hobl_bin_path%\remote (
+    mkdir %hobl_bin_path%\remote
+)
 copy %usb_drive%\%dut_setup_folder%\remote\wallpaper.png %hobl_bin_path%\remote /v /Y
 if "!dut_architecture!" EQU "arm64" (
     copy %usb_drive%\%dut_setup_folder%\remote\arm64\remote.exe %hobl_bin_path%\remote /v /Y
@@ -284,7 +293,7 @@ if "!dut_architecture!" EQU "arm64" (
     copy %usb_drive%\%dut_setup_folder%\remote\x64\remote.exe %hobl_bin_path%\remote /v /Y
 )
 
-rem Install VC++ 2015 runtime
+echo Install VC++ 2015 runtime
 %hobl_bin_path%\WindowsApplicationDriver\vc_redist.x86.exe /install /passive /norestart
 rem Install VC++ 2017 runtime for x64 apps (needed by tee.exe)
 rem %usb_drive%\%dut_setup_folder%\vc_redist.x64.exe /install /passive /norestart
@@ -342,7 +351,7 @@ if "%dut_wifi_name%" NEQ "" (
     ping 127.0.0.1 -n 10 > nul
 )
 
-rem Navigate to the developer settings window
+echo Navigate to and enable the developer settings
 start /realtime ms-settings:developers
 
 echo Waiting for 5 seconds while developer package is installed
@@ -356,6 +365,7 @@ setx WEBDRIVER_USE_DEFAULT_APP_PROCESS_BEHAVIOR 1
 
 rem We only run the setup.exe from script (dut_setup or os_install scenario).  The dut_setup.exe expands simple remote directly to c:\hobl_bin on the DUT
 rem so this installer doesn't need to be executed when called from dut_setup.exe.
+echo Installing SimpleRemoteServer based on architecture
 if "%install_simpleremote%" EQU "1" (
     rem execute Simple_Remote installer (based on architecture from ini file)
     if "!dut_architecture!" EQU "arm64" (
@@ -378,21 +388,20 @@ if "%install_simpleremote%" EQU "1" (
     )
 )
 
-if "%local_setup%" NEQ "1" (
-    rem Create task for starting SimpleRemoteConsole based on dut architecture
-    if "!dut_architecture!" EQU "arm64" (
-        echo Creating StartSimple-arm64 task
-        set this_string="%hobl_bin_path%\SimpleRemoteServer_win-arm64\start_admin_console_win-arm64.bat"
-        set this_srs="%hobl_bin_path%\SimpleRemoteServer_win-arm64\SimpleRemoteConsole.exe"
-    ) else (
-        echo Creating StartSimple-x64 task
-        set this_string="%hobl_bin_path%\SimpleRemoteServer_win-x64\start_admin_console_win-x64.bat"
-        set this_srs="%hobl_bin_path%\SimpleRemoteServer_win-x64\SimpleRemoteConsole.exe"
-    )
-    pwsh.exe -ExecutionPolicy Bypass -NoProfile %usb_drive%\%dut_setup_folder%\simple_remote_setup.ps1 -cmd_string !this_string! 
-    netsh.exe advfirewall firewall add rule name="SimpleRemoteConsole TCP" program=!this_srs! dir=in action=allow enable=yes localport=any protocol=TCP profile=public,private,domain
-    netsh.exe advfirewall firewall add rule name="SimpleRemoteConsole UDP" program=!this_srs! dir=in action=allow enable=yes localport=any protocol=UDP profile=public,private,domain
+rem Create task for starting SimpleRemoteConsole based on dut architecture
+if "!dut_architecture!" EQU "arm64" (
+    echo Creating StartSimple-arm64 task
+    set this_string="%hobl_bin_path%\SimpleRemoteServer_win-arm64\start_admin_console_win-arm64.bat"
+    set this_srs="%hobl_bin_path%\SimpleRemoteServer_win-arm64\SimpleRemoteConsole.exe"
+) else (
+    echo Creating StartSimple-x64 task
+    set this_string="%hobl_bin_path%\SimpleRemoteServer_win-x64\start_admin_console_win-x64.bat"
+    set this_srs="%hobl_bin_path%\SimpleRemoteServer_win-x64\SimpleRemoteConsole.exe"
 )
+
+pwsh.exe -ExecutionPolicy Bypass -NoProfile %usb_drive%\%dut_setup_folder%\simple_remote_setup.ps1 -cmd_string !this_string! 
+netsh.exe advfirewall firewall add rule name="SimpleRemoteConsole TCP" program=!this_srs! dir=in action=allow enable=yes localport=any protocol=TCP profile=public,private,domain
+netsh.exe advfirewall firewall add rule name="SimpleRemoteConsole UDP" program=!this_srs! dir=in action=allow enable=yes localport=any protocol=UDP profile=public,private,domain
 
 netsh.exe advfirewall firewall add rule name="Allow 4723,17556,5901,8020" dir=in action=allow enable=yes localport=4723,17556,5901,8020 protocol=TCP profile=public,private,domain
 netsh.exe advfirewall firewall add rule name="Allow ICMPv4" dir=in action=allow enable=yes protocol=icmpv4:8,any profile=public,private,domain
@@ -403,19 +412,16 @@ if "%test_signing%" EQU "1" (
 if "%test_signing%" EQU "0" (
     Bcdedit.exe -set TESTSIGNING OFF
 )
-
-if "%local_setup%" NEQ "1" (
-    rem Launch SimpleRemote
-    if "!dut_architecture!" EQU "arm64" (
-        echo Starting SimpleRemote on arm64
-        start "SimpleRemoteConsole_Admin" /MIN /D %hobl_bin_path%\SimpleRemoteServer_win-arm64 SimpleRemoteConsole_Admin_win-arm64
-    ) else (
-        echo Starting SimpleRemote on x64
-        start "SimpleRemoteConsole_Admin" /MIN /D %hobl_bin_path%\SimpleRemoteServer_win-x64 SimpleRemoteConsole_Admin_win-x64
-    )
-    rem Register host name with DNS server
-    ipconfig /registerdns
+rem Launch SimpleRemote
+if "!dut_architecture!" EQU "arm64" (
+    echo Starting SimpleRemote on arm64
+    start "SimpleRemoteConsole_Admin" /MIN /D %hobl_bin_path%\SimpleRemoteServer_win-arm64 SimpleRemoteConsole_Admin_win-arm64
+) else (
+    echo Starting SimpleRemote on x64
+    start "SimpleRemoteConsole_Admin" /MIN /D %hobl_bin_path%\SimpleRemoteServer_win-x64 SimpleRemoteConsole_Admin_win-x64
 )
+rem Register host name with DNS server
+ipconfig /registerdns
 
 rem restart dut
 if "%reboot_prompt%" EQU "1" (
@@ -423,10 +429,11 @@ if "%reboot_prompt%" EQU "1" (
 )
 if "%reboot%" EQU "1" (
     echo Restarting DUT...
+    echo dut_setup version: %dut_setup_version%
     shutdown /r /f /t 0
 ) else (
     echo
     echo Setup complete.  This window can be closed now.
+    echo dut_setup version: %dut_setup_version%
 )
-echo dut_setup version: %dut_setup_version%
 :end
