@@ -179,6 +179,9 @@ if ($framework) {
 
 if ($local) {
     "-- Installing DUT setup" | log
+    # create c:\hobl_data if it doesn't exist
+    New-Item -ItemType Directory -Force -Path c:\hobl_data > $null
+    # run dut_setup.cmd with local_setup=1
     & "$PSScriptRoot\..\..\hobl.cmd" -s dut_setup local_setup=1 2>&1 | log
     check($lastexitcode)
 }

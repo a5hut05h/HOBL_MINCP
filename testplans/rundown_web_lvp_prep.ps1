@@ -5,7 +5,6 @@ if ($ARGS[0] -eq $null) {return("Params .ini not supplied, please supply a param
 .\hobl.cmd -p $ARGS[0] -s version_report global:run_type=Prep global:attempts=2 global:post_run_delay=0
 .\hobl.cmd -p $ARGS[0] -s msa_prep global:run_type=Prep global:attempts=2 global:post_run_delay=0
 .\hobl.cmd -p $ARGS[0] -s wifi_switch global:run_type=Misc global:post_run_delay=0
-.\hobl.cmd -p $ARGS[0] -s config_check_prep global:run_type=Prep global:attempts=2 global:post_run_delay=0
 .\hobl.cmd -p $ARGS[0] -s config_check global:attempts=2 global:post_run_delay=0
 .\hobl.cmd -p $ARGS[0] -s system_prep global:run_type=Prep global:attempts=2 global:post_run_delay=0
 .\hobl.cmd -p $ARGS[0] -s store_prep global:run_type=Prep global:attempts=3 global:post_run_delay=0

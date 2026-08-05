@@ -15,7 +15,7 @@
         "description": "",
         "enabled": true,
         "id": "V2MYXP",
-        "include_path": "..\\..\\misc\\recording_phase_begin",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
         "type": "Include"
     },
     {
@@ -209,7 +209,9 @@
         "exception_on": "No match",
         "file_name": [
             "image_UT2FCP.png",
-            "image_UT2FCQ.png"
+            "image_UT2FCQ.png",
+            "image_1RWKWRV.png",
+            "image_1RWKWRX.png"
         ],
         "id": "UT2FCP",
         "match_threshold": "",
@@ -234,7 +236,7 @@
         "description": "",
         "enabled": true,
         "id": "V2N019",
-        "include_path": "..\\..\\misc\\recording_phase_end",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
         "params": [
             {
                 "name": "[phase_category]",
