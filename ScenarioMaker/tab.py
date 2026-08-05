@@ -105,6 +105,7 @@ class Tab(QtWidgets.QWidget):
         self.region_w = 0
         self.region_h = 0
         self.action_type = ""
+        self.pending_dialog = None
         self.hostPixelRatio = self.screen().devicePixelRatio()
 
         # Connect action list view
@@ -262,6 +263,26 @@ class Tab(QtWidgets.QWidget):
                 if self.mode_record:
                     if self.main_win.connected:
                         result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "TapDown", dut_x, dut_y, primary, self.main_win.current_display)
+            if self.action_type == "AddImage":
+                action = self.pending_dialog.action
+                new_name = "image_" + self.actionModel.get_id() + ".png"
+                self.capture_screen(new_name, int(x), int(y), int(w), int(h))
+                action['file_name'].append(new_name)
+                index = self.actionModel.getIndexFromAction(self.actionModel.root.index(), action)
+                item = self.actionModel.itemFromIndex(index)
+                item.setData(action, Qt.ItemDataRole.UserRole)
+                self.mode_select = False
+                self.labelImage.clearSelect()
+                self.action_type = ""
+                self.main_win.ui.cancelButton.hide()
+                self.save()
+                # Re-open a fresh dialog (the old exec() already returned when we hid it)
+                dialog = actions.ActionDialog(self.actionModel, index, self.working_dir)
+                self.pending_dialog = None
+                result = dialog.exec()
+                if result == 1:
+                    self.save()
+                    self.actionModel.layoutChanged.emit()
             if self.action_type == "Check Until Found" or  self.action_type == "Check Until Not Found":
                 action = self.actionModel.appendAction(self.working_dir, type=self.action_type, x="{:.3f}".format(0.0), y="{:.3f}".format(0.0), w="{:.3f}".format(1.0), h="{:.3f}".format(1.0), delay=str(self.settings.get("default_delay")))
                 self.capture_screen(action[u'file_name'][0], int(x), int(y), int(w), int(h))
@@ -470,6 +491,20 @@ class Tab(QtWidgets.QWidget):
             self.app.restoreOverrideCursor()
             self.main_win.ui.okButton.hide()
             self.main_win.ui.cancelButton.hide()
+        elif self.action_type == "AddImage":
+            self.action_type = ""
+            self.mode_select = False
+            self.labelImage.clearSelect()
+            self.main_win.ui.cancelButton.hide()
+            action = self.pending_dialog.action         
+            index = self.actionModel.getIndexFromAction(self.actionModel.root.index(), action)
+            # Re-open edit dialog after user presses cancel button
+            dialog = actions.ActionDialog(self.actionModel, index, self.working_dir)
+            self.pending_dialog = None
+            result = dialog.exec()
+            if result == 1:
+                self.save()
+                self.actionModel.layoutChanged.emit()
 
     def ok_pressed(self):
         if self.action_type == "Capture":
@@ -896,10 +931,15 @@ class Tab(QtWidgets.QWidget):
 
     def open_pressed(self):
         # Prompt for folder
-        open_dir = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select directory', self.settings.get("last_folder"))
-        if open_dir:
-            open_dir = open_dir.replace("/","\\")
-            self.open(open_dir)
+        while True:
+            open_dir = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select directory', self.settings.get("last_folder"))
+            if not open_dir:
+                return
+            if os.path.exists(os.path.join(open_dir, os.path.basename(open_dir) + ".json")):
+                break
+            QtWidgets.QMessageBox.warning(self, "Invalid Folder", "The selected folder is not a valid scenario folder. Select another folder or cancel.")
+        open_dir = open_dir.replace("/", "\\")
+        self.open(open_dir)
 
     def open(self, open_dir):
         # TODO: prompt for unsaved changes
@@ -1298,14 +1338,25 @@ class Tab(QtWidgets.QWidget):
     def on_action_item_delete(self, item):
         indexes = self.actionList.selectedIndexes()
         if indexes:
-            quit_msg = "Are you sure you want to delete this action?"
-            reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.StandardButton.Yes, QtWidgets.QMessageBox.StandardButton.No)
+            msg_box = QtWidgets.QMessageBox(self)
+            msg_box.setWindowTitle('Message')
+            msg_box.setIcon(QtWidgets.QMessageBox.Icon.Question)
+            msg_box.setText("Are you sure you want to delete this action?")
+            msg_box.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No)
+            msg_box.setDefaultButton(QtWidgets.QMessageBox.StandardButton.No)
+            checkbox = QtWidgets.QCheckBox("Remove associated images?")
+            checkbox.setChecked(True)
+            msg_box.setCheckBox(checkbox)
+            reply = msg_box.exec()
+            # quit_msg = "Are you sure you want to delete this action?"
+            # reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.StandardButton.Yes, QtWidgets.QMessageBox.StandardButton.No)
+            
             if reply == QtWidgets.QMessageBox.StandardButton.Yes:
                 # Indexes is a list of a single item in single-select mode.
                 index = indexes[0]
                 # Remove the item and refresh.
                 print(f"Deleting row: {index.row()}")
-                self.actionModel.remove(self.working_dir, index, remove_files=True)
+                self.actionModel.remove(self.working_dir, index, remove_files=checkbox.isChecked())
                 print(len(self.actionModel.actions))
                 if len(self.actionModel.actions) == 0:
                     self.actionModel.init_trackers()
