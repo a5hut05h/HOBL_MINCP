@@ -1357,7 +1357,7 @@ class Scenario(unittest.TestCase):
         else:
             if blocking == True and callback == False and self.async_comm == "1":
                 if log_output:
-                    logging.debug("Call - blocking with callback.  host_ip = " + self.host_ip)
+                    logging.debug(f"Call - blocking with callback.  host_ip = {self.host_ip}")
 
                 # Make socket connection
                 range_low = int(Params.get('global', 'port_range_low'))
