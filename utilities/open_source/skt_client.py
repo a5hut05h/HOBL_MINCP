@@ -12,12 +12,18 @@ Result contract (drives the process exit code so HOBL can detect failures):
 Long-running commands (e.g. Calibrate_Device) keep a single connection open
 while the server works and return one final status reply. The -timeout bounds
 the wait so a lost or hung reply can't block forever.
+
+Data_Ready is handled locally: the client obtains the completed DAQ run
+manifest with List_Data, downloads each file with Get_Data, and writes the run
+under the HOBL result directory supplied by the callback.
 '''
 from builtins import str
 from builtins import *
 import socket
 import sys
 import argparse
+import json
+import os
 
 parser = argparse.ArgumentParser(description='This is a client for testing the callback server. Call this function followed by the command you want to send.')
 parser.add_argument('-host', nargs='?', default='localhost', help="The host IP for the server to listen on. Defaults to localhost.")
@@ -57,26 +63,139 @@ def send_command(target_host, target_port, message, timeout):
         s.close()
 
 
-def download_file(target_host, target_port, message, dest_path, timeout):
-    """Send one command and stream the server's byte response to dest_path."""
+def _read_response_header(s):
+    header = bytearray()
+    while not header.endswith(b"\n"):
+        chunk = s.recv(1)
+        if not chunk:
+            raise ConnectionError("server closed the connection before sending a response header")
+        header.extend(chunk)
+        if len(header) > 65536:
+            raise ValueError("response header is too large")
+
+    header_text = header[:-1].decode("utf-8")
+    if header_text.startswith("ERROR "):
+        raise RuntimeError(header_text[6:])
+    if not header_text.startswith("OK "):
+        raise ValueError("invalid response header: {}".format(header_text))
+
+    try:
+        return int(header_text[3:])
+    except ValueError:
+        raise ValueError("invalid payload size in response header: {}".format(header_text))
+
+
+def request_payload(target_host, target_port, message, timeout):
+    """Send a request and return its framed payload."""
     s = _open_socket(target_host, target_port, timeout)
     try:
         s.sendall(message.encode() + '\r\n'.encode())
-        with open(dest_path, "wb") as f:
-            while True:
-                chunk = s.recv(1024)
-                if not chunk:
-                    break
-                f.write(chunk)
-        return "OK"
+        payload_size = _read_response_header(s)
+        payload = bytearray()
+        while len(payload) < payload_size:
+            chunk = s.recv(min(65536, payload_size - len(payload)))
+            if not chunk:
+                raise ConnectionError(
+                    "incomplete response: expected {} bytes, received {}".format(
+                        payload_size, len(payload)
+                    )
+                )
+            payload.extend(chunk)
+        return bytes(payload)
     finally:
         s.close()
 
 
+def download_file(target_host, target_port, message, dest_path, expected_size, timeout):
+    """Download one framed file response and atomically place it at dest_path."""
+    s = _open_socket(target_host, target_port, timeout)
+    temp_path = dest_path + ".part"
+    try:
+        s.sendall(message.encode() + '\r\n'.encode())
+        payload_size = _read_response_header(s)
+        if expected_size is not None and payload_size != expected_size:
+            raise ValueError(
+                "file size changed: manifest reported {}, server reported {}".format(
+                    expected_size, payload_size
+                )
+            )
+
+        parent_dir = os.path.dirname(dest_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        bytes_received = 0
+        with open(temp_path, "wb") as f:
+            while bytes_received < payload_size:
+                chunk = s.recv(min(65536, payload_size - bytes_received))
+                if not chunk:
+                    raise ConnectionError(
+                        "incomplete file: expected {} bytes, received {}".format(
+                            payload_size, bytes_received
+                        )
+                    )
+                f.write(chunk)
+                bytes_received += len(chunk)
+        os.replace(temp_path, dest_path)
+    finally:
+        s.close()
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+
+def receive_daq_run(target_host, target_port, result_dir, timeout):
+    """Pull the latest completed DAQ run into the local HOBL result directory."""
+    manifest = json.loads(
+        request_payload(target_host, target_port, "List_Data", timeout).decode("utf-8")
+    )
+    run_name = manifest.get("run_name")
+    files = manifest.get("files")
+    if not run_name or not isinstance(files, list):
+        raise ValueError("invalid DAQ data manifest")
+    if run_name != os.path.basename(run_name) or "/" in run_name or "\\" in run_name:
+        raise ValueError("invalid DAQ run name in manifest")
+
+    daq_root = os.path.abspath(os.path.join(result_dir, "DAQ", run_name))
+    for entry in files:
+        relative_path = entry.get("path") if isinstance(entry, dict) else None
+        expected_size = entry.get("size") if isinstance(entry, dict) else None
+        if not relative_path or not isinstance(expected_size, int) or expected_size < 0:
+            raise ValueError("invalid file entry in DAQ data manifest")
+
+        relative_os_path = relative_path.replace("/", os.sep)
+        if os.path.isabs(relative_os_path):
+            raise ValueError("manifest contains an absolute file path")
+        dest_path = os.path.abspath(os.path.join(daq_root, relative_os_path))
+        if os.path.commonpath((daq_root, dest_path)) != daq_root:
+            raise ValueError("manifest file path escapes the DAQ result directory")
+
+        print("Downloading: {}".format(relative_path))
+        download_file(
+            target_host,
+            target_port,
+            "Get_Data {} {}".format(run_name, relative_path),
+            dest_path,
+            expected_size,
+            timeout,
+        )
+
+    return "ok"
+
+
 try:
-    if command == "Get_Data":
-        # Receive a file from the server and write it to test.csv in the cwd.
-        rcvd_msg = download_file(host, port, send_msg, "test.csv", timeout_s)
+    if command == "Data_Ready":
+        if len(args.message) < 2:
+            raise ValueError("Data_Ready requires the HOBL result directory")
+        result_dir = " ".join(args.message[1:])
+        if not os.path.isdir(result_dir):
+            raise ValueError("HOBL result directory does not exist: {}".format(result_dir))
+        rcvd_msg = receive_daq_run(host, port, result_dir, timeout_s)
+    elif command == "Get_Data":
+        if len(args.message) < 3:
+            raise ValueError("Get_Data requires a run name and relative file path")
+        relative_path = " ".join(args.message[2:])
+        destination = os.path.basename(relative_path.replace("/", os.sep))
+        download_file(host, port, send_msg, destination, None, timeout_s)
+        rcvd_msg = "OK"
     else:
         # All other commands (including the long-running Calibrate_Device) send
         # one command and get back a single status reply.
