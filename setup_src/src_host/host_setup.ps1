@@ -179,7 +179,8 @@ if ($framework) {
 
 if ($local) {
     "-- Installing DUT setup" | log
-    # create c:\hobl_data if it doesn't exist
+    # create c:\hobl_data and c:\hobl_bin if they don't exist
+    New-Item -ItemType Directory -Force -Path c:\hobl_bin > $null
     New-Item -ItemType Directory -Force -Path c:\hobl_data > $null
     # run dut_setup.cmd with local_setup=1
     & "$PSScriptRoot\..\..\hobl.cmd" -s dut_setup local_setup=1 2>&1 | log
@@ -286,9 +287,11 @@ if ($ui) {
     Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -RunLevel Highest -Force 2>&1 | log
     checkCmd($?)
 
-    "-- Install complete" | log
-    "-- Waiting ~15 seconds for app to launch" | log
-    Start-Sleep -seconds 15
+    "-- Install complete, it may take about a minute for the UI to auto-launch for the first time." | log
+    #"-- Waiting ~30 seconds for first time app launch" | log
+    #Start-Sleep -seconds 30
+    # Press any key to exit
+    Read-Host -Prompt "-- Press any key to exit..."
 }
 
 Exit 0
