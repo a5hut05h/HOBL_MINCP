@@ -291,7 +291,7 @@ if ($ui) {
     #"-- Waiting ~30 seconds for first time app launch" | log
     #Start-Sleep -seconds 30
     # Press any key to exit
-    Read-Host -Prompt "-- Press any key to exit..."
+    Read-Host -Prompt "-- Press any key to exit"
 }
 
 Exit 0
