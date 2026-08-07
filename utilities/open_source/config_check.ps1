@@ -94,7 +94,7 @@ function Write-KeyVal ($key, $val) {
 
 # Run an executable and return its stdout lines, killing it and returning $null if it doesn't
 # exit within the timeout (SMonitor hangs retrying when no accessory is connected).
-function Invoke-WithTimeout ($FilePath, $Arguments, $TimeoutSeconds = 1) {
+function Invoke-WithTimeout ($FilePath, $Arguments, $TimeoutSeconds = 0.5) {
     try {
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = $FilePath
