@@ -92,6 +92,30 @@ function Write-KeyVal ($key, $val) {
     $table | Add-Member -Name "$key" -Value "$finalVal" -MemberType NoteProperty 
 }
 
+# Run an executable and return its stdout lines, killing it and returning $null if it doesn't
+# exit within the timeout (SMonitor hangs retrying when no accessory is connected).
+function Invoke-WithTimeout ($FilePath, $Arguments, $TimeoutSeconds = 1) {
+    try {
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = $FilePath
+        $psi.Arguments = $Arguments
+        $psi.UseShellExecute = $false
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $psi.CreateNoWindow = $true
+        $proc = [System.Diagnostics.Process]::Start($psi)
+        if (-not $proc.WaitForExit($TimeoutSeconds * 1000)) {
+            try { $proc.Kill() } catch {}
+            return $null
+        }
+        $out = $proc.StandardOutput.ReadToEnd()
+        if ([string]::IsNullOrWhiteSpace($out)) { return $null }
+        return ($out.TrimEnd("`r", "`n") -split "`r?`n")
+    } catch {
+        return $null
+    }
+}
+
 # Power Mode GUID to friendly name mapping
 $PowerModeGuidMap = @{
     "961cc777-2547-4f9d-8174-7d86181b8a7a" = "Best Power Efficiency"
@@ -1649,6 +1673,46 @@ else {
     Write-KeyVal "DC Hibernate After (min)" $val
     $val = ((powercfg /Q SCHEME_BALANCED SUB_SLEEP HIBERNATEIDLE | select-string -pattern "Current AC") -split ":" | select -last 1)
     Write-KeyVal "AC Hibernate After (min)" $val
+
+    # Pen Config Info  ## Only on Surface devices - try SAM first, then KIP stops when it first finds config data. 
+    $penParsed = $false
+    foreach ($mcu in @("sam", "kip")) {
+        try {
+            if (Test-Path "C:\Tools\SMonitor\SMonitorUAP.exe") 
+            {
+                $penconfig = Invoke-WithTimeout "C:\Tools\SMonitor\SMonitorUAP.exe" "/mcu $mcu /wlcdevicestatus"
+            } 
+            else 
+            {
+                $penconfig = Invoke-WithTimeout "C:\Tools\SMonitor\SMonitor.exe" "/mcu $mcu /wlcdevicestatus"
+            }
+            # Output line should be on success calls: /wlcgetdevicestatus:  0x028B...  (double space -> token index 2 is the 0x value)
+            $penraw = $penconfig.split("  ")[2].Substring(2)
+
+            # First byte: 00 = no pen, 01 = docked not charging, 02 = charging
+            $penByte = $penraw.Substring(0, 2)
+            switch ($penByte) {
+                "00" { $penStatus = "No pen" }
+                "01" { $penStatus = "Docked not charging" }
+                "02" { $penStatus = "Charging" }
+                default { $penStatus = "Not Supported" }
+            }
+
+            Write-KeyVal "Pen Status" $penStatus
+            # Charge value (second-to-last byte, hex->decimal) is only valid when a pen is present
+            if ($penByte -eq "01" -or $penByte -eq "02") {
+                $penRSOC = [System.Convert]::ToInt32($penraw.Substring($penraw.Length - 4, 2), 16)
+                Write-KeyVal "Pen RSOC" $penRSOC
+            }
+            $penParsed = $true
+            break
+        } catch {
+            continue
+        }
+    }
+    if (-not $penParsed) {
+        Write-KeyVal "Pen Status" "Not Supported"
+    }   
 
     # Capture Time
     [datetime]$today = get-date

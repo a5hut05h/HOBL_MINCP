@@ -96,11 +96,6 @@ class SystemPrep(core.app_scenario.Scenario):
             # Disable PCC to prevent being limited to 80% charge
             self._call([smonitor_exe, "/battpccenable 1 0"], fail_on_exception=False, log_output=False, expected_exit_code="")
 
-            if self.bpm_pcc_blm_disable:
-                self._call([smonitor_exe, "/clearbpmstatus 1"],   fail_on_exception=False, log_output=False, expected_exit_code="")
-                self._call([smonitor_exe, "/battbpmdisable 0 1"], fail_on_exception=False, log_output=False, expected_exit_code="")
-                self._call([smonitor_exe, "/battpccenable 0 0"],  fail_on_exception=False, log_output=False, expected_exit_code="")
-                self._call([smonitor_exe, "/battblmdisable 1"],   fail_on_exception=False, log_output=False, expected_exit_code="")
         except:
             logging.warning("SMonitor call failed")
 
