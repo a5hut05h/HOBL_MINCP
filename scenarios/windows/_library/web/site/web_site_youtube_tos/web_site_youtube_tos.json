@@ -137,8 +137,8 @@
             },
             {
                 "children": [],
-                "delay": "0",
-                "description": "1",
+                "delay": "1",
+                "description": "0",
                 "enabled": true,
                 "id": "1EERW83",
                 "text": "0",
