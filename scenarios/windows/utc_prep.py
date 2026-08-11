@@ -15,9 +15,9 @@ class UtcPrep(core.app_scenario.Scenario):
     enable = Params.get(module, 'enable')
 
     def runTest(self):
-
+        # C:\hobl\HOBL_MINCP\utilities\proprietary\ParseUtc\ConsumerMultitaskerPTs.xml
         if self.enable == '1':
-            self._upload("utilities\\proprietary\\ParseUtc\\UtcPerftrack.xml", "C:\\ProgramData\\Microsoft\\diagnosis\\sideload")
+            self._upload("utilities\\proprietary\\ParseUtc\\ConsumerMultitaskerPTs.xml", "C:\\ProgramData\\Microsoft\\diagnosis\\sideload")
             self._upload("utilities\\proprietary\\ParseUtc\\DisableAllUploads.json", "C:\\ProgramData\\Microsoft\\diagnosis\\sideload")
             self._call(["cmd.exe", '/C reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\DataCollection" /v AllowTelemetry /t REG_DWORD /d 3 /f > null 2>&1'])
             self._call(["cmd.exe", '/C reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting" /v DisableWerUpload /t REG_DWORD /d 1 /f > null 2>&1'])
