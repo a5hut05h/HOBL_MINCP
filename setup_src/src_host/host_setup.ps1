@@ -9,7 +9,7 @@ param(
 )
 
 # HOBL UI and Dut Setup versions
-$hobl_ui_version = "1.4"
+$hobl_ui_version = "1.5"
 # Set $dut_setup_version to value at top of setup_src\src_dut_win\dut_setup.cmd
 $dut_setup_cmd = "$PSScriptRoot\..\src_dut_win\dut_setup.cmd"
 if (Test-Path $dut_setup_cmd) {
@@ -291,7 +291,7 @@ if ($ui) {
     #"-- Waiting ~30 seconds for first time app launch" | log
     #Start-Sleep -seconds 30
     # Press any key to exit
-    Read-Host -Prompt "-- Press any key to exit"
+    Read-Host -Prompt "-- Press Enter to exit"
 }
 
 Exit 0
