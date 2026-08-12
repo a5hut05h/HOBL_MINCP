@@ -652,7 +652,7 @@
         <final id="_cancel" />
       </scxml>
     </scenario>
-    <scenario schemaversion="2" scenarioid="{0e3fbfaa-4fb2-4360-b3d3-7d0c2f1ace21}" scenarioname="PT_8920_Office_Word_FileOpen_WCOS_VAIL_0e3fbf" maxfailurereports="0" maxdurationms="600000" mintimebetweencompletionescalationsms="0" mintimebetweenfailureescalations="0" matchbehavior="newest" maxinflightinstances="1" ptscenarioname="Office_Word_FileOpen_WCOS_VAIL" measureversionguid="{00000000-0000-0000-0000-000000000000}">
+    <scenario schemaversion="2" scenarioid="{01d30e59-2043-4078-89c8-fc34e15b8fab}" scenarioname="PT_500_Office_Word_FileOpen_01d30e" maxfailurereports="0" maxdurationms="600000" mintimebetweencompletionescalationsms="0" mintimebetweenfailureescalations="0" matchbehavior="newest" maxinflightinstances="1" ptscenarioname="Office_Word_FileOpen" measureversionguid="{00000000-0000-0000-0000-000000000000}">
       <triggers>
         <trigger triggername="030F2F57-ABD0-4427-BCF1-3A3587D7DC7D.1501_0">
           <etwtrigger>
@@ -674,7 +674,7 @@
         </trigger>
       </triggers>
       <filters>
-        <filter appliesto="trigger" filtername="match63ScenarioIde_18920">
+        <filter appliesto="trigger" filtername="match63ScenarioIde_1500">
           <singletriggerpropertyfilter>
             <triggername>030F2F57-ABD0-4427-BCF1-3A3587D7DC7D.1501_0</triggername>
             <propertyselector>
@@ -685,10 +685,10 @@
             <mathoperation>add</mathoperation>
             <constant>0</constant>
             <operation>equal</operation>
-            <value>8920</value>
+            <value>500</value>
           </singletriggerpropertyfilter>
         </filter>
-        <filter appliesto="trigger" filtername="match64ScenarioIde_18920">
+        <filter appliesto="trigger" filtername="match64ScenarioIde_1500">
           <singletriggerpropertyfilter>
             <triggername>030F2F57-ABD0-4427-BCF1-3A3587D7DC7D.1503_0</triggername>
             <propertyselector>
@@ -699,7 +699,7 @@
             <mathoperation>add</mathoperation>
             <constant>0</constant>
             <operation>equal</operation>
-            <value>8920</value>
+            <value>500</value>
           </singletriggerpropertyfilter>
         </filter>
         <filter appliesto="trigger" filtername="match63MatchKeye64MatchKey">
@@ -755,21 +755,20 @@
       </filters>
       <scxml version="1.0" datamodel="custom" initial="_start" xmlns="http://www.w3.org/2005/07/scxml">
         <state id="_start">
-          <transition event="030F2F57-ABD0-4427-BCF1-3A3587D7DC7D.1501_0" target="1" name="T0" triggersource="agent">
-            <filter>match63ScenarioIde_18920</filter>
+          <transition event="030F2F57-ABD0-4427-BCF1-3A3587D7DC7D.1501_0" target="1" name="T0">
+            <filter>match63ScenarioIde_1500</filter>
             <filter strict="false">match63MatchKeye64MatchKey</filter>
             <filter strict="false">match63ScenarioIde64ScenarioId</filter>
           </transition>
         </state>
         <state id="1">
-          <transition event="030F2F57-ABD0-4427-BCF1-3A3587D7DC7D.1503_0" target="_complete" name="T1" triggersource="agent">
-            <filter>match64ScenarioIde_18920</filter>
+          <transition event="030F2F57-ABD0-4427-BCF1-3A3587D7DC7D.1503_0" target="_complete" name="T1">
+            <filter>match64ScenarioIde_1500</filter>
             <filter>match63MatchKeye64MatchKey</filter>
             <filter>match63ScenarioIde64ScenarioId</filter>
           </transition>
         </state>
         <final id="_complete" />
-        <final id="_cancel" />
       </scxml>
     </scenario>
     <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" schemaversion="2" scenarioid="{ec0e46a0-ae8f-466b-942f-cc85f0e59a32}" scenarioname="PT_8806_Office_XL_Boot v2_ec0e46" maxfailurereports="0" maxdurationms="600000" mintimebetweencompletionescalationsms="0" mintimebetweenfailureescalations="0" matchbehavior="newest" maxinflightinstances="1" ptscenarioname="Office_XL_Boot v2" measureversionguid="{00000000-0000-0000-0000-000000000000}">
