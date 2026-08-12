@@ -44,11 +44,11 @@ def main():
     aux_ip   = Params.get('global', 'aux_host')
     platform = Params.get('global', 'platform')
 
-    def call(cmd):
+    def call(cmd, method="Run"):
         if target == "dut":
-            rpc.call_rpc(dut_ip, 8000, 'Run', cmd)
+            rpc.call_rpc(dut_ip, 8000, method, cmd)
         else:
-            rpc.call_rpc(aux_ip, 8000, 'Run', cmd)
+            rpc.call_rpc(aux_ip, 8000, method, cmd)
 
     share_path     = Params.get('global', 'remote_share_path')
     share_username = Params.get('global', 'remote_share_username')
@@ -56,6 +56,8 @@ def main():
 
     if share_path != '':
         call(["cmd.exe", f"/C net use z: {share_path} {share_password} /user:{share_username}"])
+
+    call(["cmd.exe", "/C taskkill /F /T /IM remote.exe"], "RunWithResultAndExitCode")
 
     args = ""
 
