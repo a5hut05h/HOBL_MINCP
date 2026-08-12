@@ -7,8 +7,9 @@ from utilities.open_source.modules import import_run_user_only
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
+    Params.setDefault('prod_save_document', 'event_tag', '', desc='', valOptions=[])
     return
 
 def run_user_only():
-    import_run_user_only('scenarios\\windows\\_library\\run_command')
+    import_run_user_only('scenarios\\windows\\_library\\misc\\etw_event_tag')
     return
