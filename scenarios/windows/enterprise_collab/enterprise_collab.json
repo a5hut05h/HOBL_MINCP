@@ -133,32 +133,12 @@
                     },
                     {
                         "children": [],
-                        "delay": "0.0",
-                        "description": "Upload Perf Files",
-                        "enabled": true,
-                        "file_name": [
-                            "code_1EN194J.py"
-                        ],
-                        "id": "1EN194J",
-                        "type": "Code"
-                    },
-                    {
-                        "children": [],
                         "delay": "0",
                         "description": "",
                         "enabled": true,
                         "id": "1EN18UV",
-                        "include_path": "scenarios\\windows\\_library\\enterprise_collab\\diagnostics_enable",
+                        "include_path": "scenarios\\windows\\_library\\enterprise_collab\\perf_setup",
                         "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c net stop DiagTrack && net start DiagTrack",
-                        "delay": "2",
-                        "description": "Restart DiagTrack",
-                        "enabled": true,
-                        "id": "1EPL382",
-                        "type": "Command"
                     }
                 ],
                 "description": "",
@@ -1055,40 +1035,12 @@
                 "children": [
                     {
                         "children": [],
-                        "delay": "20",
-                        "description": "15",
-                        "enabled": true,
-                        "id": "1EUEFL4",
-                        "type": "Delay"
-                    },
-                    {
-                        "children": [],
-                        "delay": "0.0",
-                        "description": "Delete Perf Files",
-                        "enabled": true,
-                        "file_name": [
-                            "code_1EN1A44.py"
-                        ],
-                        "id": "1EN1A44",
-                        "type": "Code"
-                    },
-                    {
-                        "children": [],
                         "delay": "0",
                         "description": "",
                         "enabled": true,
                         "id": "1EN1A1W",
-                        "include_path": "scenarios\\windows\\_library\\enterprise_collab\\diagnostics_disable",
+                        "include_path": "scenarios\\windows\\_library\\enterprise_collab\\perf_teardown",
                         "type": "Include"
-                    },
-                    {
-                        "children": [],
-                        "command": "cmd /c net stop DiagTrack && net start DiagTrack",
-                        "delay": "2",
-                        "description": "Restart DiagTrack",
-                        "enabled": true,
-                        "id": "1EPL51E",
-                        "type": "Command"
                     }
                 ],
                 "description": "",

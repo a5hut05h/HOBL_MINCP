@@ -5,6 +5,7 @@ from cmath import log
 from datetime import datetime
 from builtins import str
 from builtins import *
+import base64
 import math
 import unittest
 import logging
@@ -55,6 +56,14 @@ from datetime import datetime
 from pathlib import Path
 
 # Base class for each application test scenario
+
+def _powershell_literal(value):
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def _encode_powershell_command(command):
+    encoded = base64.b64encode(command.encode("utf-16-le")).decode("ascii")
+    return '-ExecutionPolicy Unrestricted -EncodedCommand ' + encoded
 
 sys.stdin.reconfigure(encoding='utf-8')
 sys.stdout.reconfigure(encoding='utf-8')
@@ -504,12 +513,16 @@ class Scenario(unittest.TestCase):
             override_dict['Product'] = Params.get('global', 'product', log = False)
             override_dict['DUT Type'] = Params.get('global', 'dut_type', log = False)
             override_str = json.dumps(override_dict)
-            override_str = override_str.replace('"', "'")
+            # override_str = override_str.replace('"', "'")
             # override_str = override_str.replace(' ', "")
 
             if self.platform.lower() == "windows":
-                self._upload("utilities\\open_source\\config_check.ps1", self.dut_exec_path, check_modified=True)
-                cmd = '-ExecutionPolicy Unrestricted -Command "' + os.path.join(self.dut_exec_path, "config_check.ps1 -LogFile " + self.dut_data_path, "Config") + " -OverrideString " + '\\\"' + override_str + '\\\""'
+                powershell_command = "& {0} -LogFile {1} -OverrideString {2}".format(
+                    _powershell_literal(os.path.join(self.dut_exec_path, "config_check.ps1")),
+                    _powershell_literal(os.path.join(self.dut_data_path, "Config")),
+                    _powershell_literal(override_str)
+                )
+                cmd = _encode_powershell_command(powershell_command)
                 self._call(["powershell.exe", cmd])
             elif self.platform.lower() == "macos":
                 source = os.path.join("utilities", "open_source", "config_check.sh")
@@ -522,12 +535,16 @@ class Scenario(unittest.TestCase):
 
 
 
-            override_str = f"{{'Scenario':'{module}','Test Name':'{test_name}'}}"
+            override_str = json.dumps({"Scenario": module, "Test Name": test_name})
             # override_str = f"{{'Test Name':'{test_name}'}}"
             # override_str = f"{{'Scenario':'{module}'}}"
             # print('override string used for traige the configcheck scenario issue:   ' + override_str)
-            cmd = '-ExecutionPolicy Unrestricted -Command "' + os.path.join(self.dut_exec_path, "config_check.ps1") + " -Prerun -LogFile " + '\\\"' + os.path.join(
-                self.dut_data_path, self.testname + "_ConfigPre") + '\\\"' + "-OverrideString " + '\\\"' + override_str + '\\\""'
+            powershell_command = "& {0} -Prerun -LogFile {1} -OverrideString {2}".format(
+                _powershell_literal(os.path.join(self.dut_exec_path, "config_check.ps1")),
+                _powershell_literal(os.path.join(self.dut_data_path, self.testname + "_ConfigPre")),
+                _powershell_literal(override_str)
+            )
+            cmd = _encode_powershell_command(powershell_command)
             if self.platform.lower() == "android":
                 # result = self._host_call('python .\\utilities\\Android\\config_check_android.py --PreRun --OverrideString \'"' + override_str.replace("'", '"""') + '"\' --LogFile ' + self.result_dir + '\\' + self.testname + '_ConfigPre' + " -i " + str(self.dut_ip) + ":5555", expected_exit_code="")
                 result = self._host_call('python .\\utilities\\Android\\config_check_android.py --PreRun --OverrideString "' + '\\\"' + override_str +
