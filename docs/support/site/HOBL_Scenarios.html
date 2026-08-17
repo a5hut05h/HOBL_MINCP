@@ -299,6 +299,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#iperf3" class="md-nav__link">
+    iperf3
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#lvp" class="md-nav__link">
     lvp
   </a>
@@ -320,8 +327,22 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#perf_stress" class="md-nav__link">
+    perf_stress
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#process_idle_tasks" class="md-nav__link">
     process_idle_tasks
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standby" class="md-nav__link">
+    standby
   </a>
   
 </li>
@@ -411,8 +432,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#youtube25" class="md-nav__link">
-    youtube25
+  <a href="#brightness_study_report" class="md-nav__link">
+    brightness_study_report
   </a>
   
 </li>
@@ -554,6 +575,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#iperf3" class="md-nav__link">
+    iperf3
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#lvp" class="md-nav__link">
     lvp
   </a>
@@ -575,8 +603,22 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#perf_stress" class="md-nav__link">
+    perf_stress
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#process_idle_tasks" class="md-nav__link">
     process_idle_tasks
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standby" class="md-nav__link">
+    standby
   </a>
   
 </li>
@@ -666,8 +708,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#youtube25" class="md-nav__link">
-    youtube25
+  <a href="#brightness_study_report" class="md-nav__link">
+    brightness_study_report
   </a>
   
 </li>
@@ -714,10 +756,28 @@
 <p><u>Parameters:</u></p>
 <p><code>duration</code> - Minimum run time in seconds <strong>Default:</strong> <code>60</code> </p>
 <p><code>workload</code> - Workload type: single_core or multi_core <strong>Default:</strong> <code>multi_core</code>  <strong>Options:</strong> <code>single_core, multi_core</code></p>
+<p><code>installer_path</code> - Path to Cinebench installer on host machine. This should be the directory for your device architecture, containing the extracted Cinebench files, including cinebench.exe <strong>Default:</strong> `` </p>
 <h2 id="collect_logs">collect_logs</h2>
 <p>Collect various system logs.</p>
 <h2 id="copilot">copilot</h2>
 <p>Nonfuctional.  Needs to be updated for new architecture.</p>
+<h2 id="iperf3">iperf3</h2>
+<p>Runs iperf3 network throughput tests against a remote server while measuring power.</p>
+<p>Supports four predefined test profiles (T1-T4) drawn from the iperf3 test matrix, plus
+a 'custom' option that accepts any iperf3 argument string. Power/performance collection
+is enabled so each run captures the power impact of the traffic pattern alongside the
+raw throughput numbers.</p>
+<p>The scenario blocks on iperf3's process exit (expected exit code 0). The duration
+parameter feeds the -t flag in the command; it does not drive any internal timer.</p>
+<p>Results written to the run directory:
+    iperf3_output.txt  —  raw iperf3 console output (stdout + stderr)
+    iperf3.csv         —  parsed key metrics (throughput, jitter, packet loss)</p>
+<p><u>Parameters:</u></p>
+<p><code>server_ip</code> - IP address of the iperf3 server (required for T1-T4) <strong>Default:</strong> `` </p>
+<p><code>test_type</code> - Test profile to run: T1, T2, T3, T4, or custom <strong>Default:</strong> <code>T1</code>  <strong>Options:</strong> <code>T1, T2, T3, T4, custom</code></p>
+<p><code>custom_arguments</code> - Full iperf3 argument string when test_type='custom'. Include everything after 'iperf3', e.g. '-c 192.168.1.1 -u -b100M -t 60'. Ignored for T1-T4. <strong>Default:</strong> `` </p>
+<p><code>duration</code> - Seconds passed to iperf3 via -t (T1-T4 only). Also used to size the call timeout safety net for custom tests. <strong>Default:</strong> <code>300</code> </p>
+<p><code>wlan_logging</code> - Set to '1' to capture Wi-Fi layer telemetry alongside iperf3. Logs adapter error/discard counter deltas (Get-NetAdapterStatistics), a 5-second channel/RSSI/rate poll time series, and WLAN AutoConfig event log entries (connects, disconnects, roaming, channel switches). Adds wlan_<em>.txt / wlan_events.csv to the results directory and appends wlan_</em> metrics to iperf3.csv. <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
 <h2 id="lvp">lvp</h2>
 <p>Plays a video on full screen for a specified amount of time.  </p>
 <p><u>Parameters:</u></p>
@@ -762,6 +822,42 @@ Local camera and mic are on, other 9 participants are bots sending video and aud
 <p><code>background_onedrive_copy</code> -  <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
 <p><code>simple_office_launch</code> -  <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>1, 0</code></p>
 <p><code>perf_run</code> -  <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<h2 id="perf_stress">perf_stress</h2>
+<p>Install pyenv + Python + numpy/psutil on DUT for percentile_stress.py</p>
+<p><u>Parameters:</u></p>
+<p><code>meeting_time</code> - Set the time in minutes that the meeting can last up to. Default is teams:duration + 30 min. <strong>Default:</strong> <code>0</code> </p>
+<p><code>access_key</code> - The access key for the Teams Bots Server. Contact HOBL Support to inquire for a key. <strong>Default:</strong> <code>-1</code> </p>
+<p><code>number_of_bots</code> - Sets the number of bots to have in the meeting. <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>1, 2, 4, 8, 9</code></p>
+<p><code>bots_send_video</code> - Set to 1 if bots should have their cameras on. Set to 0 for audio only calls. <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>bots_send_audio</code> - Set to 1 to have bots send audio. Set to 0 to have bots be muted. <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>bots_share_screen</code> - Set to 1 to have the primary bot share its screen in the meeting. <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>bots_test_server</code> - For advanced use. Set to 1 to use the testing instance of the bots server. Not Recomended for general use. <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>send_video</code> - Set to 1 to have the DUT turn on its camera. Set to 0 to have the DUT camera off. <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>send_audio</code> - Set to 1 to have the DUT have its mic on. Set to 0 to have the DUT be muted. <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>send_screen</code> - Set to 1 to have the DUT share its screen in the meeting. <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>presentation_video_path</code> - Sets the path to the video file to use as the presented screen when the DUT is screen sharing. <strong>Default:</strong> <code>\teams_resources\ppt.mp4</code> </p>
+<p><code>show_desktop</code> - Set to 1 to have the DUT screen share their desktop when screen sharing. Set to 0 to share a video of a presentation instead. <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>bots_force_subscribe_resolution</code> - Force the bots to subscribe to a specific video resolution <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1080, 720, 480, 360</code></p>
+<p><code>duration</code> - The time in seconds to call for. Default is 600s or 5min. <strong>Default:</strong> <code>600</code>  <strong>Options:</strong> <code>60, 120, 300, 600</code></p>
+<p><code>parse_MSTeams_Logs</code> - Set to 1 to parse Teams logs after collecting them. <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>parser_location</code> - Sets the path to the parser to use to decode Teams logs. <strong>Default:</strong> <code>..\ScenarioAssets\Teamsdecode\bin\UnifiedLogging</code> </p>
+<p><code>collect_call_health</code> - Set to 1 to have the call health data collected. <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>collect_MSTeams_Logs</code> - Set to 1 to collect MS Teams logs of the meeting after exiting the meeting. <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>web_workload</code> - Specific websites to run during stress workload. reddit must be included (Tab 1 with new_tab=0). <strong>Default:</strong> <code>reddit amazongot googleimagesapollo youtubetos</code>  <strong>Options:</strong> <code>amazonbsg, amazongot, amazonvacuum, googleimagesapollo, googleimageslondon, googlesearchbelgium, googlesearchsuperbowl, instagram, reddit, theverge, wikipedia, youtubenasa, youtubetos</code></p>
+<p><code>background_teams</code> -  <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>stress_run</code> - For perf metrics <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>stress_cpu_target</code> - Target CPU load percentage for stress mode. <strong>Default:</strong> <code>25</code>  <strong>Options:</strong> <code>0, 25, 50, 65, 75, 85</code></p>
+<p><code>background_onedrive_copy</code> -  <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>simple_office_launch</code> -  <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>1, 0</code></p>
+<p><code>shell_probes</code> -  <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>sleep_resume_midrun</code> - This will actually sleep the DUT (pressing the power button) <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>edge_close_relaunch</code> - 1 = mid-run kill msedge and relaunch with 12 foreground sites. Side effect: destroys background Edge tabs (no automatic restore). Default 0 keeps bg tabs alive for the entire run. <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>perftrack_app_launch</code> -  <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>provider</code> - WPRP file to use for perf_utc tracing. <strong>Default:</strong> <code>perf_utc.wprp</code>  <strong>Options:</strong> <code>abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, GTPLight_CustomMemHardFaults.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp</code></p>
+<p><code>bg_heavy_capture</code> - 1 = launch collect_5min_traces.ps1 in the background on the DUT alongside the core trace. Uses a named WPR instance (perfStressHeavy). Saves rolling ETLs to C:\hobl_bin\perf_stress_heavy\<RunName>\WPR_<timestamp>.etl. WARNING: dual-session WPR perturbs metrics - debug use only. <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>bg_heavy_capture_interval</code> - Rolling ETL segment length in minutes for bg_heavy_capture (default 5). A 15-20 min run at 5 min should produce ~3 segments; shorten if wpr -stop flush eats into the next interval. <strong>Default:</strong> <code>5</code>  <strong>Options:</strong> <code>3, 4, 5, 6</code></p>
+<p><code>bg_edge_tabs</code> - 1 = open background Edge tabs to increase memory pressure and CPU stress. <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<p><code>bg_edge_tab_loops</code> - Iterations of the web_bg_tabs site loop. Each iteration opens 5 background Edge tabs. Default 6 = 30 background tabs <strong>Default:</strong> <code>6</code>  <strong>Options:</strong> <code>1, 2, 3, 4, 5, 6, 8, 10</code></p>
 <h2 id="process_idle_tasks">process_idle_tasks</h2>
 <p>Preforms various tasks that prepare a device for testing.  This includes queuing background maintenance tasks in Windows so they will not be running during tests.  To ensure consistent results, please run this scenario at least once per day on devices before starting tests.</p>
 <p><u>Parameters:</u></p>
@@ -769,6 +865,16 @@ Local camera and mic are on, other 9 participants are bots sending video and aud
 <p><code>loops</code> - Number of times the automation will attempt to perform tasks <strong>Default:</strong> <code>3</code> </p>
 <p><code>run_idle_tasks</code> - Queues Windows idle tasks so they will not be running during tests <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
 <p><code>final_reboot</code> - Sets if the device will reboot at the conclusion of process_idle_tasks <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<h2 id="standby">standby</h2>
+<p>Puts the device into standby mode, still conneccted to the network.</p>
+<p><u>Parameters:</u></p>
+<p><code>cs_duration</code> -  <strong>Default:</strong> <code>1200</code> </p>
+<p><code>button_to_record_delay</code> -  <strong>Default:</strong> <code>900</code> </p>
+<p><code>button_sleep_callback</code> -  <strong>Default:</strong> `` </p>
+<p><code>button_wake_callback</code> -  <strong>Default:</strong> `` </p>
+<p><code>local_button</code> -  <strong>Default:</strong> <code>1</code> </p>
+<p><code>sleep_mode</code> -  <strong>Default:</strong> `` </p>
+<p><code>connection</code> - Connected or Disconnected from the network during standby <strong>Default:</strong> <code>Connected</code>  <strong>Options:</strong> <code>Disconnected, Connected</code></p>
 <h2 id="system_prep">system_prep</h2>
 <p>Preforms various tasks that prepare a device for testing.</p>
 <p><u>Parameters:</u></p>
@@ -1009,18 +1115,14 @@ Local user is sharing desktop.</p>
 <p><code>duration</code> - Total scenario duration <strong>Default:</strong> <code>600</code> </p>
 <p><code>loop_duration</code> - YouTube video playback duration before looping (max 480s) <strong>Default:</strong> <code>300</code> </p>
 <p><code>full_screen</code> - Full Screen mode <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
-<h2 id="youtube25">youtube25</h2>
-<p>Plays a YouTube video in a web browser in Default View mode.</p>
-<p>Steps:</p>
-<ol>
-<li>Navigate to Tears of Steel YouTube video URL: <a href="https://youtu.be/41hv2tW5Lc4">youtu.be/41hv2tW5Lc4</a></li>
-<li>Change video quality to 1080p.</li>
-<li>Let video play for specified duration and loops.</li>
-<li>Close web browser.</li>
-</ol>
+<h2 id="brightness_study_report">brightness_study_report</h2>
+<p>Extract brightness value from a path containing a Brightness-XX folder.</p>
 <p><u>Parameters:</u></p>
-<p><code>duration</code> -  <strong>Default:</strong> <code>600</code> </p>
-<p><code>loops</code> -  <strong>Default:</strong> <code>1</code> </p>
+<p><code>result_path</code> -  <strong>Default:</strong> `` </p>
+<p><code>name</code> -  <strong>Default:</strong> `` </p>
+<p><code>device_name</code> -  <strong>Default:</strong> `` </p>
+<p><code>backlight_key</code> - Metric name for backlight power in brightness curve report. <strong>Default:</strong> <code>DisplayLight Power (W)</code> </p>
+<p><code>analog_key</code> - Metric name for analog/panel power in brightness curve report. <strong>Default:</strong> <code>DisplayLogic Power (W)</code> </p>
 <h2 id="comm_check">comm_check</h2>
 <p>Checks for valid communications between host and DUT.</p>
 <p>Steps:</p>

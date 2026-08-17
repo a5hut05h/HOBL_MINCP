@@ -31,6 +31,8 @@ Pause run and recharge device when battery drops below [charge_threshold], then 
 
 `resume_threshold` -  **Default:** `95` 
 
+`post_charge_delay` - How many seconds to wait after reaching the resume_threshold before disconnecting charger. **Default:** `1800` 
+
 `charge_on_call` -  **Default:** `` 
 
 `charge_off_call` -  **Default:** `` 
@@ -63,7 +65,7 @@ Periodically start ETL traces.
 
 <u>Parameters:</u>
 
-`providers` - ETL provider files to use **Default:** `power_light.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
+`providers` - ETL provider files to use **Default:** `power_light.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, GTPLight_CustomMemHardFaults.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
 
 `trace_duration` - The duration of the trace in seconds **Default:** `300` 
 
@@ -156,11 +158,21 @@ Collect ETL trace from specified [providers].
 
 <u>Parameters:</u>
 
-`providers` - ETL provider files to use **Default:** ``  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
+`providers` - ETL provider files to use **Default:** ``  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, GTPLight_CustomMemHardFaults.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
 
 ## frame_data
 
 Collect and parse framerate and timing data.  Does not have a significant impact on power consumption.
+
+## hard_reboot_prior
+
+Initiate a hard reboot (long press power button) before each scenario.
+Make sure this tool is listed first in the tool list so that it doesn't interrupt tracing or recording initiated by other tools.
+
+
+<u>Parameters:</u>
+
+`post_reboot_delay` - How many seconds to wait after reboot to let the system settle before continuing with the scenario. **Default:** `120` 
 
 ## kill_teams
 
@@ -174,6 +186,19 @@ Kill all instances of Teams processes.
 ## kill_widgets
 
 Stops the Windows Widgets from running.
+
+## mac_powermetrics
+
+macOS-only lightweight power measurement tool based on powermetrics.
+
+
+<u>Parameters:</u>
+
+`interval_ms` - powermetrics sample interval in ms. **Default:** `1000` 
+
+`samplers` - powermetrics -s sampler list. **Default:** `battery,cpu_power,gpu_power,ane_power` 
+
+`output_file` - Output filename written in dut_data_path. **Default:** `powertrace.plist` 
 
 ## media_perf
 
@@ -256,7 +281,15 @@ Trace specified performance counters that report utilization.
 
 <u>Parameters:</u>
 
-`processor_counter` - Processor counter to use **Default:** `\Processor(_Total)\% Processor Time` 
+`include_processes` - Include counters for individual processes **Default:** `0`  **Options:** `0, 1`
+
+`process_id_counter` - Process ID counter to use (per process) **Default:** `\Process(*)\ID Process` 
+
+`process_cpu_counter` - Process CPU counter to use (per process) **Default:** `\Process(*)\% Processor Time` 
+
+`process_mem_counter` - Process memory counter to use (per process) **Default:** `\Process(*)\Working Set` 
+
+`cpu_counter` - CPU counter to use **Default:** `\Processor(_Total)\% Processor Time` 
 
 `memory_counter` - Memory counter to use **Default:** `\Memory\Available Bytes` 
 
@@ -275,7 +308,7 @@ Collects and processes UTC Perftrack scenarios
 
 <u>Parameters:</u>
 
-`provider` - WPRP file to use for UTC Perftrack traces. **Default:** `perf_utc.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
+`provider` - WPRP file to use for UTC Perftrack traces. **Default:** `perf_utc.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, GTPLight_CustomMemHardFaults.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
 
 ## phm
 
@@ -441,6 +474,11 @@ Record periodic screen shots, for debug purposes.
 
 Records a screen cast from the DUT for debug purposes.  Has considerable power impact.
 
+
+<u>Parameters:</u>
+
+`device_index` - MacOS-only.  1 for older or non-Pro macbooks **Default:** `2`  **Options:** `1, 2`
+
 ## serialize_copyback
 
 Deprecated.
@@ -465,13 +503,13 @@ Run Intel's SOCWatch tool.
 
 ## stress_utc
 
-Collects and processes UTC Perftrack scenarios for stress workloads.
-Outputs a CSV with PT number instead of Scenario name.
+Collects and processes UTC performance metrics for stress workloads.
+Outputs a CSV with manifest id instead of Scenario name.
 
 
 <u>Parameters:</u>
 
-`provider` - WPRP file to use for UTC Perftrack traces. **Default:** `perf_utc.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
+`provider` - WPRP file to use for UTC traces. **Default:** `GTPLight_CustomMemHardFaults.wprp`  **Options:** `abl_perf.wprp, full_th.wprp, full_th_wpp.wprp, general_cpi_collector.wprp, GTPLight_CustomMemHardFaults.wprp, multimedia.wprp, perf_utc.wprp, pmu.wprp, power.wprp, power_heavy.wprp, power_light.wprp, power_memory.wprp, productivity_perf.wprp, stack_walk.wprp, thermal_power_light.wprp, web_perf.wprp`
 
 ## study_report
 

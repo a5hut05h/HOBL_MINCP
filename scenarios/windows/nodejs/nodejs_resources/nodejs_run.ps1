@@ -136,6 +136,20 @@ function getVSVersion {
 "-- Initializing Visual Studio Developer Command environment" | log
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
+# Verify required commands are findable on PATH after refresh.
+# Fail fast with a clear diagnostic instead of a chain of "term not recognized" errors.
+# pyenv check is done before we prepend pyenv paths below; pyenv must be installed by prep.
+foreach ($cmd in @('pyenv')) {
+    $resolved = Get-Command $cmd -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+        " ERROR - Required command '$cmd' not found on PATH after refresh." | log
+        " ERROR - Prep may not have completed, or the RPC service has a stale PATH." | log
+        " ERROR - PATH: $env:Path" | log
+        Exit 1
+    }
+    "Found ${cmd}: $($resolved.Source)" | log
+}
+
 $vsInfo = getVSVersion -product $vsProduct
 if (-not $vsInfo -or -not $vsInfo.Path) {
     " ERROR - Visual Studio $vsProduct installation not found via vswhere" | log

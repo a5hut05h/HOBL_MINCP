@@ -34,8 +34,16 @@ check_command() {
 
 # Always copy resources to pick up script/config changes
 log "-- Copying resources to $BIN_DIR/mac_pytorch_inf_resources"
-mkdir -p "$BIN_DIR/mac_pytorch_inf_resources"
-cp -r "$(dirname "$0")"/* "$BIN_DIR/mac_pytorch_inf_resources/"
+SRC_RES_DIR="$(cd "$(dirname "$0")" && pwd)"
+DST_RES_DIR="$BIN_DIR/mac_pytorch_inf_resources"
+mkdir -p "$DST_RES_DIR"
+check_status "resource directory creation"
+if [ "$SRC_RES_DIR" = "$DST_RES_DIR" ]; then
+    log "✓ Resource copy skipped (already running from $DST_RES_DIR)"
+else
+    cp -r "$SRC_RES_DIR"/* "$DST_RES_DIR/"
+    check_status "resource copy"
+fi
 
 echo "-- mac_pytorch_inf_prep.sh started $(date)" > "$LOG_FILE"
 log "-- pytorch_inf prep started"

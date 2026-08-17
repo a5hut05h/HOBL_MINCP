@@ -1,3 +1,7 @@
+# Microsoft-managed devices block direct PyPI access (CISO Central Feed Services policy);
+# resolve base packages through the approved Microsoft feed proxy. torch wheels still come
+# from download.pytorch.org (not covered by the block).
+--index-url https://packagefeedproxy.microsoft.io/pypi/simple
 # CPU-only wheels for Arm64 Windows (no NVIDIA GPU)
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.8.0
@@ -5,3 +9,4 @@ torch==2.8.0
 # requiring the Rust toolchain for source compilation on Arm64
 tokenizers==0.22.2
 transformers==4.56.1
+safetensors==0.8.0rc0

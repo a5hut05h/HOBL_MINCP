@@ -21,7 +21,7 @@
     "Scenarios": [
         {
             "Command": ".\\hobl.cmd",
-            "Scenario": "daily_prep",
+            "Scenario": "process_idle_tasks",
             "Enabled": true,
             "Expand": [
                 "charge"

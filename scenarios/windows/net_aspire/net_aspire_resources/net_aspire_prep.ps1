@@ -116,8 +116,20 @@ Set-Content -Path $logFile -encoding utf8 "-- net_aspire prep started ($logSuffi
 # -------------------------------------------------------------------
 # Install .NET SDK
 # -------------------------------------------------------------------
+# --- Remove the msstore source before any winget install so a broken pinned
+# certificate on that source cannot fail the command (winget 0x8a15005e /
+# -1978335138) behind an SSL-inspecting proxy. All needed packages are on 'winget'. ---
+try {
+    if ((winget source list 2>$null) -match "msstore") {
+        "Removing msstore winget source to avoid pinned-certificate failures (0x8a15005e)" | log
+        winget source remove msstore 2>&1 | log
+    }
+} catch {
+    "Could not remove msstore source (continuing): $($_.Exception.Message)" | log
+}
+
 "-- Installing .NET SDK 10.0 - 10.0.100-preview.5.25277.114 same version that's in restore.cmd" | log
-winget install --id Microsoft.DotNet.SDK.Preview --version 10.0.100-preview.5.25277.114 --accept-source-agreements --accept-package-agreements
+winget install --id Microsoft.DotNet.SDK.Preview --source winget --version 10.0.100-preview.5.25277.114 --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
@@ -125,7 +137,7 @@ $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";
 # Install .NET 8.0 SDK
 # -------------------------------------------------------------------
 "-- Installing .NET 8.0 SDK" | log
-winget install --id Microsoft.DotNet.SDK.8 --accept-source-agreements --accept-package-agreements
+winget install --id Microsoft.DotNet.SDK.8 --source winget --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
@@ -157,7 +169,7 @@ if ($isARM64) {
 # Install Git
 # -------------------------------------------------------------------
 "-- Installing git" | log
-winget install --id Git.Git --accept-source-agreements --accept-package-agreements
+winget install --id Git.Git --source winget --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
@@ -220,6 +232,19 @@ $env:PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT = "300000"
 dotnet restore Aspire.slnx
 check($lastexitcode)
 "   Restore completed successfully" | log
+
+# -------------------------------------------------------------------
+# Regenerate ConfigurationSchema.json files
+# -------------------------------------------------------------------
+# The Aspire repo validates that checked-in ConfigurationSchema.json files match
+# what the installed SDK generates. A plain 'dotnet build' fails validation if they
+# differ. The Aspire CI pipeline runs with /p:UpdateConfigurationSchema=true to
+# regenerate them before the validation check. We do the same here during prep so
+# that subsequent run iterations (which use plain 'dotnet build') pass cleanly.
+"-- Regenerating ConfigurationSchema.json files" | log
+dotnet build Aspire.slnx --no-incremental /p:UpdateConfigurationSchema=true
+check($lastexitcode)
+"   ConfigurationSchema regeneration completed" | log
 
 "-- net_aspire prep completed ($logSuffix version)" | log
 Exit 0

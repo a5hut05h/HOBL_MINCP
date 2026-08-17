@@ -21,7 +21,7 @@
     },
     {
         "children": [],
-        "delay": "100.0",
+        "delay": "10",
         "description": "Download Minecraft w/ Winget",
         "enabled": true,
         "file_name": [
@@ -44,7 +44,7 @@
         "children": [
             {
                 "children": [],
-                "delay": "0.5",
+                "delay": "5",
                 "description": "1st Launch Sign in Page",
                 "enabled": true,
                 "file_name": [
@@ -150,7 +150,8 @@
                 "enabled": true,
                 "exception_on": "No match",
                 "file_name": [
-                    "image_1ERAJTU.png"
+                    "image_1ERAJTU.png",
+                    "image_1NC03UT.png"
                 ],
                 "h": "0.375",
                 "id": "1ERAJTU",
@@ -185,7 +186,7 @@
                 "children": [
                     {
                         "children": [],
-                        "delay": "2",
+                        "delay": "10",
                         "description": "Sign in Option",
                         "enabled": true,
                         "file_name": [
@@ -207,7 +208,9 @@
                         "enabled": true,
                         "exception_on": "No match",
                         "file_name": [
-                            "image_1ERC2N2.png"
+                            "image_1ERC2N2.png",
+                            "image_1NC04V9.png",
+                            "image_1P2WN44.png"
                         ],
                         "id": "1ERC2N2",
                         "match_threshold": "",
@@ -227,7 +230,7 @@
                 "children": [
                     {
                         "children": [],
-                        "delay": "2",
+                        "delay": "10",
                         "description": "Check for Other Password Option",
                         "enabled": true,
                         "file_name": [
@@ -586,5 +589,16 @@
         "type": "Click Coord",
         "x": "0.98",
         "y": "0.02"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "code_1NFJ5HM.py"
+        ],
+        "id": "1NFJ5HM",
+        "type": "Code"
     }
 ]

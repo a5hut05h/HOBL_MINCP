@@ -169,18 +169,18 @@ source ~/.zprofile
 # Verify pyenv is available
 check_command "pyenv" || exit 1
 
-log "-- Installing Python 3.11.9"
-pyenv install 3.11.9 -f
-check_status "Python 3.11.9 installation"
+log "-- Installing Python 3.12.10"
+pyenv install 3.12.10 -f
+check_status "Python 3.12.10 installation"
 
 log "-- Setting Python version"
-pyenv global 3.11.9
+pyenv global 3.12.10
 check_status "Setting Python global version"
 
 # Verify Python version
 PYTHON_VERSION=$(python --version 2>&1 | awk '{print $2}')
-if [ "$PYTHON_VERSION" != "3.11.9" ]; then
-    log " ERROR - Python version is $PYTHON_VERSION, expected 3.11.9"
+if [ "$PYTHON_VERSION" != "3.12.10" ]; then
+    log " ERROR - Python version is $PYTHON_VERSION, expected 3.12.10"
     pyenv versions
     exit 1
 fi
@@ -199,10 +199,16 @@ if [ ! -f "requirements.txt" ]; then
 fi
 log "✓ requirements.txt found"
 
-pip install -r requirements.txt
+# Microsoft-managed devices block direct access to public PyPI (CISO Central Feed
+# Services policy). Install through the approved Microsoft package feed proxy instead.
+# Same pinned versions are served, so there is no functional or performance change.
+PYPI_INDEX_URL="https://packagefeedproxy.microsoft.io/pypi/simple"
+log "-- Using approved PyPI feed proxy: $PYPI_INDEX_URL"
+
+pip install --index-url "$PYPI_INDEX_URL" -r requirements.txt
 check_status "FastAPI requirements installation"
 
-pip install build
+pip install --index-url "$PYPI_INDEX_URL" build
 check_status "Build package installation"
 
 # Final verification

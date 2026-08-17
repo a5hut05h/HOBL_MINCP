@@ -5,6 +5,7 @@
 # Dump scenarios
 ##
 
+import argparse
 import os
 import json
 import ast
@@ -24,49 +25,45 @@ def extract_docstrings(file_path):
     return None
 
 
-def get_parent_modules(parent_modules):
-    scenarios = "scenarios"
+def main(print_json=True, short=True):
+    scenarios_dirs = [os.path.join(os.getcwd(), 'scenarios')]
 
-    entries = sorted(
-        os.listdir(scenarios),
-        key=lambda x: (x.lower() != "windows", x.lower())
-    )
+    if print_json:
+        arg_parser = argparse.ArgumentParser()
+        arg_parser.add_argument('-hobl_external', '-he', default='')
+        args = arg_parser.parse_args()
+        hobl_ext_paths = args.hobl_external.split()
 
-    for name in entries:
-        if name.endswith("_resources") or name == "__pycache__":
+        [scenarios_dirs.append(os.path.join(ext, 'scenarios')) for ext in hobl_ext_paths]
+
+    for scenarios_dir in scenarios_dirs:
+        if not os.path.exists(scenarios_dir):
             continue
 
-        path = os.path.join(scenarios, name)
-        if os.path.isdir(path):
-            parent_modules.append(path)
+        for subdir in ["windows", "common", "macos"]:
+            scenarios_dir_sub = os.path.join(scenarios_dir, subdir)
 
-    return parent_modules
-
-
-def main(print_json=True, short=True):
-
-    scenarios_dir = os.path.join(os.getcwd(), 'scenarios')
-
-    for subdir in ["windows", "common", "macos"]:
-        scenarios_dir_sub = os.path.join(scenarios_dir, subdir)
-        # print(f"Inspecting directory: {scenarios_dir_sub}")
-
-        for filename in os.listdir(scenarios_dir_sub):
-            path = os.path.join(scenarios_dir_sub, filename)
-            # if filename is a directory
-            if os.path.isdir(path):
-                path = os.path.join(path, filename + ".py")
-                filename = filename + ".py"
-            if not os.path.isfile(path):
+            if not os.path.exists(scenarios_dir_sub):
                 continue
-            if filename.endswith('.py') and filename != '__init__.py':
-                docstring = extract_docstrings(path)
-                if short and docstring is not None:
-                    # get first paragraph only
-                    docstring = docstring.split('\n\n')[0]
-                # remove '.py' extension
-                module_name = filename[:-3]
-                scenario_docs[module_name] = docstring
+
+            for filename in os.listdir(scenarios_dir_sub):
+                path = os.path.join(scenarios_dir_sub, filename)
+
+                if os.path.isdir(path):
+                    path = os.path.join(path, filename + ".py")
+                    filename = filename + ".py"
+
+                if not os.path.isfile(path):
+                    continue
+
+                if filename.endswith('.py') and filename != '__init__.py':
+                    docstring = extract_docstrings(path)
+                    if short and docstring is not None:
+                        # get first paragraph only
+                        docstring = docstring.split('\n\n')[0]
+                    # remove '.py' extension
+                    module_name = filename[:-3]
+                    scenario_docs[module_name] = docstring
 
     if print_json:
         print(json.dumps(scenario_docs))

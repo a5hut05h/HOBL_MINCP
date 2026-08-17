@@ -245,7 +245,7 @@
                 "type": "Include"
             }
         ],
-        "count": "6",
+        "count": "[bg_tab_loops]",
         "delay": "0.0",
         "description": "",
         "enabled": true,

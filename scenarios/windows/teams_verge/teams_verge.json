@@ -171,7 +171,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "13LPV69",
-                "include_path": "..\\_library\\Teams\\teams_setup",
+                "include_path": "scenarios\\windows\\_library\\Teams\\teams_setup",
                 "type": "Include"
             },
             {
@@ -180,7 +180,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "15VP5RN",
-                "include_path": "..\\_library\\web\\web_setup",
+                "include_path": "scenarios\\windows\\_library\\web\\web_setup",
                 "type": "Include"
             },
             {
@@ -189,7 +189,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "15UHVN2",
-                "include_path": "..\\_library\\web\\web_clear_cache",
+                "include_path": "scenarios\\windows\\_library\\web\\web_clear_cache",
                 "type": "Include"
             }
         ],
@@ -208,7 +208,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "15UJ1LP",
-                        "include_path": "..\\_library\\web\\site\\web_site_the_verge",
+                        "include_path": "scenarios\\windows\\_library\\web\\site\\web_site_the_verge",
                         "params": [
                             {
                                 "name": "[new_tab]",
@@ -234,7 +234,7 @@
                         "description": "",
                         "enabled": true,
                         "id": "1ERE604",
-                        "include_path": "..\\_library\\web\\web_check",
+                        "include_path": "scenarios\\windows\\_library\\web\\web_check",
                         "params": [
                             {
                                 "name": "[youtube_duration]",
@@ -273,7 +273,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "15VU9WV",
-                "include_path": "..\\_library\\web\\web_close_browser",
+                "include_path": "scenarios\\windows\\_library\\web\\web_close_browser",
                 "type": "Include"
             },
             {
@@ -282,7 +282,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "15VU9KH",
-                "include_path": "..\\_library\\web\\web_kill",
+                "include_path": "scenarios\\windows\\_library\\web\\web_kill",
                 "type": "Include"
             },
             {
@@ -291,7 +291,7 @@
                 "description": "",
                 "enabled": true,
                 "id": "13LPX71",
-                "include_path": "..\\_library\\Teams\\teams_teardown",
+                "include_path": "scenarios\\windows\\_library\\Teams\\teams_teardown",
                 "type": "Include"
             }
         ],

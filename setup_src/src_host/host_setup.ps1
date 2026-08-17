@@ -4,11 +4,12 @@
 param(
     [string]$logFile = "c:\temp\host_setup.log",
     [switch]$framework,
+    [switch]$local,
     [switch]$ui
 )
 
 # HOBL UI and Dut Setup versions
-$hobl_ui_version = "0.96"
+$hobl_ui_version = "1.5"
 # Set $dut_setup_version to value at top of setup_src\src_dut_win\dut_setup.cmd
 $dut_setup_cmd = "$PSScriptRoot\..\src_dut_win\dut_setup.cmd"
 if (Test-Path $dut_setup_cmd) {
@@ -74,7 +75,7 @@ if ($framework -eq $false -and $ui -eq $false) {
 
 if ($framework) {
 
-    $runtimeVersion = "8.0.23"
+    $runtimeVersion = "8.0.29"
     $runtimeX64DownloadUrl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/$runtimeVersion/windowsdesktop-runtime-$runtimeVersion-win-x86.exe"
     $vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.x86.exe"
 
@@ -173,6 +174,20 @@ if ($framework) {
 }
 
 ##
+## Local
+##
+
+if ($local) {
+    "-- Installing DUT setup" | log
+    # create c:\hobl_data and c:\hobl_bin if they don't exist
+    New-Item -ItemType Directory -Force -Path c:\hobl_bin > $null
+    New-Item -ItemType Directory -Force -Path c:\hobl_data > $null
+    # run dut_setup.cmd with local_setup=1
+    & "$PSScriptRoot\..\..\hobl.cmd" -s dut_setup local_setup=1 2>&1 | log
+    check($lastexitcode)
+}
+
+##
 ## UI 
 ##
 
@@ -237,6 +252,24 @@ if ($ui) {
     $desktopPath = [Environment]::GetFolderPath('Desktop')
     Copy-Item c:\HOBLweb\HOBLweb.lnk "$desktopPath\HOBLweb.lnk" 2>&1 | log
 
+    # Update appsettings.json with path to hobl set to the location of hobl, which is the location of this script and up two levels.
+    "-- Adding HoblPath to appsettings.json" | log
+    $appSettingsPath = "c:\HOBLweb\appsettings.json"
+    # Set $hoblPath to the parent directory of the script's directory (which is the root of the HOBL repo)
+    $hoblPath = Join-Path $PSScriptRoot "..\.."
+    $hoblPath = (Resolve-Path $hoblPath).Path | ConvertTo-Json
+    if (Test-Path $appSettingsPath) {
+        $appSettingsContent = Get-Content $appSettingsPath -Raw
+        # if HoblPath already exists, replace it, otherwise add it
+        if ($appSettingsContent -match '"HoblPath"\s*:\s*".*?"') {
+            $appSettingsContent = $appSettingsContent -replace '"HoblPath"\s*:\s*".*?"', "`"HoblPath`": $hoblPath"
+        } else {
+            # Add HoblPath before the last closing curly brace
+            $appSettingsContent = $appSettingsContent -replace '(?s)\}\s*$', ",`n  `"HoblPath`": $hoblPath`n}"
+        }
+        Set-Content -Path $appSettingsPath -Value $appSettingsContent -Encoding UTF8
+    }
+
     # Launch HOBL UI
     "-- Launching HOBLweb" | log
     start-process -FilePath "c:\hoblweb\hoblweb.cmd" -ArgumentList "install" -WorkingDirectory "c:\hoblweb" -WindowStyle hidden
@@ -254,9 +287,11 @@ if ($ui) {
     Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -RunLevel Highest -Force 2>&1 | log
     checkCmd($?)
 
-    "-- Install complete" | log
-    "-- Waiting ~15 seconds for app to launch" | log
-    Start-Sleep -seconds 15
+    "-- Install complete, it may take about a minute for the UI to auto-launch for the first time." | log
+    #"-- Waiting ~30 seconds for first time app launch" | log
+    #Start-Sleep -seconds 30
+    # Press any key to exit
+    Read-Host -Prompt "-- Press Enter to exit"
 }
 
 Exit 0

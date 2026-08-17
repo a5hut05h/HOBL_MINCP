@@ -4,6 +4,7 @@
 import logging
 import os
 import time
+
 from parameters import Params
 
 
@@ -14,38 +15,47 @@ def run(scenario):
         logging.info('Skipping mid-workload sleep/resume checkpoint because sleep_resume_midrun is disabled')
         return
 
-    # Mid-workload sleep/resume using the same approach as cs_floor scenario.
-    # cs_floor_wrapper.cmd disconnects WiFi, then calls button.exe -s to trigger
-    # actual Connected Standby sleep. After the sleep duration, WiFi reconnects.
-    # Total budget: ~30s sleep + ~30s reconnect = ~60s
-    wifi_off_duration_seconds = 30
+    # Mid-workload Connected Standby sleep using the same primitive the standby
+    # library (_library/misc/standby/code_W33UMT.py) uses: button.exe -s <ms>.
+    # We do NOT disconnect Wi-Fi - per perf-team feedback we want REAL CS so
+    # post-resume scenarios exercise the heavy resume overheads, not a 30s
+    # Wi-Fi reconnect window.
+    #
+    # Prereq: 'button_install' is in PerfStress.prep_scenarios so the kernel
+    # driver and arch-correct button.exe are already installed at
+    # C:\hobl_bin\button\button.exe.
+    sleep_duration_seconds = 30
 
-    wrapper = os.path.join(scenario.dut_exec_path, 'cs_floor_resources', 'cs_floor_wrapper.cmd')
+    logging.info(f'Starting mid-workload Connected Standby checkpoint (duration={sleep_duration_seconds}s)')
 
-    logging.info(f'Starting mid-workload sleep/resume checkpoint (wifi_off={wifi_off_duration_seconds}s)')
-
-    # Exactly matching cs_floor.py Connected Standby path:
-    #   self._call(["cmd.exe", "/C " + wrapper + ' ' + wifi_off_duration + " " + dut_exec_path], blocking=False)
-    #   time.sleep(2)
+    button_exe = os.path.join(scenario.dut_exec_path, "button", "button.exe")
+    duration_ms = int(sleep_duration_seconds) * 1000
+    # 'timeout 3 > NUL' matches the standby library: gives this RPC a moment to
+    # return before button.exe puts the DUT into CS.
+    cmd_str = f'/C timeout 3 > NUL && "{button_exe}" -s {duration_ms}'
+    logging.info(f'DUT command: cmd.exe {cmd_str}')
     try:
-        cmd = os.path.join(scenario.dut_exec_path, "cs_floor_resources", "cs_floor_wrapper.cmd") + \
-              ' ' + str(wifi_off_duration_seconds) + " " + scenario.dut_exec_path
-        logging.info(f'DUT command: cmd.exe /C {cmd}')
-        scenario._call(["cmd.exe", "/C " + cmd], blocking=False)
+        scenario._call(["cmd.exe", cmd_str], blocking=False)
         time.sleep(2)
     except Exception:
-        logging.error("cs_floor_wrapper.cmd or button.exe not found on DUT")
+        logging.error(" ERROR - button.exe not found on DUT. Run scenarios/windows/button_install "
+                      "first, or verify global:dut_architecture in the profile INI.")
+        return
 
-    # Wait for DUT to go to sleep and come back, using the framework's
-    # built-in _wait_for_dut_comm() which is the same method cs_floor uses.
+    # With real Connected Standby the DUT does NOT drop the network (Wi-Fi/NIC
+    # stays attached during CS), so the previous unreachable->reachable probe
+    # never fired and just wasted the full sleep window plus a 30s grace. Per
+    # perf-team feedback: a fixed wait covering the sleep duration plus
+    # a small post-resume settle is what the scenario actually needs.
     if Params.get('global', 'local_execution') != '1':
-        logging.info(f'Waiting {wifi_off_duration_seconds + 60}s for DUT to sleep and resume')
-        time.sleep(wifi_off_duration_seconds + 10)
-
-        logging.info('Waiting for DUT communication to restore')
+        post_resume_settle_seconds = 5
+        total_wait = sleep_duration_seconds + post_resume_settle_seconds
+        logging.info(f'Waiting {total_wait}s for Connected Standby + resume to complete')
+        time.sleep(total_wait)
         scenario._wait_for_dut_comm()
-        logging.info('DUT communication restored after sleep/resume')
+        logging.info('DUT communication restored after sleep/resume checkpoint')
 
-    # Give input stack/UI a short settle window before continuing.
-    time.sleep(10)
+    # Resume immediately into the next action - the whole point of sleep/resume
+    # in a stress run is to measure resume-under-stress behavior, so we do not
+    # add a quiet settle window here.
     scenario._sleep_to_now()

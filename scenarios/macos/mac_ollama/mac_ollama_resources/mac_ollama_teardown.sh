@@ -15,17 +15,19 @@ log() {
 echo "-- mac_ollama_teardown.sh started $(date)" > "$LOG_FILE"
 log "-- ollama teardown started"
 
-# Stop the Ollama server (go process)
-log "-- Stopping Ollama server (go processes)"
+# Stop the Ollama server (built binary; legacy go-run pattern as fallback)
+log "-- Stopping Ollama server"
+pkill -f "$BIN_DIR/ollama/ollama serve" 2>/dev/null
 pkill -f "go run . serve" 2>/dev/null
-pkill -f "ollama" 2>/dev/null
+pkill -x ollama 2>/dev/null
 
 # Give processes a moment to exit
 sleep 2
 
 # Verify server is stopped
-if pgrep -f "go run . serve" > /dev/null 2>&1; then
-    log "-- Force killing remaining go processes"
+if pgrep -f "$BIN_DIR/ollama/ollama serve" > /dev/null 2>&1 || pgrep -f "go run . serve" > /dev/null 2>&1; then
+    log "-- Force killing remaining ollama processes"
+    pkill -9 -f "$BIN_DIR/ollama/ollama serve" 2>/dev/null
     pkill -9 -f "go run . serve" 2>/dev/null
 fi
 

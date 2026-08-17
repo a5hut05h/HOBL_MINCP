@@ -1,7 +1,7 @@
 [
     {
-        "author": "Jeff Wilder",
-        "capture_device": "Surface Laptop 8 15in",
+        "author": "jewilder",
+        "capture_device": "Surface Laptop 7 15in,  light theme, 150% scaling",
         "children": [],
         "create_date": "2025-02-15",
         "description": "Play Tears of Steel YouTube video",
@@ -97,6 +97,16 @@
                 "enabled": true,
                 "id": "UCKUHE",
                 "text": "\ue03dr",
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
+            },
+            {
+                "children": [],
+                "delay": "1",
+                "description": "0",
+                "enabled": true,
+                "id": "1EERW83",
+                "text": "0",
                 "type": "Type",
                 "typing_delay": "[typing_delay]"
             },

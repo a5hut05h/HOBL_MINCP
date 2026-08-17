@@ -1,7 +1,7 @@
 [
     {
-        "author": "Jeff Wilder",
-        "capture_device": "Surface Laptop 8 15-in",
+        "author": "jewilder",
+        "capture_device": "Surface Laptop 7 15in, light theme, 150% scaling",
         "children": [],
         "create_date": "2025-03-02",
         "description": "Edit Excel document",
@@ -15,8 +15,19 @@
         "description": "",
         "enabled": true,
         "id": "V2MYXP",
-        "include_path": "..\\..\\misc\\recording_phase_begin",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
         "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "PSECSTX0",
+        "name": "[short_typing]",
+        "type": "Set Default",
+        "val_options": "0,1",
+        "value": "0"
     },
     {
         "children": [],
@@ -198,7 +209,9 @@
         "exception_on": "No match",
         "file_name": [
             "image_UT2FCP.png",
-            "image_UT2FCQ.png"
+            "image_UT2FCQ.png",
+            "image_1RWKWRV.png",
+            "image_1RWKWRX.png"
         ],
         "id": "UT2FCP",
         "match_threshold": "",
@@ -223,7 +236,7 @@
         "description": "",
         "enabled": true,
         "id": "V2N019",
-        "include_path": "..\\..\\misc\\recording_phase_end",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
         "params": [
             {
                 "name": "[phase_category]",

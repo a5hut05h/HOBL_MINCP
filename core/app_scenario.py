@@ -129,9 +129,6 @@ class Scenario(unittest.TestCase):
         self.web_replay_excludes_list = Params.get('global', 'web_replay_excludes_list')
         self.web_replay_ip = Params.get('global', 'web_replay_ip')
 
-        # Output full hobl command to log file
-        logging.debug("Hobl Command: " + " ".join(sys.argv))
-
         if self.platform.lower() == "macos":
             # On MacOS, 300ms tends to be a long press, so we reduce the default click time.
             self.default_click_time = 150  # milliseconds
@@ -165,6 +162,9 @@ class Scenario(unittest.TestCase):
             self.is_prep_tool = False
         if self.is_prep_tool:
             logging.debug("Initializing prep_tool " + self._module)
+
+        if not (self.is_tool or self.is_prep_tool):
+            logging.debug(f"HOBL command: {' '.join(sys.argv)}")
 
         # Resolve IP
         if self.is_tool or self.is_prep_tool:
@@ -219,6 +219,8 @@ class Scenario(unittest.TestCase):
 
         # Checking for local execution and running from web ui. If so then we want to kill web ui.
         if self.dut_ip == "127.0.0.1" and self.dashboard_url != '':
+            # self.widgets.about("Closing UI", "UI is closing to run scenario...")
+            # time.sleep(3)
             self._kill("msedge.exe")
             
         # Set up dut_exec_path and dut_data_path.  Doing it before tools initialized in case they need it.
@@ -602,30 +604,26 @@ class Scenario(unittest.TestCase):
                     raise Exception("Couldn't find provider " + profile)
                     
 
-            # Start ETL trace. In filemode use an instance name so we can avoid collisions with existing tracing sessions.
+            # Start ETL trace.
             try:
                 if Params.get('global', 'trace_filemode') == '1':
-                    self._call(["cmd.exe", "/c wpr.exe" + wpr_command + " -filemode -instancename perfTrace"])
+                    self._call(["cmd.exe", "/c wpr.exe" + wpr_command + " -filemode"])
                 else:
                     self._call(["cmd.exe", "/c wpr.exe" + wpr_command])
             except Exception as e:
                 err_msg = str(e)
                 if "-984076287" in err_msg or "0xc5583001" in err_msg.lower():
                     logging.warning("WPR reported profiles already running. Retrying trace start after cancel.")
-                    self._call(["cmd.exe", "/c wpr.exe -cancel -instancename perfTrace > null 2>&1"], expected_exit_code="")
                     self._call(["cmd.exe", "/c wpr.exe -cancel > null 2>&1"], expected_exit_code="")
                     if Params.get('global', 'trace_filemode') == '1':
-                        self._call(["cmd.exe", "/c wpr.exe" + wpr_command + " -filemode -instancename perfTrace"])
+                        self._call(["cmd.exe", "/c wpr.exe" + wpr_command + " -filemode"])
                     else:
                         self._call(["cmd.exe", "/c wpr.exe" + wpr_command])
                 else:
                     raise
 
             # Mark beginning of test
-            if Params.get('global', 'trace_filemode') == '1':
-                self._call(["cmd.exe", '/c wpr.exe -marker "test_begin" -instancename perfTrace'])
-            else:
-                self._call(["cmd.exe", '/c wpr.exe -marker "test_begin"'])
+            self._call(["cmd.exe", '/c wpr.exe -marker "test_begin"'])
             self.trace_started = True
 
         # Trigger global test begin callback
@@ -718,7 +716,9 @@ class Scenario(unittest.TestCase):
                     self.toolCallBacks("testTimeoutCallback")
                     if self.platform.lower() != 'android':
                         self.dut_conn_timeout = True
-                        self._wait_for_dut_comm()
+                        # If scenario is dut_setup, don't wait for comm_check since SimpleRemote likely not installed at this point.
+                        if (Params.get('global', 'module_name') != "dut_setup"):
+                            self._wait_for_dut_comm()
             self.toolCallBacks("testScenarioFailed")
             logging.debug("Copying data from DUT due to test exception again.")
             self._copy_data_from_remote(self.result_dir)
@@ -781,27 +781,60 @@ class Scenario(unittest.TestCase):
         logging.info("Life monitoring thread started")
         # Poll DUT to see if it's still responsive, if not, raise timeout exception
         file_path = self.result_dir + os.sep + 'battery_level.txt'
+        csv_path = self.result_dir + os.sep + 'battery_level.csv'
+        self.monitor_life_timestamp = time.time()
         while(True):
             try:
                 if self.platform.lower() == 'windows':
-                    if int(self.stop_soc) <= 0:
-                        batt_level = self._call(["powershell.exe", "Add-Type -Assembly System.Windows.Forms; [Math]::round(([System.Windows.Forms.SystemInformation]::PowerStatus.BatteryLifePercent) * 100, 2)"], timeout=30)
-                        logging.info(f"Battery level: {batt_level}")
-                        # rpc.call_rpc(self.dut_ip, self.rpc_port, "GetVersion", [])
-                        # logging.info("DUT is alive")
-                        # Use RTC timer
-                        self._kill("RTCWakeCore.exe")
-                        self._call([os.path.join(self.dut_exec_path, "RTCWakeCore", "RTCWakeCore.exe"), '-duration 1800'], blocking=False, timeout=30)
-                        # logging.info("RTC Wake timer reset")
-                    time.sleep(900)
+                    # Local execution
+                    if Params.get('global', 'dut_ip') == '127.0.0.1':
+                        new_time = time.time()
+                        logging.info("Rundown watchdog, current time: " + str(new_time) + ", last time: " + str(self.monitor_life_timestamp))
+                        if new_time - self.monitor_life_timestamp > 90:
+                            logging.info("Hibernate detected, ending rundown.")
+                            self.toolCallBacks("testTimeoutCallback")
+                            if self.platform.lower() != 'android':
+                                self.dut_conn_timeout = True
+                                self._wait_for_dut_comm()
+                            self.toolCallBacks("testScenarioFailed")
+                            logging.debug("Copying data from DUT due to test exception again.")
+                            self._copy_data_from_remote(self.result_dir)
+                            raise Exception("Device monitor timeout")
+                        self.monitor_life_timestamp = new_time
+                        time.sleep(60)
+                    # Hosted execution
+                    else:
+                        if int(self.stop_soc) <= 0:
+                            batt_level = self._call(["powershell.exe", "Add-Type -Assembly System.Windows.Forms; [Math]::round(([System.Windows.Forms.SystemInformation]::PowerStatus.BatteryLifePercent) * 100, 2)"], timeout=30)
+                            logging.info(f"Battery level: {batt_level}")
+                            # rpc.call_rpc(self.dut_ip, self.rpc_port, "GetVersion", [])
+                            # logging.info("DUT is alive")
+                            # Use RTC timer
+                            self._kill("RTCWakeCore.exe")
+                            self._call([os.path.join(self.dut_exec_path, "RTCWakeCore", "RTCWakeCore.exe"), '-duration 1800'], blocking=False, timeout=30)
+                            # logging.info("RTC Wake timer reset")
+                        time.sleep(900)
                 elif self.platform.lower() == 'macos':
-                    result = self._call(["pmset", "-g batt"], blocking=True)
-                    level = result.split("\n")[1].split("\t")[1].split("%")[0]
+                    # Get AppleRawCurrentCapacity level via ioreg
+                    raw_current_capacity_result = self._call(["bash", '-c "ioreg -r -c AppleSmartBattery -a | plutil -extract 0.AppleRawCurrentCapacity raw -"'], blocking=True)
+                    raw_current_capacity_level = raw_current_capacity_result.strip()
+
+                    # Get AppleRawMaxCapacity level via ioreg
+                    raw_max_capacity_result = self._call(["bash", '-c "ioreg -r -c AppleSmartBattery -a | plutil -extract 0.AppleRawMaxCapacity raw -"'], blocking=True)
+                    raw_max_capacity_level = raw_max_capacity_result.strip()
+
+                    # Calculate Battery level to 2 decimal places
+                    level = round(float(raw_current_capacity_level) / float(raw_max_capacity_level) * 100, 2)
+
                     current_time = datetime.now()
                     time_s = current_time.strftime("%m/%d/%Y %I:%M:%S %p")
-                    logging.info(f"Battery level: {level}")
+                    logging.info(f"Battery level : {str(level)}")
+
+                    # Write human-readable txt log
                     with open(file_path, 'a', newline='') as f:
-                        f.write(f"{time_s}: total battery: {level}\n")
+                        f.write(f"{time_s}: total battery: {str(level)}\n")
+
+            
                     if int(level) <= int(self.stop_soc):
                         break
                     time.sleep(int(self.poll_rate))
@@ -838,7 +871,7 @@ class Scenario(unittest.TestCase):
             time.sleep(172800)  # 48 hours, just to keep the thread alive, we will stop it when the scenario ends.
         elif int(self.stop_soc) <= 0:
             self._kill("MonitorPowerEvents.exe")
-            logging.info("we are entering stop_soc set to 1")
+            logging.info("stop_soc set to 0")
             self._call([os.path.join(self.dut_exec_path, "MonitorPowerEvents.exe"),
                        "/stopsoc=1" + " /execpath=" + str(self.dut_exec_path) + "\\RTCWakeCore" + " /datapath=" + str(self.dut_data_path) + " /testname=" + str(self.testname) + " /triggerpercent=" + str(self.trigger_soc) + " /triggerscript=" + str(self.trigger_script)],
                         blocking=True, timeout=172800, expected_exit_code="")
@@ -914,7 +947,7 @@ class Scenario(unittest.TestCase):
             lifeThread.raise_exception()
             scenarioThread.raise_exception()
 
-            print("Kill Threads")
+            # print("Kill Threads")
             for activeThread in self.activeHostCalls:
                 activeThread.raise_exception()
 
@@ -1021,7 +1054,7 @@ class Scenario(unittest.TestCase):
             if self.enable_tool_threading:
                 toolStatusThread.raise_exception()
 
-            print("Kill Threads")
+            # print("Kill Threads")
             for activeThread in self.activeHostCalls:
                 activeThread.raise_exception()
 
@@ -1151,17 +1184,14 @@ class Scenario(unittest.TestCase):
                         ["cmd.exe", "/c wpr.exe -cancel > null 2>&1"], expected_exit_code="")
                 else:
                     # Mark end of test
-                    if Params.get('global', 'trace_filemode') == '1':
-                        self._call(["cmd.exe", '/c wpr.exe -marker "test_end" -instancename perfTrace'])
-                    else:
-                        self._call(["cmd.exe", '/c wpr.exe -marker "test_end"'])
+                    self._call(["cmd.exe", '/c wpr.exe -marker "test_end"'])
                     # Stop ETL trace
                     outfile = os.path.join(
                         self.dut_data_path, self.testname + ".etl")
 
                     logging.info("Ending trace and saving at: " + outfile)
                     if Params.get('global', 'trace_filemode') == '1':
-                        self._call(["cmd.exe", f"/c wpr.exe -stop {outfile} -compress -instancename perfTrace"])
+                        self._call(["cmd.exe", f"/c wpr.exe -stop {outfile} -compress"])
                     else:
                         self._call(["cmd.exe", f"/c wpr.exe -stop {outfile} -compress"])
                 self.trace_started = False
@@ -1329,7 +1359,7 @@ class Scenario(unittest.TestCase):
         else:
             if blocking == True and callback == False and self.async_comm == "1":
                 if log_output:
-                    logging.debug("Call - blocking with callback.  host_ip = " + self.host_ip)
+                    logging.debug(f"Call - blocking with callback.  host_ip = {self.host_ip}")
 
                 # Make socket connection
                 range_low = int(Params.get('global', 'port_range_low'))
@@ -1734,7 +1764,7 @@ class Scenario(unittest.TestCase):
                                 except Exception:
                                     result_time = None
 
-                            # NOTE: This fallback change is done only to support MTL-SU-IDCLAB-23,
+                            # NOTE: This fallback change is to support other locales,
                             # where `forfiles` returns values like "08-03-2026 17:00:47".
                             if result_time is None and len(time_pieces) >= 2:
                                 mod_time_str = time_pieces[0] + " " + time_pieces[1]
@@ -1912,10 +1942,12 @@ class Scenario(unittest.TestCase):
         return True
 
     ''' Creates the prep status file if there is no error or failures. If exists, deletes first. '''
-    def createPrepStatusControlFile(self, suffix=""):
+    def createPrepStatusControlFile(self, suffix="", module=""):
         if isinstance(suffix, list):
             suffix = self._getLatestFileTimestampSuffix(suffix)
-        path = os.path.join(self.dut_exec_path, "prep_status", self._module + suffix)
+        if module == "":
+            module = self._module
+        path = os.path.join(self.dut_exec_path, "prep_status", module + suffix)
         if self.platform.lower() == "macos":
             path = path.replace("\\", "/")
         self._remote_make_dir(path, True)
@@ -2289,6 +2321,9 @@ class Scenario(unittest.TestCase):
             start_time = datetime.now()
             # Adjust the scale of the template to match the device Windows scaling
             template_dpi = int(Image.open(os.path.join(self.json_parent_dir, template)).info['dpi'][0])
+            if (template_dpi == 0):
+                logging.warning(f"Template DPI is 0, defaulting to 96")
+                template_dpi = 96
             factor = round(template_dpi / 24)
             template_dpi = factor * 24
             device_dpi = int(self._get_screen_scale(self.current_screen) * 96)
@@ -3421,6 +3456,7 @@ class Scenario(unittest.TestCase):
             param = str(action['name']).strip("[]")
             inc_value = float(self._resolve_params_in_item(action['value'], component))
             param_section, param_name = self._parse_param_name(param, component)
+            logging.debug(f"Incrementing parameter pre {param_section}:{param_name} to {inc_value}")
             param_value = float(Params.get(param_section, param_name))
             new_value = str(param_value + inc_value)
             logging.debug(f"Incrementing parameter {param_section}:{param_name} to {new_value}")
@@ -3544,10 +3580,7 @@ class Scenario(unittest.TestCase):
 
     def _mark_trace(self, tag):
         if self.trace == "1":
-            if Params.get('global', 'trace_filemode') == '1':
-                self._call(["cmd.exe", '/c wpr.exe -marker ' + tag + ' -instancename perfTrace'])
-            else:
-                self._call(["cmd.exe", '/c wpr.exe -marker ' + tag])
+            self._call(["cmd.exe", '/c wpr.exe -marker ' + tag])
 
     def _assert(self, assert_list):
         logging.error(assert_list)
@@ -3630,7 +3663,7 @@ class Scenario(unittest.TestCase):
                 self._call(["shutdown.exe", "/r /f /t 5"])
         elif self.platform.lower() == "macos":
             logging.info("Rebooting DUT")
-            self._call(["zsh", f'-c "echo {self.dut_password} | sudo -S shutdown -r now"'])
+            self._call(["zsh", f'-c "echo {self.password} | sudo -S shutdown -r now"'])
         else:
             logging.error("Unsupported platform")
         time.sleep(15)

@@ -1,3 +1,7 @@
+# Microsoft-managed devices block direct PyPI access (CISO Central Feed Services policy);
+# resolve base packages through the approved Microsoft feed proxy. torch wheels still come
+# from download.pytorch.org (not covered by the block).
+--index-url https://packagefeedproxy.microsoft.io/pypi/simple
 # CUDA 12.8 doesn't come with pytorch by default and on Windows we want CUDA
 --extra-index-url https://download.pytorch.org/whl/cu128
 torch==2.8.0

@@ -108,6 +108,19 @@ check_command "cmake" || exit 1
 # Set BIN_DIR to /Users/Shared/hobl_bin
 BIN_DIR="/Users/Shared/hobl_bin"
 
+# Pin ffmpeg@6 for the build. The CMake cache produced during prep already
+# resolves FFmpeg to the keg-only ffmpeg@6 formula, but export PKG_CONFIG_PATH
+# here as well so any incremental CMake reconfigure triggered by `make` keeps
+# using ffmpeg@6 instead of Homebrew's rolling ffmpeg (8.x), whose removed APIs
+# (avcodec_close, av_stream_get_side_data) break OpenCV 4.10 videoio.
+FFMPEG6_PREFIX="$(/opt/homebrew/bin/brew --prefix ffmpeg@6 2>/dev/null)"
+if [ -n "$FFMPEG6_PREFIX" ] && [ -d "$FFMPEG6_PREFIX" ]; then
+    export PKG_CONFIG_PATH="$FFMPEG6_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+    log "✓ Using ffmpeg@6 from: $FFMPEG6_PREFIX"
+else
+    log " ERROR - ffmpeg@6 prefix could not be resolved; build may pick up an incompatible ffmpeg"
+fi
+
 # Set Python version
 log "-- Setting Python version"
 pyenv global 3.12.10
@@ -135,7 +148,13 @@ log "-- Starting OpenCV build"
 CORES=$(sysctl -n hw.ncpu)
 log "Building with $CORES cores"
 
-/usr/bin/time -p -o "$LOG_DIR/mac_opencv_build_time.log" make -j$CORES
+# Redirect make output to a per-phase log so it is preserved in the results
+# share. Without redirection, stdout goes only to the RPC buffer and is lost
+# on timeout.
+BUILD_LOG="$LOG_DIR/mac_opencv_build.log"
+log "-- Build output: $BUILD_LOG"
+
+/usr/bin/time -p -o "$LOG_DIR/mac_opencv_build_time.log" make -j$CORES > "$BUILD_LOG" 2>&1
 check_status "OpenCV build"
 
 # Parse build phase timing

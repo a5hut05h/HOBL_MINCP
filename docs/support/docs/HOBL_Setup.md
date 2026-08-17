@@ -5,15 +5,20 @@
 * The HOBL UI is a web server that can be accessed by multiple users simultaneously, if needed.  For larger labs, it can also be executed with IIS.
 * The Hosts and DUTs should be on a local network that has internet access.
 * The host should be connected with ethernet, but the DUT should be on Wi-Fi, to be representative of a user operating a device on battery.  Ethernet dongles often prevent devices from getting to lower power states.
+### Wi-Fi
 * The Wi-Fi network should be set up to provide each device with **50 Mbps**, again for representativeness.  Significantly more or less BW has power consumption impact.  Not all AP's are good at controlling this, but we have found the HPE Aruba line of access points adept at it.  50 Mbps is also the minimum bandwidth requirement for correct functionality.
 * 5 GHz channels should be used for connecting to DUTs.
 * Do not domain-join the DUTs.
 * Corporate network traffic can be intense, so it is recommended to deploy a firewall between the lab LAN and corporate networks that will filter out corporate traffic but still allow access to the internet.  This will improve representativeness and reduce test variability.
+### Charger Control
 * HOBL supports automatic recharging of DUTs via a variety of mechanisms, as long as they can be controlled by a shell command.  The commands are specified in the charge_on and charge_off sections of the Device Profile.  The most common mechanisms are:
-    1. A Raritan PX-series IP-addressable power strip
-    1. <a href="https://dlidirect.com/products/new-pro-switch" target="_blank">Digital-Loggers Pro Switch</a>
-    1. An iBoot controlled by either ethernet or relay.  
+    1. Any SNMP controllable IP switchable power strip, such as Cyberpower, APC, Raritan PX-series, etc.
+    1. <a href="https://dlidirect.com/products/new-pro-switch" target="_blank">Digital-Loggers Pro Switch</a>.
+    1. An iBoot controlled by either ethernet or relay.
+    1. Shelly Smart Plugs.
+### Display Brigthness
 * A luminance meter should be used to determine the DUT brightness setting that corresponds to 150 nits.  Measure and average all 4 counters plus center of a pure white screen.  All tests are expected to run at this brightness except JEITA-related tests (which are at 200 nits).  A nits map should be specified in the profile to associate the appropriate slider postiions to 150 and 200 nits respectively.  <TODO: Add section on profle setup and tools>
+### Audio Volume
 * Tests are run with audio volume set to the out-of-box default level.  To ensure consistency, once this value is determined, it should also be specified in the device profile.
 
 ## Account Setup
@@ -79,19 +84,40 @@ Set up a Device Profile for each DUT in the HOBLweb UI, giving it a unique name 
     1. If you see an error when it tries to set the developer mode, this can safely be ignored.
 4. Test network connection to the DUT:
     1. Host and DUT need to be on the same subnet (first 2 octets of the IP address).
-    1. Run Cmd or Powershell on the Host.
-    1. Make sure sure DUT responds to pings:  `ping <dut_ip>`
+    1. Run Cmd or Powershell on the Host, and make sure sure DUT responds to pings:  `ping <dut_ip>`
     1. Make sure DUT can ping host as well.
     1. Run the "comm_check" scenario to make sure that all communications needs are met.
 
 ## DUT Setup For macOS
-1. Manually make sure the device is onnected to the appropriate Wi-Fi netowrk, on the same subnet as the Host.
-1. After running host_setup.exe, dut_setup.sh should be found in the /downloads/Setup folder.  Copy dut_setup.sh from here to a USB stick.
-1. Plug the USB stick into the DUT and execute dut_setup.sh.
-1. There will be numerous prompts for password and to enable various security items.  It's critical to enable all.
-1. Test network connection to the DUT:
+1. Manually set up the Mac with an account and connect the device to the appropriate Wi-Fi netowrk, on the same subnet as the Host.
+2. If Global Secure Access app exists, disable it.  It prevents peer-to-peer communication.
+3. Change settings to do auto-login:
+    a. System Settings -> Users & Groups -> Automatically log in as: specify account and password
+4. Copy hobl\downloads\setup\dut_setup_<ver>.sh to Mac using a FAT32 formatted USB stick, and execute from terminal window.  You will be prompted for password and access permissions multiple times.  Be sure to enable everything.  If you don't see dut_setup_\<ver>\.sh in the hobl\downloads\setup folder, then do [Host Setup](#host-setup).
+5. Either disable firewall, or disable "Stealth Mode" in Firewall Options (to allow pings to go through)
+6. Use light meter to adjust screen brightness to 150 nits, on DC with white background.  Then run /users/Shared/hobl_bin/brightness -l to report setting level.  Multiply that fraction by 100 to turn to percentage, to set display:brightness in profile.
+7. Leave audio level at out-of-box setting.
+8. The first time you run some tests or tools there may be various permissions popups.  Manually allow them all. Then subsequent runs should work without interference.
+10. Set keyboard shortcut Shift-Cmd-H to Safari "Clear History…"
+    a. Settings -> Keyboard -> Keyboard Shortcuts -> App Shortcuts
+    b. Application: "Safari"
+    c. Menu title: "Clear History…" (the three dots are critical)
+    d. Keyboard shortcut: "Shift-Cmd-H"
+11. Set Safari history clear to "All History"
+12. Test network connection to the DUT:
     1. Host and DUT need to be on the same subnet (first 2 octets of the IP address).
-    1. Run Cmd or Powershell on the Host.
-    1. Make sure sure DUT responds to pings:  `ping <dut_ip>`
+    1. Run Cmd or Powershell on the Host, and make sure sure DUT responds to pings:  `ping <dut_ip>`
     1. Make sure DUT can ping host as well.
     1. Run the "comm_check" scenario to make sure that all communications needs are met.
+
+One thing to be aware of on Mac is that as icon count in the dock increases, macos reduces their size so that they all fit.  However, in our automation we need them to stay constant size for proper image matching.  So the solution is remove unneeded icons to make sure there is plenty of space on the left and right of the dock.  So you might need to remove a few unused ones, such as Calendar, Reminders, etc.  Make sure the dock is always visible.
+
+
+Verify these settings have been set in  System Settings -> Privacy & Security:
+- Files & Folders -> SimpleRemoteconsole:
+  - Documents Folder
+  - Downloads Folder
+- Accessibility -> SimpleRemoteConsole
+- Local Network -> SimpleRemoteConsole
+- Screen & System Audio Recording -> SimpleRemoteConsole
+

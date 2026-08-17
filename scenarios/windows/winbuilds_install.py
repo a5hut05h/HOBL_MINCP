@@ -69,6 +69,7 @@ class WinbuildsInstall(core.app_scenario.Scenario):
     Params.setOverride("global", "prep_tools", "")
     Params.setOverride("global", "attempts", "1")
     Params.setOverride("dut_setup", "reboot_prompt", "0")
+    Params.setOverride("dut_setup", "run_cmd", "0")
     Params.setOverride("dut_setup", "upload_path", "C:\\dut_setup_files")
     Params.setOverride('global', 'dut_ip', Params.get(module, 'install_dut_ip'))
 
@@ -110,19 +111,28 @@ class WinbuildsInstall(core.app_scenario.Scenario):
         time.sleep(2)
 
         #  Set dut setup to refresh
-        logging.info("Set Runonce for Dut Setup")
-        self._call(["cmd.exe", '/C reg add "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v RunPowerTeamInstaller /t REG_SZ /d "C:\\dut_setup_files\\dut_setup.cmd" /f > null 2>&1'])
+        # logging.info("Set Runonce for Dut Setup")
+        # self._call(["cmd.exe", '/C reg add "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v RunPowerTeamInstaller /t REG_SZ /d "C:\\dut_setup_files\\dut_setup.cmd" /f > null 2>&1'])
 
         # Disable privacy prompts
-        logging.info("Set RegKey to skip privacy prompt at first boot")
-        self._call(["cmd.exe", '/C reg add "HKLM\\Software\\Policies\\Microsoft\\Windows\\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f > null 2>&1'])
+        # logging.info("Set RegKey to skip privacy prompt at first boot")
+        #self._call(["cmd.exe", '/C reg add "HKLM\\Software\\Policies\\Microsoft\\Windows\\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f > null 2>&1'])
 
+        # Enabling Flight signing
         # BCD edits
         self._call(["cmd.exe", "/C bcdedit /set flightsigning on"])
         # self._call(["cmd.exe", "/C bcdedit /set testsigning on"])
 
         # Reboot to get signing to stick
         self._dut_reboot()
+
+        #  Schedule dut setup to run once after the new build is applied in order to reapply changes made by dut setup
+        logging.info("Set Runonce for Dut Setup")
+        self._call(["cmd.exe", '/C reg add "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v RunPowerTeamInstaller /t REG_SZ /d "C:\\dut_setup_files\\dut_setup.cmd" /f > null 2>&1'])
+
+        # Disable privacy prompts
+        logging.info("Set RegKey to skip privacy prompt at first boot")
+        self._call(["cmd.exe", '/C reg add "HKLM\\Software\\Policies\\Microsoft\\Windows\\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1 /f > null 2>&1'])
 
         # Installing new build of windows over existing version
         logging.info("Installing Winbuild...")

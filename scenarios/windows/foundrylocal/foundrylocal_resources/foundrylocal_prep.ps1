@@ -98,8 +98,20 @@ Set-Content -Path $logFile -encoding utf8 "-- Foundry Local prep started ($logSu
 # ============================================================================
 "Step 1: Installing AI Foundry Local..." | log
 
+# --- Remove the msstore source before any winget install so a broken pinned
+# certificate on that source cannot fail the command (winget 0x8a15005e /
+# -1978335138) behind an SSL-inspecting proxy. All needed packages are on 'winget'. ---
+try {
+    if ((winget source list 2>$null) -match "msstore") {
+        "Removing msstore winget source to avoid pinned-certificate failures (0x8a15005e)" | log
+        winget source remove msstore 2>&1 | log
+    }
+} catch {
+    "Could not remove msstore source (continuing): $($_.Exception.Message)" | log
+}
+
 "Installing Microsoft.FoundryLocal version $foundryVersion via winget..." | log
-winget install Microsoft.FoundryLocal --version $foundryVersion --accept-source-agreements --accept-package-agreements 2>&1 | ForEach-Object { "  $_" | log }
+winget install Microsoft.FoundryLocal --source winget --version $foundryVersion --accept-source-agreements --accept-package-agreements 2>&1 | ForEach-Object { "  $_" | log }
 checkWinget $LASTEXITCODE
 
 # Refresh PATH to pick up newly installed foundry

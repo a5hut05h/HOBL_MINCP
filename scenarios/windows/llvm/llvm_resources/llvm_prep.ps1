@@ -283,30 +283,42 @@ Set-Content -Path $logFile -encoding utf8 "-- llvm prep started ($logSuffix vers
 # Refresh PATH
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
+# --- Remove the msstore source before any winget install so a broken pinned
+# certificate on that source cannot fail the command (winget 0x8a15005e /
+# -1978335138) behind an SSL-inspecting proxy. All needed packages are on 'winget'. ---
+try {
+    if ((winget source list 2>$null) -match "msstore") {
+        "Removing msstore winget source to avoid pinned-certificate failures (0x8a15005e)" | log
+        winget source remove msstore 2>&1 | log
+    }
+} catch {
+    "Could not remove msstore source (continuing): $($_.Exception.Message)" | log
+}
+
 # --- Install VC Runtime Redistributable ---
 "-- Installing VC Runtime Redistributable" | log
 if ($isARM64) {
-    winget install --id=Microsoft.VCRedist.2015+.arm64 --silent --accept-package-agreements --accept-source-agreements --scope=machine
+    winget install --id=Microsoft.VCRedist.2015+.arm64 --source winget --silent --accept-package-agreements --accept-source-agreements --scope=machine
 } else {
-    winget install --id=Microsoft.VCRedist.2015+.x64 --silent --accept-package-agreements --accept-source-agreements --scope=machine
+    winget install --id=Microsoft.VCRedist.2015+.x64 --source winget --silent --accept-package-agreements --accept-source-agreements --scope=machine
 }
 checkWinget($lastexitcode)
 
 # --- Install Git ---
 "-- Installing Git" | log
-winget install --id Git.Git --silent --accept-source-agreements --accept-package-agreements
+winget install --id Git.Git --source winget --silent --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
 # --- Install CMake ---
 "-- Installing CMake" | log
-winget install --id Kitware.CMake --version 4.1.1 --silent --accept-source-agreements --accept-package-agreements
+winget install --id Kitware.CMake --version 4.1.1 --source winget --silent --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
 # --- Install Ninja ---
 "-- Installing Ninja" | log
-winget install --id Ninja-build.Ninja --version 1.13.2 --silent --accept-source-agreements --accept-package-agreements
+winget install --id Ninja-build.Ninja --version 1.13.2 --source winget --silent --accept-source-agreements --accept-package-agreements
 checkWinget($lastexitcode)
 $Env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
@@ -520,10 +532,19 @@ Set-OptimizedPathOrder
 "Current session PATH contains System32: $($env:PATH -like "*System32*")" | log
 "Current session PATH contains WindowsApps: $($env:PATH -like "*WindowsApps*")" | log
 
+# --- Install Python via pyenv (conditional — DO NOT use -f) ---
+# Force-reinstall (`-f`) wipes the pyenv version directory including any packages
+# installed by other scenarios that share this Python version. We only install
+# when the version is truly missing.
 "-- Installing python $pythonVersion for $logSuffix" | log
-"Installing Python $pythonVersion (this may take several minutes)..." | log
-pyenv install $pythonVersion -f
-check($lastexitcode)
+$installedVersions = (pyenv versions --bare 2>$null) -split "`n" | ForEach-Object { $_.Trim() }
+if ($installedVersions -notcontains $pythonVersion) {
+    "Installing Python $pythonVersion via pyenv (this may take several minutes)..." | log
+    pyenv install $pythonVersion
+    check($lastexitcode)
+} else {
+    "Python $pythonVersion already installed via pyenv — preserving existing install" | log
+}
 
 "Setting Python $pythonVersion as global version..." | log
 pyenv global $pythonVersion

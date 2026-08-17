@@ -62,10 +62,11 @@ params.setDefault('global', 'charge_on_call', '', desc="A shell command to turn 
 params.setDefault('global', 'charge_off_call', '', desc="A shell command to turn off an attached charger.") 
 params.setDefault('global', 'browser', 'Edge', desc="Web browser to use.", valOptions=["Edge", "Edge Beta", "Edge Dev", "Edge Canary", "Chrome"])
 params.setDefault('global', 'host_ip', '', desc="Option to override IP address of host computer, if it doesn't get automatically determined properly.")  # Will try to determine automatically if blank
+params.setDefault('global', 'aux_host', '', desc="IP address or hostname of an auxiliary host computer, such as a DAQ system, thermal chamber, etc.  Referenced parameters are not supported here.")
 params.setDefault('global', 'run_type', '', desc="A results sub-folde to indicate the type of run it is, such as 'Power', 'ETL', 'Misc', etc.")
 params.setDefault('global', 'iterations', '1', desc="How many time to repeat the scenario.")
 params.setDefault('global', 'training_mode', '0', desc="Specify if this is a training run (1) or not (0).", valOptions=["0", "1"])
-params.setDefault('global', 'platform', 'Windows', desc="Operating system platform.", valOptions=["Windows", "Android", "W365", "MacOS"])
+params.setDefault('global', 'platform', '[PLATFORM]', desc="Operating system platform.", valOptions=["[PLATFORM]", "Windows", "Android", "W365", "MacOS"])
 params.setDefault('global', 'msa_account', '', desc="The test account that Windows and apps will be logged in with.")
 params.setDefault('global', 'dut_password', '', desc="The password for the test account (msa_account).")
 params.setDefault('global', 'dut_ip', '127.0.0.1', desc="IP address of the Device Under Test (name can be used if DNS is supported).")
@@ -91,8 +92,8 @@ params.setDefault('global', 'pre_run_delay', '0', desc="Seconds to pause to let 
 # params.setDefault('global', 'power_after', '0') # deprecated
 params.setDefault('global', 'module_name', '', desc="Override the name of a scenario, if needed.")
 params.setDefault('global', 'attempts', '1', desc="How many times to re-attempt the scenario, in case of failure.")
-params.setDefault('global', 'tools', '', desc="Space-separated list of tools to run with each non-prep scenario.")
-params.setDefault('global', 'prep_tools', '', desc="Space-separated list of tools to run with each prep scenario.")
+params.setDefault('global', 'tools', '', desc="Space-separated list of tools to run with each non-prep scenario.", multiple=True)
+params.setDefault('global', 'prep_tools', '', desc="Space-separated list of tools to run with each prep scenario.", multiple=True)
 params.setDefault('global', 'trace_filemode', '1', desc="Whether to run ETL traces in filemode (1) or memory mode (0).", valOptions=["1", "0"])
 params.setDefault('global', 'typing_delay', '200', desc="Milliseconds between injected key strokes.")
 params.setDefault('global', 'local_execution', '0')
@@ -156,7 +157,7 @@ if params_file is None or params_file == "":
 elif not os.path.exists(params_file):
     print("ERROR:  Specified device profile path does not exist: " + params_file)
     sys.exit(1)
-# print("Using profile: " + params_file)
+print("Using profile: " + params_file)
 params.setCalculated("params_file", params_file)
 
 cmd_tests = args.scenarios
@@ -201,7 +202,7 @@ if args.dump or args.dump_verbose:
 
 # Check if we're runnign a scenario that shouldn't contact the DUT before
 # loading params, which can make calls to the DUT
-for scenario in ['charge_off', 'charge_on', 'hard_reboot', 'sleep_wake', 'manual_offline', 'study_report', 'run_report', 'dut_setup']:
+for scenario in ['comm_check', 'charge_off', 'charge_on', 'hard_reboot', 'sleep_wake', 'manual_offline', 'study_report', 'run_report', 'dut_setup']:
     if scenario in sys.argv:
         print("Forcing dut_alive to 0")
         Params.setCalculated("dut_alive", '0')
@@ -410,7 +411,7 @@ def host_call(command, cwd = "."):
 def kill(test_name):
     kill_module_str = get_test_module(test_name, hobl_ext_paths)
     params.setCalculated("kill_mode", "1")
-    print(f"Kill module: {kill_module_str}")
+    # print(f"Kill module: {kill_module_str}")
     kill_module = importlib.import_module(kill_module_str)
     for name, obj in inspect.getmembers(kill_module, lambda member: inspect.isclass(member) and kill_module_str in member.__module__):
         if "Thread" in name:
@@ -418,7 +419,7 @@ def kill(test_name):
         kill_class_str = name
         kill_class = getattr(kill_module, kill_class_str)
         kill_instance = kill_class()
-        print("Calling kill()")
+        # print("Calling kill()")
         kill_instance.kill_wrapper()
 
 
@@ -482,9 +483,9 @@ def get_test_module(test_name, ext_paths=[]):
     for folder_name, display_name in [("macos", "MacOS"), ("windows", "Windows")]:
         if folder_name in test_module.lower() and platform != folder_name:
             test_module = "scenarios.common.scenario_invalid"
-            params.setCalculated("scenario_invalid", f"Invalid platform for {test_name}. Expected platform: {display_name}.")
+            params.setCalculated("scenario_invalid", f"Invalid platform {platform} for {test_name}. Expected platform: {display_name}.")
             break
-    
+
     return test_module
 
 
@@ -545,9 +546,15 @@ def _add_python_embed_firewall():
         p = subprocess.Popen(cmd, shell = True, cwd = ".")
         p.communicate()
 
-    call(f"powershell.exe unblock-file -path {firewall_add_cmd}")
-    call(f"powershell.exe Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
-    call(f"powershell.exe -File {firewall_add_cmd}")
+    if params.get('global', 'dut_ip') == "127.0.0.1":
+        call(f"pwsh.exe -Command unblock-file -path {firewall_add_cmd}")
+        call(f"pwsh.exe -Command Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
+        call(f"pwsh.exe -File {firewall_add_cmd}")
+    else:
+        call(f"powershell.exe -Command unblock-file -path {firewall_add_cmd}")
+        call(f"powershell.exe -Command Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
+        call(f"powershell.exe -File {firewall_add_cmd}")
+
 
 
 def send_completion_notification():
@@ -702,6 +709,7 @@ if __name__ == '__main__':
                     set_run_dir(test_case)
                     if params.get('global', 'module_name') == '':
                         params.setDefault('global', 'module_name', test_case)
+                        # print("Setting module_name to: " + test_case)
                     params.setCalculated('scenario_section', test_case)
                     run_dir = params.getCalculated("run_dir")
                     log = os.path.join(run_dir, "hobl.log")
@@ -944,7 +952,7 @@ if __name__ == '__main__':
 
     # Checking if local execution and if running from dashboard if so then we want to relaunch the web ui to help notify user that scenario ran. 
     try:
-        if dashboard_url != '' and dut_ip == "127.0.0.1":
+        if dashboard_url != ''and params.get('global', 'dut_ip') == "127.0.0.1":
             subprocess.call(f'start /MAX "" "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" --app="http://localhost:80/plan/Scenarios?PlanID={dashboard_plan_id}" --start-maximized', shell=True)
     except:
         pass

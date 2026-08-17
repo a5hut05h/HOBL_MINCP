@@ -9,12 +9,14 @@ import time
 import logging
 
 import core.app_scenario
+from core.parameters import Params
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
 
 class SurfaceAppPrep(core.app_scenario.Scenario):
     module = __module__.split('.')[-1]
+    Params.setDefault(module, "surface_app_prep_enabled", "0", desc="Enables or disables surface_app_prep execution.  Disabled by default since it is only useful on Surface devices.", valOptions=["0", "1"])
 
     is_prep = True
 

@@ -23,6 +23,9 @@ SetupLogging=yes
 WizardSmallImageFile="H.bmp"
 LicenseFile=eula.rtf
 WizardSizePercent=120
+ArchitecturesAllowed=x64compatible arm64
+ArchitecturesInstallIn64BitMode=x64compatible arm64
+SetupArchitecture=x64
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

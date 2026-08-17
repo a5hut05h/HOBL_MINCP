@@ -348,264 +348,265 @@ class ProductivityPrep(core.app_scenario.Scenario):
         self.desktop = self._launchApp(desired_caps)
         # self.desktop.implicitly_wait(5)
 
-        
-        if self.fast_mode == '0':
-            max_loops = 30
-            for x in range(max_loops):
-                open_windows = 0
+        max_loops = 30
+        for x in range(max_loops):
+            open_windows = 0
 
-                try:
-                    logging.info("Checking reopen item prompt")
-                    self.desktop.find_element_by_name('No').click()
-                    time.sleep(3)
-                except:
-                    pass
+            try:
+                logging.info("Checking reopen item prompt")
+                self.desktop.find_element_by_name('No').click()
+                time.sleep(3)
+            except:
+                pass
 
-                try:
-                    logging.info("Checking for Theme popup")
-                    self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
-                    self.desktop.find_element_by_name('OK').click()
-                    logging.info("Clicked OK on Theme popup.")
-                    time.sleep(3)
-                except:
-                    pass
+            try:
+                logging.info("Checking for Theme popup")
+                self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
+                self.desktop.find_element_by_name('OK').click()
+                logging.info("Clicked OK on Theme popup.")
+                time.sleep(3)
+            except:
+                pass
 
-                try:
-                    logging.info("Checking for Got it")
-                    self.desktop.find_element_by_name('Got it').click()
-                    time.sleep(3)
-                except:
-                    pass
+            try:
+                logging.info("Checking for Got it")
+                self.desktop.find_element_by_name('Got it').click()
+                time.sleep(3)
+            except:
+                pass
 
-                try:
-                    logging.info("Checking for 'Microsoft respects your privacy'")
-                    win = self.desktop.find_element_by_name('Microsoft respects your privacy')
-                    win.find_element_by_name("Next").click()
-                    time.sleep(3)
-                except:
-                    pass
+            try:
+                logging.info("Checking for 'Microsoft respects your privacy'")
+                win = self.desktop.find_element_by_name('Microsoft respects your privacy')
+                win.find_element_by_name("Next").click()
+                time.sleep(3)
+            except:
+                pass
 
-                try:
-                    logging.info("Checking for privacy pop up")
-                    self.desktop.find_element_by_name('Getting better together')
-                except:
-                    pass
-                else:
-                    # Click "Don't send optional data"
-                    # self.desktop.find_element_by_name("Don't send").click()
-                    self.desktop.find_element_by_xpath('//Button[contains(@Name, "t send")]').click()
-                    time.sleep(2)
+            try:
+                logging.info("Checking for privacy pop up")
+                self.desktop.find_element_by_name('Getting better together')
+            except:
+                pass
+            else:
+                # Click "Don't send optional data"
+                # self.desktop.find_element_by_name("Don't send").click()
+                self.desktop.find_element_by_xpath('//Button[contains(@Name, "t send")]').click()
+                time.sleep(2)
 
-                try:
-                    logging.info("Checking for 'Powering your experiences'")
-                    self.desktop.find_element_by_name('Powering your experiences')
-                except:
-                    pass
-                else:
-                    self.desktop.find_element_by_name("Done").click()
-                    time.sleep(2)
+            try:
+                logging.info("Checking for 'Powering your experiences'")
+                self.desktop.find_element_by_name('Powering your experiences')
+            except:
+                pass
+            else:
+                self.desktop.find_element_by_name("Done").click()
+                time.sleep(2)
 
 
-                try:
-                    logging.info("Checking for Privacy option")
-                    win = self.desktop.find_element_by_name('Your privacy option')
-                    win.find_element_by_name("Close").click()
-                    time.sleep(3)
-                except:
-                    pass
+            try:
+                logging.info("Checking for Privacy option")
+                win = self.desktop.find_element_by_name('Your privacy option')
+                win.find_element_by_name("Close").click()
+                time.sleep(3)
+            except:
+                pass
 
-                try:
-                    logging.info("Checking for Privacy matters")
-                    win = self.desktop.find_element_by_name('Your privacy matters')
-                    win.find_element_by_name("Close").click()
-                    time.sleep(3)
-                except:
-                    pass
+            try:
+                logging.info("Checking for Privacy matters")
+                win = self.desktop.find_element_by_name('Your privacy matters')
+                win.find_element_by_name("Close").click()
+                time.sleep(3)
+            except:
+                pass
 
-                try:
-                    logging.info("Checking for Privacy Settings Applied")
-                    win = self.desktop.find_element_by_name('Privacy Settings Applied')
-                    win.find_element_by_name("OK").click()
-                except:
-                    pass
+            try:
+                logging.info("Checking for Privacy Settings Applied")
+                win = self.desktop.find_element_by_name('Privacy Settings Applied')
+                win.find_element_by_name("OK").click()
+            except:
+                pass
 
-                try:
-                    logging.info("Checking for safe mode pop up")
-                    self.desktop.find_element_by_xpath('//*[contains(@Name, "safe mode")]')
-                except:
-                    pass
-                else:
-                    logging.info("Safe mode window is present")
-                    open_windows += 1
-                    self.desktop.find_element_by_name("No").click()
-                    time.sleep(3)
+            try:
+                logging.info("Checking for safe mode pop up")
+                self.desktop.find_element_by_xpath('//*[contains(@Name, "safe mode")]')
+            except:
+                pass
+            else:
+                logging.info("Safe mode window is present")
+                open_windows += 1
+                self.desktop.find_element_by_name("No").click()
+                time.sleep(3)
 
-                try:
-                    logging.info("Checking for 'Don't personalize' button")
-                    self.desktop.find_element_by_name("Don't personalize").click()
-                    time.sleep(3)
-                except:
-                    pass
+            try:
+                logging.info("Checking for 'Don't personalize' button")
+                self.desktop.find_element_by_name("Don't personalize").click()
+                time.sleep(3)
+            except:
+                pass
 
-                try:
-                    logging.info("Checking for 'cutting edge' pop up")
-                    cutting_edge = self.desktop.find_element_by_name("You're on the cutting edge")
-                except:
-                    pass
-                else:
-                    logging.info("'Cutting edge' window is present")
-                    open_windows += 1
-                    cutting_edge.find_element_by_name("Close").click()
-                    time.sleep(3)
+            try:
+                logging.info("Checking for 'cutting edge' pop up")
+                cutting_edge = self.desktop.find_element_by_name("You're on the cutting edge")
+            except:
+                pass
+            else:
+                logging.info("'Cutting edge' window is present")
+                open_windows += 1
+                cutting_edge.find_element_by_name("Close").click()
+                time.sleep(3)
 
-                try:
-                    logging.info("Checking for 'Get started' pop up")
-                    get_started = self.desktop.find_element_by_name("Get started")
-                except:
-                    pass
-                else:
-                    logging.info("'Get started' window is present")
-                    open_windows += 1
-                    get_started.find_element_by_name("Get started").click()
-                    time.sleep(3)
+            try:
+                logging.info("Checking for 'Get started' pop up")
+                get_started = self.desktop.find_element_by_name("Get started")
+            except:
+                pass
+            else:
+                logging.info("'Get started' window is present")
+                open_windows += 1
+                get_started.find_element_by_name("Get started").click()
+                time.sleep(3)
 
-                try:
-                    logging.info("Checking if we need to setup the account")
-                    self.desktop.find_element_by_name("Outlook")
-                    self.desktop.find_element_by_name("Advanced options collapsed")
-                    self.desktop.find_element_by_name("Connect")
-                except:
-                    pass
-                else:
-                    logging.info("Account setup window is present")
-                    open_windows += 1
-                    ActionChains(self.desktop).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
-                    # ActionChains(self.desktop).send_keys(Keys.TAB).send_keys(Keys.TAB).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
-                    self.desktop.find_element_by_name("Connect").click()
-                    time.sleep(10)
-                    ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
-                    time.sleep(5)
-                    ActionChains(self.desktop).send_keys(Keys.ENTER).perform()
-                    time.sleep(10)
-                
-                try:
-                    logging.info("Checking problem with account")
-                    self.desktop.find_element_by_name("Retry").click()
-                    logging.info("Problem with account is present")
-                    time.sleep(10)
-                except:
-                    pass
+            if self.fast_mode != '0':
+                break
 
-                try:
-                    # If Retry, probably need to enter email again
-                    logging.info("Checking Sign in")
-                    self.desktop.find_element_by_name("Sign in")
-                except:
-                    pass
-                else:
-                    logging.info("Sign in window is present")
-                    open_windows += 1
-                    ActionChains(self.desktop).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
-                    # ActionChains(self.desktop).send_keys(Keys.TAB).send_keys(Keys.TAB).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
-                    self.desktop.find_element_by_name("Next").click()
-                    time.sleep(7)
-                    ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
-                    time.sleep(5)
-                    ActionChains(self.desktop).send_keys(Keys.ENTER).perform()
-                    time.sleep(10)
+            try:
+                logging.info("Checking if we need to setup the account")
+                self.desktop.find_element_by_name("Outlook")
+                self.desktop.find_element_by_name("Advanced options collapsed")
+                self.desktop.find_element_by_name("Connect")
+            except:
+                pass
+            else:
+                logging.info("Account setup window is present")
+                open_windows += 1
+                ActionChains(self.desktop).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
+                # ActionChains(self.desktop).send_keys(Keys.TAB).send_keys(Keys.TAB).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
+                self.desktop.find_element_by_name("Connect").click()
+                time.sleep(10)
+                ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
+                time.sleep(5)
+                ActionChains(self.desktop).send_keys(Keys.ENTER).perform()
+                time.sleep(10)
+            
+            try:
+                logging.info("Checking problem with account")
+                self.desktop.find_element_by_name("Retry").click()
+                logging.info("Problem with account is present")
+                time.sleep(10)
+            except:
+                pass
 
-                try:
-                    logging.info("Checking for Windows Security")
-                    self.desktop.find_element_by_name('Windows Security')
-                except:
-                    pass
-                else:
-                    logging.info("Security window is present")
-                    open_windows += 1
-                    password_field = self.desktop.find_element_by_name("Password")
-                    password_field.click()
-                    password_field.send_keys(self.email_password)
+            try:
+                # If Retry, probably need to enter email again
+                logging.info("Checking Sign in")
+                self.desktop.find_element_by_name("Sign in")
+            except:
+                pass
+            else:
+                logging.info("Sign in window is present")
+                open_windows += 1
+                ActionChains(self.desktop).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
+                # ActionChains(self.desktop).send_keys(Keys.TAB).send_keys(Keys.TAB).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).send_keys(self.email_account).perform()
+                self.desktop.find_element_by_name("Next").click()
+                time.sleep(7)
+                ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
+                time.sleep(5)
+                ActionChains(self.desktop).send_keys(Keys.ENTER).perform()
+                time.sleep(10)
+
+            try:
+                logging.info("Checking for Windows Security")
+                self.desktop.find_element_by_name('Windows Security')
+            except:
+                pass
+            else:
+                logging.info("Security window is present")
+                open_windows += 1
+                password_field = self.desktop.find_element_by_name("Password")
+                password_field.click()
+                password_field.send_keys(self.email_password)
+                time.sleep(1)
+                self.desktop.find_element_by_name("Remember my credentials").click()
+                time.sleep(1)
+                self.desktop.find_element_by_name("OK").click()
+                time.sleep(1)
+
+            try:
+                logging.info("Checking for Enter Password")
+                self.desktop.find_element_by_name('Enter Password')
+            except:
+                pass
+            else:
+                logging.info("Password window is present")
+                open_windows += 1
+                password_field = self.desktop.find_element_by_name("Password")
+                password_field.click()
+                password_field.send_keys(self.email_password)
+                time.sleep(1)
+                self.desktop.find_element_by_name("Remember my credentials").click()
+                time.sleep(1)
+                self.desktop.find_element_by_name("OK").click()
+                time.sleep(1)
+
+            try:
+                logging.info("Checking for Advanced Setup")
+                WebDriverWait(self.desktop, 20).until(EC.presence_of_element_located((By.NAME,'Advanced setup')))
+            except:
+                pass
+            else:
+                logging.info("Advanced setup is present")
+                open_windows += 1
+                self.desktop.find_element_by_name("Microsoft 365").click()
+                time.sleep(5)
+
+            try:
+                logging.info("Checking for Account is added window")
+                # Uncheck setup outlook mobile
+                phone_elem = WebDriverWait(self.desktop, 20).until(EC.presence_of_element_located((By.NAME,"Set up Outlook Mobile on my phone, too")))
+                if phone_elem.is_selected():
+                    phone_elem.click()
                     time.sleep(1)
-                    self.desktop.find_element_by_name("Remember my credentials").click()
-                    time.sleep(1)
-                    self.desktop.find_element_by_name("OK").click()
-                    time.sleep(1)
-
-                try:
-                    logging.info("Checking for Enter Password")
-                    self.desktop.find_element_by_name('Enter Password')
-                except:
-                    pass
                 else:
-                    logging.info("Password window is present")
-                    open_windows += 1
-                    password_field = self.desktop.find_element_by_name("Password")
-                    password_field.click()
-                    password_field.send_keys(self.email_password)
-                    time.sleep(1)
-                    self.desktop.find_element_by_name("Remember my credentials").click()
-                    time.sleep(1)
-                    self.desktop.find_element_by_name("OK").click()
-                    time.sleep(1)
+                    logging.info("Set up Outlook Mobile is already unchecked")
+            except:
+                pass
+            else:
+                logging.info("Account is added window is present")
+                open_windows += 1
+                self.desktop.find_element_by_name("Done").click()
+            
+            # Check for Theme popup
+            try:
+                logging.info("Checking for Theme popup")
+                self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
+                self.desktop.find_element_by_name('OK').click()
+                logging.info("Clicked OK on Theme popup.")
+                time.sleep(3)
+            except:
+                pass
+            else:
+                open_windows += 1
 
-                try:
-                    logging.info("Checking for Advanced Setup")
-                    WebDriverWait(self.desktop, 20).until(EC.presence_of_element_located((By.NAME,'Advanced setup')))
-                except:
-                    pass
-                else:
-                    logging.info("Advanced setup is present")
-                    open_windows += 1
-                    self.desktop.find_element_by_name("Microsoft 365").click()
-                    time.sleep(5)
+            if open_windows == 0:
+                break
 
-                try:
-                    logging.info("Checking for Account is added window")
-                    # Uncheck setup outlook mobile
-                    phone_elem = WebDriverWait(self.desktop, 20).until(EC.presence_of_element_located((By.NAME,"Set up Outlook Mobile on my phone, too")))
-                    if phone_elem.is_selected():
-                        phone_elem.click()
-                        time.sleep(1)
-                    else:
-                        logging.info("Set up Outlook Mobile is already unchecked")
-                except:
-                    pass
-                else:
-                    logging.info("Account is added window is present")
-                    open_windows += 1
-                    self.desktop.find_element_by_name("Done").click()
-                
-                # Check for Theme popup
-                try:
-                    logging.info("Checking for Theme popup")
-                    self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
-                    self.desktop.find_element_by_name('OK').click()
-                    logging.info("Clicked OK on Theme popup.")
-                    time.sleep(3)
-                except:
-                    pass
-                else:
-                    open_windows += 1
-
-                if open_windows == 0:
-                    break
-                
-            # fail the test if it gets to the end of the last iteration without meeting the conditions to break out
-            if x >= max_loops-1:
-                logging.error(f"Unable to dismiss all popups in {max_loops} iterations.  Check video or failedscreen.png for something that needs to be manually dismissed.")
-                self.fail()
-        
-        win = WebDriverWait(self.desktop, 120).until(EC.presence_of_element_located((By.CLASS_NAME,'rctrl_renwnd32')))
-        self.outlook_driver = self.getDriverFromWin(win)
-        # self.outlook_driver.maximize_window()
-        # Restore window first to handle the case we accidentally went into Zen mode
-        ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" r").key_up(Keys.ALT).perform()
-        time.sleep(1)
-        # Maximize window
-        ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" x").key_up(Keys.ALT).perform()
-        time.sleep(2)
+        # fail the test if it gets to the end of the last iteration without meeting the conditions to break out
+        if x >= max_loops-1:
+            logging.error(f"Unable to dismiss all popups in {max_loops} iterations.  Check video or failedscreen.png for something that needs to be manually dismissed.")
+            self.fail()
 
         if self.fast_mode == '0':
+            win = WebDriverWait(self.desktop, 120).until(EC.presence_of_element_located((By.CLASS_NAME,'rctrl_renwnd32')))
+            self.outlook_driver = self.getDriverFromWin(win)
+            # self.outlook_driver.maximize_window()
+            # Restore window first to handle the case we accidentally went into Zen mode
+            ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" r").key_up(Keys.ALT).perform()
+            time.sleep(1)
+            # Maximize window
+            ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" x").key_up(Keys.ALT).perform()
+            time.sleep(2)
+
             try:
                 # Dismiss metered connection warning
                 warning = self.outlook_driver.find_element_by_name("Connect Anyway")
@@ -619,303 +620,337 @@ class ProductivityPrep(core.app_scenario.Scenario):
             except:
                 pass
 
-        try:
-            # Pin ribbon
-            ribbon = self.outlook_driver.find_element_by_name("Ribbon")
             try:
-                ribbon.find_element_by_name("Archive...")
-                # If successful, then ribbon already pinned.
-            except:
-                # Do ctrl-F1 to pin ribbon
-                ActionChains(self.outlook_driver).key_down(Keys.CONTROL).send_keys(Keys.F1).key_up(Keys.CONTROL).perform()
-                time.sleep(2)
+                # Pin ribbon
+                ribbon = self.outlook_driver.find_element_by_name("Ribbon")
+                try:
+                    ribbon.find_element_by_name("Archive...")
+                    # If successful, then ribbon already pinned.
+                except:
+                    # Do ctrl-F1 to pin ribbon
+                    ActionChains(self.outlook_driver).key_down(Keys.CONTROL).send_keys(Keys.F1).key_up(Keys.CONTROL).perform()
+                    time.sleep(2)
 
-        except Exception as e :
-            self._page_source(self.outlook_driver)
-            raise e
+            except Exception as e :
+                self._page_source(self.outlook_driver)
+                raise e
 
-        # Set ribbon to Simplified
-        ActionChains(self.outlook_driver).key_down(Keys.ALT).perform()
-        time.sleep(0.5)
-        ActionChains(self.outlook_driver).key_up(Keys.ALT).perform()
-        time.sleep(0.5)
-        ActionChains(self.outlook_driver).send_keys("z").perform()
-        time.sleep(0.5)
-        ActionChains(self.outlook_driver).send_keys("r").perform()
-        time.sleep(0.5)
-        ActionChains(self.outlook_driver).send_keys("i").perform()
-        time.sleep(3)
+            # Set ribbon to Simplified
+            ActionChains(self.outlook_driver).key_down(Keys.ALT).perform()
+            time.sleep(0.5)
+            ActionChains(self.outlook_driver).key_up(Keys.ALT).perform()
+            time.sleep(0.5)
+            ActionChains(self.outlook_driver).send_keys("z").perform()
+            time.sleep(0.5)
+            ActionChains(self.outlook_driver).send_keys("r").perform()
+            time.sleep(0.5)
+            ActionChains(self.outlook_driver).send_keys("i").perform()
+            time.sleep(3)
 
-        ribbon = self.outlook_driver.find_element_by_name("Ribbon")
-        ribbon.find_element_by_name("New Email").click()
-        time.sleep(3)
+            ribbon = self.outlook_driver.find_element_by_name("Ribbon")
+            ribbon.find_element_by_name("New Email").click()
+            time.sleep(3)
 
-        # Maximize new email window
-        ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" x").key_up(Keys.ALT).perform()
-        time.sleep(2)
+            # Maximize new email window
+            ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" x").key_up(Keys.ALT).perform()
+            time.sleep(2)
 
-        # Discard instead of send
-        reply_win = self.desktop.find_element_by_name('Untitled - Message (HTML) ')
-        reply_win.find_element_by_name("Ribbon").find_element_by_name("Close").click()
-        time.sleep(1)
-        reply_win.find_element_by_name("No").click()
-        time.sleep(3)
-
+            # Discard instead of send
+            reply_win = self.desktop.find_element_by_name('Untitled - Message (HTML) ')
+            reply_win.find_element_by_name("Ribbon").find_element_by_name("Close").click()
+            time.sleep(1)
+            reply_win.find_element_by_name("No").click()
+            time.sleep(3)
 
         ##############################
         # OneNote
         ##############################
 
-        # Launch OneNote
-        # "To sync this notebook, sign in to OneNote."
-        self.launchOrSwitchApp(self.desktop, "OneNote")        
-        time.sleep(10)
-        
-        try:
-            logging.info("Checking for 'Start Normally'")
-            self.desktop.find_element_by_xpath('//Button[@Name="Start Normally"]').click()
-            logging.info("Clicked 'Start Normally', waiting 20s")
-            time.sleep(20)
-        except:
-            pass
-
-        # See if the "Sign in" popup is there.
-        try:
-            logging.info("Checking for 'Sign In' pop up")
-            cutting_onenote = self.desktop.find_element_by_name("Sign In").click()
-            time.sleep(5)
-            # Check for email prompt
-            self.desktop.find_element_by_xpath("//*[contains(@Name, 'Email, phone')]")
-            ActionChains(self.desktop).send_keys(self.email_account).send_keys(Keys.ENTER).perform()
+        if self.fast_mode == '0':
+            # Launch OneNote
+            # "To sync this notebook, sign in to OneNote."
+            self.launchOrSwitchApp(self.desktop, "OneNote")        
             time.sleep(10)
-            # check for password prompt
-            self.desktop.find_element_by_xpath("//*[contains(@Name, 'assword')]")
-            ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
-            time.sleep(10)
-        except:
-            pass
+            
+            try:
+                logging.info("Checking for 'Start Normally'")
+                self.desktop.find_element_by_xpath('//Button[@Name="Start Normally"]').click()
+                logging.info("Clicked 'Start Normally', waiting 20s")
+                time.sleep(20)
+            except:
+                pass
 
-        win = WebDriverWait(self.desktop, 120).until(EC.presence_of_element_located((By.CLASS_NAME,'Framework::CFrame')))
-        self.onenote_driver = self.getDriverFromWin(win)
-        # self.onenote_driver.implicitly_wait(5)
-        time.sleep(3)
+            # See if the "Sign in" popup is there.
+            try:
+                logging.info("Checking for 'Sign In' pop up")
+                cutting_onenote = self.desktop.find_element_by_name("Sign In").click()
+                time.sleep(5)
+                # Check for email prompt
+                self.desktop.find_element_by_xpath("//*[contains(@Name, 'Email, phone')]")
+                ActionChains(self.desktop).send_keys(self.email_account).send_keys(Keys.ENTER).perform()
+                time.sleep(10)
+                # check for password prompt
+                self.desktop.find_element_by_xpath("//*[contains(@Name, 'assword')]")
+                ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
+                time.sleep(10)
+            except:
+                pass
 
-        try:
-            logging.info("Checking for 'cutting edge' pop up")
-            cutting_onenote = self.desktop.find_element_by_name("You're on the cutting edge")
-        except:
-            pass
-        else:
-            logging.info("'Cutting edge' window is present")
-            cutting_onenote.find_element_by_name("Close").click()
+            win = WebDriverWait(self.desktop, 120).until(EC.presence_of_element_located((By.CLASS_NAME,'Framework::CFrame')))
+            self.onenote_driver = self.getDriverFromWin(win)
+            # self.onenote_driver.implicitly_wait(5)
             time.sleep(3)
 
-        # Check for Got it popup
-        try:
-            logging.info("Checking for Got it")
-            self.desktop.find_element_by_name('Got it').click()
-            logging.info("Clicked Got it popup.")
-            time.sleep(3)
-        except:
-            pass
+            try:
+                logging.info("Checking for 'cutting edge' pop up")
+                cutting_onenote = self.desktop.find_element_by_name("You're on the cutting edge")
+            except:
+                pass
+            else:
+                logging.info("'Cutting edge' window is present")
+                cutting_onenote.find_element_by_name("Close").click()
+                time.sleep(3)
 
-        # Check for Your privacy matters popup
-        try:
-            logging.info("Checking for Privacy matters")
-            win = self.desktop.find_element_by_name('Your privacy matters')
-            win.find_element_by_name("Close").click()
-            time.sleep(3)
-        except:
-            pass
+            # Check for Got it popup
+            try:
+                logging.info("Checking for Got it")
+                self.desktop.find_element_by_name('Got it').click()
+                logging.info("Clicked Got it popup.")
+                time.sleep(3)
+            except:
+                pass
 
-        # Check for Got it! popup
-        try:
-            logging.info("Checking for Got it!")
-            self.desktop.find_element_by_name('Got it!').click()
-            logging.info("Clicked Got it! popup.")
-            time.sleep(3)
-        except:
-            pass
+            # Check for Your privacy matters popup
+            try:
+                logging.info("Checking for Privacy matters")
+                win = self.desktop.find_element_by_name('Your privacy matters')
+                win.find_element_by_name("Close").click()
+                time.sleep(3)
+            except:
+                pass
 
-        # Check for Theme popup
-        try:
-            logging.info("Checking for Theme popup")
-            self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
-            self.desktop.find_element_by_name('OK').click()
-            logging.info("Clicked OK on Theme popup.")
-            time.sleep(3)
-        except:
-            pass
+            # Check for Got it! popup
+            try:
+                logging.info("Checking for Got it!")
+                self.desktop.find_element_by_name('Got it!').click()
+                logging.info("Clicked Got it! popup.")
+                time.sleep(3)
+            except:
+                pass
 
-        # Maximize window
-        ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" x").key_up(Keys.ALT).perform()
-        time.sleep(2)
+            # Check for Theme popup
+            try:
+                logging.info("Checking for Theme popup")
+                self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
+                self.desktop.find_element_by_name('OK').click()
+                logging.info("Clicked OK on Theme popup.")
+                time.sleep(3)
+            except:
+                pass
 
-        # Pin ribbon
-        ribbon = self.onenote_driver.find_element_by_name("Ribbon")
-        try:
-            ribbon.find_element_by_name("Email Page")
-            # If successful, then ribbon already pinned.
-        except:
-            # Do ctrl-F1 to pin ribbon
-            logging.info("Pin ribbon")
-            ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys(Keys.F1).key_up(Keys.CONTROL).perform()
-            time.sleep(1)
-
-        # Set ribbon to Simplified
-        ActionChains(self.onenote_driver).key_down(Keys.ALT).perform()
-        time.sleep(0.5)
-        ActionChains(self.onenote_driver).key_up(Keys.ALT).perform()
-        time.sleep(0.5)
-        ActionChains(self.onenote_driver).send_keys("z").perform()
-        time.sleep(0.5)
-        ActionChains(self.onenote_driver).send_keys("r").perform()
-        time.sleep(0.5)
-        ActionChains(self.onenote_driver).send_keys("i").perform()
-
-        # Check for no open notebooks
-        try:
-            logging.info("Checking to make sure a notebook is open")
-            self.desktop.find_element_by_accessibility_id('903749698').click()
-            time.sleep(4)
-            logging.info("Opening notebook.")
-            # down - Open
-            ActionChains(self.onenote_driver).send_keys(Keys.DOWN).perform()
-            # pause 5s for list of notebooks to populate
-            time.sleep(5)
-            # right, down, down - select top notebook
-            ActionChains(self.onenote_driver).send_keys(Keys.RIGHT).send_keys(Keys.DOWN).send_keys(Keys.DOWN).perform()
-            # enter to open
-            ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
-            # wait 10s for notebook to load
-            time.sleep(25)
-        except:
-            pass
-        logging.info("Notebook is open")
-
-        # Force sync
-        ActionChains(self.onenote_driver).key_down(Keys.SHIFT).send_keys(Keys.F9).key_up(Keys.SHIFT).perform()
-        logging.info("Waiting 10s for sync.")
-        time.sleep(10)
-        self.onenote_driver.implicitly_wait(5)
-
-        # Check again for Got it popup that is blocking delete page
-        try:
-            logging.info("Checking for Got it again")
-            self.desktop.find_element_by_name('Got it').click()
-            logging.info("Clicked Got it popup.")
-            time.sleep(3)
-        except:
-            pass
-
-        try:
-            # Delete existing pages
-            while (True):
-                pages_list = self.onenote_driver.find_element_by_xpath('//List[@Name="Pages"]')
-                try:
-                    page = pages_list.find_element_by_xpath("//ListItem")
-                except:
-                    break
-                name = page.get_attribute("Name")
-                logging.info("Deleting page " + name)
-                page.click()
-                time.sleep(1)
-                ActionChains(self.onenote_driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys("a").key_up(Keys.SHIFT).key_up(Keys.CONTROL).perform()
-                time.sleep(1)
-                ActionChains(self.onenote_driver).send_keys(Keys.DELETE).perform()
-                # page.send_keys(Keys.DELETE)
-                time.sleep(2)
-                try:
-                    self.onenote_driver.find_element_by_name("Cannot Send to Deleted Notes")
-                    self.onenote_driver.find_element_by_name("OK").click()
-                except:
-                    continue
-
-            # Populate default page
-            time.sleep(1)
-            self.onenote_driver.find_element_by_name("Add Page").click()
-            time.sleep(1)
-            page = self.onenote_driver.find_element_by_xpath('//ListItem[contains(@Name, "Untitled")]')
-            page.click()
-            time.sleep(1)
-            page.click()
-
-            ActionChains(self.onenote_driver).send_keys("Default Page" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).key_down(Keys.ALT).send_keys("npf").key_up(Keys.ALT).perform()
+            # Maximize window
+            ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" x").key_up(Keys.ALT).perform()
             time.sleep(2)
 
-            # file_elem = self.onenote_driver.find_element_by_xpath('//Edit[@Name="File name:"]')  # This is not being found reliably even thought he tag is in the source.
-            file_elem = self.onenote_driver.find_element_by_accessibility_id("1148")
-            time.sleep(3)
-            file_elem.click()
-            time.sleep(0.5)
-            ActionChains(self.onenote_driver).send_keys(self.onedrive_path).perform()
-            logging.info("Onedrive Path: " + self.onedrive_path)
-            ActionChains(self.onenote_driver).send_keys("Manarola1.png" + Keys.ENTER).perform()
-            time.sleep(10)
-
+            # Pin ribbon
+            ribbon = self.onenote_driver.find_element_by_name("Ribbon")
             try:
-                win = WebDriverWait(self.desktop, 120).until(EC.presence_of_element_located((By.CLASS_NAME,'Framework::CFrame')))
-                self.onenote_driver = self.getDriverFromWin(win)
+                ribbon.find_element_by_name("Email Page")
+                # If successful, then ribbon already pinned.
+            except:
+                # Do ctrl-F1 to pin ribbon
+                logging.info("Pin ribbon")
+                ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys(Keys.F1).key_up(Keys.CONTROL).perform()
+                time.sleep(1)
+
+            # Set ribbon to Simplified
+            ActionChains(self.onenote_driver).key_down(Keys.ALT).perform()
+            time.sleep(0.5)
+            ActionChains(self.onenote_driver).key_up(Keys.ALT).perform()
+            time.sleep(0.5)
+            ActionChains(self.onenote_driver).send_keys("z").perform()
+            time.sleep(0.5)
+            ActionChains(self.onenote_driver).send_keys("r").perform()
+            time.sleep(0.5)
+            ActionChains(self.onenote_driver).send_keys("i").perform()
+
+            # Check whether a notebook is already open.
+            # The Pages list element exists even when no notebook is open (just empty),
+            # so we must confirm it contains at least one ListItem.
+            notebook_open = False
+            logging.info("Checking to make sure a notebook is open")
+            try:
+                pages_list = self.onenote_driver.find_element_by_xpath('//List[@Name="Pages"]')
+                pages_list.find_element_by_xpath('.//ListItem')
+                notebook_open = True
+                logging.info("Notebook is already open.")
+            except:
+                logging.info("Pages list is empty or not found - no notebook open.")
+
+            if not notebook_open:
+                opened_prompt = False
+                # Try selectors in priority order.
+                # "Click here" is the hyperlink OneNote shows in its "no open notebooks" state.
+                for selector_type, selector in [
+                    ("onenote_xpath", '//*[contains(@Name, "Click here")]'),
+                    ("accessibility_id", "903749698"),  # Legacy UIA id (pre-2026 OneNote).
+                    ("name", "Open Notebook"),
+                    ("name", "Open notebook"),
+                    ("name", "Open"),
+                ]:
+                    try:
+                        if selector_type == "onenote_xpath":
+                            self.onenote_driver.find_element_by_xpath(selector).click()
+                        elif selector_type == "accessibility_id":
+                            self.desktop.find_element_by_accessibility_id(selector).click()
+                        else:
+                            self.desktop.find_element_by_name(selector).click()
+                        opened_prompt = True
+                        logging.info("Opened OneNote notebook prompt using %s: %s", selector_type, selector)
+                        break
+                    except:
+                        pass
+
+                if opened_prompt:
+                    time.sleep(4)
+                    logging.info("Opening notebook.")
+                    # down - Open
+                    ActionChains(self.onenote_driver).send_keys(Keys.DOWN).perform()
+                    # pause 5s for list of notebooks to populate
+                    time.sleep(5)
+                    # right, down, down - select top notebook
+                    ActionChains(self.onenote_driver).send_keys(Keys.RIGHT).send_keys(Keys.DOWN).send_keys(Keys.DOWN).perform()
+                    # enter to open
+                    ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
+                    # wait 10s for notebook to load
+                    time.sleep(25)
+                else:
+                    logging.info("Could not find open-notebook prompt; continuing.")
+            logging.info("Notebook is open")
+
+            # Force sync
+            ActionChains(self.onenote_driver).key_down(Keys.SHIFT).send_keys(Keys.F9).key_up(Keys.SHIFT).perform()
+            logging.info("Waiting 10s for sync.")
+            time.sleep(10)
+            self.onenote_driver.implicitly_wait(5)
+
+            # Check again for Got it popup that is blocking delete page
+            try:
+                logging.info("Checking for Got it again")
+                self.desktop.find_element_by_name('Got it').click()
+                logging.info("Clicked Got it popup.")
+                time.sleep(3)
             except:
                 pass
 
-            ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys("b").key_up(Keys.CONTROL).perform()
-            ActionChains(self.onenote_driver).send_keys("Packing List" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys("b").key_up(Keys.CONTROL).perform()
-            ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys("1").key_up(Keys.CONTROL).perform()
-            ActionChains(self.onenote_driver).send_keys(Keys.TAB).perform()
-            ActionChains(self.onenote_driver).send_keys("D5 2x" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Spare charger" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("50 Prime" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Passport" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Light Box" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Transmitter & receiver" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Gaffer tape" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Lens hood" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Headphones" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Batteries" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Lighting rig" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Models" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Location reservations" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Motorcycles 6x" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Trail jacket 4x" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Radios 10x" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("MB Jeep 2x" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys("Boat 2x" + Keys.ENTER).perform()
-            ActionChains(self.onenote_driver).send_keys(Keys.PAGE_UP).perform()
-
-            logging.info("Syncing for 10s.")
-            time.sleep(10)
-
             try:
-                # Empty Deleted Pages.  If there aren't any deleted pages, then elements won't be found, just pass.
-                self.onenote_driver.find_element_by_name("History").click()
-                time.sleep(2)
-                self.onenote_driver.find_element_by_name("Notebook Recycle Bin").find_element_by_name("More Options").click()
-                time.sleep(1)
-                self.onenote_driver.find_element_by_xpath('//MenuItem[@Name="Empty Recycle Bin"]').click()
-                time.sleep(0.5)
-                self.onenote_driver.find_element_by_xpath('//Button[@Name="Delete"]').click()
-                time.sleep(2)
-
-                # Wait for Delete dialog to finish, by checking for presence of Cancel button.
-                while(True):
+                # Delete existing pages
+                while (True):
+                    pages_list = self.onenote_driver.find_element_by_xpath('//List[@Name="Pages"]')
                     try:
-                        self.onenote_driver.find_element_by_name("Cancel")
-                        logging.info("Waiting 10 more seconds for Delete to finish.")
-                        time.sleep(10)
+                        page = pages_list.find_element_by_xpath("//ListItem")
                     except:
                         break
-                time.sleep(2)
-            except:
-                logging.info("Could not empty recycle bin.")
-                pass
+                    name = page.get_attribute("Name")
+                    logging.info("Deleting page " + name)
+                    page.click()
+                    time.sleep(1)
+                    ActionChains(self.onenote_driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys("a").key_up(Keys.SHIFT).key_up(Keys.CONTROL).perform()
+                    time.sleep(1)
+                    ActionChains(self.onenote_driver).send_keys(Keys.DELETE).perform()
+                    # page.send_keys(Keys.DELETE)
+                    time.sleep(2)
+                    try:
+                        self.onenote_driver.find_element_by_name("Cannot Send to Deleted Notes")
+                        self.onenote_driver.find_element_by_name("OK").click()
+                    except:
+                        continue
 
-        except Exception as e :
-            self._page_source(self.onenote_driver)
-            raise e
+                # Populate default page
+                time.sleep(1)
+                self.onenote_driver.find_element_by_name("Add Page").click()
+                time.sleep(1)
+                page = self.onenote_driver.find_element_by_xpath('//ListItem[contains(@Name, "Untitled")]')
+                page.click()
+                time.sleep(1)
+                page.click()
+
+                ActionChains(self.onenote_driver).send_keys("Default Page" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).key_down(Keys.ALT).send_keys("npf").key_up(Keys.ALT).perform()
+                time.sleep(2)
+
+                # file_elem = self.onenote_driver.find_element_by_xpath('//Edit[@Name="File name:"]')  # This is not being found reliably even thought he tag is in the source.
+                file_elem = self.onenote_driver.find_element_by_accessibility_id("1148")
+                time.sleep(3)
+                file_elem.click()
+                time.sleep(0.5)
+                ActionChains(self.onenote_driver).send_keys(self.onedrive_path).perform()
+                logging.info("Onedrive Path: " + self.onedrive_path)
+                ActionChains(self.onenote_driver).send_keys("Manarola1.png" + Keys.ENTER).perform()
+                time.sleep(10)
+
+                try:
+                    win = WebDriverWait(self.desktop, 120).until(EC.presence_of_element_located((By.CLASS_NAME,'Framework::CFrame')))
+                    self.onenote_driver = self.getDriverFromWin(win)
+                except:
+                    pass
+
+                ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys("b").key_up(Keys.CONTROL).perform()
+                ActionChains(self.onenote_driver).send_keys("Packing List" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys("b").key_up(Keys.CONTROL).perform()
+                ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys("1").key_up(Keys.CONTROL).perform()
+                ActionChains(self.onenote_driver).send_keys(Keys.TAB).perform()
+                ActionChains(self.onenote_driver).send_keys("D5 2x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Spare charger" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("50 Prime" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Passport" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Light Box" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Transmitter & receiver" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Gaffer tape" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Lens hood" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Headphones" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Batteries" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Lighting rig" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Models" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Location reservations" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Motorcycles 6x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Trail jacket 4x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Radios 10x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("MB Jeep 2x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Boat 2x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys(Keys.PAGE_UP).perform()
+
+                logging.info("Syncing for 10s.")
+                time.sleep(10)
+
+                try:
+                    # Empty Deleted Pages.  If there aren't any deleted pages, then elements won't be found, just pass.
+                    self.onenote_driver.find_element_by_name("History").click()
+                    time.sleep(2)
+                    self.onenote_driver.find_element_by_name("Notebook Recycle Bin").find_element_by_name("More Options").click()
+                    time.sleep(1)
+                    self.onenote_driver.find_element_by_xpath('//MenuItem[@Name="Empty Recycle Bin"]').click()
+                    time.sleep(0.5)
+                    self.onenote_driver.find_element_by_xpath('//Button[@Name="Delete"]').click()
+                    time.sleep(2)
+
+                    # Wait for Delete dialog to finish, by checking for presence of Cancel button.
+                    while(True):
+                        try:
+                            self.onenote_driver.find_element_by_name("Cancel")
+                            logging.info("Waiting 10 more seconds for Delete to finish.")
+                            time.sleep(10)
+                        except:
+                            break
+                    time.sleep(2)
+                except:
+                    logging.info("Could not empty recycle bin.")
+                    pass
+
+            except Exception as e :
+                self._page_source(self.onenote_driver)
+                raise e
 
 
         ##############################
@@ -1204,7 +1239,10 @@ class ProductivityPrep(core.app_scenario.Scenario):
             time.sleep(1)
         except:
             pass
-        word_driver.maximize_window()
+        try:
+            word_driver.maximize_window()
+        except:
+            logging.info("Unable to maximize Word")
         return word_driver
 
     def launchExcel(self, desktop_driver):
@@ -1219,7 +1257,10 @@ class ProductivityPrep(core.app_scenario.Scenario):
             time.sleep(1)
         except:
             pass
-        excel_driver.maximize_window()
+        try:
+            excel_driver.maximize_window()
+        except:
+            logging.info("Unable to maximize Excel")
         return excel_driver
 
     def launchPowerPoint(self, desktop_driver):
@@ -1234,7 +1275,10 @@ class ProductivityPrep(core.app_scenario.Scenario):
             time.sleep(1)
         except:
             pass
-        ppt_driver.maximize_window()
+        try:
+            ppt_driver.maximize_window()
+        except:
+            logging.info("Unable to maximize PowerPoint")
         return ppt_driver
 
     def recoverUnsavedDocuments(self, app_driver):

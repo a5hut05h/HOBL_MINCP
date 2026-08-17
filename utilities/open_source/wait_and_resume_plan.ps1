@@ -24,7 +24,7 @@ $timeout = New-TimeSpan -Minutes $TimeoutMinutes
 
 while ($true) {
     try {
-        $response = Invoke-WebRequest -Uri $pokeUrl -MaximumRedirection 0 -ErrorAction SilentlyContinue
+        $response = Invoke-WebRequest -Uri $pokeUrl -MaximumRedirection 0 -UseBasicParsing -ErrorAction SilentlyContinue
         $statusCode = $response.StatusCode
     }
     catch {
@@ -53,6 +53,8 @@ while ($true) {
     Start-Sleep -Seconds $PollIntervalSeconds
 }
 
+Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" -ArgumentList "--app=`"http://localhost:80/plan/Scenarios?PlanID=$PlanID`"", "-start-maximized"
+
 # Set scenario to pending if flag is set
 if ($SetScenarioPending) {
     if (-not $ScenarioID) {
@@ -69,7 +71,7 @@ if ($SetScenarioPending) {
     # Send State request
     $body["State"] = "Pending"
     try {
-        $response = Invoke-WebRequest -Uri $pendingUrl -Method Post -Body $body -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri $pendingUrl -Method Post -Body $body -UseBasicParsing -ErrorAction Stop
         Write-Host "Set scenario State=Pending response: $($response.StatusCode)"
     }
     catch {
@@ -80,7 +82,7 @@ if ($SetScenarioPending) {
     $body.Remove("State")
     $body["Status"] = "PENDING"
     try {
-        $response = Invoke-WebRequest -Uri $pendingUrl -Method Post -Body $body -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri $pendingUrl -Method Post -Body $body -UseBasicParsing -ErrorAction Stop
         Write-Host "Set scenario Status=PENDING response: $($response.StatusCode)"
     }
     catch {
@@ -90,7 +92,7 @@ if ($SetScenarioPending) {
 
 # Send resume command
 try {
-    $response = Invoke-WebRequest -Uri $resumeUrl -MaximumRedirection 0 -ErrorAction SilentlyContinue
+    $response = Invoke-WebRequest -Uri $resumeUrl -MaximumRedirection 0 -UseBasicParsing -ErrorAction SilentlyContinue
     Write-Host "Resume plan response: $($response.StatusCode)"
 }
 catch {

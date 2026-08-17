@@ -125,12 +125,14 @@ class Params(object):
         # First check global
         val = Params.getDefault("global", key)
         if val:
+            # print(f" INFO - getSectionForKey returning global for {key}, val = {val}")
             return "global"
         
         # Then check module
         module = Params.get_raw("global", "module_name")
         val = Params.getDefault(module, key)
         if val:
+            # print(f" INFO - getSectionForKey returning module {module} for {key}, val = {val}")
             return module
         
         # Then check everything else
@@ -432,6 +434,10 @@ class Params(object):
 
     @classmethod
     def resolveHostIp(cls):
+        # If local execution, specified by a dut_ip of 127.0.0.1, then return same for host_ip
+        dut_ip = Params.get('global', 'dut_ip')
+        if dut_ip == "127.0.0.1":
+            return "127.0.0.1"
         # Get all host interface IP addresses
         interfaces = socket.gethostbyname_ex(socket.gethostname())[2]
         # If only one interface, return it
@@ -482,8 +488,12 @@ class Params(object):
                 val = date.isoformat(date.today())
                 continue
 
-            # print(f" INFO resolveVars - calling get_raw(None, {name})")
-            val = Params.get_raw(None, name, log = False, recurse_init = False)
+            section_raw = None
+            name_raw    = name
+            if ":" in name:
+                section_raw, name_raw = (name.split(':', 1) + [""])[:2]
+
+            val = Params.get_raw(section_raw, name_raw, log = False, recurse_init = False)
 
             if val == None: 
                 # new key value
@@ -492,7 +502,7 @@ class Params(object):
                 # either 
                 # print (f"Key Name: {name}")
                 # print(f" INFO resolveVars2 - calling get(None, {name})")
-                val_new = Params.get(None, name, log = False, recurse_init = False)
+                val_new = Params.get(section_raw, name_raw, log = False, recurse_init = False)
                 if val_new != None:
                     reg_write(name, val_new)
                     val = val_new
@@ -521,6 +531,9 @@ def find_val(name):
     val = "Undefined"
     if Params.getCalculated("dut_alive") == '0':
         val = reg_read(name)
+        if val == "Undefined" and name == "PLATFORM":
+            # Default to Windows if platform is not found in registry
+            val = "Windows"
         return val
     # print("Finding parameter: ", name)
     if name == "LKG":
@@ -678,7 +691,7 @@ def reg_clean(sub_key):
 
 def call(command, cwd = ".", timeout = 10):
     result = None
-    print("  Calling: ", command)
+    # print("  Calling: ", command)
     try:
         if Params.get_raw('global', "local_execution", log = False, recurse_init = True) == '1':
             cmd_str = " ".join(command)
@@ -692,7 +705,7 @@ def call(command, cwd = ".", timeout = 10):
             deserialized_output = json.loads(output)
             if "result" in deserialized_output:
                 result = deserialized_output["result"].strip()
-                print(result)
+                # print(result)
                 if "Exception" in result or "ERROR" in result:
                     result = None
             else:
