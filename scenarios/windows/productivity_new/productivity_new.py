@@ -23,7 +23,7 @@ class Productivity(core.app_scenario.Scenario):
         result = rpc.plugin_load(self.dut_ip, self.rpc_port, "InputInject", "InputInject.Application", "C:\\hobl_bin\\InputInject\\InputInject.dll")
 
         # Load actions JSON.
-        actions_json = os.path.join(os.path.dirname(__file__), "productivity.json")
+        actions_json = os.path.join(os.path.dirname(__file__), "productivity_new.json")
         self.actions = self.load_action_json(actions_json)
 
         # Execute Setup actions, if they exist
