@@ -1,0 +1,1139 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+##
+# Prepare the Productivity Powershell test, pinning Outlook (new) instead of classic Outlook
+#
+# Setup instructions:
+##
+
+import builtins
+import logging
+import core.app_scenario
+from core.parameters import Params
+import os
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
+class ProductivityNewPrep(core.app_scenario.Scenario):
+    module = __module__.split('.')[-1]
+    # Set default parameters
+    Params.setDefault(module, 'email_account', Params.get('global', 'msa_account'))
+    Params.setDefault(module, 'email_password', Params.get('global', 'dut_password'))
+    Params.setDefault(module, 'fast_mode', '0')
+
+    # Get parameters
+    email_account = Params.get(module, 'email_account')
+    email_password = Params.get(module, 'email_password')
+    fast_mode = Params.get(module, 'fast_mode')
+
+    is_prep = True
+
+    excel_doc = "FamilyBudget.xlsx"
+    word_long_doc = "test_long_doc.docx"
+    word_untrusted_doc = "Test-Scrolling-3d.docx"
+    ppt_doc = "sample.pptx"
+
+    outlook_driver = None
+    onenote_driver = None
+    word_driver = None
+    excel_driver = None
+    ppt_driver = None
+
+    # AUMID (PackageFamilyName!AppId) used to launch Outlook (new) via explorer.exe shell:AppsFolder
+    outlook_new_aumid = "Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.OutlookforWindows"
+
+    def runTest(self):
+        if Params.get("global", "local_execution") == "0":
+            self.userprofile = self._call(["cmd.exe", "/C echo %USERPROFILE%"])
+        else:
+            self.userprofile = os.environ['USERPROFILE']
+        # Flag to indicate if prep passed successfully
+        self.success = False
+
+        # Kill MSOsync to prevent handles to open files
+        try:
+            self._kill("msosync.exe") # msosync can keep file handles open from time to time, preventing re-upload
+        except:
+            # Try again
+            logging.debug("Killing msosync failed, trying again.")
+            self._kill("msosync.exe") # msosync can keep file handles open from time to time, preventing re-upload
+        time.sleep(5)
+
+        # Delete folders uploaded OneDrive in prior versions of HOBL, so that they don't continue to sync.
+        self._call(["cmd.exe", "/C rmdir /s /q " + self.userprofile + "\\OneDrive\\productivity_content"], expected_exit_code="")
+        self._call(["cmd.exe", "/C rmdir /s /q " + self.userprofile + "\\OneDrive\\abl_resources"], expected_exit_code="")
+
+        # Upload documents used by Office apps
+        self.onedrive_path = self.userprofile + "\\OneDrive\\abl_docs\\"
+        try:
+            self._upload("scenarios\\windows\\_library\\productivity\\prod_setup\\abl_docs", self.userprofile + "\\OneDrive")
+        except:
+            logging.debug("Could not copy productivity content to onedrive.")
+
+        # Show file extensions (necessary for scripts to match certain window titles properly, like Word)
+        self._call(["cmd.exe", r"/C reg add HKCU\software\Microsoft\Windows\CurrentVersion\Explorer\Advanced /v HideFileExt /t REG_DWORD /f /d 00000000"])
+
+        try:
+            # Hide Windows Search box to make sure there is room for all the taskbar icons we want to add
+            self._call(["cmd.exe", r"/C reg add HKCU\software\Microsoft\Windows\CurrentVersion\Search /v SearchboxTaskbarMode /t REG_DWORD /f /d 00000000"])
+        except:
+            pass
+
+        # Disable auto-recover on Office apps.  This is necessary to be able to recover from a mishap (lost keys or mouse clicks) in a subsequent loop.
+        self._call(["cmd.exe", r"/C reg add HKCU\Software\Microsoft\office\16.0\excel\options /v AutoRecoverEnabled /t REG_DWORD /f /d 00000000"])
+        self._call(["cmd.exe", r"/C reg add HKCU\Software\Microsoft\office\16.0\PowerPoint\options /v SaveAutoRecoveryInfo /t REG_DWORD /f /d 00000000"])
+        self._call(["cmd.exe", r"/C reg add HKCU\Software\Microsoft\office\16.0\Word\options /v KeepUnsavedChanges /t REG_DWORD /f /d 00000000"])
+
+        # Disable Design Ideas suggestions in PowerPoint because of it's indeterminant behavior causing wild power variations.
+        self._call(["cmd.exe", r"/C reg add HKCU\Software\Microsoft\office\16.0\PowerPoint\options /v EnableSuggestionServiceUserSetting /t REG_DWORD /f /d 00000000"])
+
+        # Show powerpoint ribbon.
+        self._call(["cmd.exe", r"/C reg add HKCU\Software\Microsoft\Office\16.0\Common\Toolbars\PowerPoint /v QuickAccessToolbarStyle /t REG_DWORD /f /d 00000016"])
+
+        # Disable OneNote full screen on pen undock.
+        self._call(["cmd.exe", r"/C reg add HKCU\Software\Microsoft\Office\16.0\OneNote\Options /v FullPageModeOnPenUndock /t REG_DWORD /f /d 00000000"])
+
+        # Force "mouse mode" in Office, so that the UI doesn't change when blade is attached/detached.
+        self._call(["cmd.exe", r"/C reg add HKCU\Software\Microsoft\Office\16.0\Common /v OverridePointerMode /t REG_DWORD /f /d 00000001"])
+        self._call(["cmd.exe", r"/C reg add HKCU\Software\Microsoft\Office\16.0\Common /v OverrideTabletMode /t REG_DWORD /f /d 00000001"])
+        self._call(["cmd.exe", r"/C reg add HKCU\Software\Microsoft\Office\16.0\Common /v PointerModeInitVersion /t REG_DWORD /f /d 00000001"])
+
+        # Set TeachCallouts to indicate they'be been completed
+        key = 'HKCU\\SOFTWARE\\Microsoft\\Office\\16.0\\Common\\TeachingCallouts'
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "AccCheckerStatusBarTeachingCallout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "AutoSaveFirstSaveExcel" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "AutoSaveFirstSavePPT" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "AutoSaveFirstSaveWord" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "AutoSaveToggleOnExcel" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "AutoSaveToggleOnPPT" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "AutoSaveToggleOnWord" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "CloudSettingsSyncTeachingCallout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "FocusedInboxTeachingCallout_2" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "HubBarTeachingCallout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "MessageExtensionsTeachingCallout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "Olk_SearchBoxTitleBar_SLR_Sequence" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "OneNoteFullPageViewButtonCallout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "OneNoteInkCalloutId" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "OneNoteModernLayoutVerticalCollapsedStateSequence" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "OneNoteModernLayoutVerticalExpandedStateSequence" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "PPT_InsertCameo_Callout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "PPT_RecordVideoPresentation_Callout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "RibbonOverflowTeachingCalloutID" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "RoamingSigTeachingCallout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "SLRToggleReplaceTeachingCalloutID" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "TryNewOutlookToggle" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "UseTighterSpacingTeachingCallout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "UseToDoAppTeachingCallout" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "VersionHistoryRenameCalloutExcel" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "VersionHistoryRenameCalloutPPT" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "VersionHistoryRenameCalloutWord" /t REG_DWORD /d 2 /f > null 2>&1'])
+        self._call(["cmd.exe", f'/C reg add "{key}" /v "Word_Paste_MergeFormatByDefault" /t REG_DWORD /d 2 /f > null 2>&1'])
+
+        logging.info("Launching WinAppDriver.exe on DUT.")
+        self._call([(self.dut_exec_path + "\\WindowsApplicationDriver\\WinAppDriver.exe"), (self.dut_resolved_ip + " " + self.app_port + " /forcequit")], blocking=False)
+        time.sleep(1)
+
+        desired_caps = {}
+        desired_caps["app"] = "Root"
+        self.desktop = self._launchApp(desired_caps)
+        self.desktop.implicitly_wait(0)
+
+        # Dismiss secruity popup
+        try:
+            logging.info("Checking for system notification")
+            self.desktop.find_element_by_name('Move notification to notification center').click()
+            time.sleep(3)
+        except:
+            pass
+
+        # Pin Powershell to taskbar
+        try:
+            error = "Can't find Windows PowerShell - 1 running window"
+            app_elem = self._get_app_tray(self.desktop).find_element_by_name("Windows PowerShell - 1 running window")
+            error = "Can't context click Powershell"
+            ActionChains(self.desktop).context_click(app_elem).perform()
+            time.sleep(1)
+            error = "Can't find Pin to taskbar"
+            pinbutton = self.desktop.find_element_by_name("Pin to taskbar")
+            error = "Can't click Pin to taskbar"
+            pinbutton.click()
+            logging.info("Powershell now pinned.")
+        except Exception as e :
+            logging.info(error)
+
+        # Pin simple remote console
+        try:
+            error = "Can't find SimpleRemoteConsole_Admin - 1 running window"
+            app_elem = self._get_app_tray(self.desktop).find_element_by_name("SimpleRemoteConsole_Admin - 1 running window")
+            error = "Can't context click SRC"
+            ActionChains(self.desktop).context_click(app_elem).perform()
+            time.sleep(1)
+            error = "Can't find Pin to taskbar"
+            pinbutton = self.desktop.find_element_by_name("Pin to taskbar")
+            error = "Can't click Pin to taskbar"
+            pinbutton.click()
+            logging.info("SimpleRemoteConsole now pinned.")
+        except Exception as e :
+            logging.info(error)
+
+        # Dismiss context menu with ESCAPE (needed for early Win11 bug)
+        ActionChains(self.desktop).send_keys(Keys.ESCAPE).perform()
+        time.sleep(2)
+
+        # Unpin classic Outlook, if it's pinned
+        try:
+            logging.info("Checking for 'Outlook (classic)'.")
+            icon = self._get_app_tray(self.desktop).find_element_by_name("Outlook (classic)")
+        except Exception as e1:
+            try:
+                logging.info("Name not found, checking for classic Outlook by AutomationId")
+                icon = self._get_app_tray(self.desktop).find_element_by_accessibility_id("Appid: Microsoft.Office.OUTLOOK.EXE.15")
+            except Exception as e2:
+                logging.info("Classic Outlook not found pinned.")
+                icon = None
+        if icon:
+            try:
+                time.sleep(3)
+                ActionChains(self.desktop).move_to_element(icon).context_click().perform()
+                time.sleep(3)
+                logging.info("Unpinning classic Outlook.")
+                self.desktop.find_element_by_name("Unpin from taskbar").click()
+                time.sleep(1)
+            except Exception as e3:
+                logging.warning("Failed to unpin classic Outlook: %s", str(e3))
+
+        # New method, avoiding use of unreliable Start menu
+        # Check for pinned apps (classic Outlook intentionally excluded; Outlook (new) handled separately below)
+        for app in ["Word", "OneNote", "PowerPoint", "Excel"]:
+            try:
+                app_elem = self._get_app_tray(self.desktop).find_element_by_name(app)
+                logging.info(app + " already pinned.")
+            except:
+                try:
+                    app_cmd = app.upper()
+                    if app == "Word":
+                        app_cmd = "WINWORD"
+                    elif app == "PowerPoint":
+                        app_cmd = "POWERPNT"
+                    app_cmd = app_cmd + ".EXE" 
+                    try:
+                        app_elem = self.desktop.find_element_by_accessibility_id("Appid: Microsoft.Office." + app_cmd + ".15")
+                    except:
+                        app_elem = self.desktop.find_element_by_accessibility_id("Microsoft.Office." + app_cmd + ".15")
+                except:
+                    app_elem = None
+            if app_elem:
+                logging.info(app + " already pinned.")
+                continue
+
+            self._call(["cmd.exe", "/C start " + app_cmd], blocking=False)
+            time.sleep(10)
+            if app == "OneNote":
+                time.sleep(10)
+
+            try:
+                icon = self.desktop.find_element_by_accessibility_id("Appid: Microsoft.Office." + app_cmd + ".15")
+            except:
+                icon = self.desktop.find_element_by_accessibility_id("Microsoft.Office." + app_cmd + ".15")
+
+            ActionChains(self.desktop).move_to_element(icon).context_click().perform()
+            time.sleep(3)
+            self.desktop.find_element_by_name("Pin to taskbar").click()
+
+            # Unpin and repin to work around Windows bug
+            time.sleep(3)
+            ActionChains(self.desktop).move_to_element(icon).context_click().perform()
+            time.sleep(3)
+            self.desktop.find_element_by_name("Unpin from taskbar").click()
+            time.sleep(3)
+            ActionChains(self.desktop).move_to_element(icon).context_click().perform()
+            time.sleep(3)
+            self.desktop.find_element_by_name("Pin to taskbar").click()
+
+        # Pin Outlook (new) to the taskbar, launching it first if it's not already pinned or running
+        try:
+            logging.info("Checking for 'Outlook (new)'.")
+            new_icon = self._get_app_tray(self.desktop).find_element_by_name("Outlook (new)")
+            logging.info("Outlook (new) already pinned.")
+        except:
+            try:
+                new_icon = self._get_app_tray(self.desktop).find_element_by_accessibility_id("Appid: " + self.outlook_new_aumid)
+                logging.info("Outlook (new) already pinned.")
+            except:
+                new_icon = None
+
+        if not new_icon:
+            logging.info("Launching Outlook (new) to pin it.")
+            self._call(["cmd.exe", "/C start explorer.exe shell:AppsFolder\\" + self.outlook_new_aumid], blocking=False)
+            time.sleep(15)
+
+            try:
+                new_icon = self.desktop.find_element_by_accessibility_id("Appid: " + self.outlook_new_aumid)
+            except:
+                new_icon = self.desktop.find_element_by_accessibility_id(self.outlook_new_aumid)
+
+            ActionChains(self.desktop).move_to_element(new_icon).context_click().perform()
+            time.sleep(3)
+            self.desktop.find_element_by_name("Pin to taskbar").click()
+
+            # Unpin and repin to work around Windows bug that results in blank icons
+            time.sleep(3)
+            ActionChains(self.desktop).move_to_element(new_icon).context_click().perform()
+            time.sleep(3)
+            self.desktop.find_element_by_name("Unpin from taskbar").click()
+            time.sleep(3)
+            ActionChains(self.desktop).move_to_element(new_icon).context_click().perform()
+            time.sleep(3)
+            self.desktop.find_element_by_name("Pin to taskbar").click()
+
+        # Kill all the apps because the popups are too hard to deal with when all apps are open
+        self._kill("Outlook.exe olk.exe OneNote.exe Excel.exe Powerpnt.exe Winword.exe")
+
+
+        ##############################
+        # Outlook (new)
+        ##############################
+        # Outlook (new) is a WinUI3 app, not the classic Win32 Outlook, so the classic
+        # ribbon/window-class first-run automation does not apply here. Just launch it
+        # once so any first-run/account setup completes before timed test scenarios run.
+        self.launchOrSwitchApp(self.desktop, "Outlook")
+        logging.info("Waiting 20s for Outlook (new) to fully open.")
+        time.sleep(20)
+        self.desktop = self._launchApp(desired_caps)
+
+        max_loops = 30
+        for x in range(max_loops):
+            open_windows = 0
+
+            try:
+                logging.info("Checking reopen item prompt")
+                self.desktop.find_element_by_name('No').click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for Theme popup")
+                self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
+                self.desktop.find_element_by_name('OK').click()
+                logging.info("Clicked OK on Theme popup.")
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for Got it")
+                self.desktop.find_element_by_name('Got it').click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for 'Microsoft respects your privacy'")
+                win = self.desktop.find_element_by_name('Microsoft respects your privacy')
+                win.find_element_by_name("Next").click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for privacy pop up")
+                self.desktop.find_element_by_name('Getting better together')
+            except:
+                pass
+            else:
+                self.desktop.find_element_by_xpath('//Button[contains(@Name, "t send")]').click()
+                time.sleep(2)
+
+            try:
+                logging.info("Checking for 'Powering your experiences'")
+                self.desktop.find_element_by_name('Powering your experiences')
+            except:
+                pass
+            else:
+                self.desktop.find_element_by_name("Done").click()
+                time.sleep(2)
+
+            try:
+                logging.info("Checking for Privacy option")
+                win = self.desktop.find_element_by_name('Your privacy option')
+                win.find_element_by_name("Close").click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for Privacy matters")
+                win = self.desktop.find_element_by_name('Your privacy matters')
+                win.find_element_by_name("Close").click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for Privacy Settings Applied")
+                win = self.desktop.find_element_by_name('Privacy Settings Applied')
+                win.find_element_by_name("OK").click()
+            except:
+                pass
+
+            try:
+                logging.info("Checking for 'Don't personalize' button")
+                self.desktop.find_element_by_name("Don't personalize").click()
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                logging.info("Checking for 'cutting edge' pop up")
+                cutting_edge = self.desktop.find_element_by_name("You're on the cutting edge")
+            except:
+                pass
+            else:
+                logging.info("'Cutting edge' window is present")
+                open_windows += 1
+                cutting_edge.find_element_by_name("Close").click()
+                time.sleep(3)
+
+            try:
+                logging.info("Checking for 'Get started' pop up")
+                get_started = self.desktop.find_element_by_name("Get started")
+            except:
+                pass
+            else:
+                logging.info("'Get started' window is present")
+                open_windows += 1
+                get_started.find_element_by_name("Get started").click()
+                time.sleep(3)
+
+            if self.fast_mode != '0':
+                break
+
+            if open_windows == 0:
+                break
+
+        if self.fast_mode == '0':
+            logging.info("Outlook (new) uses a different UI framework than classic Outlook; skipping classic ribbon-based first-run automation.")
+            time.sleep(5)
+
+        ##############################
+        # OneNote
+        ##############################
+
+        if self.fast_mode == '0':
+            # Launch OneNote
+            # "To sync this notebook, sign in to OneNote."
+            self.launchOrSwitchApp(self.desktop, "OneNote")        
+            time.sleep(10)
+            
+            try:
+                logging.info("Checking for 'Start Normally'")
+                self.desktop.find_element_by_xpath('//Button[@Name="Start Normally"]').click()
+                logging.info("Clicked 'Start Normally', waiting 20s")
+                time.sleep(20)
+            except:
+                pass
+
+            # See if the "Sign in" popup is there.
+            try:
+                logging.info("Checking for 'Sign In' pop up")
+                cutting_onenote = self.desktop.find_element_by_name("Sign In").click()
+                time.sleep(5)
+                # Check for email prompt
+                self.desktop.find_element_by_xpath("//*[contains(@Name, 'Email, phone')]")
+                ActionChains(self.desktop).send_keys(self.email_account).send_keys(Keys.ENTER).perform()
+                time.sleep(10)
+                # check for password prompt
+                self.desktop.find_element_by_xpath("//*[contains(@Name, 'assword')]")
+                ActionChains(self.desktop).send_keys(self.password).send_keys(Keys.ENTER).perform()
+                time.sleep(10)
+            except:
+                pass
+
+            win = WebDriverWait(self.desktop, 120).until(EC.presence_of_element_located((By.CLASS_NAME,'Framework::CFrame')))
+            self.onenote_driver = self.getDriverFromWin(win)
+            time.sleep(3)
+
+            try:
+                logging.info("Checking for 'cutting edge' pop up")
+                cutting_onenote = self.desktop.find_element_by_name("You're on the cutting edge")
+            except:
+                pass
+            else:
+                logging.info("'Cutting edge' window is present")
+                cutting_onenote.find_element_by_name("Close").click()
+                time.sleep(3)
+
+            # Check for Got it popup
+            try:
+                logging.info("Checking for Got it")
+                self.desktop.find_element_by_name('Got it').click()
+                logging.info("Clicked Got it popup.")
+                time.sleep(3)
+            except:
+                pass
+
+            # Check for Your privacy matters popup
+            try:
+                logging.info("Checking for Privacy matters")
+                win = self.desktop.find_element_by_name('Your privacy matters')
+                win.find_element_by_name("Close").click()
+                time.sleep(3)
+            except:
+                pass
+
+            # Check for Got it! popup
+            try:
+                logging.info("Checking for Got it!")
+                self.desktop.find_element_by_name('Got it!').click()
+                logging.info("Clicked Got it! popup.")
+                time.sleep(3)
+            except:
+                pass
+
+            # Check for Theme popup
+            try:
+                logging.info("Checking for Theme popup")
+                self.desktop.find_element_by_xpath('//*[contains(@Name, "Choose a theme")]')
+                self.desktop.find_element_by_name('OK').click()
+                logging.info("Clicked OK on Theme popup.")
+                time.sleep(3)
+            except:
+                pass
+
+            # Maximize window
+            ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" x").key_up(Keys.ALT).perform()
+            time.sleep(2)
+
+            # Pin ribbon
+            ribbon = self.onenote_driver.find_element_by_name("Ribbon")
+            try:
+                ribbon.find_element_by_name("Email Page")
+                # If successful, then ribbon already pinned.
+            except:
+                # Do ctrl-F1 to pin ribbon
+                logging.info("Pin ribbon")
+                ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys(Keys.F1).key_up(Keys.CONTROL).perform()
+                time.sleep(1)
+
+            # Set ribbon to Simplified
+            ActionChains(self.onenote_driver).key_down(Keys.ALT).perform()
+            time.sleep(0.5)
+            ActionChains(self.onenote_driver).key_up(Keys.ALT).perform()
+            time.sleep(0.5)
+            ActionChains(self.onenote_driver).send_keys("z").perform()
+            time.sleep(0.5)
+            ActionChains(self.onenote_driver).send_keys("r").perform()
+            time.sleep(0.5)
+            ActionChains(self.onenote_driver).send_keys("i").perform()
+
+            # Check whether a notebook is already open.
+            # The Pages list element exists even when no notebook is open (just empty),
+            # so we must confirm it contains at least one ListItem.
+            notebook_open = False
+            logging.info("Checking to make sure a notebook is open")
+            try:
+                pages_list = self.onenote_driver.find_element_by_xpath('//List[@Name="Pages"]')
+                pages_list.find_element_by_xpath('.//ListItem')
+                notebook_open = True
+                logging.info("Notebook is already open.")
+            except:
+                logging.info("Pages list is empty or not found - no notebook open.")
+
+            if not notebook_open:
+                opened_prompt = False
+                # Try selectors in priority order.
+                # "Click here" is the hyperlink OneNote shows in its "no open notebooks" state.
+                for selector_type, selector in [
+                    ("onenote_xpath", '//*[contains(@Name, "Click here")]'),
+                    ("accessibility_id", "903749698"),  # Legacy UIA id (pre-2026 OneNote).
+                    ("name", "Open Notebook"),
+                    ("name", "Open notebook"),
+                    ("name", "Open"),
+                ]:
+                    try:
+                        if selector_type == "onenote_xpath":
+                            self.onenote_driver.find_element_by_xpath(selector).click()
+                        elif selector_type == "accessibility_id":
+                            self.desktop.find_element_by_accessibility_id(selector).click()
+                        else:
+                            self.desktop.find_element_by_name(selector).click()
+                        opened_prompt = True
+                        logging.info("Opened OneNote notebook prompt using %s: %s", selector_type, selector)
+                        break
+                    except:
+                        pass
+
+                if opened_prompt:
+                    time.sleep(4)
+                    logging.info("Opening notebook.")
+                    # down - Open
+                    ActionChains(self.onenote_driver).send_keys(Keys.DOWN).perform()
+                    # pause 5s for list of notebooks to populate
+                    time.sleep(5)
+                    # right, down, down - select top notebook
+                    ActionChains(self.onenote_driver).send_keys(Keys.RIGHT).send_keys(Keys.DOWN).send_keys(Keys.DOWN).perform()
+                    # enter to open
+                    ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
+                    # wait 10s for notebook to load
+                    time.sleep(25)
+                else:
+                    logging.info("Could not find open-notebook prompt; continuing.")
+            logging.info("Notebook is open")
+
+            # Force sync
+            ActionChains(self.onenote_driver).key_down(Keys.SHIFT).send_keys(Keys.F9).key_up(Keys.SHIFT).perform()
+            logging.info("Waiting 10s for sync.")
+            time.sleep(10)
+            self.onenote_driver.implicitly_wait(5)
+
+            # Check again for Got it popup that is blocking delete page
+            try:
+                logging.info("Checking for Got it again")
+                self.desktop.find_element_by_name('Got it').click()
+                logging.info("Clicked Got it popup.")
+                time.sleep(3)
+            except:
+                pass
+
+            try:
+                # Delete existing pages
+                while (True):
+                    pages_list = self.onenote_driver.find_element_by_xpath('//List[@Name="Pages"]')
+                    try:
+                        page = pages_list.find_element_by_xpath("//ListItem")
+                    except:
+                        break
+                    name = page.get_attribute("Name")
+                    logging.info("Deleting page " + name)
+                    page.click()
+                    time.sleep(1)
+                    ActionChains(self.onenote_driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys("a").key_up(Keys.SHIFT).key_up(Keys.CONTROL).perform()
+                    time.sleep(1)
+                    ActionChains(self.onenote_driver).send_keys(Keys.DELETE).perform()
+                    time.sleep(2)
+                    try:
+                        self.onenote_driver.find_element_by_name("Cannot Send to Deleted Notes")
+                        self.onenote_driver.find_element_by_name("OK").click()
+                    except:
+                        continue
+
+                # Populate default page
+                time.sleep(1)
+                self.onenote_driver.find_element_by_name("Add Page").click()
+                time.sleep(1)
+                page = self.onenote_driver.find_element_by_xpath('//ListItem[contains(@Name, "Untitled")]')
+                page.click()
+                time.sleep(1)
+                page.click()
+
+                ActionChains(self.onenote_driver).send_keys("Default Page" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).key_down(Keys.ALT).send_keys("npf").key_up(Keys.ALT).perform()
+                time.sleep(2)
+
+                file_elem = self.onenote_driver.find_element_by_accessibility_id("1148")
+                time.sleep(3)
+                file_elem.click()
+                time.sleep(0.5)
+                ActionChains(self.onenote_driver).send_keys(self.onedrive_path).perform()
+                logging.info("Onedrive Path: " + self.onedrive_path)
+                ActionChains(self.onenote_driver).send_keys("Manarola1.png" + Keys.ENTER).perform()
+                time.sleep(10)
+
+                try:
+                    win = WebDriverWait(self.desktop, 120).until(EC.presence_of_element_located((By.CLASS_NAME,'Framework::CFrame')))
+                    self.onenote_driver = self.getDriverFromWin(win)
+                except:
+                    pass
+
+                ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys("b").key_up(Keys.CONTROL).perform()
+                ActionChains(self.onenote_driver).send_keys("Packing List" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys("b").key_up(Keys.CONTROL).perform()
+                ActionChains(self.onenote_driver).key_down(Keys.CONTROL).send_keys("1").key_up(Keys.CONTROL).perform()
+                ActionChains(self.onenote_driver).send_keys(Keys.TAB).perform()
+                ActionChains(self.onenote_driver).send_keys("D5 2x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Spare charger" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("50 Prime" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Passport" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Light Box" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Transmitter & receiver" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Gaffer tape" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Lens hood" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Headphones" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Batteries" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Lighting rig" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Models" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Location reservations" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Motorcycles 6x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Trail jacket 4x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Radios 10x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("MB Jeep 2x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys("Boat 2x" + Keys.ENTER).perform()
+                ActionChains(self.onenote_driver).send_keys(Keys.PAGE_UP).perform()
+
+                logging.info("Syncing for 10s.")
+                time.sleep(10)
+
+                try:
+                    # Empty Deleted Pages.  If there aren't any deleted pages, then elements won't be found, just pass.
+                    self.onenote_driver.find_element_by_name("History").click()
+                    time.sleep(2)
+                    self.onenote_driver.find_element_by_name("Notebook Recycle Bin").find_element_by_name("More Options").click()
+                    time.sleep(1)
+                    self.onenote_driver.find_element_by_xpath('//MenuItem[@Name="Empty Recycle Bin"]').click()
+                    time.sleep(0.5)
+                    self.onenote_driver.find_element_by_xpath('//Button[@Name="Delete"]').click()
+                    time.sleep(2)
+
+                    # Wait for Delete dialog to finish, by checking for presence of Cancel button.
+                    while(True):
+                        try:
+                            self.onenote_driver.find_element_by_name("Cancel")
+                            logging.info("Waiting 10 more seconds for Delete to finish.")
+                            time.sleep(10)
+                        except:
+                            break
+                    time.sleep(2)
+                except:
+                    logging.info("Could not empty recycle bin.")
+                    pass
+
+            except Exception as e :
+                self._page_source(self.onenote_driver)
+                raise e
+
+
+        ##############################
+        # Word
+        ##############################
+
+        # Open a docuemnt in each app to let feature gates update and dismiss popups
+
+        # Launch Word and open long doc
+        self.word_driver = self.launchWord(self.desktop)
+        time.sleep(3)
+        self.recoverUnsavedDocuments(self.word_driver)
+        time.sleep(3)
+        self.word_driver = self.launchWord(self.desktop)
+
+        try:
+            # Open Word doc
+            try:
+                self.word_driver.find_element_by_name("Open Other Documents").click()
+            except:
+                self.word_driver.find_element_by_name("Open").click()
+            time.sleep(0.5)
+            self.word_driver.find_element_by_name("Browse").click()
+            time.sleep(0.5)
+            file_elem = self.word_driver.find_element_by_xpath('//Edit[@Name="File name:"]')
+            file_elem.click()
+            time.sleep(0.5)
+            file_elem.send_keys(self.onedrive_path)
+            file_elem.send_keys(self.word_long_doc)
+            time.sleep(0.5)
+            self.word_driver.find_element_by_xpath('//SplitButton[@Name="Open"]').click()
+            time.sleep(5)
+        except Exception as e :
+            self._page_source(self.word_driver)
+            raise e
+
+        ribbon = self.word_driver.find_element_by_name("Ribbon")
+        try:
+            # If "Ribbon Display Options" is present, then ribbon is visible
+            ribbon.find_element_by_name("Ribbon Display Options")
+        except:
+            # If not, send ctrl-F1 to pin it.
+            ribbon.send_keys(Keys.CONTROL + Keys.F1)
+            time.sleep(2)
+
+
+        ##############################
+        # Excel
+        ##############################
+
+        # Launch Excel
+        self.excel_driver = self.launchExcel(self.desktop)
+        time.sleep(8)
+
+        try:
+            logging.info("Checking for Privacy Settings Applied")
+            win = self.desktop.find_element_by_name('Privacy Settings Applied')
+            win.find_element_by_name("OK").click()
+        except:
+            pass
+
+        time.sleep(1)
+        self.recoverUnsavedDocuments(self.excel_driver)
+        time.sleep(3)
+        self.excel_driver = self.launchExcel(self.desktop)
+
+        try:
+            # Open Excel doc
+            try:
+                self.excel_driver.find_element_by_name("Open Other Workbooks").click()
+            except:
+                self.excel_driver.find_element_by_name("File").find_element_by_name("Open").click()
+            time.sleep(0.5)
+            self.excel_driver.find_element_by_name("Browse").click()
+            time.sleep(0.5)
+            file_elem = self.excel_driver.find_element_by_xpath('//Edit[@Name="File name:"]')
+            file_elem.click()
+            time.sleep(0.5)
+            file_elem.send_keys(self.onedrive_path)
+            file_elem.send_keys(self.excel_doc)
+            time.sleep(0.5)
+            self.excel_driver.find_element_by_xpath('//SplitButton[@Name="Open"]').click()
+            time.sleep(5)
+        except Exception as e :
+            self._page_source(self.excel_driver)
+            raise e
+
+        ribbon = self.excel_driver.find_element_by_name("Ribbon")
+        try:
+            # If "Ribbon Display Options" is present, then ribbon is visible
+            ribbon.find_element_by_name("Ribbon Display Options")
+        except:
+            # If not, send ctrl-F1 to pin it.
+            ribbon.send_keys(Keys.CONTROL + Keys.F1)
+            time.sleep(2)
+
+        try:
+            # Click Insert button on ribbon to initiate plugin download
+            ribbon.find_element_by_name("Home").click()
+            time.sleep(1)
+
+            ribbon.find_element_by_name("Insert").click()
+            time.sleep(5)
+        except Exception as e :
+            self._page_source(self.excel_driver)
+            raise e
+
+
+        ##############################
+        # PowerPoint
+        ##############################
+
+        # Launch PowerPoint
+        self.ppt_driver = self.launchPowerPoint(self.desktop)
+        time.sleep(3)
+        self.recoverUnsavedDocuments(self.ppt_driver)
+        time.sleep(3)
+        self.ppt_driver = self.launchPowerPoint(self.desktop)
+
+        try:
+            # Open PowerPoint doc
+            try:
+                self.ppt_driver.find_element_by_name("Open Other Presentations").click()
+            except:
+                self.ppt_driver.find_element_by_name("Open").click()
+            time.sleep(0.5)
+            self.ppt_driver.find_element_by_name("Browse").click()
+            time.sleep(0.5)
+            file_elem = self.ppt_driver.find_element_by_xpath('//Edit[@Name="File name:"]')
+            file_elem.click()
+            time.sleep(0.5)
+            file_elem.send_keys(self.onedrive_path)
+            file_elem.send_keys(self.ppt_doc)
+            time.sleep(0.5)
+            self.ppt_driver.find_element_by_xpath('//SplitButton[@Name="Open"]').click()
+            time.sleep(2)
+        except Exception as e :
+            self._page_source(self.ppt_driver)
+            raise e
+
+        ribbon = self.ppt_driver.find_element_by_name("Ribbon")
+        try:
+            # If "Ribbon Display Options" is present, then ribbon is visible
+            ribbon.find_element_by_name("Ribbon Display Options")
+        except:
+            # If not, send ctrl-F1 to pin it.
+            ribbon.send_keys(Keys.CONTROL + Keys.F1)
+            time.sleep(2)
+
+
+        self.launchOrSwitchApp(self.desktop, "Outlook")
+
+        self.success = True
+
+    def tearDown(self):
+        logging.info("Performing teardown.")
+        # Close all apps
+        try:
+            if self.word_driver:
+                time.sleep(2)
+                self.launchOrSwitchApp(self.desktop, "Word")
+                try:
+                    self.word_driver.find_element_by_name("Got it").click()
+                except:
+                    pass
+                self.word_driver.find_element_by_name("Ribbon").find_element_by_name("Close").click()
+        except:
+            logging.error("Unable to close Word.")
+            pass
+
+        try:
+            if self.excel_driver:
+                time.sleep(2)
+                self.launchOrSwitchApp(self.desktop, "Excel")
+                try:
+                    self.excel_driver.find_element_by_name("Got it").click()
+                except:
+                    pass
+                self.excel_driver.find_element_by_name("Ribbon").find_element_by_name("Close").click()
+        except:
+            logging.error("Unable to close Excel.")
+            pass
+
+        try:
+            if self.ppt_driver:
+                time.sleep(2)
+                self.launchOrSwitchApp(self.desktop, "PowerPoint")
+                try:
+                    self.ppt_driver.find_element_by_name("Got it").click()
+                except:
+                    pass
+                self.ppt_driver.find_element_by_name("Ribbon").find_element_by_name("Close").click()
+        except:
+            logging.error("Unable to close PowerPoint.")
+            pass
+        
+        try:
+            if self.onenote_driver:
+                time.sleep(2)
+                self.launchOrSwitchApp(self.desktop, "OneNote")
+                self.onenote_driver.find_element_by_name("Ribbon").find_element_by_name("Close").click()
+        except:
+            logging.error("Unable to close OneNote.")
+            pass
+
+        # outlook_driver is never set for Outlook (new), so close it by process instead of by UI
+        try:
+            logging.debug("Killing Outlook (new) process (olk.exe).")
+            self._kill("olk.exe")
+        except:
+            logging.error("Unable to close Outlook (new).")
+            pass
+
+        core.app_scenario.Scenario.tearDown(self)
+        self._call(["taskkill.exe", "/F /IM WinAppDriver.exe"])
+
+        if self.success:
+            self.createPrepStatusControlFile()
+
+
+    def slow_send_keys(self, keys):
+        for key in keys:
+            ActionChains(self.desktop).send_keys(key).perform()
+
+    def launchWord(self, desktop_driver):
+        self.launchOrSwitchApp(desktop_driver, "Word")
+        win = WebDriverWait(desktop_driver, 40).until(EC.presence_of_element_located((By.CLASS_NAME,'OpusApp')))
+        word_driver = self.getDriverFromWin(win)
+        word_driver.implicitly_wait(2)
+        try:
+            # Dismiss any popups
+            dialog = word_driver.find_element_by_class_name("NUIDialog")
+            dialog.find_element_by_name("Close").click()
+            time.sleep(1)
+        except:
+            pass
+        try:
+            word_driver.maximize_window()
+        except:
+            logging.info("Unable to maximize Word")
+        return word_driver
+
+    def launchExcel(self, desktop_driver):
+        self.launchOrSwitchApp(desktop_driver, "Excel")
+        win = WebDriverWait(desktop_driver, 40).until(EC.presence_of_element_located((By.CLASS_NAME,'XLMAIN')))
+        excel_driver = self.getDriverFromWin(win)
+        excel_driver.implicitly_wait(2)
+        try:
+            # Dismiss any popups
+            dialog = excel_driver.find_element_by_class_name("NUIDialog")
+            dialog.find_element_by_name("Close").click()
+            time.sleep(1)
+        except:
+            pass
+        try:
+            excel_driver.maximize_window()
+        except:
+            logging.info("Unable to maximize Excel")
+        return excel_driver
+
+    def launchPowerPoint(self, desktop_driver):
+        self.launchOrSwitchApp(desktop_driver, "PowerPoint")
+        win = WebDriverWait(desktop_driver, 40).until(EC.presence_of_element_located((By.CLASS_NAME,'PPTFrameClass')))
+        ppt_driver = self.getDriverFromWin(win)
+        ppt_driver.implicitly_wait(2)
+        try:
+            # Dismiss any popups
+            dialog = ppt_driver.find_element_by_class_name("NUIDialog")
+            dialog.find_element_by_name("Close").click()
+            time.sleep(1)
+        except:
+            pass
+        try:
+            ppt_driver.maximize_window()
+        except:
+            logging.info("Unable to maximize PowerPoint")
+        return ppt_driver
+
+    def recoverUnsavedDocuments(self, app_driver):
+        try:
+            app_driver.find_element_by_xpath('//*[contains(@Name, "Blank")]')
+        except:
+            try:
+                app_driver.find_element_by_name("Collapsible Group").click()
+            except:
+                app_driver.find_element_by_name("Hide or show region").click()
+        time.sleep(1)
+        app_driver.find_element_by_xpath('//*[contains(@Name, "Blank")]').click()
+        time.sleep(1)
+        app_driver.find_element_by_name("File Tab").click()
+        time.sleep(1)
+        app_driver.find_element_by_name("Info").click()
+        time.sleep(3)
+        app_driver.find_elements_by_xpath('//*[contains(@Name, "Manage")]')[1].click()
+        time.sleep(1)
+        try:
+            app_driver.find_element_by_xpath('//*[contains(@Name, "Delete All Unsaved")]').click()
+            time.sleep(1)
+            app_driver.find_element_by_name("Yes").click()
+            time.sleep(1)
+        except:
+            pass
+        app_driver.find_element_by_class_name("NetUIFullpageUIWindow").find_element_by_name("Close").click()
+        time.sleep(1)
+        try:
+            app_driver.find_element_by_xpath('//Button[contains(@Name, "OK")]').click()
+        except:
+            pass
+
+    def launchOrSwitchApp(self, driver, app):
+        # app argument should be one of: Outlook, Word, Excel, PowerPoint, OneNote
+        logging.info("Launching " + app)
+        self._get_start_button(driver).click()
+        time.sleep(1.5)
+
+        apps_elem = self._get_app_tray(driver)
+
+        app_button = None
+        try:
+            # Try finding by Name via XPath
+            app_button = apps_elem.find_element_by_xpath(f'//Button[contains(@Name,"{app}")]')
+        except:
+            # If not found, try fallback to accessibility ID
+            if app == "Outlook":
+                # Outlook (new) accessibility ID (AUMID), not the classic Office one
+                try:
+                    app_button = apps_elem.find_element_by_accessibility_id("Appid: " + self.outlook_new_aumid)
+                except:
+                    app_button = apps_elem.find_element_by_accessibility_id(self.outlook_new_aumid)
+            else:
+                app_cmd = app.upper()
+                if app == "Word":
+                    app_cmd = "WINWORD"
+                elif app == "PowerPoint":
+                    app_cmd = "POWERPNT"
+                app_cmd += ".EXE"
+                # Try both known accessibility ID formats
+                try:
+                    app_button = apps_elem.find_element_by_accessibility_id(f"Appid: Microsoft.Office.{app_cmd}.15")
+                except:
+                    try:
+                        app_button = apps_elem.find_element_by_accessibility_id(f"Microsoft.Office.{app_cmd}.15")
+                    except:
+                        logging.error(f"Could not locate taskbar icon for {app}")
+        app_button.click()
+
+    def getWindowHandle(self, win):
+        win_handle = int(win.get_attribute("NativeWindowHandle"))
+        win_handle = format(win_handle, 'x') # convert to hex string
+        return win_handle
+
+    def getDriverFromWin(self, win):
+        win_handle = self.getWindowHandle(win)
+
+        # Launch new session attached to the window
+        desired_caps = {}
+        desired_caps["appTopLevelWindow"] = win_handle
+        driver = self._launchApp(desired_caps, track_driver = False)
+        time.sleep(2)  
+        driver.switch_to_window(win_handle)
+        return driver
+
+    def kill(self):
+        self._call([(self.dut_exec_path + "\\WindowsApplicationDriver\\WinAppDriver.exe"), (self.dut_resolved_ip + " " + self.app_port + " /forcequit")], blocking=False)
+        time.sleep(1)
+
+        desired_caps = {}
+        desired_caps["app"] = "Root"
+        desktop_driver = self._launchApp(desired_caps)
+
+        result = self._call(["tasklist.exe", '/fi "imagename eq olk.exe"'])
+        if "No tasks are running" not in result:
+            try:
+                self._kill("olk.exe")
+            except:
+                pass
+
+        result = self._call(["tasklist.exe", '/fi "imagename eq onenote.exe"'])
+        if "No tasks are running" not in result:
+            try:
+                self.onenote_driver = self.getDriverFromWin(WebDriverWait(desktop_driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'Framework::CFrame'))))
+                self.onenote_driver.maximize_window()
+                self.onenote_driver.find_element_by_class_name("NetUIFullpageUIWindow").find_element_by_name("Close").click()
+            except:
+                pass
+
+        result = self._call(["tasklist.exe", '/fi "imagename eq WINWORD.exe"'])
+        if "No tasks are running" not in result:
+            try:
+                word_driver = self.getDriverFromWin(WebDriverWait(desktop_driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'OpusApp'))))
+                word_driver.maximize_window()
+                word_driver.find_element_by_class_name("NetUIFullpageUIWindow").find_element_by_name("Close").click()
+                try:
+                    word_driver.find_element_by_name("Don't Save").click()
+                except:
+                    pass
+            except:
+                pass
+        
+        result = self._call(["tasklist.exe", '/fi "imagename eq EXCEL.exe"'])
+        if "No tasks are running" not in result:
+            try:
+                excel_driver = self.getDriverFromWin(WebDriverWait(desktop_driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'XLMAIN'))))
+                excel_driver.maximize_window()
+                excel_driver.find_element_by_class_name("NetUIFullpageUIWindow").find_element_by_name("Close").click()
+                try:
+                    excel_driver.find_element_by_name("Don't Save").click()
+                except:
+                    pass
+            except:
+                pass
+
+        result = self._call(["tasklist.exe", '/fi "imagename eq POWERPNT.exe"'])
+        if "No tasks are running" not in result:
+            try:
+                powerpoint_driver = self.getDriverFromWin(WebDriverWait(desktop_driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'PPTFrameClass'))))
+                powerpoint_driver.maximize_window()
+                powerpoint_driver.find_element_by_class_name("NetUIFullpageUIWindow").find_element_by_name("Close").click()
+                try:
+                    powerpoint_driver.find_element_by_name("Don't Save").click()
+                except:
+                    pass
+            except:
+                pass
+
+        try:
+            logging.debug("Killing olk.exe OneNote.exe Excel.exe Powerpnt.exe Winword.exe WinAppDriver.exe")
+            self._kill("olk.exe OneNote.exe Excel.exe Powerpnt.exe Winword.exe WinAppDriver.exe")
+        except:
+            pass

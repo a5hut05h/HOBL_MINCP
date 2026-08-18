@@ -1,0 +1,98 @@
+[
+    {
+        "author": "jewilder",
+        "capture_device": "Surface Laptop 7 15in, light theme, 150% scaling",
+        "children": [],
+        "create_date": "2025-03-02",
+        "description": "Productivity",
+        "enabled": true,
+        "id": "UTHNC8",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "",
+        "enabled": true,
+        "id": "W5E05X",
+        "name": "[phase_reporting]",
+        "type": "Set",
+        "value": "1"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "UTHNNE",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_setup",
+                "params": [
+                    {
+                        "name": "[office_theme]",
+                        "val_options": "Colorful, Dark Gray, Black, White, System",
+                        "value": "System"
+                    }
+                ],
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "UTHNK6",
+        "type": "Setup"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "UTHP5J",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_open",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "UTHP0W",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_run",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "UTHPC2",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_close",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "UTHNUW",
+        "type": "Run Test"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "V4JF19",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_kill",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "UTHNWM",
+        "type": "Teardown"
+    }
+]
