@@ -28,7 +28,7 @@ def run(scenario):
 
 
     # Checking if bots + DUT was in call by getting the count of participants and making sure it adds up to # of bots + 1
-    result = get_participant_list(scenario, scenario.bot_uris[0])
+    result = get_participant_list(scenario, bot_uris[0])
     if len(result) - 1 == number_of_bots:
         logging.info("All bots and DUT are in the call.")
     else:
