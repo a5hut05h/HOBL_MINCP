@@ -50,8 +50,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "UTHP5J",
-                "include_path": "scenarios\\windows\\_library\\productivity\\prod_open",
+                "id": "1TMWTH6",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_open",
                 "type": "Include"
             },
             {
@@ -59,8 +59,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "UTHP0W",
-                "include_path": "scenarios\\windows\\_library\\productivity\\prod_run",
+                "id": "1TMWTRN",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_run",
                 "type": "Include"
             },
             {
@@ -68,8 +68,8 @@
                 "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "UTHPC2",
-                "include_path": "scenarios\\windows\\_library\\productivity\\prod_close",
+                "id": "1TMWTWU",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_close",
                 "type": "Include"
             }
         ],
