@@ -342,12 +342,12 @@ class ProductivityPrep(core.app_scenario.Scenario):
         # Outlook
         ##############################
 
-        self.launchOrSwitchApp(self.desktop, "Outlook")
-        logging.info("Waiting 20s for Outlook to fully open.")
-        time.sleep(20)
+        # self.launchOrSwitchApp(self.desktop, "Outlook")
+        # logging.info("Waiting 20s for Outlook to fully open.")
+        # time.sleep(20)
         self.desktop = self._launchApp(desired_caps)
         # self.desktop.implicitly_wait(5)
-
+        """
         max_loops = 30
         for x in range(max_loops):
             open_windows = 0
@@ -661,7 +661,7 @@ class ProductivityPrep(core.app_scenario.Scenario):
             time.sleep(1)
             reply_win.find_element_by_name("No").click()
             time.sleep(3)
-
+        """
         ##############################
         # OneNote
         ##############################
@@ -737,7 +737,6 @@ class ProductivityPrep(core.app_scenario.Scenario):
                 time.sleep(3)
             except:
                 pass
-
             # Check for Theme popup
             try:
                 logging.info("Checking for Theme popup")
@@ -751,6 +750,7 @@ class ProductivityPrep(core.app_scenario.Scenario):
             # Maximize window
             ActionChains(self.desktop).key_down(Keys.ALT).send_keys(" x").key_up(Keys.ALT).perform()
             time.sleep(2)
+            ActionChains(self.onenote_driver).send_keys(Keys.ESCAPE).perform()
 
             # Pin ribbon
             ribbon = self.onenote_driver.find_element_by_name("Ribbon")
@@ -824,6 +824,38 @@ class ProductivityPrep(core.app_scenario.Scenario):
                     ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
                     # wait 10s for notebook to load
                     time.sleep(25)
+                    logging.info("Checking if notebook opened successfully.")
+                    ActionChains(self.onenote_driver).key_down(Keys.SHIFT).key_up(Keys.SHIFT).perform() # if theres no notebook associated to onenote account it will launch edge browser. This command brings onenote back to focus
+                    try:
+                        self.onenote_driver.find_element_by_name("Add Page").click()
+                        time.sleep(1)
+                        pages_list = self.onenote_driver.find_element_by_xpath('//List[@Name="Pages"]')
+                        pages_list.find_element_by_xpath('.//ListItem')
+                    except:
+                        # Go to new notebook section and select edit box for notebook name
+                        logging.info("Didn't detect a notebook opened, will create new notebook.")
+                        ActionChains(self.onenote_driver).key_down(Keys.ALT).perform()
+                        time.sleep(0.5)
+                        ActionChains(self.onenote_driver).key_up(Keys.ALT).perform()
+                        time.sleep(0.5)
+                        ActionChains(self.onenote_driver).send_keys("n").perform()
+                        time.sleep(0.5)
+                        ActionChains(self.onenote_driver).send_keys("k").perform()
+                        time.sleep(0.5)
+                        ActionChains(self.onenote_driver).send_keys("y").perform()
+                        time.sleep(0.5)
+                        ActionChains(self.onenote_driver).send_keys("2").perform()
+                        time.sleep(0.5)
+                        ActionChains(self.onenote_driver).send_keys("Firstname Lastname").perform()
+                        time.sleep(0.5)
+                        ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
+                        time.sleep(5)
+                        ActionChains(self.onenote_driver).send_keys(Keys.ESCAPE).perform()
+                        time.sleep(15)
+                        try:
+                            self._kill("msedge.exe")
+                        except:
+                            pass
                 else:
                     logging.info("Could not find open-notebook prompt; continuing.")
             logging.info("Notebook is open")
