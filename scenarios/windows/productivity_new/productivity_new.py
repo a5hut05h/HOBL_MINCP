@@ -11,7 +11,7 @@ from . import default_params
 
 class Productivity(core.app_scenario.Scenario):
     
-    prep_scenarios = ["office_install", "onedrive_prep", "productivitynew_prep"]
+    prep_scenarios = ["office_install", "onedrive_prep"]
 
     # Set default parameters:
     default_params.run()

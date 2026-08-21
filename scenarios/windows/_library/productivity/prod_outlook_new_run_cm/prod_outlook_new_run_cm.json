@@ -43,29 +43,30 @@
         "description": "New Email",
         "enabled": true,
         "file_name": [
-            "image_VKCEX4.png"
+            "image_1TP2T1U.png"
         ],
-        "h": "0.168",
-        "id": "VKCEX4",
+        "h": "0.222",
+        "id": "1TP2T1U",
         "recapture": false,
         "type": "Capture",
-        "w": "0.165",
+        "w": "0.132",
         "x": "0.000",
         "y": "0.000"
     },
     {
-        "capture_id": "VKCEX4",
+        "capture_id": "1TP2T1U",
         "children": [],
         "delay": "2",
         "description": "New Email",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_VKCFCK.png"
+            "image_1TP314P.png"
         ],
-        "id": "VKCFCK",
+        "id": "1TP314P",
         "match_threshold": "",
         "primary": true,
+        "scale": "",
         "type": "Click",
         "x": "0.500",
         "y": "0.500"
@@ -83,10 +84,10 @@
     {
         "children": [],
         "delay": "1.5",
-        "description": "TAB-TAB-TAB",
+        "description": "TAB-TAB",
         "enabled": true,
         "id": "V3V5XK",
-        "text": "\ue004\ue004\ue004",
+        "text": "\ue004\ue004",
         "type": "Type",
         "typing_delay": "400"
     },
@@ -174,7 +175,7 @@
     },
     {
         "children": [],
-        "delay": "2",
+        "delay": "5",
         "description": "Close Message",
         "enabled": true,
         "id": "1LEHH46",
@@ -184,33 +185,44 @@
     },
     {
         "children": [],
-        "delay": "1",
-        "description": "Discard",
+        "delay": "2",
+        "description": "",
         "enabled": true,
-        "file_name": [
-            "image_VJCVWH.png"
-        ],
-        "h": "0.192",
-        "id": "VJCVWH",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.246",
-        "x": "0.381",
-        "y": "0.420"
+        "id": "1TPFVKY",
+        "text": "\ue00a",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
     },
     {
-        "capture_id": "VJCVWH",
+        "children": [],
+        "delay": "0.5",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "image_1TPFVL0.png"
+        ],
+        "h": "1",
+        "id": "1TPFVL0",
+        "recapture": false,
+        "type": "Capture",
+        "w": "1",
+        "x": "0",
+        "y": "0"
+    },
+    {
+        "capture_id": "1TPFVL0",
         "children": [],
         "delay": "2",
-        "description": "Discard",
+        "description": "",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_VVXCYF.png"
+            "image_1TPFVL1.png"
         ],
-        "id": "VVXCYF",
+        "id": "1TPFVL1",
         "match_threshold": "",
         "primary": true,
+        "scale": "",
         "type": "Click",
         "x": "0.500",
         "y": "0.500"
