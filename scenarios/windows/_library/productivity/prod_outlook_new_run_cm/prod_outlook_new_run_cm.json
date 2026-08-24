@@ -195,22 +195,6 @@
     },
     {
         "children": [],
-        "delay": "1",
-        "description": "Discard Email",
-        "enabled": false,
-        "file_name": [
-            "image_1TPFVL0.png"
-        ],
-        "h": "1",
-        "id": "1TPFVL0",
-        "recapture": false,
-        "type": "Capture",
-        "w": "1",
-        "x": "0",
-        "y": "0"
-    },
-    {
-        "children": [],
         "delay": "0.5",
         "description": "Discard Email",
         "enabled": true,
@@ -224,24 +208,6 @@
         "w": "0.391",
         "x": "0.305",
         "y": "0.394"
-    },
-    {
-        "capture_id": "1TPFVL0",
-        "children": [],
-        "delay": "2",
-        "description": "Cancel",
-        "enabled": false,
-        "exception_on": "No match",
-        "file_name": [
-            "image_1TPFVL1.png"
-        ],
-        "id": "1TPFVL1",
-        "match_threshold": "",
-        "primary": true,
-        "scale": "",
-        "type": "Click",
-        "x": "0.500",
-        "y": "0.500"
     },
     {
         "capture_id": "1TVCTHE",
