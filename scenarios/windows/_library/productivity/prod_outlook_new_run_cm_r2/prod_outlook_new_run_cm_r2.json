@@ -1,0 +1,148 @@
+[
+    {
+        "author": "aadityaaren",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-08-25",
+        "description": "Outlook attach ppt and xlsx",
+        "enabled": true,
+        "id": "1TWNFXM",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "image_1TWNU97.png"
+        ],
+        "h": "0.034",
+        "id": "1TWNU97",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.071",
+        "x": "0.407",
+        "y": "0.080"
+    },
+    {
+        "capture_id": "1TWNU97",
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1TWNUT8.png"
+        ],
+        "id": "1TWNUT8",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "image_1TWNV59.png"
+        ],
+        "h": "0.048",
+        "id": "1TWNV59",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.140",
+        "x": "0.406",
+        "y": "0.102"
+    },
+    {
+        "capture_id": "1TWNV59",
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1TWNVEY.png"
+        ],
+        "id": "1TWNVEY",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "image_1TWNWA7.png"
+        ],
+        "h": "0.034",
+        "id": "1TWNWA7",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.079",
+        "x": "0.122",
+        "y": "0.138"
+    },
+    {
+        "capture_id": "1TWNWA7",
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1TWNWHC.png"
+        ],
+        "id": "1TWNWHC",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "image_1TWNWXU.png"
+        ],
+        "h": "0.036",
+        "id": "1TWNWXU",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.069",
+        "x": "0.355",
+        "y": "0.446"
+    },
+    {
+        "capture_id": "1TWNWXU",
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1TWNX3W.png"
+        ],
+        "id": "1TWNX3W",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    }
+]
