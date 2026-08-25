@@ -347,7 +347,6 @@ class ProductivityPrep(core.app_scenario.Scenario):
         # time.sleep(20)
         self.desktop = self._launchApp(desired_caps)
         # self.desktop.implicitly_wait(5)
-        """
         max_loops = 30
         for x in range(max_loops):
             open_windows = 0
@@ -661,7 +660,6 @@ class ProductivityPrep(core.app_scenario.Scenario):
             time.sleep(1)
             reply_win.find_element_by_name("No").click()
             time.sleep(3)
-        """
         ##############################
         # OneNote
         ##############################
@@ -780,8 +778,9 @@ class ProductivityPrep(core.app_scenario.Scenario):
             notebook_open = False
             logging.info("Checking to make sure a notebook is open")
             try:
-                pages_list = self.onenote_driver.find_element_by_xpath('//List[@Name="Pages"]')
-                pages_list.find_element_by_xpath('.//ListItem')
+                # pages_list = self.onenote_driver.find_element_by_xpath('//List[@Name="Pages"]')
+                # pages_list.find_element_by_xpath('.//ListItem')
+                self.onenote_driver.find_element_by_xpath('//TreeItem[contains(@Name, "New Section")]')
                 notebook_open = True
                 logging.info("Notebook is already open.")
             except:
@@ -818,19 +817,20 @@ class ProductivityPrep(core.app_scenario.Scenario):
                     ActionChains(self.onenote_driver).send_keys(Keys.DOWN).perform()
                     # pause 5s for list of notebooks to populate
                     time.sleep(5)
-                    # right, down, down - select top notebook
-                    ActionChains(self.onenote_driver).send_keys(Keys.RIGHT).send_keys(Keys.DOWN).send_keys(Keys.DOWN).perform()
-                    # enter to open
-                    ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
-                    # wait 10s for notebook to load
-                    time.sleep(25)
-                    logging.info("Checking if notebook opened successfully.")
-                    ActionChains(self.onenote_driver).key_down(Keys.SHIFT).key_up(Keys.SHIFT).perform() # if theres no notebook associated to onenote account it will launch edge browser. This command brings onenote back to focus
+                    # # right, down, down - select top notebook
+                    # ActionChains(self.onenote_driver).send_keys(Keys.RIGHT).send_keys(Keys.DOWN).send_keys(Keys.DOWN).perform()
+                    # # enter to open
+                    # ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
+                    # Click first notebook under "My Notebooks" if it exists.
                     try:
-                        self.onenote_driver.find_element_by_name("Add Page").click()
-                        time.sleep(1)
-                        pages_list = self.onenote_driver.find_element_by_xpath('//List[@Name="Pages"]')
-                        pages_list.find_element_by_xpath('.//ListItem')
+                        first_notebook = WebDriverWait(self.onenote_driver, 10).until(
+                            EC.presence_of_element_located(
+                                (By.XPATH, '//Group[@Name="My Notebooks"]//ListItem[1]')
+                            )
+                        )
+                        logging.info("Selecting first notebook under 'My Notebooks': " + str(first_notebook.get_attribute("Name")))
+                        first_notebook.click()
+                        time.sleep(25)
                     except:
                         # Go to new notebook section and select edit box for notebook name
                         logging.info("Didn't detect a notebook opened, will create new notebook.")
@@ -846,16 +846,16 @@ class ProductivityPrep(core.app_scenario.Scenario):
                         time.sleep(0.5)
                         ActionChains(self.onenote_driver).send_keys("2").perform()
                         time.sleep(0.5)
-                        ActionChains(self.onenote_driver).send_keys("Firstname Lastname").perform()
+                        ActionChains(self.onenote_driver).send_keys("HoblTest").perform()
                         time.sleep(0.5)
                         ActionChains(self.onenote_driver).send_keys(Keys.ENTER).perform()
                         time.sleep(5)
                         ActionChains(self.onenote_driver).send_keys(Keys.ESCAPE).perform()
                         time.sleep(15)
-                        try:
-                            self._kill("msedge.exe")
-                        except:
-                            pass
+
+                    logging.info("Checking if notebook opened.")
+                    self._page_source(self.onenote_driver, "open_notebook")
+                    self.onenote_driver.find_element_by_xpath('//TreeItem[contains(@Name, "New Section")]')
                 else:
                     logging.info("Could not find open-notebook prompt; continuing.")
             logging.info("Notebook is open")
