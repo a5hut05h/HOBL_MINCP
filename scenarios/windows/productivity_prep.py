@@ -854,7 +854,6 @@ class ProductivityPrep(core.app_scenario.Scenario):
                         time.sleep(15)
 
                     logging.info("Checking if notebook opened.")
-                    self._page_source(self.onenote_driver, "open_notebook")
                     self.onenote_driver.find_element_by_xpath('//TreeItem[contains(@Name, "New Section")]')
                 else:
                     logging.info("Could not find open-notebook prompt; continuing.")
