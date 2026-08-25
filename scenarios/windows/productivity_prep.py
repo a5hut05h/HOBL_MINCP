@@ -342,9 +342,9 @@ class ProductivityPrep(core.app_scenario.Scenario):
         # Outlook
         ##############################
 
-        # self.launchOrSwitchApp(self.desktop, "Outlook")
-        # logging.info("Waiting 20s for Outlook to fully open.")
-        # time.sleep(20)
+        self.launchOrSwitchApp(self.desktop, "Outlook")
+        logging.info("Waiting 20s for Outlook to fully open.")
+        time.sleep(20)
         self.desktop = self._launchApp(desired_caps)
         # self.desktop.implicitly_wait(5)
         max_loops = 30
