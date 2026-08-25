@@ -4,7 +4,7 @@
         "capture_device": "",
         "children": [],
         "create_date": "2026-08-25",
-        "description": "Outlook attach ppt and xlsx",
+        "description": "Outlook attach ppt",
         "enabled": true,
         "id": "1TWNFXM",
         "type": "Information"
@@ -12,7 +12,7 @@
     {
         "children": [],
         "delay": "0.5",
-        "description": "",
+        "description": "Attach file",
         "enabled": true,
         "file_name": [
             "image_1TWNU97.png"
@@ -29,7 +29,7 @@
         "capture_id": "1TWNU97",
         "children": [],
         "delay": "2",
-        "description": "",
+        "description": "Attach file",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
@@ -46,7 +46,7 @@
     {
         "children": [],
         "delay": "0.5",
-        "description": "",
+        "description": "Browse this computer",
         "enabled": true,
         "file_name": [
             "image_1TWNV59.png"
@@ -63,7 +63,7 @@
         "capture_id": "1TWNV59",
         "children": [],
         "delay": "2",
-        "description": "",
+        "description": "Browse this computer",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
@@ -79,42 +79,18 @@
     },
     {
         "children": [],
-        "delay": "0.5",
-        "description": "",
-        "enabled": true,
-        "file_name": [
-            "image_1TWNWA7.png"
-        ],
-        "h": "0.034",
-        "id": "1TWNWA7",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.079",
-        "x": "0.122",
-        "y": "0.138"
-    },
-    {
-        "capture_id": "1TWNWA7",
-        "children": [],
         "delay": "2",
-        "description": "",
+        "description": "PPT path",
         "enabled": true,
-        "exception_on": "No match",
-        "file_name": [
-            "image_1TWNWHC.png"
-        ],
-        "id": "1TWNWHC",
-        "match_threshold": "",
-        "primary": true,
-        "scale": "",
-        "type": "Click",
-        "x": "0.500",
-        "y": "0.500"
+        "id": "1TX3NX1",
+        "text": "C:\\abl_docs\\asample.pptx",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
     },
     {
         "children": [],
         "delay": "0.5",
-        "description": "",
+        "description": "Open",
         "enabled": true,
         "file_name": [
             "image_1TWNWXU.png"
@@ -131,7 +107,7 @@
         "capture_id": "1TWNWXU",
         "children": [],
         "delay": "2",
-        "description": "",
+        "description": "Open",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
