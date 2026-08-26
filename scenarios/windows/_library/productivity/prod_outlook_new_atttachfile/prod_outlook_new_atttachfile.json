@@ -11,22 +11,22 @@
     },
     {
         "children": [],
-        "delay": "2",
+        "delay": "0.5",
         "description": "Attach file",
         "enabled": true,
         "file_name": [
-            "image_1TX832X.png"
+            "image_1TY4WM1.png"
         ],
-        "h": "0.025",
-        "id": "1TX832X",
+        "h": "0.116",
+        "id": "1TY4WM1",
         "recapture": false,
         "type": "Capture",
-        "w": "0.064",
-        "x": "0.412",
-        "y": "0.084"
+        "w": "0.156",
+        "x": "0.367",
+        "y": "0.043"
     },
     {
-        "capture_id": "1TX832X",
+        "capture_id": "1TY4WM1",
         "children": [],
         "delay": "2",
         "description": "Attach file",
@@ -45,22 +45,22 @@
     },
     {
         "children": [],
-        "delay": "2",
+        "delay": "0.5",
         "description": "Browse this computer",
         "enabled": true,
         "file_name": [
-            "image_1TX83VR.png"
+            "image_1TY4X3U.png"
         ],
-        "h": "0.037",
-        "id": "1TX83VR",
+        "h": "0.139",
+        "id": "1TY4X3U",
         "recapture": false,
         "type": "Capture",
-        "w": "0.125",
-        "x": "0.411",
-        "y": "0.109"
+        "w": "0.229",
+        "x": "0.380",
+        "y": "0.046"
     },
     {
-        "capture_id": "1TX83VR",
+        "capture_id": "1TY4X3U",
         "children": [],
         "delay": "2",
         "description": "Browse this computer",
@@ -91,7 +91,7 @@
     {
         "children": [],
         "delay": "2",
-        "description": "Ppt path",
+        "description": "File path",
         "enabled": true,
         "id": "1TX84H8",
         "text": "[file_path]",
@@ -104,18 +104,18 @@
         "description": "Open",
         "enabled": true,
         "file_name": [
-            "image_1TX84P7.png"
+            "image_1TY4XHA.png"
         ],
-        "h": "0.033",
-        "id": "1TX84P7",
+        "h": "0.088",
+        "id": "1TY4XHA",
         "recapture": false,
         "type": "Capture",
-        "w": "0.062",
-        "x": "0.359",
-        "y": "0.446"
+        "w": "0.141",
+        "x": "0.374",
+        "y": "0.424"
     },
     {
-        "capture_id": "1TX84P7",
+        "capture_id": "1TY4XHA",
         "children": [],
         "delay": "2",
         "description": "Open",
