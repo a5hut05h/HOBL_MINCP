@@ -85,7 +85,7 @@
         "id": "1TY2MVN",
         "name": "[file_path]",
         "type": "Set Default",
-        "val_options": "C:\\abl_docs\\asample.pptx, C:\\abl_docs\\FamilyBudget.xlsx",
+        "val_options": "C:\\abl_docs\\asample.pptx, C:\\abl_docs\\FamilyBudget.xlsx, test_long_doc.docx",
         "value": "C:\\abl_docs\\asample.pptx"
     },
     {
