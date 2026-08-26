@@ -11,7 +11,7 @@
     },
     {
         "children": [],
-        "delay": "0.5",
+        "delay": "2",
         "description": "Attach file",
         "enabled": true,
         "file_name": [
@@ -45,7 +45,7 @@
     },
     {
         "children": [],
-        "delay": "0.5",
+        "delay": "2",
         "description": "Browse this computer",
         "enabled": true,
         "file_name": [
@@ -100,7 +100,7 @@
     },
     {
         "children": [],
-        "delay": "0.5",
+        "delay": "2",
         "description": "Open",
         "enabled": true,
         "file_name": [
