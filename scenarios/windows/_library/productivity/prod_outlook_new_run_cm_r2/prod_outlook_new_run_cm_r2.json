@@ -4,121 +4,41 @@
         "capture_device": "",
         "children": [],
         "create_date": "2026-08-25",
-        "description": "Outlook attach ppt",
+        "description": "Outlook new attach files",
         "enabled": true,
         "id": "1TWNFXM",
         "type": "Information"
     },
     {
         "children": [],
-        "delay": "0.5",
-        "description": "Attach file",
+        "delay": "0",
+        "description": "Attach PowerPoint",
         "enabled": true,
-        "file_name": [
-            "image_1TWNU97.png"
+        "id": "1TX8HXX",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_atttachfile",
+        "params": [
+            {
+                "name": "[file_path]",
+                "val_options": "",
+                "value": "C:\\abl_docs\\asample.pptx"
+            }
         ],
-        "h": "0.034",
-        "id": "1TWNU97",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.071",
-        "x": "0.407",
-        "y": "0.080"
-    },
-    {
-        "capture_id": "1TWNU97",
-        "children": [],
-        "delay": "2",
-        "description": "Attach file",
-        "enabled": true,
-        "exception_on": "No match",
-        "file_name": [
-            "image_1TWNUT8.png"
-        ],
-        "id": "1TWNUT8",
-        "match_threshold": "",
-        "primary": true,
-        "scale": "",
-        "type": "Click",
-        "x": "0.500",
-        "y": "0.500"
+        "type": "Include"
     },
     {
         "children": [],
-        "delay": "0.5",
-        "description": "Browse this computer",
+        "delay": "0",
+        "description": "Attach Excel workbook",
         "enabled": true,
-        "file_name": [
-            "image_1TWNV59.png"
+        "id": "1TX8J1E",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_atttachfile",
+        "params": [
+            {
+                "name": "[file_path]",
+                "val_options": "",
+                "value": "C:\\abl_docs\\FamilyBudget.xlsx"
+            }
         ],
-        "h": "0.048",
-        "id": "1TWNV59",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.140",
-        "x": "0.406",
-        "y": "0.102"
-    },
-    {
-        "capture_id": "1TWNV59",
-        "children": [],
-        "delay": "2",
-        "description": "Browse this computer",
-        "enabled": true,
-        "exception_on": "No match",
-        "file_name": [
-            "image_1TWNVEY.png"
-        ],
-        "id": "1TWNVEY",
-        "match_threshold": "",
-        "primary": true,
-        "scale": "",
-        "type": "Click",
-        "x": "0.500",
-        "y": "0.500"
-    },
-    {
-        "children": [],
-        "delay": "2",
-        "description": "PPT path",
-        "enabled": true,
-        "id": "1TX3NX1",
-        "text": "C:\\abl_docs\\asample.pptx",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
-    },
-    {
-        "children": [],
-        "delay": "0.5",
-        "description": "Open",
-        "enabled": true,
-        "file_name": [
-            "image_1TWNWXU.png"
-        ],
-        "h": "0.036",
-        "id": "1TWNWXU",
-        "recapture": false,
-        "type": "Capture",
-        "w": "0.069",
-        "x": "0.355",
-        "y": "0.446"
-    },
-    {
-        "capture_id": "1TWNWXU",
-        "children": [],
-        "delay": "2",
-        "description": "Open",
-        "enabled": true,
-        "exception_on": "No match",
-        "file_name": [
-            "image_1TWNX3W.png"
-        ],
-        "id": "1TWNX3W",
-        "match_threshold": "",
-        "primary": true,
-        "scale": "",
-        "type": "Click",
-        "x": "0.500",
-        "y": "0.500"
+        "type": "Include"
     }
 ]

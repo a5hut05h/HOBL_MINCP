@@ -1,0 +1,135 @@
+[
+    {
+        "author": "aadityaaren",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-08-25",
+        "description": "Outlook new attach <file> ",
+        "enabled": true,
+        "id": "1TX82AU",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Attach file",
+        "enabled": true,
+        "file_name": [
+            "image_1TX832X.png"
+        ],
+        "h": "0.025",
+        "id": "1TX832X",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.064",
+        "x": "0.412",
+        "y": "0.084"
+    },
+    {
+        "capture_id": "1TX832X",
+        "children": [],
+        "delay": "2",
+        "description": "Attach file",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1TX83LT.png"
+        ],
+        "id": "1TX83LT",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Browse this computer",
+        "enabled": true,
+        "file_name": [
+            "image_1TX83VR.png"
+        ],
+        "h": "0.037",
+        "id": "1TX83VR",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.125",
+        "x": "0.411",
+        "y": "0.109"
+    },
+    {
+        "capture_id": "1TX83VR",
+        "children": [],
+        "delay": "2",
+        "description": "Browse this computer",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1TX8470.png"
+        ],
+        "id": "1TX8470",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "File path",
+        "enabled": true,
+        "id": "1TY2MVN",
+        "name": "[file_path]",
+        "type": "Set Default",
+        "val_options": "C:\\abl_docs\\asample.pptx, C:\\abl_docs\\FamilyBudget.xlsx",
+        "value": "C:\\abl_docs\\asample.pptx"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Ppt path",
+        "enabled": true,
+        "id": "1TX84H8",
+        "text": "[file_path]",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "0.5",
+        "description": "Open",
+        "enabled": true,
+        "file_name": [
+            "image_1TX84P7.png"
+        ],
+        "h": "0.033",
+        "id": "1TX84P7",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.062",
+        "x": "0.359",
+        "y": "0.446"
+    },
+    {
+        "capture_id": "1TX84P7",
+        "children": [],
+        "delay": "2",
+        "description": "Open",
+        "enabled": true,
+        "exception_on": "No match",
+        "file_name": [
+            "image_1TX854Y.png"
+        ],
+        "id": "1TX854Y",
+        "match_threshold": "",
+        "primary": true,
+        "scale": "",
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.500"
+    }
+]

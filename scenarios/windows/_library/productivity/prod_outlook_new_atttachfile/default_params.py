@@ -7,8 +7,8 @@ from utilities.open_source.modules import import_run_user_only
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
+    Params.setDefault('prod_outlook_new_atttachfile', 'file_path', 'C:\abl_docs\asample.pptx', desc='File path', valOptions=['C:\\abl_docs\\asample.pptx', 'C:\\abl_docs\\FamilyBudget.xlsx'])
     return
 
 def run_user_only():
-    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_outlook_new_atttachfile')
     return
