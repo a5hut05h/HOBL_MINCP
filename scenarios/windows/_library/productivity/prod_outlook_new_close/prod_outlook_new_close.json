@@ -11,33 +11,34 @@
     },
     {
         "children": [],
-        "delay": "0.5",
-        "description": "Outlook Close Button",
+        "delay": "2",
+        "description": "Close",
         "enabled": true,
         "file_name": [
-            "image_UTA59H.png"
+            "image_1TY72FW.png"
         ],
-        "h": "0.042",
-        "id": "UTA59H",
+        "h": "0.095",
+        "id": "1TY72FW",
         "recapture": false,
         "type": "Capture",
-        "w": "0.032",
-        "x": "0.968",
+        "w": "0.104",
+        "x": "0.895",
         "y": "0.000"
     },
     {
-        "capture_id": "UTA59H",
+        "capture_id": "1TY72FW",
         "children": [],
-        "delay": "1",
-        "description": "Outlook Close Button",
+        "delay": "2",
+        "description": "Close",
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_UTA5JV.png"
+            "image_1TY72R1.png"
         ],
-        "id": "UTA5JV",
+        "id": "1TY72R1",
         "match_threshold": "",
         "primary": true,
+        "scale": "",
         "type": "Click",
         "x": "0.500",
         "y": "0.500"
