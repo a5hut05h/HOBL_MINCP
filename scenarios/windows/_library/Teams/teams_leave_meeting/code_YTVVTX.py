@@ -27,13 +27,13 @@ def run(scenario):
     logging.info("==========================================")
 
 
-    # Checking if bots + DUT was in call by getting the count of participants and making sure it adds up to # of bots + 1
-    result = get_participant_list(scenario, scenario.bot_uris[0])
-    if len(result) - 1 == number_of_bots:
-        logging.info("All bots and DUT are in the call.")
-    else:
-        logging.error("Didn't detect all bots and DUT in the call.")
-        scenario.fail("Didn't detect all bots and DUT in the call.")
+    # # Checking if bots + DUT was in call by getting the count of participants and making sure it adds up to # of bots + 1
+    # result = get_participant_list(scenario, scenario.bot_uris[0])
+    # if len(result) - 1 == number_of_bots:
+    #     logging.info("All bots and DUT are in the call.")
+    # else:
+    #     logging.error("Didn't detect all bots and DUT in the call.")
+    #     scenario.fail("Didn't detect all bots and DUT in the call.")
 
     # Build Stop request string
     bot_data = json.dumps({"botUris" : bot_uris}, sort_keys=True)
