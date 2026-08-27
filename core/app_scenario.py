@@ -786,6 +786,7 @@ class Scenario(unittest.TestCase):
         while(True):
             try:
                 if self.platform.lower() == 'windows':
+                    # Local execution
                     if Params.get('global', 'dut_ip') == '127.0.0.1':
                         new_time = time.time()
                         logging.info("Rundown watchdog, current time: " + str(new_time) + ", last time: " + str(self.monitor_life_timestamp))
@@ -801,6 +802,7 @@ class Scenario(unittest.TestCase):
                             raise Exception("Device monitor timeout")
                         self.monitor_life_timestamp = new_time
                         time.sleep(60)
+                    # Hosted execution
                     else:
                         if int(self.stop_soc) <= 0:
                             batt_level = self._call(["powershell.exe", "Add-Type -Assembly System.Windows.Forms; [Math]::round(([System.Windows.Forms.SystemInformation]::PowerStatus.BatteryLifePercent) * 100, 2)"], timeout=30)
@@ -869,7 +871,7 @@ class Scenario(unittest.TestCase):
             time.sleep(172800)  # 48 hours, just to keep the thread alive, we will stop it when the scenario ends.
         elif int(self.stop_soc) <= 0:
             self._kill("MonitorPowerEvents.exe")
-            logging.info("we are entering stop_soc set to 1")
+            logging.info("stop_soc set to 0")
             self._call([os.path.join(self.dut_exec_path, "MonitorPowerEvents.exe"),
                        "/stopsoc=1" + " /execpath=" + str(self.dut_exec_path) + "\\RTCWakeCore" + " /datapath=" + str(self.dut_data_path) + " /testname=" + str(self.testname) + " /triggerpercent=" + str(self.trigger_soc) + " /triggerscript=" + str(self.trigger_script)],
                         blocking=True, timeout=172800, expected_exit_code="")

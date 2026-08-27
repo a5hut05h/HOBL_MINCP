@@ -9,7 +9,7 @@
 
 #define MAX_MONS                16
 #define IDM_DISP_BASE           1000
-#define MAX_WAIT_TIME_MS        20000
+#define MAX_WAIT_TIME_MS        120000
 #define RES_CHANGE_WAIT_TIME_MS 500
 
 rfbScreenInfoPtr rfbScreen;
