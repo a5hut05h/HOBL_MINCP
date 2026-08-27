@@ -35,6 +35,7 @@ def run(scenario):
     #     logging.error("Didn't detect all bots and DUT in the call.")
     #     scenario.fail("Didn't detect all bots and DUT in the call.")
 
+
     # Build Stop request string
     bot_data = json.dumps({"botUris" : bot_uris}, sort_keys=True)
     stop_request = server_url + "/StopMeeting" + "?code=" + access_key
@@ -60,10 +61,10 @@ def run(scenario):
         logging.error("Unable to Stop Meeting! Server Side Error")
         raise Exception("Unable to Stop Meeting! Server Side Error")
 
-def get_participant_list(scenario, uri):
+def get_participant_list(server_url, access_key, uri):
     request_string = ""
-    request_string += scenario.server_url # Add the URL to the request string
-    request_string += ("/GetParticipants" + "?code=" + scenario.access_key)
+    request_string += server_url # Add the URL to the request string
+    request_string += ("/GetParticipants" + "?code=" + access_key)
     request_data = json.dumps({"botUris" : [uri]}, sort_keys=True)
     logging.debug("Getting participant list for bot URI: " + uri)
 
@@ -81,7 +82,7 @@ def get_participant_list(scenario, uri):
 
             elif r.status_code == 401:
                 logging.error("Error. 401 Unauthorized. You are not authorized to access the Teams Bots server. Please confirm you have entered your access key correctly.")
-                logging.error("Access key entered:" + scenario.access_key)
+                logging.error("Access key entered:" + access_key)
                 return None
 
             logging.debug("Bad server response, re-sending request")
