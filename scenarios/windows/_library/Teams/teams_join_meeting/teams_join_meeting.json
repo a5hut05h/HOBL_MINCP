@@ -654,6 +654,39 @@
     },
     {
         "children": [],
+        "delay": "0.5",
+        "description": "",
+        "enabled": true,
+        "file_name": [
+            "image_1T1ERCL.png"
+        ],
+        "h": "0.426",
+        "id": "1T1ERCL",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.562",
+        "x": "0.436",
+        "y": "0.004"
+    },
+    {
+        "capture_id": "1T1ERCL",
+        "children": [],
+        "delay": "5",
+        "description": "Checking if DUT joined meeting",
+        "enabled": true,
+        "file_name": [
+            "image_1T1ER12.png"
+        ],
+        "h": "0.426",
+        "id": "1T1ER12",
+        "timeout": "30",
+        "type": "Check Until Found",
+        "w": "0.562",
+        "x": "0.436",
+        "y": "0.004"
+    },
+    {
+        "children": [],
         "delay": "0.0",
         "description": "Meeting is now Running",
         "enabled": true,

@@ -13,7 +13,7 @@
 ### Quick Start for Local Web Browsing Battery Life Testing
 * Running locally (meaning HOBL is executing on the device directly with no host) should be limited to short term, one-off testing.  For long-term repeated testing, it's highly recommended to [set up](docs/support/docs/HOBL_Setup.md) a dedicated HOBL Host computer on a private network.
 * For official results, adjust the screen brightness to 150 nits, set Wi-Fi AP to 50 Mbps per client on 5 Ghz, and out-of-box audio volume.  Detailed instructions [here](docs/support/docs/HOBL_Setup.md#lab-setup).
-* Download the [latest release](https://github.com/microsoft/HOBL/releases/latest) to the test device (DUT), unzip it to `c:\`, and rename the folder `hobl`.
+* Download the [latest code](https://github.com/microsoft/HOBL/archive/refs/heads/main.zip) to the test device (DUT), unzip it to `c:\`, and rename the folder `hobl`.
 * Run `local_setup.exe`, located in the `c:\hobl` folder.  Select both options.
 * The HOBL UI will open with a `Default` profile that is set up for local rundown testing.
 * With the profile selected, select `Web Rundown` from the Quick Launch menu, which can be found either by right-clicking on the profile, or opening the arrow on the `Launch Job` button on the top-right of the window.
