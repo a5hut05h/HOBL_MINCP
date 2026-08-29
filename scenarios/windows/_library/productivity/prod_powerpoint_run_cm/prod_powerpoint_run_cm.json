@@ -1,0 +1,116 @@
+[
+    {
+        "author": "aadityaaren",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-08-29",
+        "description": "Launch PowerPoint and open a presentation from C:\\abl_docs",
+        "enabled": true,
+        "id": "PPRCMI00",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Set the path of the PowerPoint deck to open",
+        "enabled": true,
+        "id": "PPRCMS01",
+        "name": "[deck_path]",
+        "type": "Set Default",
+        "val_options": "C:\\abl_docs\\sample.pptx",
+        "value": "C:\\abl_docs\\sample.pptx"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "Begin recording the PowerPoint launch and deck-open phase",
+        "enabled": true,
+        "id": "PPRCMI01",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+        "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Launch PowerPoint",
+        "enabled": true,
+        "id": "PPRCMC01",
+        "type": "Comment"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "Launch or switch to PowerPoint using the existing taskbar action",
+        "enabled": true,
+        "id": "PPRCMI02",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_switchto",
+        "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "10",
+        "description": "Wait for PowerPoint to finish launching",
+        "enabled": true,
+        "id": "PPRCMD01",
+        "type": "Delay"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Open the PowerPoint deck",
+        "enabled": true,
+        "id": "PPRCMC02",
+        "type": "Comment"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Dismiss startup overlays (Escape twice)",
+        "enabled": true,
+        "id": "PPRCMT01",
+        "text": "\ue00c\ue00c",
+        "type": "Type",
+        "typing_delay": "1000"
+    },
+    {
+        "children": [],
+        "delay": "4",
+        "description": "Open the PowerPoint file picker (Alt+F, O, O)",
+        "enabled": true,
+        "id": "PPRCMT02",
+        "text": "\ue00a\ue00afoo",
+        "type": "Type",
+        "typing_delay": "1000"
+    },
+    {
+        "children": [],
+        "delay": "14",
+        "description": "Enter the deck path and open the presentation (Enter)",
+        "enabled": true,
+        "id": "PPRCMT03",
+        "text": "[deck_path]\ue007",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "End recording the PowerPoint launch and deck-open phase",
+        "enabled": true,
+        "id": "PPRCMI03",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
+        "params": [
+            {
+                "name": "[phase_category]",
+                "val_options": "",
+                "value": "prod"
+            },
+            {
+                "name": "[phase_name]",
+                "val_options": "",
+                "value": "run_powerpoint"
+            }
+        ],
+        "type": "Include"
+    }
+]
