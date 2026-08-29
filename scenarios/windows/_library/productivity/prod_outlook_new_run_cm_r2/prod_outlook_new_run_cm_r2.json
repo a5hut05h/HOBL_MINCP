@@ -4,15 +4,23 @@
         "capture_device": "",
         "children": [],
         "create_date": "2026-08-25",
-        "description": "Outlook new attach files",
+        "description": "Attach a PowerPoint presentation and an Excel workbook to an open email draft in New Outlook",
         "enabled": true,
         "id": "1TWNFXM",
         "type": "Information"
     },
     {
         "children": [],
+        "delay": "0.0",
+        "description": "Attach the PowerPoint presentation to the open email draft",
+        "enabled": true,
+        "id": "PONR2C01",
+        "type": "Comment"
+    },
+    {
+        "children": [],
         "delay": "0",
-        "description": "Attach PowerPoint",
+        "description": "Attach the PowerPoint presentation",
         "enabled": true,
         "id": "1TX8HXX",
         "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_atttachfile",
@@ -27,8 +35,16 @@
     },
     {
         "children": [],
+        "delay": "0.0",
+        "description": "Attach the Excel workbook to the open email draft",
+        "enabled": true,
+        "id": "PONR2C02",
+        "type": "Comment"
+    },
+    {
+        "children": [],
         "delay": "0",
-        "description": "Attach Excel workbook",
+        "description": "Attach the Excel workbook",
         "enabled": true,
         "id": "1TX8J1E",
         "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_atttachfile",
