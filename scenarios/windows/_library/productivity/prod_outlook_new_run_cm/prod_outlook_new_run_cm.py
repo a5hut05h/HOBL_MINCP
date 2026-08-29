@@ -6,7 +6,7 @@ import os
 from . import default_params
 
 # Description:
-#   Automatically generated standard scenario.
+#   Composes an email, pastes a captured snippet, and cancels the discard dialog in New Outlook.
 
 class ProdOutlookNewRunCm(core.app_scenario.Scenario):
     # Set default parameters:
@@ -24,7 +24,7 @@ class ProdOutlookNewRunCm(core.app_scenario.Scenario):
         if setup_action is not None:
             self.run_actions(setup_action["children"])
 
-        # Call base class setUp() to dump config, call tool callbacks, and start measurment
+        # Call base class setUp() to dump config, call tool callbacks, and start measurement
         core.app_scenario.Scenario.setUp(self)
 
 
@@ -43,7 +43,7 @@ class ProdOutlookNewRunCm(core.app_scenario.Scenario):
 
 
     def tearDown(self):
-        # Call base class tearDown() to stop measurment, copy back data from DUT, and call tool callbacks
+        # Call base class tearDown() to stop measurement, copy back data from DUT, and call tool callbacks
         core.app_scenario.Scenario.tearDown(self)
 
         # Execute Teardown actions, if they exist

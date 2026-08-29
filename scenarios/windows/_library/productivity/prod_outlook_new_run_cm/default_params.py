@@ -7,10 +7,11 @@ from utilities.open_source.modules import import_run_user_only
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
-    Params.setDefault('prod_outlook_new_run_cm', 'short_typing', '0', desc='', valOptions=['0', '1'])
+    Params.setDefault('prod_outlook_new_run_cm', 'short_typing', '0', desc='Use the shortened email body when enabled', valOptions=['0', '1'])
     return
 
 def run_user_only():
     import_run_user_only('scenarios\\windows\\_library\\misc\\recording_phase_begin')
     import_run_user_only('scenarios\\windows\\_library\\misc\\recording_phase_end')
+    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_outlook_new_create_email')
     return
