@@ -1,0 +1,126 @@
+[
+    {
+        "author": "aadityaaren",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-08-29",
+        "description": "Switch to an open PowerPoint deck, paste clipboard content, insert an image, and save the deck",
+        "enabled": true,
+        "id": "PPR2I00",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Set the path of the image to insert",
+        "enabled": true,
+        "id": "PPR2S01",
+        "name": "[image_path]",
+        "type": "Set Default",
+        "val_options": "C:\\abl_docs\\Manarola2.png",
+        "value": "C:\\abl_docs\\Manarola2.png"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "Begin recording the PowerPoint paste and image-insertion phase",
+        "enabled": true,
+        "id": "PPR2I01",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_begin",
+        "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Switch to the open PowerPoint deck and paste the clipboard content",
+        "enabled": true,
+        "id": "PPR2C01",
+        "type": "Comment"
+    },
+    {
+        "children": [],
+        "delay": "4",
+        "description": "Switch to the open PowerPoint window",
+        "enabled": true,
+        "id": "PPR2I02",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_switchto",
+        "type": "Include"
+    },
+    {
+        "children": [],
+        "delay": "5",
+        "description": "Paste the previously copied content into the current slide (Ctrl+V)",
+        "enabled": true,
+        "id": "PPR2T01",
+        "text": "\ue009v",
+        "type": "Type",
+        "typing_delay": "400"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Insert an image from the configured path",
+        "enabled": true,
+        "id": "PPR2C02",
+        "type": "Comment"
+    },
+    {
+        "children": [],
+        "delay": "4",
+        "description": "Open the Insert Picture from This Device file picker (Alt+N, P, D)",
+        "enabled": true,
+        "id": "PPR2T02",
+        "text": "\ue00anpd",
+        "type": "Type",
+        "typing_delay": "600"
+    },
+    {
+        "children": [],
+        "delay": "10",
+        "description": "Enter the image path and insert the image (Enter)",
+        "enabled": true,
+        "id": "PPR2T03",
+        "text": "[image_path]\ue007",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
+        "description": "Save the updated PowerPoint deck",
+        "enabled": true,
+        "id": "PPR2C03",
+        "type": "Comment"
+    },
+    {
+        "children": [],
+        "delay": "5",
+        "description": "Save the PowerPoint deck (Ctrl+S)",
+        "enabled": true,
+        "id": "PPR2T04",
+        "text": "\ue009s",
+        "type": "Type",
+        "typing_delay": "400"
+    },
+    {
+        "children": [],
+        "delay": "0",
+        "description": "End recording the PowerPoint paste and image-insertion phase",
+        "enabled": true,
+        "id": "PPR2I03",
+        "include_path": "scenarios\\windows\\_library\\misc\\recording_phase_end",
+        "params": [
+            {
+                "name": "[phase_category]",
+                "val_options": "",
+                "value": "prod"
+            },
+            {
+                "name": "[phase_name]",
+                "val_options": "",
+                "value": "run_powerpoint"
+            }
+        ],
+        "type": "Include"
+    }
+]
