@@ -66,11 +66,41 @@
     },
     {
         "children": [],
-        "delay": "4",
-        "description": "Open the Insert Picture from This Device file picker (Alt+N, P1, D)",
+        "delay": "2",
+        "description": "Open the Insert tab (Alt+N)",
         "enabled": true,
         "id": "PPR2T02",
-        "text": "\ue00anp1d",
+        "text": "\ue00an",
+        "type": "Type",
+        "typing_delay": "600"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Start the Pictures KeyTip (P)",
+        "enabled": true,
+        "id": "PPR2T05",
+        "text": "p",
+        "type": "Type",
+        "typing_delay": "600"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "Complete the Pictures KeyTip (1)",
+        "enabled": true,
+        "id": "PPR2T06",
+        "text": "1",
+        "type": "Type",
+        "typing_delay": "600"
+    },
+    {
+        "children": [],
+        "delay": "4",
+        "description": "Open the This Device file picker (D)",
+        "enabled": true,
+        "id": "PPR2T07",
+        "text": "d",
         "type": "Type",
         "typing_delay": "600"
     },
