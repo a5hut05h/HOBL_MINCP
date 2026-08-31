@@ -94,7 +94,7 @@
             {
                 "name": "[file_path]",
                 "val_options": "",
-                "value": "C:\\abl_docs\\test_long_doc.docx"
+                "value": "abl_docs\\test_long_doc.docx"
             }
         ],
         "type": "Include"
