@@ -26,6 +26,11 @@
         "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_atttachfile",
         "params": [
             {
+                "name": "[file_source]",
+                "val_options": "OneDrive,Local",
+                "value": "Local"
+            },
+            {
                 "name": "[file_path]",
                 "val_options": "",
                 "value": "abl_docs\\asample.pptx"
@@ -49,6 +54,11 @@
         "id": "1TX8J1E",
         "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_atttachfile",
         "params": [
+            {
+                "name": "[file_source]",
+                "val_options": "OneDrive,Local",
+                "value": "Local"
+            },
             {
                 "name": "[file_path]",
                 "val_options": "",
