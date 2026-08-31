@@ -1,0 +1,19 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+from core.parameters import Params
+from utilities.open_source.modules import import_run_user_only
+
+
+def run():
+    Params.setCalculated('scenario_section', __package__.split('.')[-1])
+    run_user_only()
+    Params.setDefault('prod_powerpoint_run_r3', 'pdf_path', r'C:\abl_docs\sample.pdf', desc='Path of the PDF to export', valOptions=[r'C:\abl_docs\sample.pdf'])
+    return
+
+
+def run_user_only():
+    import_run_user_only('scenarios\\windows\\_library\\misc\\recording_phase_begin')
+    import_run_user_only('scenarios\\windows\\_library\\misc\\recording_phase_end')
+    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_powerpoint_switchto')
+    return
