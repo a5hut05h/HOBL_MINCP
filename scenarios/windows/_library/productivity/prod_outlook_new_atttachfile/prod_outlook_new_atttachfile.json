@@ -12,6 +12,17 @@
     {
         "children": [],
         "delay": "0.0",
+        "description": "Choose whether to attach the file from OneDrive or the local user profile",
+        "enabled": true,
+        "id": "PONAFS01",
+        "name": "[file_source]",
+        "type": "Set Default",
+        "val_options": "OneDrive,Local",
+        "value": "Local"
+    },
+    {
+        "children": [],
+        "delay": "0.0",
         "description": "Set the path of the file to attach",
         "enabled": true,
         "id": "1TY2MVN",
@@ -46,17 +57,17 @@
                 "description": "Enter the OneDrive file path and attach the file (Enter)",
                 "enabled": true,
                 "id": "PONAFT03",
-                "text": "[global:onedrive_path]\\[file_path]\ue007",
+                "text": "[userprofile]\\onedrive\\[file_path]\ue007",
                 "type": "Type",
                 "typing_delay": "[typing_delay]"
             }
         ],
-        "description": "Use the OneDrive attachment path on W365",
+        "description": "Use the OneDrive attachment path",
         "enabled": true,
         "id": "PONAFT02",
         "eval_method": "==",
-        "left_term": "[global:platform]",
-        "right_term": "W365",
+        "left_term": "[file_source]",
+        "right_term": "OneDrive",
         "type": "If"
     },
     {
@@ -72,7 +83,7 @@
                 "typing_delay": "[typing_delay]"
             }
         ],
-        "description": "Use the local attachment path on other platforms",
+        "description": "Use the local attachment path",
         "enabled": true,
         "id": "PONAFE01",
         "type": "Else"
