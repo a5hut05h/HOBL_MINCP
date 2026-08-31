@@ -20,6 +20,15 @@
     },
     {
         "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
+        "id": "1U6NJ6F",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_open",
+        "type": "Include"
+    },
+    {
+        "children": [],
         "delay": "0.0",
         "description": "Use the shortened email body when enabled",
         "enabled": true,
