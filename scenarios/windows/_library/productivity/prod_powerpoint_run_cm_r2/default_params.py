@@ -7,11 +7,11 @@ from utilities.open_source.modules import import_run_user_only
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
-    Params.setDefault('prod_powerpoint_run_cm_r2', 'image_path', 'C:\abl_docs\Manarola2.png', desc='Set the path of the image to insert', valOptions=['C:\\abl_docs\\Manarola2.png'])
     return
 
 def run_user_only():
     import_run_user_only('scenarios\\windows\\_library\\misc\\recording_phase_begin')
     import_run_user_only('scenarios\\windows\\_library\\misc\\recording_phase_end')
+    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_powerpoint_insertpicture')
     import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_powerpoint_switchto')
     return
