@@ -9,6 +9,15 @@
         "id": "PONR3I00",
         "type": "Information"
     },
+    {
+        "children": [],
+        "delay": "3",
+        "description": "Switch to the New Outlook window",
+        "enabled": true,
+        "id": "PONR2I01",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_new_switchto",
+        "type": "Include"
+    },
     {  
         "children": [],
         "delay": "0",
