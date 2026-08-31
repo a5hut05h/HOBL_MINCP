@@ -37,12 +37,15 @@ class Recharge(core.app_scenario.Scenario):
 
     def setResumeThreshold(self, value):
         self.resume_threshold = value
+        Params.setParam(self.module, 'resume_threshold', value)
     
     def setLeaveOnAc(self, value):
         self.leave_on_ac = value
+        Params.setParam(self.module, 'leave_on_ac', value)
 
     def setMonitorOnly(self, value):
         self.monitor_only = value
+        Params.setParam(self.module, 'monitor_only', value)
 
     def runTest(self):
         # Get parameters

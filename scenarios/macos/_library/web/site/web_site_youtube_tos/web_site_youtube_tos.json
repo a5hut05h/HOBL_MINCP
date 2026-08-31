@@ -102,6 +102,16 @@
             },
             {
                 "children": [],
+                "delay": "1",
+                "description": "0",
+                "enabled": true,
+                "id": "1EERW83",
+                "text": "0",
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
+            },
+            {
+                "children": [],
                 "delay": "2",
                 "description": "Settings",
                 "enabled": true,

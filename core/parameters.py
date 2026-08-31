@@ -248,6 +248,8 @@ class Params(object):
                         key_list.append(key)
             for key in key_list:
                 val = Params.get(section, key, log=False)
+                if 'password' in key.lower():
+                    continue
                 logging.debug("Resolved - " + str(section) + " : " + str(key) + " = " + str(val))
 
     @classmethod
