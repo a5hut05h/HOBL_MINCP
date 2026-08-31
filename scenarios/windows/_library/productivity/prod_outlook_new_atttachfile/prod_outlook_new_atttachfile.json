@@ -17,8 +17,8 @@
         "id": "1TY2MVN",
         "name": "[file_path]",
         "type": "Set Default",
-        "val_options": "C:\\abl_docs\\asample.pptx,C:\\abl_docs\\FamilyBudget.xlsx,C:\\abl_docs\\test_long_doc.docx",
-        "value": "C:\\abl_docs\\asample.pptx"
+        "val_options": "abl_docs\\asample.pptx,abl_docs\\FamilyBudget.xlsx,abl_docs\\test_long_doc.docx",
+        "value": "abl_docs\\asample.pptx"
     },
     {
         "children": [],
@@ -39,13 +39,49 @@
         "typing_delay": "400"
     },
     {
-        "children": [],
-        "delay": "8",
-        "description": "Enter the file path and attach the file (Enter)",
+        "children": [
+            {
+                "children": [],
+                "delay": "8",
+                "description": "Enter the OneDrive file path and attach the file (Enter)",
+                "enabled": true,
+                "id": "PONAFT03",
+                "text": "[global:onedrive_path]\\[file_path]\ue007",
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
+            }
+        ],
+        "description": "Use the OneDrive attachment path on W365",
         "enabled": true,
         "id": "PONAFT02",
-        "text": "[file_path]\ue007",
-        "type": "Type",
-        "typing_delay": "[typing_delay]"
+        "eval_method": "==",
+        "left_term": "[global:platform]",
+        "right_term": "W365",
+        "type": "If"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "8",
+                "description": "Enter the local file path and attach the file (Enter)",
+                "enabled": true,
+                "id": "PONAFT04",
+                "text": "[userprofile]\\[file_path]\ue007",
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
+            }
+        ],
+        "description": "Use the local attachment path on other platforms",
+        "enabled": true,
+        "id": "PONAFE01",
+        "type": "Else"
+    },
+    {
+        "children": [],
+        "description": "End attachment path selection",
+        "enabled": true,
+        "id": "PONAFN01",
+        "type": "End If"
     }
 ]
