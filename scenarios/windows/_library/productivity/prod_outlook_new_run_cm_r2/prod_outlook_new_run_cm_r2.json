@@ -28,7 +28,7 @@
             {
                 "name": "[file_path]",
                 "val_options": "",
-                "value": "C:\\abl_docs\\asample.pptx"
+                "value": "abl_docs\\asample.pptx"
             }
         ],
         "type": "Include"
@@ -52,7 +52,7 @@
             {
                 "name": "[file_path]",
                 "val_options": "",
-                "value": "C:\\abl_docs\\FamilyBudget.xlsx"
+                "value": "abl_docs\\FamilyBudget.xlsx"
             }
         ],
         "type": "Include"
