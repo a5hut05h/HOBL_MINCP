@@ -38,10 +38,10 @@
     {
         "children": [],
         "delay": "2",
-        "description": "Select the first object on the current slide (Tab)",
+        "description": "Move focus to the current slide and select the first object (F6, Tab)",
         "enabled": true,
         "id": "PPR1T01",
-        "text": "\ue004",
+        "text": "\ue036\ue004",
         "type": "Type",
         "typing_delay": "400"
     },
