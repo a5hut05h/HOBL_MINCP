@@ -11,17 +11,6 @@
     },
     {
         "children": [],
-        "delay": "0.0",
-        "description": "Set the PDF export path",
-        "enabled": true,
-        "id": "PPR3S01",
-        "name": "[pdf_path]",
-        "type": "Set Default",
-        "val_options": "\\abl_docs\\sample.pdf",
-        "value": "\\abl_docs\\sample.pdf"
-    },
-    {
-        "children": [],
         "delay": "0",
         "description": "Begin recording the PowerPoint paste and PDF-export phase",
         "enabled": true,
@@ -80,7 +69,7 @@
         "description": "Enter the PDF path and publish the presentation (Enter)",
         "enabled": true,
         "id": "PPR3T03",
-        "text": "[userprofile][pdf_path]\ue007",
+        "text": "[userprofile]\\abl_docs\\sample.pdf\ue007",
         "type": "Type",
         "typing_delay": "[typing_delay]"
     },
