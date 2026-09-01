@@ -18,7 +18,7 @@ class ProdOutlookNewRunCmR2(core.app_scenario.Scenario):
 
     def setUp(self):
         # Load actions JSON.
-        actions_json = os.path.join(os.path.dirname(__file__), "pord_outlook_new_run_r1.json")
+        actions_json = os.path.join(os.path.dirname(__file__), "prod_outlook_new_run_r1.json")
         self.actions = self.load_action_json(actions_json)
 
         # Execute Setup actions, if they exist
