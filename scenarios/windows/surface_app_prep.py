@@ -16,14 +16,22 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 class SurfaceAppPrep(core.app_scenario.Scenario):
     module = __module__.split('.')[-1]
-    Params.setDefault(module, "surface_app_prep_enabled", "0", desc="Enables or disables surface_app_prep execution.  Disabled by default since it is only useful on Surface devices.", valOptions=["0", "1"])
+    # Params.setDefault(module, "surface_app_prep_enabled", "0", desc="Enables or disables surface_app_prep execution.  Disabled by default since it is only useful on Surface devices.", valOptions=["0", "1"])
 
     is_prep = True
-
+    hide_ui = False
 
     def runTest(self):
-        logging.info("Launching WinAppDriver.exe on DUT")
 
+        # Check if surface app exists, if not, then skip this prep
+        result = self._call(["pwsh", "-Command Get-AppxPackage -Name Microsoft.SurfaceHub | Select-Object -ExpandProperty Name"], timeout=10)
+        if not result:
+            logging.debug("Surface Hub app not found, skipping surface_app_prep.")
+            self.createPrepStatusControlFile()
+            return
+
+        self._status_window(f"Preparing Surface App for testing.")
+        logging.info("Launching WinAppDriver.exe on DUT")
         self._call([
             (self.dut_exec_path + "\\WindowsApplicationDriver\\WinAppDriver.exe"),
             (self.dut_resolved_ip + " " + self.app_port)],

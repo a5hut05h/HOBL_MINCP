@@ -15,7 +15,7 @@ import threading
 
 class SystemPrep(core.app_scenario.Scenario):
     '''
-    Preforms various tasks that prepare a device for testing.
+    Performs various tasks that prepare a device for testing.
     '''
     module = __module__.split('.')[-1]
     Params.setDefault(module, "hibernate_enabled", "1", desc="Enables or disables hibernation on the device", valOptions=["0", "1"])
@@ -26,24 +26,26 @@ class SystemPrep(core.app_scenario.Scenario):
     Params.setDefault(module, 'final_reboot', '1', desc="Sets if the device will reboot at the conclusion of daily_prep", valOptions=["0", "1"])
     Params.setDefault(module, 'bpm_pcc_blm_disable', '0', desc="Disable BPM, PCC, and BLM", valOptions=["0", "1"])
 
-    wallpaper = Params.get(module, 'wallpaper')
-
-    hibernate_enabled = int(Params.get(module, 'hibernate_enabled'))
-    telemetry_enabled = Params.get(module, 'telemetry_enabled')
-    # hdr_enabled = Params.get(module, 'hdr_enabled')
-    theme = Params.get(module, 'theme')
-    dut_architecture = Params.get('global', 'dut_architecture')
-    final_reboot = Params.get(module, 'final_reboot')
-    bpm_pcc_blm_disable = Params.get(module, 'bpm_pcc_blm_disable') == '1'
-    reboot_complete = False
-
     # Params.setOverride("global", "collection_enabled", "0")
     Params.setOverride("global", "prep_tools", "")
     is_prep = True
-
+    hide_ui = False
 
     def runTest(self):
         #logging.info("Setup")
+        self.wallpaper = Params.get(self.module, 'wallpaper')
+        self.hibernate_enabled = int(Params.get(self.module, 'hibernate_enabled'))
+        self.telemetry_enabled = Params.get(self.module, 'telemetry_enabled')
+        self.theme = Params.get(self.module, 'theme')
+        self.dut_architecture = Params.get('global', 'dut_architecture')
+        self.final_reboot = Params.get(self.module, 'final_reboot')
+        self.bpm_pcc_blm_disable = Params.get(self.module, 'bpm_pcc_blm_disable') == '1'
+
+        if self.final_reboot == "1":
+            self._status_window("Preparing device for automated testing.\nDevice will reboot when finished.")
+        else:
+            self._status_window("Preparing device for automated testing.")
+
         self._upload("utilities\\open_source\\system_prep.ps1", self.dut_exec_path)
         #logging.info("Initial Thread timeout - " + str(self.timeout / 60) + " min.")
         self._call(["powershell.exe", 'set-executionpolicy unrestricted -Force'], expected_exit_code="", fail_on_exception=False)
@@ -104,7 +106,7 @@ class SystemPrep(core.app_scenario.Scenario):
         result = self._call(["powershell.exe", 'Get-PolicyFileEntry -Path "$env:windir\\' + system_path + '\\GroupPolicy\\Machine\\registry.pol" -All'])
         if "AutoplayAllowed" not in result:
             raise Exception
-        self._call(["cmd.exe", '/C gpupdate /wait:1200'])
+        self._call(["cmd.exe", '/C gpupdate /wait:300'])
 
         if self.telemetry_enabled == "1":
             # Enable telemetry collected by Microsoft servers

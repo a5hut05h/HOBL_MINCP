@@ -164,6 +164,14 @@ class DutSetup(core.app_scenario.Scenario):
         logging.debug("Dest  : " + dest)
         copy_tree(source_path + "\\utilities\\open_source\\DesktopImages" , dest, verbose=0)
 
+        # Copy HOBLStatusWindow folder contents to usb drive
+        dest = usb_hobl_bin + "\\HOBLStatusWindow"
+        if not os.path.exists(dest):
+            os.makedirs(dest)
+        logging.debug("Source: " + source_path + "\\utilities\\open_source\\HOBLStatusWindow\\bin\\Release\\net8.0-windows")
+        logging.debug("Dest  : " + dest)
+        copy_tree(source_path + "\\utilities\\open_source\\HOBLStatusWindow\\bin\\Release\\net8.0-windows" , dest, verbose=0)
+
         # Copy WindowsApplicationDriver folder contents to usb drive
         if self.local_setup:
             self._host_call("taskkill /F /IM WinAppDriver.exe", timeout=30, expected_exit_code="")

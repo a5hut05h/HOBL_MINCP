@@ -29,6 +29,8 @@ class StorePrep(core.app_scenario.Scenario):
 
     # Override collection of config data, traces, and execution of callbacks 
     is_prep = True
+    hide_ui = False
+
     new_store = True
     store_prep_enabled = Params.get(module, 'store_prep_enabled')
 
@@ -79,6 +81,11 @@ class StorePrep(core.app_scenario.Scenario):
             self.createPrepStatusControlFile()
             return
         
+        if Params.get('global', 'dut_ip') == "127.0.0.1":
+            self._status_window(f"Updating Store apps and disabling auto updates.\nClosing UI for this.")
+        else:
+            self._status_window(f"Updating Store apps and disabling auto updates.")
+
         logging.info("Uninstalling Microsoft Whiteboard app if installed")
         self._call(["powershell.exe", "Get-AppxPackage *Microsoft.Whiteboard* | Remove-AppxPackage"], expected_exit_code="")
 
@@ -206,6 +213,9 @@ class StorePrep(core.app_scenario.Scenario):
         #     except:
         #         logging.info("Update apps automatically when I'm on Wi-Fi is off")
         #         pass
+
+        logging.info("Setting reg key to disable Auto Updates")
+        self._call(['cmd.exe', r'/C reg.exe Add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\WindowsStore" /v AutoDownload /t REG_DWORD /d 2 /f'], expected_exit_code="")
 
         # Close store driver
         self.driver.close()

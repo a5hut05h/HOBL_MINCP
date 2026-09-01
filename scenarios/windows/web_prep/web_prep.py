@@ -20,6 +20,11 @@ class WebPrep(core.app_scenario.Scenario):
     actions = None
 
     def setUp(self):
+        if Params.get('global', 'dut_ip') == "127.0.0.1":
+            self._status_window(f"Preparing Edge for testing.\nDismissing first-run popups.\nClosing UI for this.")
+        else:
+            self._status_window(f"Preparing Edge for testing.\nDismissing first-run popups.")
+        
         # Load actions JSON.
         actions_json = os.path.join(os.path.dirname(__file__), "web_prep.json")
         self.actions = self.load_action_json(actions_json)

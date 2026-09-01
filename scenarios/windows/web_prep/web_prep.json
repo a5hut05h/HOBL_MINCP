@@ -194,7 +194,7 @@
                 "children": [],
                 "delay": "1",
                 "description": "Top right corner",
-                "enabled": true,
+                "enabled": false,
                 "file_name": [
                     "image_W72474.png"
                 ],
@@ -212,7 +212,7 @@
                 "delay": "1",
                 "description": "Settings",
                 "edge_thresholds": "5,50",
-                "enabled": true,
+                "enabled": false,
                 "exception_on": "Never",
                 "file_name": [
                     "image_W724A2.png"
@@ -228,7 +228,7 @@
                 "children": [],
                 "delay": "1",
                 "description": "Settings menu",
-                "enabled": true,
+                "enabled": false,
                 "file_name": [
                     "image_W724NE.png"
                 ],
@@ -245,7 +245,7 @@
                 "children": [],
                 "delay": "1",
                 "description": "Full page",
-                "enabled": true,
+                "enabled": false,
                 "exception_on": "Never",
                 "file_name": [
                     "image_W7251L.png"
@@ -262,7 +262,7 @@
                 "children": [],
                 "delay": "1",
                 "description": "Settings",
-                "enabled": true,
+                "enabled": false,
                 "exception_on": "Never",
                 "file_name": [
                     "image_W725YW.png"
@@ -272,6 +272,60 @@
                 "primary": true,
                 "type": "Click",
                 "x": "0.863",
+                "y": "0.500"
+            },
+            {
+                "children": [],
+                "delay": "1",
+                "description": "CTRL-l",
+                "enabled": true,
+                "id": "1U6VY40",
+                "text": "\ue009l",
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
+            },
+            {
+                "children": [],
+                "delay": "10",
+                "description": "resetProfileSettings URL",
+                "enabled": true,
+                "id": "1U6W02H",
+                "text": "edge://settings/resetProfileSettings\ue007",
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
+            },
+            {
+                "children": [],
+                "delay": "1",
+                "description": "Dialog",
+                "enabled": true,
+                "file_name": [
+                    "image_1U6W1RT.png"
+                ],
+                "h": "0.4",
+                "id": "1U6W1RT",
+                "recapture": false,
+                "type": "Capture",
+                "w": "0.75",
+                "x": "0.25",
+                "y": "0.5"
+            },
+            {
+                "capture_id": "1U6W1RT",
+                "children": [],
+                "delay": "3",
+                "description": "Reset",
+                "enabled": true,
+                "exception_on": "No match",
+                "file_name": [
+                    "image_1U6W3KR.png"
+                ],
+                "id": "1U6W3KR",
+                "match_threshold": "",
+                "primary": true,
+                "scale": "",
+                "type": "Click",
+                "x": "0.500",
                 "y": "0.500"
             },
             {

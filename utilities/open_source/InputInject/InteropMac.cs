@@ -194,8 +194,9 @@ namespace InputInject
             return (return_string);
         }
 
-        public void MoveTo(Int64 x, Int64 y, Int64 screenIndex = 0)
+        public void MoveTo(Int64 x, Int64 y, Int64 screenIndex = 0, bool moveCursor = false)
         {
+            // moveCursor is not implemented for MacOS
             point.x = x;
             point.y = y;
             var mouseEvent = CGEventCreateMouseEvent(0, kCGEventMouseMoved, point, 0);
@@ -203,7 +204,7 @@ namespace InputInject
             CFRelease(mouseEvent);
         }
 
-        public void MoveBy(Int64 x, Int64 y)
+        public void MoveBy(Int64 x, Int64 y, bool moveCursor = false)
         {
             IntPtr eventPtr = CGEventCreate(IntPtr.Zero);
             CGPOINT locStruct = CGEventGetLocation(eventPtr);
@@ -215,29 +216,29 @@ namespace InputInject
             CFRelease(mouseEvent);
         }
 
-        public void Tap(Int64 x, Int64 y, Int64 delay, bool primary, Int64 screenIndex = 0)
+        public void Tap(Int64 x, Int64 y, Int64 delay, bool primary, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            MoveTo(x, y, screenIndex);
+            MoveTo(x, y, screenIndex, moveCursor);
             TouchDown(primary);
             Thread.Sleep((int)delay);
             TouchUp(primary);
         }
 
-        public void TapDown(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0)
+        public void TapDown(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            MoveTo(x, y, screenIndex);
+            MoveTo(x, y, screenIndex, moveCursor);
             TouchDown(primary);
         }
 
-        public void TapUp(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0)
+        public void TapUp(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            MoveTo(x, y, screenIndex);
+            MoveTo(x, y, screenIndex, moveCursor);
             TouchUp(primary);
         }
 
-        public void Scroll(Int64 x, Int64 y, Int64 delay, string direction, Int64 screenIndex = 0)
+        public void Scroll(Int64 x, Int64 y, Int64 delay, string direction, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            MoveTo(x, y, screenIndex);
+            MoveTo(x, y, screenIndex, moveCursor);
             if (direction == "down")
             {
                 // MouseWheel(0);

@@ -22,6 +22,8 @@ Write-Host "Waiting for server at $pokeUrl to respond with 302..."
 $startTime = Get-Date
 $timeout = New-TimeSpan -Minutes $TimeoutMinutes
 
+$exitcode = 0
+
 while ($true) {
     try {
         $response = Invoke-WebRequest -Uri $pokeUrl -MaximumRedirection 0 -UseBasicParsing -ErrorAction SilentlyContinue
@@ -53,13 +55,12 @@ while ($true) {
     Start-Sleep -Seconds $PollIntervalSeconds
 }
 
-Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" -ArgumentList "--app=`"http://localhost:80/plan/Scenarios?PlanID=$PlanID`"", "-start-maximized"
 
 # Set scenario to pending if flag is set
 if ($SetScenarioPending) {
     if (-not $ScenarioID) {
         Write-Host " ERROR - ScenarioID is required when using -SetScenarioPending"
-        exit 1
+        $exitcode = 1
     }
     Write-Host "Setting scenario $ScenarioID to pending..."
     $pendingUrl = "$ServerUrl/plan/Update"
@@ -101,8 +102,11 @@ catch {
     }
     else {
         Write-Host " ERROR - Failed to resume plan: $_"
-        exit 1
+        $exitcode = 1
     }
 }
 
+Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" -ArgumentList "--app=`"http://localhost:80/plan/Scenarios?PlanID=$PlanID`"", "-start-maximized"
+
 Write-Host "Plan $PlanID resumed successfully"
+exit $exitcode

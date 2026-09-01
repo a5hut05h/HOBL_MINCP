@@ -49,6 +49,7 @@ def _call_rpc(host, port, payload, log = True, timeout = 1800): # 1800
         if s:
             s.close()
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         connect_timeout = timeout
         if timeout > 5:
             connect_timeout = 5 * (i + 1)
@@ -57,30 +58,48 @@ def _call_rpc(host, port, payload, log = True, timeout = 1800): # 1800
         try:
             if log:
                 logging.debug(f"Attempting RPC connection to {host}:{port}, try {i+1}/3")
+                # print(f"Attempting RPC connection to {host}:{port}, try {i+1}/3")
             s.connect((host, port))
             break
+        except socket.timeout as e:
+            logging.debug("Socket timeout.")
+            if i == 2:
+                raise e
+            time.sleep(2)
         except OSError as e:
             if e.errno == errno.EISCONN:
                 if log:
                     logging.warning("Socket is already connected.")
+                    # print("Socket is already connected.")
             elif e.errno == errno.EALREADY:
                 if log:
                     logging.warning("Connection already in progress.")
+                    # print("Connection already in progress.")
             else:
                 if log:
                     logging.warning(f"RPC ERROR: {e} - {payload}")             
+                    # print(f"RPC ERROR: {e} - {payload}")      
+            if i == 2:
+                raise e
+            time.sleep(2)
+        except socket.error as e:
+            if log:
+                logging.warning(f"Socket ERROR: {e} - {payload}")             
+                # print(f"Socket ERROR: {e} - {payload}")      
             if i == 2:
                 raise e
             time.sleep(2)
         except:
             if log:
                 logging.error(f"RPC connection failed. payload {payload}")
-            pass
+                # print(f"RPC connection failed. payload {payload}")
+            raise
 
     # Convert to JSON and send
     request = json.dumps(payload)
     if log:
         logging.debug("sending RPC: " + str(request))
+        # print("sending RPC: " + str(request))
     s.sendall(request.encode('utf-8') + b'\r\n')
 
     # Loop retrieving port number until nothing more can be pulled from buffer
@@ -366,12 +385,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # output = call_rpc(args.host, int(args.port), args.method, args.params)
+
+    # output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["cmd.exe", "/c dir c:\\web_replay\\v1.5.0\\recordings\\web_archive_2026-04-08"])
+    # output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["powershell", "-Command invoke-webrequest https://github.com/microsoft/web_replay/releases/download/archive-1/web_archive_2026-04-08.zip -UseBasicParsing -OutFile c:\\web_replay\\v1.5.0\\recordings\\web_archive_2026-04-08.zip"])
+    # output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["powershell", "-Command cd c:\\web_replay\\v1.5.0\\recordings; expand-archive .\\web_archive_2026-04-08.zip"])
+    # output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["powershell", "-Command cd c:\\web_replay\\v1.5.0\\recordings; expand-archive .\\web_archive_2026-04-08.zip"])
+    output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["cmd.exe", "/c del c:\\web_replay\\v1.5.0\\recordings\\web_archive_2026-04-08.zip"])
+
     # plugin_load(args.host, int(args.port), "InputInject", "InputInject.Application", "C:\\hobl_bin\\InputInject\\InputInject.dll")
     # plugin_call(args.host, int(args.port), "InputInject", "Type", "f", 400)
     # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue015', 400)
     # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue013', 400)
     # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue00c', 400)
-    # plugin_call(args.host, int(args.port), "InputInject", "MoveTo", 5, 500)
     # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue03dl', 100)
     # plugin_call(args.host, int(args.port), "InputInject", "Type", 'l', 100)
     # plugin_screen_info(args.host, int(args.port), "InputInject")
@@ -380,7 +405,7 @@ if __name__ == "__main__":
     # plugin_call(args.host, int(args.port), "InputInject", "Path", [1250, 1255, 1260, 1265, 1270, 1275], [830, 835, 830, 845, 830, 855], [200, 200, 200, 200, 200, 200], True, 0)
     # plugin_call(args.host, int(args.port), "InputInject", "Path", [1250, 1275], [830, 855], [500, 500], True, 0)
     # plugin_call(args.host, int(args.port), "InputInject", "Path", [1920, 2000], [1080, 1200], [500, 500], True, 1)
-    plugin_call(args.host, int(args.port), "InputInject", "MoveBy", 10, 10)
+    # plugin_call(args.host, int(args.port), "InputInject", "MoveBy", 10, 10)
 
     # img = plugin_screenshot(args.host, int(args.port), "InputInject", 0.0, 0.0, 1.0, 1.0, 0)
     # with open("c:\\temp\\test.qoi", 'bw') as f:
@@ -397,4 +422,4 @@ if __name__ == "__main__":
     # image.save("c:\\temp\\test_1.png")
 
 
-    # print (output)
+    print (output)
