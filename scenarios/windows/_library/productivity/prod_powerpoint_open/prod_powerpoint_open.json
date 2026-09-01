@@ -81,6 +81,27 @@
             {
                 "children": [],
                 "delay": "14",
+                "description": "Local sample.pptx",
+                "enabled": true,
+                "id": "PPOLOC1",
+                "text": "[userprofile]\\abl_docs\\sample.pptx\ue007",
+                "type": "Type",
+                "typing_delay": "[typing_delay]"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "eval_method": "==",
+        "id": "PPOLOC2",
+        "left_term": "[global:platform]",
+        "right_term": "Local",
+        "type": "Else If"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "14",
                 "description": "sample.pptx",
                 "enabled": true,
                 "id": "UH86K8",
