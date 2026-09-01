@@ -228,18 +228,6 @@ def plugin_call(host, port, dll_id, method, *arg):
     return result
 
 
-# def plugin_call(host, port, dll_id, method):
-#     # Store details in dictionary
-#     payload = {
-#         "method":"PluginCallMethod",
-#         "params": [dll_id, method],
-#         "jsonrpc": "2.0",
-#         "id": "1",
-#     }
-#     result = _call_rpc(host, port, payload)
-#     return result
-
-
 def plugin_screenshot(host, port, dll_id, x=0.0, y=0.0, w=1.0, h=1.0, screenIndex=0):
     # Store details in dictionary
     payload = {
@@ -259,7 +247,8 @@ def plugin_screenshot(host, port, dll_id, x=0.0, y=0.0, w=1.0, h=1.0, screenInde
         print(" ERROR Unexpected response from plugin_screenshot()")
         print(result_dict)
         return ""
-    
+
+
 def plugin_continuous_screenshot(host, port, dll_id, x=0, y=0, w=10, h=10, outputDir="", screenIndex=0, time_ms=1000, framerate=60):
     # Store details in dictionary
     payload = {
@@ -281,7 +270,8 @@ def plugin_continuous_screenshot(host, port, dll_id, x=0, y=0, w=10, h=10, outpu
         print(" ERROR Unexpected response from plugin_continuous_screenshot()")
         print(result_dict)
         return ""
-    
+
+
 def plugin_write_captures_to_disk(host, port, dll_id, capture_dir):
     payload = {
         "method":"PluginCallMethod",
@@ -298,7 +288,8 @@ def plugin_write_captures_to_disk(host, port, dll_id, capture_dir):
         print(" ERROR Unexpected response from plugin_write_capture_to_disk()")
         print(result_dict)
         return ""
-    
+
+
 def plugin_stop_performance_capture(host, port, dll_id):
     payload = {
         "method":"PluginCallMethod",
@@ -316,6 +307,7 @@ def plugin_stop_performance_capture(host, port, dll_id):
         print(result_dict)
         return ""
 
+
 def plugin_clear_captures(host, port, dll_id):
     payload = {
         "method":"PluginCallMethod",
@@ -330,6 +322,7 @@ def plugin_clear_captures(host, port, dll_id):
         return data
     else:
         return ""
+
 
 def plugin_screen_info(host, port, dll_id):
     # Store details in dictionary
@@ -384,42 +377,5 @@ if __name__ == "__main__":
     parser.add_argument('params', metavar='Message', nargs=argparse.REMAINDER, help='The parameters to the method, separated by space.')
     args = parser.parse_args()
 
-    # output = call_rpc(args.host, int(args.port), args.method, args.params)
-
-    # output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["cmd.exe", "/c dir c:\\web_replay\\v1.5.0\\recordings\\web_archive_2026-04-08"])
-    # output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["powershell", "-Command invoke-webrequest https://github.com/microsoft/web_replay/releases/download/archive-1/web_archive_2026-04-08.zip -UseBasicParsing -OutFile c:\\web_replay\\v1.5.0\\recordings\\web_archive_2026-04-08.zip"])
-    # output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["powershell", "-Command cd c:\\web_replay\\v1.5.0\\recordings; expand-archive .\\web_archive_2026-04-08.zip"])
-    # output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["powershell", "-Command cd c:\\web_replay\\v1.5.0\\recordings; expand-archive .\\web_archive_2026-04-08.zip"])
-    output = call_rpc("73.83.228.219", 6000, "RunWithResultAndExitCode", ["cmd.exe", "/c del c:\\web_replay\\v1.5.0\\recordings\\web_archive_2026-04-08.zip"])
-
-    # plugin_load(args.host, int(args.port), "InputInject", "InputInject.Application", "C:\\hobl_bin\\InputInject\\InputInject.dll")
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", "f", 400)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue015', 400)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue013', 400)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue00c', 400)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue03dl', 100)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", 'l', 100)
-    # plugin_screen_info(args.host, int(args.port), "InputInject")
-    # plugin_call(args.host, int(args.port), "InputInject", "Tap", 1248, 832, 300, True, 0)
-    # plugin_call(args.host, int(args.port), "InputInject", "Tap", 1920, 1080, 300, True, 1)
-    # plugin_call(args.host, int(args.port), "InputInject", "Path", [1250, 1255, 1260, 1265, 1270, 1275], [830, 835, 830, 845, 830, 855], [200, 200, 200, 200, 200, 200], True, 0)
-    # plugin_call(args.host, int(args.port), "InputInject", "Path", [1250, 1275], [830, 855], [500, 500], True, 0)
-    # plugin_call(args.host, int(args.port), "InputInject", "Path", [1920, 2000], [1080, 1200], [500, 500], True, 1)
-    # plugin_call(args.host, int(args.port), "InputInject", "MoveBy", 10, 10)
-
-    # img = plugin_screenshot(args.host, int(args.port), "InputInject", 0.0, 0.0, 1.0, 1.0, 0)
-    # with open("c:\\temp\\test.qoi", 'bw') as f:
-    #     f.write(img)
-    # bmp_bytes = qoi.decode(img)
-    # image = Image.fromarray(bmp_bytes)
-    # image.save("c:\\temp\\test_0.png")
-
-    # img = plugin_screenshot(args.host, int(args.port), "InputInject", 0.3, 0.0, 0.2, 1.0, 1)
-    # with open("c:\\temp\\test.qoi", 'bw') as f:
-    #     f.write(img)
-    # bmp_bytes = qoi.decode(img)
-    # image = Image.fromarray(bmp_bytes)
-    # image.save("c:\\temp\\test_1.png")
-
-
+    output = call_rpc(args.host, int(args.port), args.method, args.params)
     print (output)
