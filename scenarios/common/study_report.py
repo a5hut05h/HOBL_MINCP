@@ -44,6 +44,7 @@ class StudyReport(core.app_scenario.Scenario):
     Params.setDefault(module, 'uploader', '')
 
     is_prep = True
+    hide_ui = False
 
     def setUp(self):
         # Get parameters

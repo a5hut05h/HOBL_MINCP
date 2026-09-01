@@ -31,6 +31,7 @@ class ChargeOff(core.app_scenario.Scenario):
     widgets = Widgets()
 
     is_prep = True
+    hide_ui = False
 
     def setUp(self):
         # Don't call base setUp so that we don't interact with DUT.
@@ -38,12 +39,19 @@ class ChargeOff(core.app_scenario.Scenario):
 
     def runTest(self):
         logging.info("Attempting to turn off charger...")
+        self._status_window("Attempting to turn off charger...")
         if self.charge_off_call == '':
+            if self.checkState() == 1:
+                logging.info("Already on DC power.")
+                self._status_window("Already on DC power.")
+                return
             logging.warning("No charge_off_call specified.  Manually turn off charger to continue.")
-            self.widgets.about("Disconnect Charger", "Manually disconnect charger.")
+            self._status_window("Attempting to turn off charger...\nAutomated charging not set up.\nManually disconnect charger to continue.")
+            self.widgets.about("Disconnect Charger", "Manually disconnect charger.", break_callback=self.onDC)
         else:
             self._host_call(self.charge_off_call)
             logging.info("Charger turned off.")
+            self._status_window("Charger turned off.")
 
     def tearDown(self):
         # Don't call base tearDown so that we don't interact with DUT.
@@ -52,4 +60,27 @@ class ChargeOff(core.app_scenario.Scenario):
     def kill(self):
         # Prevent base kill routine from running
         return 0
-        
+
+    def checkState(self):
+        # Returns 1 for DC, 2 for AC.
+        state = 0
+        if self.platform.lower() == 'macos':
+            battery_status = self._call(["bash", "-c \"pmset -g batt | grep -o 'discharging\\|charging\\|charged' | head -n 1\""], timeout=10)
+            if "discharging" in battery_status:
+                state = 1
+            elif "charging" in battery_status:
+                state = 2
+            elif "charged" in battery_status:
+                state = 2
+        else:
+            state = int(self._call(["powershell", "(Get-WmiObject -Class Win32_Battery -ea 0).BatteryStatus"], timeout=10))
+
+        return state
+
+    def onDC(self):
+        state = self.checkState()
+        if state == 1:
+            return True
+        else:
+            return False
+

@@ -495,10 +495,40 @@ namespace InputInject
             return sb.ToString();
         }
 
-        public void MoveTo(Int64 x, Int64 y, Int64 screenIndex = 0)
+        public void MoveTo(Int64 x, Int64 y, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            // SetPhysicalCursorPos((int)(ScreenX[screenIndex] + x),  (int)(ScreenY[screenIndex] + y));
-            // Move the mouse using SendInput()
+            if (moveCursor)
+            {
+                // Move the cursor using SetCursorPos()
+                MoveCursorToTargetAsync(x, y, screenIndex).GetAwaiter().GetResult();
+            }
+            else {
+                // SetPhysicalCursorPos((int)(ScreenX[screenIndex] + x),  (int)(ScreenY[screenIndex] + y));
+                // Move the mouse using SendInput()
+                INPUT[] data = new INPUT[1];
+                data[0] = new INPUT();
+                data[0].type = 0; // mouse input
+
+                MouseInput ms = new MouseInput();
+                ms.dwFlags = 0x8000 | 0x0001 | 0x4000; // MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_VIRTUALDESK
+
+                // Normalize coordinates to 0..65535
+                int virtualScreenWidth = GetSystemMetrics(SystemMetric.VirtualScreenWidth);
+                int virtualScreenHeight = GetSystemMetrics(SystemMetric.VirtualScreenHeight);
+
+                ms.dx = (int)Math.Round((65535.0 * (ScreenX[screenIndex] + x - SystemInformation.VirtualScreen.Left)) / virtualScreenWidth);
+                ms.dy = (int)Math.Round((65535.0 * (ScreenY[screenIndex] + y - SystemInformation.VirtualScreen.Top)) / virtualScreenHeight);
+
+                data[0].ms = ms;
+
+                SendInput(1, data, Marshal.SizeOf(typeof(INPUT)));
+            }
+        }
+
+
+        private async Task MoveCursorToTargetAsync(Int64 x, Int64 y, Int64 screenIndex = 0)
+        {
+
             INPUT[] data = new INPUT[1];
             data[0] = new INPUT();
             data[0].type = 0; // mouse input
@@ -510,56 +540,91 @@ namespace InputInject
             int virtualScreenWidth = GetSystemMetrics(SystemMetric.VirtualScreenWidth);
             int virtualScreenHeight = GetSystemMetrics(SystemMetric.VirtualScreenHeight);
 
-            ms.dx = (int)Math.Round((65535.0 * (ScreenX[screenIndex] + x - SystemInformation.VirtualScreen.Left)) / virtualScreenWidth);
-            ms.dy = (int)Math.Round((65535.0 * (ScreenY[screenIndex] + y - SystemInformation.VirtualScreen.Top)) / virtualScreenHeight);
 
-            data[0].ms = ms;
+            Point start = Cursor.Position;
+            Point target = new Point((int)(ScreenX[screenIndex] + x), (int)(ScreenY[screenIndex] + y));
+            int deltaX = target.X - start.X;
+            int deltaY = target.Y - start.Y;
+            double distance = Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
+            int pointCount = Math.Clamp((int)(distance / 6) + 2, 10, 250);
+            Point[] path = MousePathGenerator.Generate(start, target, pointCount);
 
-            SendInput(1, data, Marshal.SizeOf(typeof(INPUT)));
+            await Task.Run(() =>
+            {
+                using HighResolutionPeriodicTimer timer = new(TimeSpan.FromMilliseconds(8));
+
+                for (int index = 1; index < path.Length; index++)
+                {
+                    if (index > 1)
+                    {
+                        timer.WaitForNextTick();
+                    }
+
+
+                    ms.dx = (int)Math.Round((65535.0 * (ScreenX[screenIndex] + path[index].X - SystemInformation.VirtualScreen.Left)) / virtualScreenWidth);
+                    ms.dy = (int)Math.Round((65535.0 * (ScreenY[screenIndex] + path[index].Y - SystemInformation.VirtualScreen.Top)) / virtualScreenHeight);
+                    data[0].ms = ms;
+                    SendInput(1, data, Marshal.SizeOf(typeof(INPUT)));
+
+
+                    // Cursor.Position = path[index];
+                }
+            });
         }
 
-        public void MoveBy(Int64 x, Int64 y)
+
+        public void MoveBy(Int64 x, Int64 y, bool moveCursor = false)
         {
-            INPUT[] data = new INPUT[1];
-            data[0] = new INPUT();
-            data[0].type = 0; // mouse input
+            if (moveCursor)
+            {
+                // x and y are relative to the current cursor position.
+                // Calculate the absolute target position and move the cursor there.
+                Int64 ax = Cursor.Position.X + x;
+                Int64 ay = Cursor.Position.Y + y;
+                MoveCursorToTargetAsync(ax, ay, 0).GetAwaiter().GetResult();
+            }
+            else {
+                INPUT[] data = new INPUT[1];
+                data[0] = new INPUT();
+                data[0].type = 0; // mouse input
 
-            MouseInput ms = new MouseInput();
-            // For relative mouse movement (MOUSEEVENTF_MOVE without MOUSEEVENTF_ABSOLUTE), 
-            // the coordinates should NOT be normalized to 0..65535. They are interpreted as relative pixel deltas.
-            ms.dwFlags = 0x0001; // MOUSEEVENTF_MOVE (relative move)
+                MouseInput ms = new MouseInput();
+                // For relative mouse movement (MOUSEEVENTF_MOVE without MOUSEEVENTF_ABSOLUTE), 
+                // the coordinates should NOT be normalized to 0..65535. They are interpreted as relative pixel deltas.
+                ms.dwFlags = 0x0001; // MOUSEEVENTF_MOVE (relative move)
 
-            ms.dx = (int)x;
-            ms.dy = (int)y;
+                ms.dx = (int)x;
+                ms.dy = (int)y;
 
-            data[0].ms = ms;
+                data[0].ms = ms;
 
-            SendInput(1, data, Marshal.SizeOf(typeof(INPUT)));
+                SendInput(1, data, Marshal.SizeOf(typeof(INPUT)));
+            }
         }
 
-        public void Tap(Int64 x, Int64 y, Int64 delay, bool primary, Int64 screenIndex = 0)
+        public void Tap(Int64 x, Int64 y, Int64 delay, bool primary, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            MoveTo(x, y, screenIndex);
+            MoveTo(x, y, screenIndex, moveCursor);
             TouchDown(primary);
             Thread.Sleep((int)delay);
             TouchUp(primary);
         }
 
-        public void TapDown(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0)
+        public void TapDown(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            MoveTo(x, y, screenIndex);
+            MoveTo(x, y, screenIndex, moveCursor);
             TouchDown(primary);
         }
 
-        public void TapUp(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0)
+        public void TapUp(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            MoveTo(x, y, screenIndex);
+            MoveTo(x, y, screenIndex, moveCursor);
             TouchUp(primary);
         }
 
-        public void Scroll(Int64 x, Int64 y, Int64 delay, string direction, Int64 screenIndex = 0)
+        public void Scroll(Int64 x, Int64 y, Int64 delay, string direction, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            MoveTo(x, y, screenIndex);
+            MoveTo(x, y, screenIndex, moveCursor);
             if (direction == "down")
             {
                 MouseWheel((int)(delay * (-1)));
