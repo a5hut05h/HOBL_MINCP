@@ -8,7 +8,7 @@ from utilities.open_source.modules import import_run_user_only
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
-    Params.setDefault('prod_powerpoint_run_r3', 'pdf_path', r'C:\abl_docs\sample.pdf', desc='Path of the PDF to export', valOptions=[r'C:\abl_docs\sample.pdf'])
+    Params.setDefault('prod_powerpoint_run_r3', 'pdf_path', r'\abl_docs\sample.pdf', desc='Path of the PDF to export relative to the user profile', valOptions=[r'\abl_docs\sample.pdf'])
     return
 
 
