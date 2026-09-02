@@ -29,7 +29,6 @@ class EdgeInstall(core.app_scenario.Scenario):
     is_prep = True
 
     def runTest(self):
-
         # If the environment variable:EDGE_FEATURE_OVERRIDES_SOURCE is set to server_default (value is case-insensitive), then official builds will get only 100% allocated configurations from the server.
         self._call(['cmd.exe', '/C setx /m EDGE_FEATURE_OVERRIDES_SOURCE server_default'])
         
@@ -42,15 +41,24 @@ class EdgeInstall(core.app_scenario.Scenario):
             # installer_path = os.path.join(self.dut_exec_path, "MicrosoftEdgeSetup" + edge_version +".exe")
 
         if self.install == "1":
+            if Params.get('global', 'dut_ip') == "127.0.0.1":
+                self._status_window(f"Downloading latest {self.browser} browser.\nClosing UI for this.")
+            else:
+                self._status_window(f"Downloading latest {self.browser} browser.")
             logging.info("Downloading the new Microsoft Edge " + edge_version + " installer to host")
             # self._call(["powershell.exe", "wget \\\"https://go.microsoft.com/fwlink/?linkid=2108834&Channel=" + edge_version + "&language=en\\\" -outfile " + installer_path])
             self._call(["powershell.exe", "wget \\\"https://go.microsoft.com/fwlink/?linkid=2109047&Channel=" + edge_version + "&language=en\\\" -outfile " + installer_path])
 
+            if Params.get('global', 'dut_ip') == "127.0.0.1":
+                self._status_window(f"Installing latest {self.browser} browser.\nClosing UI for this.")
+            else:
+                self._status_window(f"Installing latest {self.browser} browser.")
             logging.info("Running the installer")
             self._call([installer_path,"/silent /install"], expected_exit_code="")
                 
             time.sleep(20)
 
+        self._status_window(f"Adjusting Edge settings for automation.")
         # Install administrative templates to be able to control settings
         self._upload("utilities\\open_source\\MicrosoftEdgePolicyTemplates\\windows\\admx\\msedge.admx", "c:\\Windows\\PolicyDefinitions")
         self._upload("utilities\\open_source\\MicrosoftEdgePolicyTemplates\\windows\\admx\\msedgeupdate.admx", "c:\\Windows\\PolicyDefinitions")
@@ -71,6 +79,18 @@ class EdgeInstall(core.app_scenario.Scenario):
         self._call(["powershell.exe", 'Set-PolicyFileEntry -Path "$env:windir\\system32\\GroupPolicy\\Machine\\registry.pol" -Key SOFTWARE\\Policies\\Microsoft\\EdgeUpdate -ValueName UpdateDefault -Data 0 -Type DWord'])
         result = self._call(["powershell.exe", 'Get-PolicyFileEntry -Path "$env:windir\\system32\\GroupPolicy\\Machine\\registry.pol" -All'])
         self._call(["cmd.exe", '/C gpupdate /wait:1200'])
+
+        # set same keys in registry for currnet user to support Windows Home
+        self._call(["powershell.exe", 'New-Item -Path "HKCU:\\Software\\Policies\\Microsoft" -Name "Edge" -Force'])
+        self._call(["powershell.exe", 'New-Item -Path "HKCU:\\Software\\Policies\\Microsoft" -Name "EdgeUpdate" -Force'])
+        self._call(["powershell.exe", 'Set-ItemProperty -Path "HKCU:\\Software\\Policies\\Microsoft\\Edge" -Name AutoplayAllowed -Value 1 -Type DWord'])
+        self._call(["powershell.exe", 'Set-ItemProperty -Path "HKCU:\\Software\\Policies\\Microsoft\\Edge" -Name ShowRecommendationsEnabled -Value 0 -Type DWord'])
+        self._call(["powershell.exe", 'Set-ItemProperty -Path "HKCU:\\Software\\Policies\\Microsoft\\Edge" -Name HideFirstRunExperience -Value 1 -Type DWord'])
+        self._call(["powershell.exe", 'Set-ItemProperty -Path "HKCU:\\Software\\Policies\\Microsoft\\Edge" -Name HideRestoreDialogEnabled -Value 1 -Type DWord'])
+        self._call(["powershell.exe", 'Set-ItemProperty -Path "HKCU:\\Software\\Policies\\Microsoft\\Edge" -Name EdgeWorkspacesEnabled -Value 0 -Type DWord'])
+        self._call(["powershell.exe", 'Set-ItemProperty -Path "HKCU:\\Software\\Policies\\Microsoft\\Edge" -Name DefaultGeolocationSetting -Value 2 -Type DWord'])
+        self._call(["powershell.exe", 'Set-ItemProperty -Path "HKCU:\\Software\\Policies\\Microsoft\\EdgeUpdate" -Name AutoUpdateCheckPeriodMinutes -Value 0 -Type DWord'])
+        self._call(["powershell.exe", 'Set-ItemProperty -Path "HKCU:\\Software\\Policies\\Microsoft\\EdgeUpdate" -Name UpdateDefault -Value 0 -Type DWord'])
 
         # Set reg key to not disable popups and disable offer to save passwrods popup
         logging.info('Setting reg keys.')

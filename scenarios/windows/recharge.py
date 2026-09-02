@@ -34,15 +34,19 @@ class Recharge(core.app_scenario.Scenario):
     Params.setOverride("global", "prep_tools", "")
 
     is_prep = True
+    hide_ui = False
 
     def setResumeThreshold(self, value):
         self.resume_threshold = value
+        Params.setParam(self.module, 'resume_threshold', value)
     
     def setLeaveOnAc(self, value):
         self.leave_on_ac = value
+        Params.setParam(self.module, 'leave_on_ac', value)
 
     def setMonitorOnly(self, value):
         self.monitor_only = value
+        Params.setParam(self.module, 'monitor_only', value)
 
     def runTest(self):
         # Get parameters
@@ -75,6 +79,7 @@ class Recharge(core.app_scenario.Scenario):
                 time.sleep(60)
                 continue          
             logging.info("Battery level: " + str(batt_level) + "  Expected Level: " + str(self.resume_threshold))
+            self._status_window(f"Charging to {self.resume_threshold}%...\nCurrent battery level: [color=white]{batt_level}%[/color]")
 
             if batt_level >= int(self.resume_threshold):
                 logging.info("Charging complete")
@@ -84,7 +89,12 @@ class Recharge(core.app_scenario.Scenario):
                 except:
                     logging.error(f"Invalid post_charge_delay setting: {self.post_charge_delay}.  Make sure it's an integer.")
                 else:
-                    logging.info(f"Delaying for {delay} seconds.")
+                    logging.info(f"Delaying for {delay} seconds. This delay is configurable by adding the 'post_charge_delay' parameter in the device profile.")
+                    units = "seconds"
+                    if delay > 60:
+                        delay = int(delay / 60)
+                        units = "minutes"
+                    self._status_window(f"Charging complete.\nDelaying for {delay} {units} before disconnecting charger.")
                     time.sleep(delay)
                 if (self.leave_on_ac == '0'):
                     self.chargeOff()
@@ -97,7 +107,8 @@ class Recharge(core.app_scenario.Scenario):
                 else:
                     count = 0
                 if count == MAX_COUNT and self.check_smart_charge == "1":
-                    logging.info("Smart charging feature prevents recharge from completing.")
+                    logging.info("Smart charging feature prevents recharge from completing.  Run down the battery and try again.")
+                    self._status_window(f"Smart charging feature prevents recharge from completing.  Run down the battery and try again.")
                     if (self.leave_on_ac == '0'):
                         self.chargeOff()
                     break
@@ -117,6 +128,20 @@ class Recharge(core.app_scenario.Scenario):
             out, err = p.communicate()
             actual_exit_code = p.returncode
             batt_level = out.decode('utf-8').rstrip()
+
+        elif self.platform.lower() == 'macos':
+            # Get AppleRawCurrentCapacity level via ioreg
+            raw_current_capacity_result = self._call(["bash", '-c "ioreg -r -c AppleSmartBattery -a | plutil -extract 0.AppleRawCurrentCapacity raw -"'], blocking=True)
+            raw_current_capacity_level = raw_current_capacity_result.strip()
+
+            # Get AppleRawMaxCapacity level via ioreg
+            raw_max_capacity_result = self._call(["bash", '-c "ioreg -r -c AppleSmartBattery -a | plutil -extract 0.AppleRawMaxCapacity raw -"'], blocking=True)
+            raw_max_capacity_level = raw_max_capacity_result.strip()
+
+            # Calculate Battery level to 2 decimal places
+            level = round(float(raw_current_capacity_level) / float(raw_max_capacity_level) * 100, 2)
+            batt_level = int(level)
+
         else:
             batt_level = self._call(["powershell.exe", "Add-Type -Assembly System.Windows.Forms; [Math]::round(([System.Windows.Forms.SystemInformation]::PowerStatus.BatteryLifePercent) * 100, 2)"])
         return int(batt_level)
@@ -135,8 +160,8 @@ class Recharge(core.app_scenario.Scenario):
             logging.info("Charger turned on.")
         else:
             logging.warning("No charge_on_call specified.  Manually turn on charger to continue.")
-            self.widgets.about("Connect Charger", "Manually connect charger.")
-            self.waitForState(2, automated=False)
+            self._status_window("Attempting to turn on charger...\nAutomated charging not set up.\nManually connect charger to continue.")
+            self.widgets.about("Connect Charger", "Manually connect charger.", break_callback=self.onAC)
 
     def chargeOff(self):
         if (self.leave_on_ac != '0'):
@@ -144,17 +169,33 @@ class Recharge(core.app_scenario.Scenario):
         if self.monitor_only == '1':
             logging.info("Monitoring only, not turning off charger.")
             return
+        if self.checkState() == 1:
+            logging.info("Already on battery.")
+            return
         logging.info("Attempting to turn off charger...")
         if (self.charge_off_call!=""):
             self._host_call(self.charge_off_call)
             logging.info("Charger turned off.")
+            self.waitForState(1, automated=True)
         else:
             logging.warning("No charge_off_call specified.  Manually turn off charger to continue.")
-            self.widgets.about("Disconnect Charger", "Manually disconnect charger.")
+            self._status_window("Attempting to turn off charger...\nAutomated charging not set up.\nManually disconnect charger to continue.")
+            self.widgets.about("Disconnect Charger", "Manually disconnect charger.", break_callback=self.onDC)
 
     def checkState(self):
         # Returns 1 for DC, 2 for AC.
-        state = int(self._call(["powershell", "(Get-WmiObject -Class Win32_Battery -ea 0).BatteryStatus"]))
+        state = 0
+        if self.platform.lower() == 'macos':
+            battery_status = self._call(["bash", "-c \"pmset -g batt | grep -o 'discharging\\|charging\\|charged' | head -n 1\""], timeout=10)
+            if "discharging" in battery_status:
+                state = 1
+            elif "charging" in battery_status:
+                state = 2
+            elif "charged" in battery_status:
+                state = 2
+        else:
+            state = int(self._call(["powershell", "(Get-WmiObject -Class Win32_Battery -ea 0).BatteryStatus"], timeout=10))
+
         return state
 
     def waitForState(self, target_state, automated=False):
@@ -171,4 +212,17 @@ class Recharge(core.app_scenario.Scenario):
                     break
         return state
 
+    def onAC(self):
+        state = self.checkState()
+        if state == 2:
+            return True
+        else:
+            return False
+
+    def onDC(self):
+        state = self.checkState()
+        if state == 1:
+            return True
+        else:
+            return False
 

@@ -61,6 +61,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 class Scenario(unittest.TestCase):
     is_prep = False
+    hide_ui = True
     ffmpeg_launched = False
     toolCallBacks_failed = False
     toolCallBacks_backtrace = []
@@ -128,6 +129,8 @@ class Scenario(unittest.TestCase):
         self.web_replay_http_proxy_port = Params.get('global', 'web_replay_http_proxy_port')
         self.web_replay_excludes_list = Params.get('global', 'web_replay_excludes_list')
         self.web_replay_ip = Params.get('global', 'web_replay_ip')
+
+        self.cursor_movement_enable = (Params.get('global', 'cursor_movement_enable') == '1')
 
         if self.platform.lower() == "macos":
             # On MacOS, 300ms tends to be a long press, so we reduce the default click time.
@@ -217,8 +220,14 @@ class Scenario(unittest.TestCase):
             # Store the resolved IP in the Params object
             Params.setCalculated("dut_resolved_ip", self.dut_resolved_ip)
 
+            # Kill HOBLStatusWindow.exe if it is running
+            # self._call(["cmd.exe", '/c taskkill /IM HOBLStatusWindow.exe /T /F > null 2>&1'], expected_exit_code="")
+
+
         # Checking for local execution and running from web ui. If so then we want to kill web ui.
-        if self.dut_ip == "127.0.0.1" and self.dashboard_url != '':
+        Params.setCalculated("hide_ui", str(self.hide_ui))
+        active_ui = (Params.get('global', 'check_ui') == '1') or self.dashboard_url != ''
+        if self.dut_ip == "127.0.0.1" and active_ui and self.hide_ui:
             # self.widgets.about("Closing UI", "UI is closing to run scenario...")
             # time.sleep(3)
             self._kill("msedge.exe")
@@ -267,34 +276,11 @@ class Scenario(unittest.TestCase):
         if self.is_tool == False and self.is_prep_tool == False and self.dut_alive == '1':
             # Check DUT Setup version
             if self.platform.lower() == 'windows':
-                # Read first line of setup/src_dut_win/dut_setup.cmd
-                with open("setup_src/src_dut_win/dut_setup.cmd", "r") as f:
-                    lines = f.readlines()
-                    if lines:
-                        first_line = lines[0].strip()
-                        logging.debug(f"DUT Setup first line: {first_line}")
-                        if first_line.startswith("set dut_setup_version="):
-                            expected_dut_setup_version = first_line.split('=')[1].strip()
-                            expected_dut_setup_major_version = expected_dut_setup_version.split('.')[0]
-                            expected_dut_setup_minor_version = expected_dut_setup_version.split('.')[1]
-                            logging.debug(f"Expected DUT Setup version: {expected_dut_setup_major_version}.{expected_dut_setup_minor_version}")
-                # Read last line of dut_setup.log on DUT to get actual DUT setup version
-                try:
-                    last_line = self._call(["powershell", "-Command Get-Content -Path 'C:\\hobl_bin\\dut_setup.log' | Select-Object -Last 1"], expected_exit_code="", fail_on_exception=False)
-                    if last_line.startswith("dut_setup version: "):
-                        actual_dut_setup_version = last_line.split(': ')[1].strip()
-                        actual_dut_setup_major_version = actual_dut_setup_version.split('.')[0]
-                        actual_dut_setup_minor_version = actual_dut_setup_version.split('.')[1]
-                        logging.debug(f"Actual DUT Setup version: {actual_dut_setup_major_version}.{actual_dut_setup_minor_version}")
-                        if actual_dut_setup_major_version != expected_dut_setup_major_version:
-                            logging.error(f"DUT Setup version {actual_dut_setup_version} does not match required version {expected_dut_setup_version}. You need to run the latest dut_setup.exe on the DUT.")
-                        elif actual_dut_setup_minor_version != expected_dut_setup_minor_version:
-                            logging.warning(f"DUT Setup version {actual_dut_setup_version} does not match expected version {expected_dut_setup_version}. It is recommended to re-run the latest dut_setup.exe on the DUT.")
-                    else:
-                        logging.warning("Could not determine actual DUT Setup version.")
-                except:
-                    logging.warning("Could not read dut_setup.log on DUT to determine actual DUT Setup version.")
-                    pass
+                dut_version = self._getDutSetupVersionOfDut()
+                host_version = self._getDutSetupVersionOfHost()
+                if dut_version != host_version:
+                    logging.warning(f"DUT Setup version {dut_version} does not match expected version {host_version}. It is recommended to run the dut_setup scenario to update the DUT to the right version.")
+
             # Load InputInject plugin to SimpleRemote
             if self.platform.lower() == 'macos':
                 result = rpc.plugin_load(self.dut_ip, self.rpc_port, "InputInject", "InputInject.Application", "/Users/Shared/hobl_bin/InputInject/InputInject.dll")
@@ -391,6 +377,39 @@ class Scenario(unittest.TestCase):
         self.rundown_mode = Params.get('global', 'rundown_mode')
         self.poll_rate = "360" # 6 minutes, gives us battery life hours in 0.1 increments.
 
+    def _getDutSetupVersionOfDut(self):
+        if self.platform.lower() == 'windows':
+            # Read last line of dut_setup.log on DUT to get actual DUT setup version
+            try:
+                last_line = self._call(["powershell", "-Command Get-Content -Path 'C:\\hobl_bin\\dut_setup.log' | Select-Object -Last 1"], expected_exit_code="", fail_on_exception=False)
+                if last_line.startswith("dut_setup version: "):
+                    actual_dut_setup_version = last_line.split(': ')[1].strip()
+                    actual_dut_setup_major_version = actual_dut_setup_version.split('.')[0]
+                    actual_dut_setup_minor_version = actual_dut_setup_version.split('.')[1]
+                    version = f"{actual_dut_setup_major_version}.{actual_dut_setup_minor_version}"
+                    logging.debug(f"Actual DUT Setup version: {version}")
+                    return version
+            except:
+                pass
+            return ""
+
+    def _getDutSetupVersionOfHost(self):
+        if self.platform.lower() == 'windows':
+            # Read first line of setup/src_dut_win/dut_setup.cmd
+            with open("setup_src/src_dut_win/dut_setup.cmd", "r") as f:
+                lines = f.readlines()
+                if lines:
+                    first_line = lines[0].strip()
+                    logging.debug(f"DUT Setup first line: {first_line}")
+                    if first_line.startswith("set dut_setup_version="):
+                        expected_dut_setup_version = first_line.split('=')[1].strip()
+                        expected_dut_setup_major_version = expected_dut_setup_version.split('.')[0]
+                        expected_dut_setup_minor_version = expected_dut_setup_version.split('.')[1]
+                        version = f"{expected_dut_setup_major_version}.{expected_dut_setup_minor_version}"
+                        logging.debug(f"Expected DUT Setup version: {version}")
+                        return version
+        return ""
+
     def _record_phase_time(self, phase_name, start_time, duration):
         if Params.get('global', 'phase_reporting') == "1":
             file_path = self.result_dir + os.sep + 'phase_time.csv'
@@ -443,11 +462,13 @@ class Scenario(unittest.TestCase):
         Params.dumpResolved()
 
         # Make sure ffmpeg left over from a previous scenario isn't still running on the DUT
-        logging.debug("Stopping ffmpeg: launched = " +
-                      str(self.ffmpeg_launched))
+        logging.debug("Stopping ffmpeg: launched = " + str(self.ffmpeg_launched))
         if self.platform.lower() == "windows" and not self.ffmpeg_launched:
-            self._call(
-                ["cmd.exe", '/c taskkill /IM ffmpeg.exe /T /F > null 2>&1'], expected_exit_code="")
+            self._call(["cmd.exe", '/c taskkill /IM ffmpeg.exe /T /F > null 2>&1'], expected_exit_code="")
+
+        if self.platform.lower() == "windows" and not self.is_prep and not self.is_tool and not self.is_prep_tool:
+            # Kill HOBLStatusWindow.exe if it is running
+            self._call(["cmd.exe", '/c taskkill /IM HOBLStatusWindow.exe /T /F > null 2>&1'], expected_exit_code="")
 
         # Initialize tools
         self.toolCallBacks("initCallback")
@@ -460,7 +481,6 @@ class Scenario(unittest.TestCase):
         test_name = module
         if (Params.get('global', 'module_name') != ""):
             test_name = Params.get('global', 'module_name')
-
         
         url = ""
         if self.dashboard_url != '':
@@ -786,6 +806,7 @@ class Scenario(unittest.TestCase):
         while(True):
             try:
                 if self.platform.lower() == 'windows':
+                    # Local execution
                     if Params.get('global', 'dut_ip') == '127.0.0.1':
                         new_time = time.time()
                         logging.info("Rundown watchdog, current time: " + str(new_time) + ", last time: " + str(self.monitor_life_timestamp))
@@ -801,6 +822,7 @@ class Scenario(unittest.TestCase):
                             raise Exception("Device monitor timeout")
                         self.monitor_life_timestamp = new_time
                         time.sleep(60)
+                    # Hosted execution
                     else:
                         if int(self.stop_soc) <= 0:
                             batt_level = self._call(["powershell.exe", "Add-Type -Assembly System.Windows.Forms; [Math]::round(([System.Windows.Forms.SystemInformation]::PowerStatus.BatteryLifePercent) * 100, 2)"], timeout=30)
@@ -869,7 +891,7 @@ class Scenario(unittest.TestCase):
             time.sleep(172800)  # 48 hours, just to keep the thread alive, we will stop it when the scenario ends.
         elif int(self.stop_soc) <= 0:
             self._kill("MonitorPowerEvents.exe")
-            logging.info("we are entering stop_soc set to 1")
+            logging.info("stop_soc set to 0")
             self._call([os.path.join(self.dut_exec_path, "MonitorPowerEvents.exe"),
                        "/stopsoc=1" + " /execpath=" + str(self.dut_exec_path) + "\\RTCWakeCore" + " /datapath=" + str(self.dut_data_path) + " /testname=" + str(self.testname) + " /triggerpercent=" + str(self.trigger_soc) + " /triggerscript=" + str(self.trigger_script)],
                         blocking=True, timeout=172800, expected_exit_code="")
@@ -2134,6 +2156,11 @@ class Scenario(unittest.TestCase):
                 self._call(["cmd.exe", '/c taskkill /IM MonitorPowerEvents.exe /T /F > null 2>&1'], expected_exit_code="")
             except:
                 pass
+            # try:
+            #     logging.debug("Killing HOBLStatusWindow.exe")
+            #     self._call(["cmd.exe", '/c taskkill /IM HOBLStatusWindow.exe /T /F > null 2>&1'], expected_exit_code="")
+            # except:
+            #     pass
 
     def _kill(self, names, force = True, timeout = 30):
         name_list = names if isinstance(names, list) else names.split()
@@ -2559,7 +2586,7 @@ class Scenario(unittest.TestCase):
         # Click the point
         x = (point[0] + x_adj) * self.dut_coord_scaler
         y = (point[1] + y_adj) * self.dut_coord_scaler
-        rpc.plugin_call(self.dut_ip, self.rpc_port, "InputInject", "Tap", int(x), int(y), delay, primary, self.current_screen, traceId, traceX, traceY, traceW, traceH, traceMs, traceFramerate)
+        rpc.plugin_call(self.dut_ip, self.rpc_port, "InputInject", "Tap", int(x), int(y), delay, primary, self.current_screen, self.cursor_movement_enable, traceId, traceX, traceY, traceW, traceH, traceMs, traceFramerate)
         # time.sleep(sleep/1000) # Sleep is handled by the plugin
         # return the point for use or recording
         return point
@@ -2598,7 +2625,7 @@ class Scenario(unittest.TestCase):
         # Move to the point
         x = (point[0] + x_adj) * self.dut_coord_scaler
         y = (point[1] + y_adj) * self.dut_coord_scaler
-        rpc.plugin_call(self.dut_ip, self.rpc_port, "InputInject", "MoveTo", int(x), int(y), self.current_screen)
+        rpc.plugin_call(self.dut_ip, self.rpc_port, "InputInject", "MoveTo", int(x), int(y), self.current_screen, self.cursor_movement_enable)
         # return the point for use or recording
         return point
     
@@ -2620,7 +2647,7 @@ class Scenario(unittest.TestCase):
         w_screen, h_screen = self._get_screen_size(self.current_screen)
         x = w_screen * x_frac * self.dut_coord_scaler
         y = h_screen * y_frac * self.dut_coord_scaler
-        rpc.plugin_call(self.dut_ip, self.rpc_port, "InputInject", "Scroll", int(x), int(y), 720, direction, self.current_screen, traceId, traceX, traceY, traceW, traceH, traceMs, traceFramerate)
+        rpc.plugin_call(self.dut_ip, self.rpc_port, "InputInject", "Scroll", int(x), int(y), 720, direction, self.current_screen, self.cursor_movement_enable, traceId, traceX, traceY, traceW, traceH, traceMs, traceFramerate)
 
     # Check for a template match in a screenshot. Returns True if the template is found, False if it is not
     def _check_by_template(self, template, capture_id=None, threshold=None, method=default_template_method, scale=default_scale, edge_detect_thresholds=[]):
@@ -3315,7 +3342,7 @@ class Scenario(unittest.TestCase):
             x = int(float(x_frac) * screen_width * self.dut_coord_scaler)
             y = int(float(y_frac) * screen_height * self.dut_coord_scaler)
             # Click the point
-            rpc.plugin_call(self.dut_ip, self.rpc_port, "InputInject", "Tap", int(x), int(y), 100, primary, self.current_screen, action["traceId"], action["traceX"], action["traceY"], action["traceW"], action["traceH"], action["traceMs"], action["traceFramerate"])
+            rpc.plugin_call(self.dut_ip, self.rpc_port, "InputInject", "Tap", int(x), int(y), 100, primary, self.current_screen, self.cursor_movement_enable, action["traceId"], action["traceX"], action["traceY"], action["traceW"], action["traceH"], action["traceMs"], action["traceFramerate"])
 
         # Find the template in the screenshot and move the mouse to it on the DUT
         elif action["type"] == "Move":
@@ -3621,10 +3648,15 @@ class Scenario(unittest.TestCase):
     def _check_local_exec_reboot(self):
         if self.dut_ip == "127.0.0.1" and self.platform.lower() == "windows":
             Params.setCalculated("local_execution_reboot", "1")
-            dashboard_url = Params.get('global', 'dashboard_url')
+            # prep_dashboard_url is the dashboard_url for the prep scenario handed down to the sub-prep scenarios.
+            real_dashboard_url = Params.get('global', 'dashboard_url')
+            prep_dashboard_url = Params.get('global', 'prep_dashboard_url')
+            dashboard_url = real_dashboard_url or prep_dashboard_url  # these should be mutually exclusive
 
             if dashboard_url != "":
+                # HOBL UI exection
                 dashboard_plan_id = Params.get('global', 'dashboard_plan_id')
+                dashboard_scenario_id = Params.get('global', 'dashboard_scenario_id')
 
                 url = urlunparse(
                     urlparse(dashboard_url)._replace(
@@ -3640,7 +3672,11 @@ class Scenario(unittest.TestCase):
                 # post_reboot_script = r"C:\hobl_bin\wait_and_resume_plan.ps1"
                 hobl_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
                 post_reboot_script = os.path.join(hobl_path, "utilities", "open_source", "wait_and_resume_plan.ps1")
-                post_reboot_call = f'powershell.exe -ExecutionPolicy Bypass -File "{post_reboot_script}" -PlanID {dashboard_plan_id} -ServerUrl "{base_url}"'
+
+                if prep_dashboard_url != None and prep_dashboard_url != "":
+                    post_reboot_call = f'powershell.exe -ExecutionPolicy Bypass -File "{post_reboot_script}" -PlanID {dashboard_plan_id} -ServerUrl "{base_url}" -ScenarioID {dashboard_scenario_id} -SetScenarioPending'
+                else:
+                    post_reboot_call = f'powershell.exe -ExecutionPolicy Bypass -File "{post_reboot_script}" -PlanID {dashboard_plan_id} -ServerUrl "{base_url}"'
                 
                 reg_cmd = f'reg.exe add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v LocalExec_PostReboot /t REG_SZ /d "{post_reboot_call}" /f'
                 self._call(["cmd.exe", "/c " + reg_cmd])
@@ -3664,7 +3700,7 @@ class Scenario(unittest.TestCase):
             self._call(["zsh", f'-c "echo {self.password} | sudo -S shutdown -r now"'])
         else:
             logging.error("Unsupported platform")
-        time.sleep(15)
+        time.sleep(30)
         self._wait_for_dut_comm()
 
     def _get_start_button(self, driver):
@@ -3779,6 +3815,12 @@ class Scenario(unittest.TestCase):
             csv_writter = csv.writer(eventsFile)
             csv_writter.writerow([tag, "{:.3f}".format(t_offset)])
 
+    def _status_window(self, message):
+        message = "[color=lime]" + message + "[/color]"
+        if self.platform.lower() == "windows":
+            self._call([os.path.join(self.dut_exec_path, "HOBLStatusWindow", "HOBLStatusWindow.exe"), message], blocking=False)
+        else:
+            pass
 
     # Deprecated function, kept for reference
     # def _call_input_inject(self, training_path, json_name, image_name, start_time, perf_mode=""):
@@ -3795,7 +3837,7 @@ class Scenario(unittest.TestCase):
         test_pass = False
         for line in lines:
             if "total battery" in line:
-                battery = int(line.split("total battery: ")[-1])
+                battery = int(line.split("total battery: ")[-1].strip())
                 if (battery <= int(self.crit_batt_level) + 1):
                     test_pass = True
         if (test_pass):
@@ -3813,7 +3855,7 @@ class Scenario(unittest.TestCase):
         last = None
         for line in lines:
             if "total battery" in line:
-                battery = int(line.split("total battery: ")[-1])
+                battery = int(line.split("total battery: ")[-1].strip())
                 if (battery <= lowest):
                     lowest = battery
                     prev_last = last

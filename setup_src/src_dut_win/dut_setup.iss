@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "dut_setup"
-#define MyAppVersion "2.2"
+#define MyAppVersion "2.3"
 #define MyAppPublisher "Microsoft"
 
 [Setup]
@@ -49,6 +49,7 @@ Source: "SimpleRemoteServer_win-x64.zip"; DestDir: "{tmp}\dut_setup\SimpleRemote
 Source: "SimpleRemoteServer_win-arm64.zip"; DestDir: "{tmp}\dut_setup\SimpleRemote"; Flags: ignoreversion
 Source: "..\..\utilities\third_party\PolicyFileEditor\*"; DestDir: "{tmp}\dut_setup\PolicyFileEditor"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\..\utilities\open_source\DesktopImages\*"; DestDir: "{tmp}\dut_setup\DesktopImages"; Flags: ignoreversion
+Source: "..\..\utilities\open_source\HOBLStatusWindow\bin\Release\net8.0-windows\*"; DestDir: "{tmp}\dut_setup\HOBLStatusWindow"; Flags: ignoreversion
 Source: "..\..\utilities\proprietary\WindowsApplicationDriver\*"; DestDir: "{tmp}\dut_setup\WindowsApplicationDriver"; Flags: ignoreversion
 Source: "..\..\utilities\open_source\InputInject\Output\InputInject_win*.zip"; DestDir: "{tmp}\dut_setup\InputInject"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\..\utilities\open_source\ScreenServer\Output\ScreenServer_win*.zip"; DestDir: "{tmp}\dut_setup\ScreenServer"; Flags: ignoreversion recursesubdirs createallsubdirs

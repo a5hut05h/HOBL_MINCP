@@ -199,13 +199,13 @@
                 "file_name": [
                     "image_UCHFX3.png"
                 ],
-                "h": "0.500",
+                "h": "0.600",
                 "id": "UCHFX3",
                 "recapture": true,
                 "type": "Capture",
                 "w": "1.000",
                 "x": "0.004",
-                "y": "0.500"
+                "y": "0.300"
             },
             {
                 "capture_id": "UCHFX3",

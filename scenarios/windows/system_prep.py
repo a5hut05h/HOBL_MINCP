@@ -15,7 +15,7 @@ import threading
 
 class SystemPrep(core.app_scenario.Scenario):
     '''
-    Preforms various tasks that prepare a device for testing.
+    Performs various tasks that prepare a device for testing.
     '''
     module = __module__.split('.')[-1]
     Params.setDefault(module, "hibernate_enabled", "1", desc="Enables or disables hibernation on the device", valOptions=["0", "1"])
@@ -26,24 +26,26 @@ class SystemPrep(core.app_scenario.Scenario):
     Params.setDefault(module, 'final_reboot', '1', desc="Sets if the device will reboot at the conclusion of daily_prep", valOptions=["0", "1"])
     Params.setDefault(module, 'bpm_pcc_blm_disable', '0', desc="Disable BPM, PCC, and BLM", valOptions=["0", "1"])
 
-    wallpaper = Params.get(module, 'wallpaper')
-
-    hibernate_enabled = int(Params.get(module, 'hibernate_enabled'))
-    telemetry_enabled = Params.get(module, 'telemetry_enabled')
-    # hdr_enabled = Params.get(module, 'hdr_enabled')
-    theme = Params.get(module, 'theme')
-    dut_architecture = Params.get('global', 'dut_architecture')
-    final_reboot = Params.get(module, 'final_reboot')
-    bpm_pcc_blm_disable = Params.get(module, 'bpm_pcc_blm_disable') == '1'
-    reboot_complete = False
-
     # Params.setOverride("global", "collection_enabled", "0")
     Params.setOverride("global", "prep_tools", "")
     is_prep = True
-
+    hide_ui = False
 
     def runTest(self):
         #logging.info("Setup")
+        self.wallpaper = Params.get(self.module, 'wallpaper')
+        self.hibernate_enabled = int(Params.get(self.module, 'hibernate_enabled'))
+        self.telemetry_enabled = Params.get(self.module, 'telemetry_enabled')
+        self.theme = Params.get(self.module, 'theme')
+        self.dut_architecture = Params.get('global', 'dut_architecture')
+        self.final_reboot = Params.get(self.module, 'final_reboot')
+        self.bpm_pcc_blm_disable = Params.get(self.module, 'bpm_pcc_blm_disable') == '1'
+
+        if self.final_reboot == "1":
+            self._status_window("Preparing device for automated testing.\nDevice will reboot when finished.")
+        else:
+            self._status_window("Preparing device for automated testing.")
+
         self._upload("utilities\\open_source\\system_prep.ps1", self.dut_exec_path)
         #logging.info("Initial Thread timeout - " + str(self.timeout / 60) + " min.")
         self._call(["powershell.exe", 'set-executionpolicy unrestricted -Force'], expected_exit_code="", fail_on_exception=False)
@@ -96,11 +98,6 @@ class SystemPrep(core.app_scenario.Scenario):
             # Disable PCC to prevent being limited to 80% charge
             self._call([smonitor_exe, "/battpccenable 1 0"], fail_on_exception=False, log_output=False, expected_exit_code="")
 
-            if self.bpm_pcc_blm_disable:
-                self._call([smonitor_exe, "/clearbpmstatus 1"],   fail_on_exception=False, log_output=False, expected_exit_code="")
-                self._call([smonitor_exe, "/battbpmdisable 0 1"], fail_on_exception=False, log_output=False, expected_exit_code="")
-                self._call([smonitor_exe, "/battpccenable 0 0"],  fail_on_exception=False, log_output=False, expected_exit_code="")
-                self._call([smonitor_exe, "/battblmdisable 1"],   fail_on_exception=False, log_output=False, expected_exit_code="")
         except:
             logging.warning("SMonitor call failed")
 
@@ -109,7 +106,7 @@ class SystemPrep(core.app_scenario.Scenario):
         result = self._call(["powershell.exe", 'Get-PolicyFileEntry -Path "$env:windir\\' + system_path + '\\GroupPolicy\\Machine\\registry.pol" -All'])
         if "AutoplayAllowed" not in result:
             raise Exception
-        self._call(["cmd.exe", '/C gpupdate /wait:1200'])
+        self._call(["cmd.exe", '/C gpupdate /wait:300'])
 
         if self.telemetry_enabled == "1":
             # Enable telemetry collected by Microsoft servers
@@ -160,6 +157,8 @@ class SystemPrep(core.app_scenario.Scenario):
         # Ensure DUT and host clocks are synced
         logging.info("Enabling auto time zone")
         self._call(["cmd.exe", '/C reg add "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\tzautoupdate" /v Start /t REG_DWORD /d 00000003 /f > null 2>&1'])
+        # Align time zone first; a mismatched TZ can prevent w32tm /resync from succeeding
+        self.syncTimeZone()
         logging.info("Checking for clock sync")
         resync_attempts = 0
         while resync_attempts < 3:
@@ -182,6 +181,34 @@ class SystemPrep(core.app_scenario.Scenario):
         else:
             logging.info("Unable to sync clocks")
             self.fail()
+
+    def syncTimeZone(self):
+        # Force the DUT's Windows time zone to match the host's so w32tm /resync can succeed
+        try:
+            host_tz = self._host_call("tzutil /g", expected_exit_code="", timeout=30)
+        except Exception as e:
+            logging.warning("Unable to read host time zone via tzutil /g: " + str(e))
+            return
+
+        host_tz = (host_tz or "").strip()
+        if not host_tz:
+            logging.warning("Host time zone came back empty; skipping DUT time zone sync")
+            return
+
+        logging.info("Host time zone: " + host_tz)
+        try:
+            dut_tz = self._call(["cmd.exe", "/C tzutil /g"]).strip()
+            logging.info("DUT time zone: " + dut_tz)
+        except Exception:
+            dut_tz = ""
+
+        if dut_tz and dut_tz.lower() == host_tz.lower():
+            logging.info("DUT time zone already matches host")
+            return
+
+        logging.info("Setting DUT time zone to " + host_tz)
+        # tzutil /s requires the ID to be quoted because names contain spaces
+        self._call(["cmd.exe", '/C tzutil /s "' + host_tz + '"'], expected_exit_code="")
 
     def tearDown(self):
         # Set polling rate for Surface power monitor chips (after all reboots have happened)

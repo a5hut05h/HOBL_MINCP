@@ -49,6 +49,7 @@ def _call_rpc(host, port, payload, log = True, timeout = 1800): # 1800
         if s:
             s.close()
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         connect_timeout = timeout
         if timeout > 5:
             connect_timeout = 5 * (i + 1)
@@ -57,30 +58,48 @@ def _call_rpc(host, port, payload, log = True, timeout = 1800): # 1800
         try:
             if log:
                 logging.debug(f"Attempting RPC connection to {host}:{port}, try {i+1}/3")
+                # print(f"Attempting RPC connection to {host}:{port}, try {i+1}/3")
             s.connect((host, port))
             break
+        except socket.timeout as e:
+            logging.debug("Socket timeout.")
+            if i == 2:
+                raise e
+            time.sleep(2)
         except OSError as e:
             if e.errno == errno.EISCONN:
                 if log:
                     logging.warning("Socket is already connected.")
+                    # print("Socket is already connected.")
             elif e.errno == errno.EALREADY:
                 if log:
                     logging.warning("Connection already in progress.")
+                    # print("Connection already in progress.")
             else:
                 if log:
                     logging.warning(f"RPC ERROR: {e} - {payload}")             
+                    # print(f"RPC ERROR: {e} - {payload}")      
+            if i == 2:
+                raise e
+            time.sleep(2)
+        except socket.error as e:
+            if log:
+                logging.warning(f"Socket ERROR: {e} - {payload}")             
+                # print(f"Socket ERROR: {e} - {payload}")      
             if i == 2:
                 raise e
             time.sleep(2)
         except:
             if log:
                 logging.error(f"RPC connection failed. payload {payload}")
-            pass
+                # print(f"RPC connection failed. payload {payload}")
+            raise
 
     # Convert to JSON and send
     request = json.dumps(payload)
     if log:
         logging.debug("sending RPC: " + str(request))
+        # print("sending RPC: " + str(request))
     s.sendall(request.encode('utf-8') + b'\r\n')
 
     # Loop retrieving port number until nothing more can be pulled from buffer
@@ -209,18 +228,6 @@ def plugin_call(host, port, dll_id, method, *arg):
     return result
 
 
-# def plugin_call(host, port, dll_id, method):
-#     # Store details in dictionary
-#     payload = {
-#         "method":"PluginCallMethod",
-#         "params": [dll_id, method],
-#         "jsonrpc": "2.0",
-#         "id": "1",
-#     }
-#     result = _call_rpc(host, port, payload)
-#     return result
-
-
 def plugin_screenshot(host, port, dll_id, x=0.0, y=0.0, w=1.0, h=1.0, screenIndex=0):
     # Store details in dictionary
     payload = {
@@ -240,7 +247,8 @@ def plugin_screenshot(host, port, dll_id, x=0.0, y=0.0, w=1.0, h=1.0, screenInde
         print(" ERROR Unexpected response from plugin_screenshot()")
         print(result_dict)
         return ""
-    
+
+
 def plugin_continuous_screenshot(host, port, dll_id, x=0, y=0, w=10, h=10, outputDir="", screenIndex=0, time_ms=1000, framerate=60):
     # Store details in dictionary
     payload = {
@@ -262,7 +270,8 @@ def plugin_continuous_screenshot(host, port, dll_id, x=0, y=0, w=10, h=10, outpu
         print(" ERROR Unexpected response from plugin_continuous_screenshot()")
         print(result_dict)
         return ""
-    
+
+
 def plugin_write_captures_to_disk(host, port, dll_id, capture_dir):
     payload = {
         "method":"PluginCallMethod",
@@ -279,7 +288,8 @@ def plugin_write_captures_to_disk(host, port, dll_id, capture_dir):
         print(" ERROR Unexpected response from plugin_write_capture_to_disk()")
         print(result_dict)
         return ""
-    
+
+
 def plugin_stop_performance_capture(host, port, dll_id):
     payload = {
         "method":"PluginCallMethod",
@@ -297,6 +307,7 @@ def plugin_stop_performance_capture(host, port, dll_id):
         print(result_dict)
         return ""
 
+
 def plugin_clear_captures(host, port, dll_id):
     payload = {
         "method":"PluginCallMethod",
@@ -311,6 +322,7 @@ def plugin_clear_captures(host, port, dll_id):
         return data
     else:
         return ""
+
 
 def plugin_screen_info(host, port, dll_id):
     # Store details in dictionary
@@ -365,36 +377,5 @@ if __name__ == "__main__":
     parser.add_argument('params', metavar='Message', nargs=argparse.REMAINDER, help='The parameters to the method, separated by space.')
     args = parser.parse_args()
 
-    # output = call_rpc(args.host, int(args.port), args.method, args.params)
-    # plugin_load(args.host, int(args.port), "InputInject", "InputInject.Application", "C:\\hobl_bin\\InputInject\\InputInject.dll")
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", "f", 400)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue015', 400)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue013', 400)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue00c', 400)
-    # plugin_call(args.host, int(args.port), "InputInject", "MoveTo", 5, 500)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", '\ue03dl', 100)
-    # plugin_call(args.host, int(args.port), "InputInject", "Type", 'l', 100)
-    # plugin_screen_info(args.host, int(args.port), "InputInject")
-    # plugin_call(args.host, int(args.port), "InputInject", "Tap", 1248, 832, 300, True, 0)
-    # plugin_call(args.host, int(args.port), "InputInject", "Tap", 1920, 1080, 300, True, 1)
-    # plugin_call(args.host, int(args.port), "InputInject", "Path", [1250, 1255, 1260, 1265, 1270, 1275], [830, 835, 830, 845, 830, 855], [200, 200, 200, 200, 200, 200], True, 0)
-    # plugin_call(args.host, int(args.port), "InputInject", "Path", [1250, 1275], [830, 855], [500, 500], True, 0)
-    # plugin_call(args.host, int(args.port), "InputInject", "Path", [1920, 2000], [1080, 1200], [500, 500], True, 1)
-    plugin_call(args.host, int(args.port), "InputInject", "MoveBy", 10, 10)
-
-    # img = plugin_screenshot(args.host, int(args.port), "InputInject", 0.0, 0.0, 1.0, 1.0, 0)
-    # with open("c:\\temp\\test.qoi", 'bw') as f:
-    #     f.write(img)
-    # bmp_bytes = qoi.decode(img)
-    # image = Image.fromarray(bmp_bytes)
-    # image.save("c:\\temp\\test_0.png")
-
-    # img = plugin_screenshot(args.host, int(args.port), "InputInject", 0.3, 0.0, 0.2, 1.0, 1)
-    # with open("c:\\temp\\test.qoi", 'bw') as f:
-    #     f.write(img)
-    # bmp_bytes = qoi.decode(img)
-    # image = Image.fromarray(bmp_bytes)
-    # image.save("c:\\temp\\test_1.png")
-
-
-    # print (output)
+    output = call_rpc(args.host, int(args.port), args.method, args.params)
+    print (output)

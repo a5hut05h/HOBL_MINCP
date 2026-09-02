@@ -172,39 +172,74 @@
         "type": "Delay"
     },
     {
+        "children": [],
+        "delay": "0.5",
+        "description": "YTV4N8",
+        "enabled": true,
+        "file_name": [
+            "image_YTV4N8.png"
+        ],
+        "h": "0.5",
+        "id": "YTV4N8",
+        "recapture": false,
+        "type": "Capture",
+        "w": "0.5",
+        "x": "0.5",
+        "y": "0"
+    },
+    {
+        "capture_id": "YTV4N8",
+        "children": [],
+        "delay": "2",
+        "description": "Leave Button",
+        "enabled": true,
+        "exception_on": "Never",
+        "file_name": [
+            "image_YTV4NA.png"
+        ],
+        "id": "YTV4NA",
+        "match_threshold": "",
+        "primary": true,
+        "type": "Click",
+        "x": "0.500",
+        "y": "0.556"
+    },
+    {
         "children": [
             {
                 "children": [],
                 "delay": "0.5",
-                "description": "YTV4N8",
+                "description": "Leave confirmation",
                 "enabled": true,
                 "file_name": [
-                    "image_YTV4N8.png"
+                    "image_1T1ETX0.png"
                 ],
-                "h": "0.5",
-                "id": "YTV4N8",
+                "h": "0.469",
+                "id": "1T1ETX0",
                 "recapture": false,
                 "type": "Capture",
-                "w": "1",
-                "x": "0",
-                "y": "0"
+                "w": "0.350",
+                "x": "0.650",
+                "y": "0.001"
             },
             {
-                "capture_id": "YTV4N8",
+                "capture_id": "1T1ETX0",
                 "children": [],
                 "delay": "2",
-                "description": "Leave Button",
+                "description": "Confirm to Leave Meeting Button",
                 "enabled": true,
                 "exception_on": "No match",
                 "file_name": [
-                    "image_YTV4NA.png"
+                    "image_1T1EWLE.png",
+                    "image_1T5MNJ6.png"
                 ],
-                "id": "YTV4NA",
+                "id": "1T1EWLE",
                 "match_threshold": "",
                 "primary": true,
+                "scale": "",
                 "type": "Click",
                 "x": "0.500",
-                "y": "0.556"
+                "y": "0.745"
             }
         ],
         "description": "",

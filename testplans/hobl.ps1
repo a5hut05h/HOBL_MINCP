@@ -3,7 +3,7 @@ if ($ARGS[0] -eq $null) {return("Params .ini not supplied, please supply a param
 .\hobl.cmd -p $ARGS[0] -s config_check
 .\hobl.cmd -p $ARGS[0] -s charge_off global:run_type=Misc global:post_run_delay=900
 
-.\hobl.cmd -p $ARGS[0] -s idle_desktop global:iterations=3 global:attempts=2 global:run_type=Power global:tools="+power_light"
+.\hobl.cmd -p $ARGS[0] -s idle_desktop global:iterations=3 global:attempts=2 global:run_type=Power global:tools="+power_light" pre_run_delay=60
 .\hobl.cmd -p $ARGS[0] -s cs_floor global:iterations=2 global:attempts=2 global:run_type=Power global:tools="+powercfg power_light"
 .\hobl.cmd -p $ARGS[0] -s abl_active global:iterations=3 global:attempts=2 global:run_type=Power global:tools="+power_light"
 .\hobl.cmd -p $ARGS[0] -s web global:iterations=3  global:run_type=Power global:tools="+power_light"
@@ -17,7 +17,7 @@ if ($ARGS[0] -eq $null) {return("Params .ini not supplied, please supply a param
 .\hobl.cmd -p $ARGS[0] -s teams2_1on1_audio global:iterations=3 global:attempts=2 global:run_type=Power global:tools="+power_light"
 .\hobl.cmd -p $ARGS[0] -s teams2_1on1_video global:iterations=3 global:attempts=2 global:run_type=Power global:tools="+power_light"
 .\hobl.cmd -p $ARGS[0] -s teams2_idle global:iterations=3 global:attempts=2 global:run_type=Power global:tools="+power_light"
-.\hobl.cmd -p $ARGS[0] -s idle_desktop global:iterations=1 global:run_type=Power global:tools="+power_light"
+.\hobl.cmd -p $ARGS[0] -s idle_desktop global:iterations=1 global:run_type=Power global:tools="+power_light" pre_run_delay=60
 .\hobl.cmd -p $ARGS[0] -s cs_floor global:iterations=1 global:run_type=Power global:tools="+powercfg power_light"
 .\hobl.cmd -p $ARGS[0] -s charge_on global:run_type=Misc
 .\hobl.cmd -p $ARGS[0] -s study_report global:run_type=Misc

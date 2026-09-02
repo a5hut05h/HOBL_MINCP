@@ -14,6 +14,7 @@ import os
 import requests
 from urllib.parse import urlparse, urlunparse
 import time
+import scenarios.windows.dut_setup as dut_setup
 
 import core.app_scenario
 from core.parameters import Params
@@ -32,6 +33,12 @@ class Prep(core.app_scenario.Scenario):
     Params.setOverride('global', 'collection_enabled', '0')
     Params.setOverride('global', 'post_run_delay', '0')  # Important to be fast in common case where no preps need to be run.
 
+    Params.setOverride("dut_setup", "reboot_prompt", "0")
+    Params.setOverride("dut_setup", "reboot", "0")
+    Params.setOverride("dut_setup", "run_cmd", "1")
+    Params.setOverride("dut_setup", "upload_path", "")
+    Params.setOverride("dut_setup", "target_path", "")
+
     common_preps      = Params.get('prep', 'common_preps').split()
     scenarios_to_prep = Params.get('prep', 'scenarios_to_prep').split()
     additional_preps  = Params.get('prep', 'additional_preps').split()
@@ -42,16 +49,23 @@ class Prep(core.app_scenario.Scenario):
     hobl_external = Params.get('global', 'hobl_external').split()
 
     is_prep = True
+    hide_ui = False
+    num_preps = 0 # excludes net_preps
 
     def get_prep_scenarios(self):
+        # Check if inserting net_preps are needed by checking if anything other than Wi-Fi is specified in the profile or overrides
+        net_prep_needed = False
+        if Params.get('global', 'platform').lower() == "windows" and Params.get('net_prep', 'connection') != "Wi-Fi":
+            net_prep_needed = True
+
         parent_modules = get_parent_modules(["scenarios"], ext_paths=self.hobl_external)
 
         prep_scenarios = []
 
         if Params.get('global', 'platform').lower() == "windows":
-            prep_scenarios.extend(
-                self.checkPrepStatusNew(self.common_preps)
-            )
+            if net_prep_needed:
+                prep_scenarios.append("net_prep_wifi")
+            prep_scenarios.extend(self.checkPrepStatusNew(self.common_preps))
 
         for scenario in self.scenarios_to_prep:
             for parent_module in parent_modules:
@@ -72,6 +86,9 @@ class Prep(core.app_scenario.Scenario):
 
         prep_scenarios.extend(self.additional_preps)
 
+        if net_prep_needed:
+            prep_scenarios.append("net_prep")
+
         unique_prep_scenarios = []
         for p in prep_scenarios:
             if p not in unique_prep_scenarios:
@@ -86,22 +103,23 @@ class Prep(core.app_scenario.Scenario):
         if self.scenarios_to_prep == ["comm_check"]:
             logging.info("comm_check specified, skipping prep scenarios and running comm check only.")
             return
-        
-        self.checkLocalExecution()
 
         prep_scenarios = self.get_prep_scenarios()
-
-        if len(prep_scenarios) == 0:
+        self.num_preps = sum(1 for p in prep_scenarios if p not in ["net_prep_wifi", "net_prep"])
+        if self.num_preps == 0:  # If only net_prep_wifi and net_prep are in the list, then no other preps to run.
             logging.info("No preps to run")
-        else:
-            for p in prep_scenarios:
-                if isinstance(p, tuple):
-                    if isinstance(p[1], list):
-                        logging.info(f"Running Prep: {p[0]} version = file dependencies")
-                    else:
-                        logging.info(f"Running Prep: {p[0]} version = {p[1]}")
+            return
+
+        # self.checkLocalExecution()
+
+        for p in prep_scenarios:
+            if isinstance(p, tuple):
+                if isinstance(p[1], list):
+                    logging.info(f"Running Prep: {p[0]} version = file dependencies")
                 else:
-                    logging.info(f"Running Prep: {p}")
+                    logging.info(f"Running Prep: {p[0]} version = {p[1]}")
+            else:
+                logging.info(f"Running Prep: {p}")
 
         failing_scenario = None
 
@@ -118,14 +136,19 @@ class Prep(core.app_scenario.Scenario):
                 f"global:result_dir_complete={self.run_dir}",
                 "global:prep_run_only=1",
                 "global:attempts=2",
-                "global:post_run_delay=0"
+                "global:post_run_delay=0",
+                "global:dashboard_plan_id=" + Params.get('global', 'dashboard_plan_id'),
+                "global:dashboard_scenario_id=" + Params.get('global', 'dashboard_scenario_id'),
+                "global:prep_dashboard_url=" + Params.get('global', 'dashboard_url'), # Used in app_scenario in case of reboot.  We don't want to pass the real dashboard_url to these sub-preps because it is used in many places for updating the UI.
+                "global:preserve_status_window=1", # This will keep the StatusWindow open for preps spawned by the prep scenario.  When prep itself completes, the window will be dismissed.
+                "global:check_ui=1" # This instructs the scenario to respect the "hide_ui" flag even though no dashboard_url is present.
             ])
 
             if result.returncode != 0 and not failing_scenario:
                 failing_scenario = s
             time.sleep(10)
 
-        self.postLocalExecution()
+        # self.postLocalExecution()
 
         # Delete to prevent this scenario from copying over the last prep data files during teardown
         self._remote_make_dir(self.dut_data_path, True)
@@ -138,6 +161,9 @@ class Prep(core.app_scenario.Scenario):
 
     def kill(self):
         prep_scenarios = self.get_prep_scenarios()
+
+        if len(prep_scenarios) <= 2:  # If only net_prep_wifi and net_prep are in the list, then no other preps to run.
+            return
 
         for p in prep_scenarios:
             if isinstance(p, tuple):
@@ -153,60 +179,70 @@ class Prep(core.app_scenario.Scenario):
 
         return 0
 
-    def checkLocalExecution(self):
-        # Checks if it's local execution and will pause plan if neccessary and set registry to run prep scenario again after reboot.
-        if self.dut_ip == "127.0.0.1" and self.platform.lower() == "windows":
-            dashboard_url = Params.get('global', 'dashboard_url')
-            hobl_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
+    def updateDutSetup(self):
+        # Check the current dut_setup.cmd version and compare with version on DUT.  If not the same, then run the dut_setup scenario.
+        if self.platform.lower() == "windows":
+            dut_version = self._getDutSetupVersionOfDut()
+            host_version = self._getDutSetupVersionOfHost()
+            if dut_version != host_version:
+                ds = dut_setup.DutSetup()
+                ds.runTest()
 
-            if dashboard_url == "":
-                hobl_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
-                #combine sys.argv into a string 
-                arguments = " ".join(sys.argv[1:])
-                post_reboot_call = os.path.join(hobl_path, "hobl.cmd") + " " + arguments
 
-                # Write to RunOnce registry to execute after reboot
-                reg_cmd = f'reg.exe add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v LocalExec_PostReboot /t REG_SZ /d "{post_reboot_call}" /f'
-                self._call(["cmd.exe", "/c " + reg_cmd])
-            else:
-                # if were running server then we need to "trick" server into setting prep.py to pending/pending so when it reboots it will run prep again. 
-                dashboard_plan_id = Params.get('global', 'dashboard_plan_id')
-                dashboard_scenario_id = Params.get('global', 'dashboard_scenario_id')
+    # def checkLocalExecution(self):
+    #     # Checks if it's local execution and will pause plan if neccessary and set registry to run prep scenario again after reboot.
+    #     if self.dut_ip == "127.0.0.1" and self.platform.lower() == "windows":
+    #         dashboard_url = Params.get('global', 'dashboard_url')
+    #         hobl_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
 
-                url = urlunparse(
-                    urlparse(dashboard_url)._replace(
-                        path='/plan/PausePlan',
-                        query=f"PlanIDs={dashboard_plan_id}"
-                    )
-                )
+    #         if dashboard_url == "":
+    #             hobl_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
+    #             #combine sys.argv into a string 
+    #             arguments = " ".join(sys.argv[1:])
+    #             post_reboot_call = os.path.join(hobl_path, "hobl.cmd") + " " + arguments
 
-                requests.get(url, allow_redirects=False)
+    #             # Write to RunOnce registry to execute after reboot
+    #             reg_cmd = f'reg.exe add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v LocalExec_PostReboot /t REG_SZ /d "{post_reboot_call}" /f'
+    #             self._call(["cmd.exe", "/c " + reg_cmd])
+    #         else:
+    #             # if were running server then we need to "trick" server into setting prep.py to pending/pending so when it reboots it will run prep again. 
+    #             dashboard_plan_id = Params.get('global', 'dashboard_plan_id')
+    #             dashboard_scenario_id = Params.get('global', 'dashboard_scenario_id')
 
-                # Build the post-reboot command to run the wait_and_resume_plan.ps1 script
-                base_url = urlunparse(urlparse(dashboard_url)._replace(path='',query='', fragment=''))
+    #             url = urlunparse(
+    #                 urlparse(dashboard_url)._replace(
+    #                     path='/plan/PausePlan',
+    #                     query=f"PlanIDs={dashboard_plan_id}"
+    #                 )
+    #             )
 
-                # post_reboot_script = r"C:\hobl_bin\wait_and_resume_plan.ps1"
-                post_reboot_script = os.path.join(hobl_path, "utilities", "open_source", "wait_and_resume_plan.ps1")
-                post_reboot_call = f'powershell.exe -ExecutionPolicy Bypass -File "{post_reboot_script}" -PlanID {dashboard_plan_id} -ServerUrl "{base_url}" -ScenarioID {dashboard_scenario_id} -SetScenarioPending'
+    #             requests.get(url, allow_redirects=False)
+
+    #             # Build the post-reboot command to run the wait_and_resume_plan.ps1 script
+    #             base_url = urlunparse(urlparse(dashboard_url)._replace(path='',query='', fragment=''))
+
+    #             # post_reboot_script = r"C:\hobl_bin\wait_and_resume_plan.ps1"
+    #             post_reboot_script = os.path.join(hobl_path, "utilities", "open_source", "wait_and_resume_plan.ps1")
+    #             post_reboot_call = f'powershell.exe -ExecutionPolicy Bypass -File "{post_reboot_script}" -PlanID {dashboard_plan_id} -ServerUrl "{base_url}" -ScenarioID {dashboard_scenario_id} -SetScenarioPending'
                 
-                reg_cmd = f'reg.exe add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v LocalExec_PostReboot /t REG_SZ /d "{post_reboot_call}" /f'
-                self._call(["cmd.exe", "/c " + reg_cmd])
-                logging.info(f"Set RunOnce registry to resume plan {dashboard_plan_id} after reboot")
+    #             reg_cmd = f'reg.exe add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v LocalExec_PostReboot /t REG_SZ /d "{post_reboot_call}" /f'
+    #             self._call(["cmd.exe", "/c " + reg_cmd])
+    #             logging.info(f"Set RunOnce registry to resume plan {dashboard_plan_id} after reboot")
 
-    def postLocalExecution(self):  
-        # Post local execution check to see if need to unpause plan and delete registry key as prep has fully finished now.
-        # Remove registry to run scenario again if we rebooted for local execution
-        if self.dut_ip == "127.0.0.1" and self.platform.lower() == "windows":
-            dashboard_url = Params.get('global', 'dashboard_url')
-            dashboard_plan_id = Params.get('global', 'dashboard_plan_id')
-            logging.info("Unpausing plan if paused from prep. Also deleting reg key")
-            url = urlunparse(
-                    urlparse(dashboard_url)._replace(
-                        path='plan/ResumePlan',
-                        query=f"PlanIDs={dashboard_plan_id}"
-                    )
-                )
+    # def postLocalExecution(self):  
+    #     # Post local execution check to see if need to unpause plan and delete registry key as prep has fully finished now.
+    #     # Remove registry to run scenario again if we rebooted for local execution
+    #     if self.dut_ip == "127.0.0.1" and self.platform.lower() == "windows":
+    #         dashboard_url = Params.get('global', 'dashboard_url')
+    #         dashboard_plan_id = Params.get('global', 'dashboard_plan_id')
+    #         logging.info("Unpausing plan if paused from prep. Also deleting reg key")
+    #         url = urlunparse(
+    #                 urlparse(dashboard_url)._replace(
+    #                     path='plan/ResumePlan',
+    #                     query=f"PlanIDs={dashboard_plan_id}"
+    #                 )
+    #             )
 
-            requests.get(url, allow_redirects=False)
-            reg_cmd = f'reg.exe DELETE "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v LocalExec_PostReboot /f'
-            self._call(["cmd.exe", "/c " + reg_cmd])
+    #         requests.get(url, allow_redirects=False)
+    #         reg_cmd = f'reg.exe DELETE "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce" /v LocalExec_PostReboot /f'
+    #         self._call(["cmd.exe", "/c " + reg_cmd])

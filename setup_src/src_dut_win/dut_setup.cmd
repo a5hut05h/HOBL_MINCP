@@ -1,4 +1,4 @@
-set dut_setup_version=2.2
+set dut_setup_version=2.3
 
 REM Copyright (c) Microsoft. All rights reserved.
 REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
@@ -212,6 +212,8 @@ REM reg add %this_reg% /v AutoAdminlogon /t REG_SZ /d 1 /f > null 2>&1
 
 echo Copy DeskTopImages to dut hobl_bin folder
 robocopy %usb_drive%\%dut_setup_folder%\DeskTopImages %hobl_bin_path%\DesktopImages /S /E
+echo Copy HOBLStatusWindow to dut hobl_bin folder
+robocopy %usb_drive%\%dut_setup_folder%\HOBLStatusWindow %hobl_bin_path%\HOBLStatusWindow /S /E
 echo Copy WindowsApplicationDrivers to dut hobl_bin folder
 robocopy %usb_drive%\%dut_setup_folder%\WindowsApplicationDriver %hobl_bin_path%\WindowsApplicationDriver /S /E
 @REM if "!dut_architecture!" EQU "arm64" (
@@ -400,10 +402,14 @@ if "!dut_architecture!" EQU "arm64" (
 )
 
 pwsh.exe -ExecutionPolicy Bypass -NoProfile %usb_drive%\%dut_setup_folder%\simple_remote_setup.ps1 -cmd_string !this_string! 
+netsh advfirewall firewall delete rule name="SimpleRemoteConsole TCP"
 netsh.exe advfirewall firewall add rule name="SimpleRemoteConsole TCP" program=!this_srs! dir=in action=allow enable=yes localport=any protocol=TCP profile=public,private,domain
+netsh advfirewall firewall delete rule name="SimpleRemoteConsole UDP"
 netsh.exe advfirewall firewall add rule name="SimpleRemoteConsole UDP" program=!this_srs! dir=in action=allow enable=yes localport=any protocol=UDP profile=public,private,domain
 
+netsh advfirewall firewall delete rule name="Allow 4723,17556,5901,8020"
 netsh.exe advfirewall firewall add rule name="Allow 4723,17556,5901,8020" dir=in action=allow enable=yes localport=4723,17556,5901,8020 protocol=TCP profile=public,private,domain
+netsh advfirewall firewall delete rule name="Allow ICMPv4"
 netsh.exe advfirewall firewall add rule name="Allow ICMPv4" dir=in action=allow enable=yes protocol=icmpv4:8,any profile=public,private,domain
 
 if "%test_signing%" EQU "1" (
