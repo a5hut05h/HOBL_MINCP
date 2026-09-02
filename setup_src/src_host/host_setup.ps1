@@ -9,7 +9,7 @@ param(
 )
 
 # HOBL UI and Dut Setup versions
-$hobl_ui_version = "1.5"
+$hobl_ui_version = "1.6"
 # Set $dut_setup_version to value at top of setup_src\src_dut_win\dut_setup.cmd
 $dut_setup_cmd = "$PSScriptRoot\..\src_dut_win\dut_setup.cmd"
 if (Test-Path $dut_setup_cmd) {
@@ -192,6 +192,8 @@ if ($local) {
 ##
 
 if ($ui) {
+    # SQL Server requires storage sector size to be 4K or less.  This might require a reboot to take effect.
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\stornvme\Parameters\Device" /v "ForcedPhysicalSectorSizeInBytes" /t REG_MULTI_SZ /d "* 4096" /f
 
     # Backup existing appsettings.json and delete existing hoblweb folder
     if (test-path c:\hoblweb) {
