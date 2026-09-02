@@ -11,11 +11,10 @@
 * For questions or issues, send mail to [HOBLsupport@microsoft.com](mailto:HOBLsupport@microsoft.com).  Attach the hobl.log file and relevant screen shots for any problematic test run.
 
 ### Quick Start for Local Web Browsing Battery Life Testing
-* Running locally (meaning HOBL is executing on the device directly with no host) should be limited to short term, one-off testing.  For long-term repeated testing, it's highly recommended to [set up](docs/support/docs/HOBL_Setup.md) a dedicated HOBL Host computer on a private network.
-* For official results, adjust the screen brightness to 150 nits, set Wi-Fi AP to 50 Mbps per client on 5 Ghz, and out-of-box audio volume.  Detailed instructions [here](docs/support/docs/HOBL_Setup.md#lab-setup).
-* Download the [latest code](https://github.com/microsoft/HOBL/archive/refs/heads/main.zip) to the test device (DUT), unzip it to `c:\`, and rename the folder `hobl`.
-* Run `local_setup.exe`, located in the `c:\hobl` folder.  Select both options.
-* The HOBL UI will open with a `Default` profile that is set up for local rundown testing.
+* Running locally (meaning HOBL is executing on the device directly with no host) can be useful for short term, one-off testing.  For long-term repeated testing, it's highly recommended to [set up](docs/support/docs/HOBL_Setup.md) a dedicated HOBL Host computer on a private network.
+* For official results, adjust the screen brightness to 150 nits, set Wi-Fi AP to 50 Mbps per client on 5 Ghz, and out-of-box audio volume.  Detailed instructions [here](docs/support/docs/HOBL_Setup.md#lab-setup).  For quick results, a free app for iPhone and Android called, "Screen Brightness Nits Meter" seems to do reasonably well for measuring screen brightness (be sure to set a white background for measurement).
+* Download the [HOBL Installer](https://github.com/microsoft/HOBL/releases/download/hobl_installer/hobl_installer.exe) to the test device (DUT) and execute it.  Select the "Local setup" option.
+* After installation, the HOBL UI will open with a `Default` profile that is set up for local rundown testing.
 * With the profile selected, select `Web Rundown` from the Quick Launch menu, which can be found either by right-clicking on the profile, or opening the arrow on the `Launch Job` button on the top-right of the window.
 * The `rundown_web` test plan will execute and does the following:
   * The `prep` scenario will run some scenarios to prepare the system for web testing.  This includes freshly installing the latest Edge.  Details on system prep can be found [here](docs/support/docs/HOBL_Prep.md).
@@ -26,9 +25,12 @@
   * The `web` scenario does the actual web browsing, opening 12 different web sites across 7 tabs and interacting with them.  It will loop continually until the device goes into hibernate.  The plan also specifies a screen shot tool that will take screen shots every hour.  This can be helpful to review and make sure pages loaded properly.
   * `charge_on` will again turn on the charger after the rundown, or prompt you to.
   * `study_report` will roll up the results of multiple runs into a single Excel report generated from a template.  A basic template is used by default.  The report will be saved to the specified result directory of the study.
+* If you need to stop the rundown:
+  * If the HOBL UI is up, click the "Stop Plan" button on the top.
+  * If the "web" scenario is running, close the browser and wait a few minutes.  It will detect that it can't navigate the browser, FAIL the test accordingly, and bring up the HOBL UI.
 * At the end of the rundown the device will go into hibernate.  Manually reconnect the charger and after about 2 minutes press the power button to bring the device back online.  The device needs to remain in hibernate for at least 2 minutes for it to be detected properly.
-* Let the test execution continue.  After a couple minutes the browser should close and the HOB UI will open showing the plan execution.
-* When the plan is completed, you can view detailed result files of the `web` scenario you by clicking on the blue `RunDir` link on that line.  Or, to view a summmary of all runs click the `Result Summary` button at the top.
+* Let the test execution continue.  After a couple minutes the browser should close and the HOB UI will open showing the executing test plan.
+* When the plan is completed, you can view detailed result files of the `web` scenario you by clicking on the blue `RunDir` link on that line.  Or, to view a summmary of all runs click the `Result Summary` button at the top.  Look for the "Metric > Full Run Duration" for the measured battery life.
 
 ### Quick Start for experienced HOBL users (novice users please read full [Setup](docs/support/docs/HOBL_Setup.md) instructions)
 * Make sure Git for Windows is installed on HOBL Host.

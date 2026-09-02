@@ -175,6 +175,17 @@ Local camera and mic are on, other 9 participants are bots sending video and aud
 
 `perf_run` -  **Default:** `0`  **Options:** `0, 1`
 
+## net_prep_wifi
+
+Set device routing table to prefer Wi-Fi connection between DUT and HOBL Host, to ensure that prep scenarios do not run over cellular.
+
+
+<u>Parameters:</u>
+
+`net_prep_enabled` -  **Default:** `1` 
+
+`connection` -  **Default:** `Wi-Fi` 
+
 ## perf_stress
 
 Install pyenv + Python + numpy/psutil on DUT for percentile_stress.py
@@ -286,7 +297,7 @@ Puts the device into standby mode, still conneccted to the network.
 
 ## system_prep
 
-Preforms various tasks that prepare a device for testing.
+Performs various tasks that prepare a device for testing.
 
 
 <u>Parameters:</u>

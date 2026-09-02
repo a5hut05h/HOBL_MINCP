@@ -27,7 +27,7 @@ import os
 
 parser = argparse.ArgumentParser(description='This is a client for testing the callback server. Call this function followed by the command you want to send.')
 parser.add_argument('-host', nargs='?', default='localhost', help="The host IP for the server to listen on. Defaults to localhost.")
-parser.add_argument('-port', nargs='?', default=9999, help="The port number for the server to listen on. Defaults to 9999.")
+parser.add_argument('-port', nargs='?', default=4771, help="The port number for the server to listen on. Defaults to 4771.")
 parser.add_argument('-timeout', nargs='?', type=float, default=900.0, help="Max seconds to wait for the server's reply (bounds connect + reply). Long-running commands like Calibrate_Device may need the full window; quick commands reply immediately. Defaults to 900.")
 parser.add_argument('message', metavar='Message', nargs=argparse.REMAINDER, help='This is the command that you would like to send.')
 

@@ -14,16 +14,16 @@ from core.parameters import Params
 import shutil
 
 class NetPrep(core.app_scenario.Scenario):
-    module = __module__.split('.')[-1]
-
     # Override collection of config data, traces, and execution of callbacks 
     # Params.setOverride('global', 'collection_enabled', '0')
     Params.setOverride('global', 'prep_tools', '')
 
     # Set default parameters
-    Params.setDefault(module, 'connection', 'Wi-Fi')  # Wi-Fi, Cellular, or Ethernet
+    Params.setDefault("net_prep", 'net_prep_enabled', '1')  # Enable or disable NetPrep
+    Params.setDefault("net_prep", 'connection', 'Wi-Fi')  # Wi-Fi, Cellular, or Ethernet
 
     is_prep = True
+    hide_ui = False
 
     def runTest(self):
 
@@ -38,7 +38,12 @@ class NetPrep(core.app_scenario.Scenario):
         # arm64 sysnative   sysnative (because powerhsell is 32b program on 64b OS)
 
         # Get parameters
-        connection = Params.get(self.module, 'connection')
+        enabled = (Params.get("net_prep", 'net_prep_enabled') == '1')
+        if not enabled:
+            logging.info("NetPrep is disabled.")
+            return
+        connection = Params.get("net_prep", 'connection')
+        self._status_window(f"Preparing network for {connection} connection.")
         host_ip = Params.get('global', 'host_ip')
 
         system_path = "System32"

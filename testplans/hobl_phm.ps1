@@ -4,7 +4,7 @@ if ($ARGS[0] -eq $null) {return("Params .ini not supplied, please supply a param
 .\hobl.cmd -p $ARGS[0] -s charge_off global:run_type=Misc global:post_run_delay=300
 
 .\hobl.cmd -p $ARGS[0] -s phm_prep global:run_type=Prep
-.\hobl.cmd -p $ARGS[0] -s idle_desktop global:tools="+phm" global:run_type=PHM
+.\hobl.cmd -p $ARGS[0] -s idle_desktop global:tools="+phm" global:run_type=PHM pre_run_delay=60
 .\hobl.cmd -p $ARGS[0] -s cs_floor global:tools="+phm powercfg" global:run_type=PHM
 
 .\hobl.cmd -p $ARGS[0] -s abl_active global:tools="+phm" global:run_type=PHM
