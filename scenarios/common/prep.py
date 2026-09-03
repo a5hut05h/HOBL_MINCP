@@ -104,6 +104,9 @@ class Prep(core.app_scenario.Scenario):
             logging.info("comm_check specified, skipping prep scenarios and running comm check only.")
             return
 
+        # See if dut_setup needs to be updated.
+        self.updateDutSetup()
+
         prep_scenarios = self.get_prep_scenarios()
         self.num_preps = sum(1 for p in prep_scenarios if p not in ["net_prep_wifi", "net_prep"])
         if self.num_preps == 0:  # If only net_prep_wifi and net_prep are in the list, then no other preps to run.
@@ -185,6 +188,7 @@ class Prep(core.app_scenario.Scenario):
             dut_version = self._getDutSetupVersionOfDut()
             host_version = self._getDutSetupVersionOfHost()
             if dut_version != host_version:
+                logging.info(f"Updating dut_setup.cmd on DUT from version {dut_version} to {host_version}")
                 ds = dut_setup.DutSetup()
                 ds.runTest()
 
