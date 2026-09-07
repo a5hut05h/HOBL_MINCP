@@ -54,6 +54,33 @@ function checkCmd {
     }
 }
 
+function downloadAndInstallDotNet {
+    param(
+        [string]$runtimeVersion,
+        [string]$architecture
+    )
+
+    $downloadUrl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/$runtimeVersion/windowsdesktop-runtime-$runtimeVersion-win-$architecture.exe"
+
+    # Create downloads directory structure if it doesn't exist
+    New-Item -ItemType Directory -Force -Path "$PSScriptRoot\..\..\downloads\setup\assets" > $null
+
+    # Download .NET Windows Desktop Runtime installers
+    $runtimeFilePath = "$PSScriptRoot\..\..\downloads\setup\assets\windowsdesktop-runtime-$runtimeVersion-win-$architecture.exe"
+    if (-not (Test-Path $runtimeFilePath)) {
+        "-- Downloading .NET Windows Desktop Runtime $runtimeVersion" | log
+        "-- Download URL: $downloadUrl" | log
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $runtimeFilePath 2>&1 | log
+        checkCmd($?)
+        "-- Installing .NET Windows Desktop Runtime $runtimeVersion" | log
+        & "$runtimeFilePath" /quiet 2>&1 | log
+        # check($lastexitcode)
+    } else {
+        "   $runtimeFilePath already exists, skipping download" | log
+    }
+
+}
+
 New-Item -ItemType Directory -Force -Path c:\temp > $null
 New-Item -ItemType Directory -Force -Path c:\hobl_results > $null
 
@@ -63,11 +90,12 @@ Set-Content -Path $logFile -encoding utf8 "-- HOBL Install started"
 "Install local: $local" | log
 
 # Validate args
-if ($framework -eq $false -and $ui -eq $false) {
-    "No components specifed. Aborting." | log
+if ($framework -eq $false -and $ui -eq $false -and $local -eq $false) {
+    "No components specified. Aborting." | log
     "`nYou must specify at least one of: " | log
     "  -framework" | log
     "  -ui" | log
+    "  -local" | log
     exit 1
 }
 
@@ -111,28 +139,12 @@ if ($ui) {
 ##
 
 if ($framework) {
-
-    $runtimeVersion = "8.0.29"
-    $runtimeX64DownloadUrl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/$runtimeVersion/windowsdesktop-runtime-$runtimeVersion-win-x86.exe"
-    $vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.x86.exe"
-
-    # Create downloads directory structure if it doesn't exist
-    New-Item -ItemType Directory -Force -Path "$PSScriptRoot\..\..\downloads\setup\assets" > $null
-
-    # Download .NET Windows Desktop Runtime installers
-    $runtimeFilePath = "$PSScriptRoot\..\..\downloads\setup\assets\windowsdesktop-runtime-$runtimeVersion-win-x86.exe"
-    if (-not (Test-Path $runtimeFilePath)) {
-        "-- Downloading .NET Windows Desktop Runtime $runtimeVersion" | log
-        Invoke-WebRequest -Uri $runtimeX64DownloadUrl -OutFile $runtimeFilePath 2>&1 | log
-        checkCmd($?)
-        "-- Installing .NET Windows Desktop Runtime $runtimeVersion" | log
-        & "$runtimeFilePath" /quiet 2>&1 | log
-        # check($lastexitcode)
-    } else {
-        "   $runtimeFilePath already exists, skipping download" | log
-    }
+    # Download and install .NET runtimes
+    downloadAndInstallDotNet -runtimeVersion "8.0.29" -architecture "x86"
+    downloadAndInstallDotNet -runtimeVersion "10.0.11" -architecture "x64"
 
     # Download Visual C++ Redistributable
+    $vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.x86.exe"
     $vcRedistPath = "$PSScriptRoot\..\..\downloads\setup\assets\vc_redist.x86.exe"
     if (-not (Test-Path $vcRedistPath)) {
         "-- Downloading Visual C++ Redistributable" | log
