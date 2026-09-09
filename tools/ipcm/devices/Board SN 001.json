@@ -1,0 +1,98 @@
+[
+{
+    "ChannelName":"MEM_V1P8",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x20",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"MEM_VDD2",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x20",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"VDDQ_LP5",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x20",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"VDD2_CPU",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x20",
+    "DeviceIndex":3
+},
+{
+    "ChannelName":"VCCPRIM_1P8",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x22",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"V3P3S_SSD",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x22",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"V3P3SX",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x22",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"V5P0SX",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x22",
+    "DeviceIndex":3
+},
+{
+    "ChannelName":"VCCIN_AUX",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x28",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"VCORE_VSYS",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x28",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"VGT_VSYS",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x28",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"V3P3A",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x28",
+    "DeviceIndex":3
+},
+{
+    "ChannelName":"VBAT",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x30",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"V1P8A",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x30",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"V3P3A",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x30",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"V5P0A",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x30",
+    "DeviceIndex":3
+}
+]

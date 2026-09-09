@@ -1,0 +1,32 @@
+[
+  {
+    "ConfigSection": "LastTimeDevices",
+    "ConnectionMode": "FT2232H",
+    "LastTimeCoreConfFile": "devices\\Board SN 001_FBVDDQIN.json",
+    "LastTimeIoConfFile": "",
+    "ChannelBitmap": "8589934591",
+    "ChannelColors": "FF;FF00;FFFF;FF0000;FF00FF;FFFF00;D8;CC00;CCD8;BF0000;BF00D8;BFCC00;B8;A300;A3B8;8F0000;8F00B8;8FA300;9C;8200;829C;6B0000;6B009C;6B8200;85;6800;6885;500000;500085;506800;71;5300;5371;3C0000;3C0071;3C5300;60;4200;4260;2D0000;2D0060;2D4200;51;3500;3551;220000;220051;223500;45;2A00;2A45;190000;190045;192A00;3B;2200;223B;130000;13003B;132200;32;1B00;1B32;E0000;"
+  },
+  {
+    "ConfigSection": "IpcmSettings",
+    "DeviceConfigCachePath": "devices",
+    "LogPath": "C:\\hobl_results\\Power\\consumer_multitasker_057\\IPCM",
+    "IndependentTimestamp": "True",
+    "FilenamePrefix1": "ipcmview-log-",
+    "FilenamePrefix2": "",
+    "FilenameSuffix": "",
+    "EnableLog": "True",
+    "EnableBidirectional": "True",
+    "EnablePieChart": "False",
+    "RestoreChannelColor": "False",
+    "DataQueueLength": "200",
+    "AutoStopDuration": "30",
+    "SamplePeriod": "500"
+  },
+  {
+    "ConfigSection": "AzureSettings",
+    "ConnectionString": "",
+    "ContainerName": "whlcalibrationdata",
+    "RemoteDir": ""
+  }
+]

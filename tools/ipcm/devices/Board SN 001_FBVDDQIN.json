@@ -1,0 +1,200 @@
+[
+{
+    "ChannelName":"VDDCR_SR_VSYS",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x2E",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"VDDCR_SOC_VSYS",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x2E",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"V3P3A_EC",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x2E",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"VGA_CORE_IN_VSYS",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x2E",
+    "DeviceIndex":3
+},
+{
+    "ChannelName":"1.8VS_AUD",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x20",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"V5P0SX_FAN1",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x20",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"3V3_1V8_AUDIO",
+    "Resistor":"0x186A0",
+    "I2CSlave":"0x20",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"PVDD_AUDIO",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x20",
+    "DeviceIndex":3
+},
+{
+    "ChannelName":"V3P3_IR_VCC",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x26",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"V3P3S_SSD1",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x26",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"V12_Fan",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x26",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"V1P2_DDS",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x28",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"V3P3S_SSD2",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x28",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"5VS_AUDIO",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x28",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"V3P3_DISPLAY_CONN",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x28",
+    "DeviceIndex":3
+},
+{
+    "ChannelName":"MEM_VDD2L",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x22",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"MEM_RT",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x22",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"V0P78SX",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x22",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"V1P05U_VDDQ",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x22",
+    "DeviceIndex":3
+},
+{
+    "ChannelName":"V3P3SX_EDP_MUX",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x2A",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"VBATA_BKLT_IN",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x2A",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"V3P3_CAM_CONN",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x2A",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"CHG_ACP",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x2A",
+    "DeviceIndex":3
+},
+{
+    "ChannelName":"V0P75A",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x30",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"VDDCR_CPU_VSYS",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x30",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"VBAT",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x30",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"V1P8_AON",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x24",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"V1P1SX",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x24",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"PEX_VDD",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x24",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"V3P3_WLAN",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x2C",
+    "DeviceIndex":0
+},
+{
+    "ChannelName":"FBVDDQ_IN_VGA_CORE_IN",
+    "Resistor":"0x1388",
+    "I2CSlave":"0x2C",
+    "DeviceIndex":1
+},
+{
+    "ChannelName":"V5P0SX_FAN2",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x2C",
+    "DeviceIndex":2
+},
+{
+    "ChannelName":"V0P75SX",
+    "Resistor":"0x2710",
+    "I2CSlave":"0x2C",
+    "DeviceIndex":3
+}
+]
