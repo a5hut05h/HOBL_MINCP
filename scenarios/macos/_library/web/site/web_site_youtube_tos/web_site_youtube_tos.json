@@ -186,8 +186,8 @@
             },
             {
                 "children": [],
-                "delay": "87",
-                "description": "Watch video for 87s",
+                "delay": "79",
+                "description": "Watch video for 79s",
                 "enabled": true,
                 "id": "UCL4U1",
                 "type": "Delay"
