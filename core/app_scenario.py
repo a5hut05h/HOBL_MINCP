@@ -2964,6 +2964,30 @@ class Scenario(unittest.TestCase):
             if action_result == 1:
                 if fail_on_error:
                     logging.error(f"Action failed: {action['id']}")
+                    if "capture_id" in action:
+                        # Copy the template image(s) into image_matching next to the exception capture
+                        img_path = os.path.join(self.result_dir, "image_matching")
+                        copied_templates = []
+                        if "file_name" in action:
+                            os.makedirs(img_path, exist_ok=True)
+                            for tmpl in action["file_name"]:
+                                src = tmpl if os.path.isabs(tmpl) else os.path.join(self.json_parent_dir, tmpl)
+                                if os.path.exists(src):
+                                    dst = os.path.join(img_path, "exception_template_" + os.path.basename(src))
+                                    shutil.copy2(src, dst)
+                                    copied_templates.append(dst)
+
+                        # Log a dashboard link so the failure line is clickable to the image compare view
+                        if self.dashboard_url:
+                            hobl_url = self.dashboard_url.split('/')[0] + "//" + self.dashboard_url.split('/')[2] + '/'
+                            capture_path = os.path.join(img_path, "exception_" + str(action["id"]) + ".png")
+                            files = ";".join([capture_path] + copied_templates)
+                            views = ";".join(["/result/ImageView"] * (1 + len(copied_templates)))
+                            # '&amp;' (not '&'): the log viewer sets innerHTML on line insert, which decodes '&curren' (legacy named entity) into '¤' before Prism runs. Encoding as '&amp;' survives the decode as '&'.
+                            url = f"{hobl_url}result/Results?path={img_path}&amp;currentFiles={files}&amp;currentViews={views}"
+                            # Prism log grammar's 'markdown' token captures [text](url) whole (any char except ')'), so backslashes and ';' in the URL survive; a bare URL would be truncated at the first ';' or '\'.
+                            logging.info(r'[HOBL Results - Image Match Failure](' + url + r')')
+
                     self.fail("Failure to run action: " + str(action["id"]))
                 return 1
 
