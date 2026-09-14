@@ -95,7 +95,6 @@ class SystemPrep(core.app_scenario.Scenario):
 
             # Disable PCC to prevent being limited to 80% charge
             self._call([smonitor_exe, "/battpccenable 1 0"], fail_on_exception=False, log_output=False, expected_exit_code="")
-
         except:
             logging.warning("SMonitor call failed")
 

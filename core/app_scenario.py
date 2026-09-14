@@ -4131,7 +4131,8 @@ class Scenario(unittest.TestCase):
             title = yt_entry["title"]
             dur = yt_entry["end"] - yt_entry["start"]
 
-            logging.debug(f"Checking YouTube playback log entry '{title}'.  Comparing expected duration {youtube_duration}s with actual duration {dur:.2f}s")
+            logging.debug(f"Checking YouTube playback log entry '{title}'. Comparing expected duration {youtube_duration}s with actual duration {dur:.2f}s")
+
             if not youtube_duration - 15 <= dur <= youtube_duration + 15:
                 err_str = f"Unexpected YouTube {title} playback duration {dur}"
                 logging.error(err_str)
