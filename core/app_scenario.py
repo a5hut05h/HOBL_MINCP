@@ -690,7 +690,7 @@ class Scenario(unittest.TestCase):
                         img_path = os.path.join(self.result_dir, "failedscreen.png")
                         url = f"{hobl_url}result/Results?path={self.result_dir}&amp;currentFiles={img_path}&amp;currentViews=/result/ImageView"
                         # Prism log grammar's 'markdown' token captures [text](url) whole (any char except ')'), so backslashes and ';' in the URL survive; a bare URL would be truncated at the first ';' or '\'.
-                        logging.info(r'[HOBL Results - Failedscreen link](' + url + r')')
+                        logging.error(r'[HOBL Results - Failedscreen link](' + url + r')')
 
                     logging.debug(
                         "Copying data from DUT due to test exception.")
@@ -2993,7 +2993,7 @@ class Scenario(unittest.TestCase):
                             # '&amp;' (not '&'): the log viewer sets innerHTML on line insert, which decodes '&curren' (legacy named entity) into '¤' before Prism runs. Encoding as '&amp;' survives the decode as '&'.
                             url = f"{hobl_url}result/Results?path={img_path}&amp;currentFiles={files}&amp;currentViews={views}"
                             # Prism log grammar's 'markdown' token captures [text](url) whole (any char except ')'), so backslashes and ';' in the URL survive; a bare URL would be truncated at the first ';' or '\'.
-                            logging.info(r'[HOBL Results - Image Match Failure](' + url + r')')
+                            logging.error(r'[HOBL Results - Image Match Failure](' + url + r')')
 
                     self.fail("Failure to run action: " + str(action["id"]))
                 return 1
