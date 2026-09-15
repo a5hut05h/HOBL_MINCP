@@ -685,6 +685,13 @@ class Scenario(unittest.TestCase):
                                      "GetVersion", [])
 
                     self._screenshot(name="failedscreen.png")
+                    if self.dashboard_url:
+                        hobl_url = self.dashboard_url.split('/')[0] + "//" + self.dashboard_url.split('/')[2] + '/'
+                        img_path = os.path.join(self.result_dir, "failedscreen.png")
+                        url = f"{hobl_url}result/Results?path={self.result_dir}&amp;currentFiles={img_path}&amp;currentViews=/result/ImageView"
+                        # Prism log grammar's 'markdown' token captures [text](url) whole (any char except ')'), so backslashes and ';' in the URL survive; a bare URL would be truncated at the first ';' or '\'.
+                        logging.info(r'[HOBL Results - Failedscreen link](' + url + r')')
+
                     logging.debug(
                         "Copying data from DUT due to test exception.")
                     self._copy_data_from_remote(self.result_dir)
