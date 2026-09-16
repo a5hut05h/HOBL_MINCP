@@ -97,9 +97,11 @@ def run(scenario):
 
         # Send Request to the bot server. Retry as needed.
         attempts = 1
+        return_data = None
+        last_error = ""
         while attempts < 10:
             logging.info("Attempting to start meeting. Attempt #" + str(attempts))
-            logging.debug("Request String: " + request_string.replace("code=", "[REDACTED]"))
+            logging.debug("Request String: " + request_string.replace(access_key, "[REDACTED]"))
             logging.debug("Bot Data: " + bot_data)
             # break
             # Send the request to the server
@@ -107,30 +109,34 @@ def run(scenario):
             logging.info(r.status_code)
             logging.debug(r.text)
 
-            # Good Status return
             if r.status_code == 200:
-                break
-
+                try:
+                    response_data = r.json()
+                except ValueError:
+                    last_error = "Bot service returned invalid JSON: " + r.text
+                else:
+                    required_keys = ["botUris", "meetingJoinUri"]
+                    missing_keys = [key for key in required_keys if key not in response_data]
+                    if not missing_keys:
+                        return_data = response_data
+                        break
+                    last_error = response_data.get("error", "Missing response fields: " + ", ".join(missing_keys))
+                logging.warning("Bot service did not create a usable meeting: " + last_error)
             elif r.status_code == 401:
-                logging.error("Error. 401 Unauthorized. You are not authorized to access the Teams Bots server. Please confirm you have entered your access key correctly.")
-                logging.error("Access key entered:" + access_key)
+                last_error = "401 Unauthorized. Confirm the Teams Bots access key is valid."
+                logging.error(last_error)
                 break
+            else:
+                last_error = "HTTP " + str(r.status_code) + ": " + r.text
 
-            logging.info("Bad server response, re-sending request")
+            logging.info("Bad bot service response, re-sending request")
             time.sleep(30)
             attempts += 1
 
-        # End if bad meeting request return
-        if r.status_code != 200:
-            logging.error("Unable to Start Meeting! Server Error")
-            # hangup()
-            # tearDown()
-            raise Exception("Unable to Start Meeting! Server Error")
-
-        
-        # Get new meeting info
-        return_data = json.loads(r.content)
-        logging.info(type(return_data))
+        if return_data is None:
+            error_message = "Unable to start meeting. Bot service error: " + last_error
+            logging.error(error_message)
+            raise Exception(error_message)
 
 
         # Log bot names and uris for later 

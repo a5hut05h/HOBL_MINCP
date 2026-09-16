@@ -1,0 +1,43 @@
+[
+    {
+        "author": "",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-08-10",
+        "description": "",
+        "enabled": true,
+        "id": "1T4YR5M",
+        "type": "Information"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "1T4YR6K",
+        "type": "Setup"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1T4YRE6",
+                "include_path": "scenarios\\windows\\_library\\enterprise_collab\\snipping_tool",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "1T4YR73",
+        "type": "Run Test"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "1T4YR7N",
+        "type": "Teardown"
+    }
+]

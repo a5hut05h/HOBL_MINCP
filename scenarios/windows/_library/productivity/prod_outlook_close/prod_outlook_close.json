@@ -15,6 +15,7 @@
         "description": "Outlook Close Button",
         "enabled": true,
         "file_name": [
+            "image_1TN53YN.png",
             "image_UTA59H.png"
         ],
         "h": "0.042",
@@ -33,6 +34,7 @@
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
+            "image_1TN4P7N.png",
             "image_UTA5JV.png"
         ],
         "id": "UTA5JV",

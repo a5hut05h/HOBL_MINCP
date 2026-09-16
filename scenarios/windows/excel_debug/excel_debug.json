@@ -1,0 +1,97 @@
+[
+    {
+        "author": "",
+        "capture_device": "",
+        "children": [],
+        "create_date": "2026-08-03",
+        "description": "",
+        "enabled": true,
+        "id": "1RU4F6H",
+        "type": "Information"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1RU4FKW",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_setup",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "1RU4F8H",
+        "type": "Setup"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1RU4FR3",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_open",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1RU4FUW",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_run",
+                "params": [
+                    {
+                        "name": "[short_typing]",
+                        "val_options": "0,1",
+                        "value": "0"
+                    }
+                ],
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1RU4FXF",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_close",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "1RU4F9W",
+        "type": "Run Test"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1RU4H8K",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_close",
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1RU4H20",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_kill",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "1RU4FAU",
+        "type": "Teardown"
+    }
+]

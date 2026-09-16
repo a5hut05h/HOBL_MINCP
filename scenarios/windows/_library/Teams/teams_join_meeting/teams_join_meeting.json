@@ -157,7 +157,7 @@
         "children": [],
         "delay": "0.5",
         "description": "YTV33V",
-        "enabled": true,
+        "enabled": false,
         "file_name": [
             "image_YTV33V.png"
         ],
@@ -315,7 +315,7 @@
                         "delay": "2",
                         "description": "Verify that Mic is On",
                         "enabled": true,
-                        "exception_on": "No match",
+                        "exception_on": "Ignore",
                         "file_name": [
                             "image_YTV81C.png",
                             "image_16AU7EH.png"

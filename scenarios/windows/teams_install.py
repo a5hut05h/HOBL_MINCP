@@ -102,14 +102,23 @@ class TeamsInstall(core.app_scenario.Scenario):
 
             # Download the Teams installer
             if self.dut_architecture == "arm64":
-                self._call(["powershell.exe", "wget \\\"https://go.microsoft.com/fwlink/?linkid=2196207&clcid=0x409&culture=en-us&country=us\\\" -outfile " + installer_path])
+                self._call(["powershell.exe", "wget \\\"https://go.microsoft.com/fwlink/?linkid=2196207&clcid=0x409&culture=en-us&country=us\\\" -outfile " + installer_path], timeout=3600)
             else:
-                self._call(["powershell.exe", "wget \\\"https://go.microsoft.com/fwlink/?linkid=2196106&clcid=0x409&culture=en-us&country=us\\\" -outfile " + installer_path])
+                self._call(["powershell.exe", "wget \\\"https://go.microsoft.com/fwlink/?linkid=2196106&clcid=0x409&culture=en-us&country=us\\\" -outfile " + installer_path], timeout=3600)
                 
             # Run the installer silently
             logging.info("Running the installer")
             # self._call(["powershell.exe", 'Add-AppProvisionedPackage -Online -PackagePath "' + installer_path + '" -SkipLicense'])
-            self._call(["powershell.exe", 'Add-AppxPackage -Path "' + installer_path + '"'])
+            install_command = (
+                "$ErrorActionPreference = 'Stop'; "
+                "try { Add-AppxPackage -Path \"" + installer_path + "\" } "
+                "catch { "
+                "if (($_ | Out-String) -match '0x80073D06') { "
+                "Write-Host 'A newer MSTeams package is already installed; skipping downgrade.' "
+                "} else { throw } "
+                "}"
+            )
+            self._call(["powershell.exe", install_command])
             logging.info("Wait for Teams Installer run")
             time.sleep(10)
 

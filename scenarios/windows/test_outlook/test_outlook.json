@@ -1,0 +1,59 @@
+[
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1TN3PA3",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_open",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "1TN3N4V",
+        "type": "Setup"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": false,
+                "id": "1TN3PL0",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_run_minwin",
+                "params": [
+                    {
+                        "name": "[short_typing]",
+                        "val_options": "0,1",
+                        "value": "0"
+                    }
+                ],
+                "type": "Include"
+            },
+            {
+                "children": [],
+                "delay": "0",
+                "description": "",
+                "enabled": true,
+                "id": "1TN3PR5",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_close",
+                "type": "Include"
+            }
+        ],
+        "description": "",
+        "enabled": true,
+        "id": "1TN3NAJ",
+        "type": "Run Test"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "1TN3PY6",
+        "type": "Teardown"
+    }
+]

@@ -1,0 +1,573 @@
+diff --git a/.gitignore b/.gitignore
+index 075ed98..df8cae5 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -6,3 +6,5 @@
+ __pycache__
+ /downloads/**
+ /scenarios/windows/enterprise_collab/resources/large/**
++
++*.bak
+diff --git a/core/app_scenario.py b/core/app_scenario.py
+index 899e5d6..612a517 100644
+--- a/core/app_scenario.py
++++ b/core/app_scenario.py
+@@ -5,6 +5,7 @@ from cmath import log
+ from datetime import datetime
+ from builtins import str
+ from builtins import *
++import base64
+ import math
+ import unittest
+ import logging
+@@ -56,6 +57,14 @@ from pathlib import Path
+ 
+ # Base class for each application test scenario
+ 
++def _powershell_literal(value):
++    return "'" + str(value).replace("'", "''") + "'"
++
++
++def _encode_powershell_command(command):
++    encoded = base64.b64encode(command.encode("utf-16-le")).decode("ascii")
++    return '-ExecutionPolicy Unrestricted -EncodedCommand ' + encoded
++
+ sys.stdin.reconfigure(encoding='utf-8')
+ sys.stdout.reconfigure(encoding='utf-8')
+ 
+@@ -504,13 +513,18 @@ class Scenario(unittest.TestCase):
+             override_dict['HOBL Version'] = hobl_ver.strip()
+             override_dict['Study Type'] = Params.get('global', 'study_type', log = False)
+             override_dict['Product'] = Params.get('global', 'product', log = False)
++            override_dict['DUT Type'] = Params.get('global', 'dut_type', log = False)
+             override_str = json.dumps(override_dict)
+-            override_str = override_str.replace('"', "'")
++            # override_str = override_str.replace('"', "'")
+             # override_str = override_str.replace(' ', "")
+ 
+             if self.platform.lower() == "windows":
+-                self._upload("utilities\\open_source\\config_check.ps1", self.dut_exec_path, check_modified=True)
+-                cmd = '-ExecutionPolicy Unrestricted -Command "' + os.path.join(self.dut_exec_path, "config_check.ps1 -LogFile " + self.dut_data_path, "Config") + " -OverrideString " + '\\\"' + override_str + '\\\""'
++                powershell_command = "& {0} -LogFile {1} -OverrideString {2}".format(
++                    _powershell_literal(os.path.join(self.dut_exec_path, "config_check.ps1")),
++                    _powershell_literal(os.path.join(self.dut_data_path, "Config")),
++                    _powershell_literal(override_str)
++                )
++                cmd = _encode_powershell_command(powershell_command)
+                 self._call(["powershell.exe", cmd])
+             elif self.platform.lower() == "macos":
+                 source = os.path.join("utilities", "open_source", "config_check.sh")
+@@ -523,12 +537,16 @@ class Scenario(unittest.TestCase):
+ 
+ 
+ 
+-            override_str = f"{{'Scenario':'{module}','Test Name':'{test_name}'}}"
++            override_str = json.dumps({"Scenario": module, "Test Name": test_name})
+             # override_str = f"{{'Test Name':'{test_name}'}}"
+             # override_str = f"{{'Scenario':'{module}'}}"
+             # print('override string used for traige the configcheck scenario issue:   ' + override_str)
+-            cmd = '-ExecutionPolicy Unrestricted -Command "' + os.path.join(self.dut_exec_path, "config_check.ps1") + " -Prerun -LogFile " + '\\\"' + os.path.join(
+-                self.dut_data_path, self.testname + "_ConfigPre") + '\\\"' + "-OverrideString " + '\\\"' + override_str + '\\\""'
++            powershell_command = "& {0} -Prerun -LogFile {1} -OverrideString {2}".format(
++                _powershell_literal(os.path.join(self.dut_exec_path, "config_check.ps1")),
++                _powershell_literal(os.path.join(self.dut_data_path, self.testname + "_ConfigPre")),
++                _powershell_literal(override_str)
++            )
++            cmd = _encode_powershell_command(powershell_command)
+             if self.platform.lower() == "android":
+                 # result = self._host_call('python .\\utilities\\Android\\config_check_android.py --PreRun --OverrideString \'"' + override_str.replace("'", '"""') + '"\' --LogFile ' + self.result_dir + '\\' + self.testname + '_ConfigPre' + " -i " + str(self.dut_ip) + ":5555", expected_exit_code="")
+                 result = self._host_call('python .\\utilities\\Android\\config_check_android.py --PreRun --OverrideString "' + '\\\"' + override_str +
+diff --git a/core/hobl.py b/core/hobl.py
+index 8a9c6b8..13db3e2 100644
+--- a/core/hobl.py
++++ b/core/hobl.py
+@@ -54,7 +54,7 @@ if "-d" not in sys.argv and "-dv" not in sys.argv:
+ params = Params
+ 
+ # Set default global parameters
+-params.setDefault('global', 'hardware_version', '', desc="Optional information to pass to reporting.")
++params.setDefault('global', 'hardware_version', '', desc="Optional information to pass to reporting.", valOptions=["EV", "DV","Pre EV","PV"])
+ params.setDefault('global', 'accessories', '', desc="Optional information to pass to reporting.")
+ params.setDefault('global', 'result_dir', 'c:\\hobl_results', desc="Base file path for storing test results.")
+ params.setDefault('global', 'goals', '', desc="Path to a CSV file that has goals for each scenario to compare results with.")
+@@ -72,6 +72,7 @@ params.setDefault('global', 'dut_password', '', desc="The password for the test
+ params.setDefault('global', 'dut_ip', '127.0.0.1', desc="IP address of the Device Under Test (name can be used if DNS is supported).")
+ params.setDefault('global', 'dut_name', '', desc="Name of the Device Under Test.  Every DUT on the lab netowrk needs to have a unique name.")
+ params.setDefault('global', 'dut_architecture', 'x64', desc="The CPU architecture of the DUT, used for running apps and tools that are optimized for that architecture.", valOptions=["x64", "arm64"])
++
+ params.setDefault('global', 'dut_wifi_name', '', desc="Name of the Wi-Fi netowrk SSID that this device should connect to.")
+ params.setDefault('global', 'dut_wifi_password', '', desc="Password of the Wi-Fi netowrk SSID that this device should connect to.")
+ params.setDefault('global', 'dut_wifi_authentication', 'WPA2PSK', desc="Wi-Fi authentication type.", valOptions=["WPA2PSK", "WPA3SAE"]) # WPA3SAE for Wi-Fi 6E+
+@@ -146,7 +147,9 @@ params.setDefault('global', 'dut_coord_scaler', '1.0', desc="Multiply InputInjec
+ params.setDefault('global', 'prep_status_enable', '1', desc="Check prep status before scenario execution.", valOptions=["1", "0"])
+ params.setDefault('global', 'prep_run_only', '0', desc="Run prep only for scenarios that have both a prep and test component.", valOptions=["1", "0"])
+ params.setDefault('global', 'result_dir_complete', '', desc="Completed file path for storing test results (already including study type, study variables, and run type).")
+-
++params.setDefault('global', 'fungates_upload_enabled', '0', desc="Auto-extract results and upload ETL files to Fungates after each PASS run.", valOptions=["1", "0"])
++params.setDefault('global', 'fungates_cse_uploader_path', '', desc="Full path to CSEUploader.exe. Leave blank to use the bundled one in utilities/fungates_uploader.")
++params.setDefault('global', 'dut_type', '', desc="Hardware platform of the DUT, used to select the correct SOC power formula in reporting. Leave blank if unknown.", valOptions=["", "Pantherlake/LunarLake surface", "HP chiharu", "Cadmus Romulus", "Cadmus Denali", "Heracles", "Purwa"])
+ 
+ # Command line arguments
+ core.arguments.Arguments()
+@@ -604,6 +607,60 @@ def preps_missing_print(prep_scenarios_to_run):
+             logging.error(f"Missing prep: {p}")
+ 
+ 
++def _post_run_extract_and_upload(run_dir_str):
++    """Extract run results to hobl_result.json and upload ETL files to Fungates.
++
++    Controlled by global params:
++      fungates_upload_enabled  - must be '1' to run
++      fungates_cse_uploader_path - optional override for CSEUploader.exe path
++    """
++    if params.get('global', 'fungates_upload_enabled') != '1':
++        return
++    if params.get('global', 'collection_enabled') == '0':
++        return
++
++    from utilities.extractor.json_builder import extract_run, save_json
++
++    run_path = Path(run_dir_str)
++
++    # Step 1: Extract CSVs -> hobl_result.json
++    logging.info("Extracting run results from: %s", run_dir_str)
++    extracted = extract_run(run_path)
++    if extracted is None:
++        logging.warning("Extractor returned no data for %s — skipping Fungates upload", run_dir_str)
++        return
++
++    hobl_result_json = run_path / "hobl_result.json"
++    save_json(extracted, hobl_result_json)
++    logging.info("Saved hobl_result.json to %s", hobl_result_json)
++
++    # Step 2: Invoke Upload-ToFungates.ps1 with the run dir as input folder
++    uploader_ps1 = Path(__file__).parents[1] / "utilities" / "fungates_uploader" / "Upload-ToFungates.ps1"
++    if not uploader_ps1.exists():
++        logging.error("Upload-ToFungates.ps1 not found at %s", uploader_ps1)
++        return
++
++    cmd = [
++        "powershell.exe",
++        "-ExecutionPolicy", "Unrestricted",
++        "-File", str(uploader_ps1),
++        "-InputFolder", run_dir_str,
++    ]
++    cse_path = params.get('global', 'fungates_cse_uploader_path')
++    if cse_path:
++        cmd += ["-CSEUploaderPath", cse_path]
++
++    logging.info("Launching Fungates uploader for %s", run_dir_str)
++    proc = subprocess.run(cmd, capture_output=True, text=True)
++    if proc.stdout:
++        for line in proc.stdout.splitlines():
++            logging.info("[fungates] %s", line)
++    if proc.returncode != 0:
++        logging.error("Fungates upload failed (exit %d): %s", proc.returncode, proc.stderr.strip())
++    else:
++        logging.info("Fungates upload completed successfully for %s", run_dir_str)
++
++
+ if __name__ == '__main__':
+ 
+     try:
+@@ -858,6 +915,12 @@ if __name__ == '__main__':
+                         write_desktop_ini(run_dir, "pass")
+                         success = True
+ 
++                        # Extract results and upload to Fungates (if enabled)
++                        try:
++                            _post_run_extract_and_upload(run_dir)
++                        except Exception as e:
++                            logging.error("Post-run extract/upload failed: %s", e)
++
+                         try:
+                             close_log()
+                         except:
+diff --git a/git_hooks/pre-push b/git_hooks/pre-push
+index 9664593..0423029 100644
+--- a/git_hooks/pre-push
++++ b/git_hooks/pre-push
+@@ -1,2 +1,2 @@
+ #!/bin/sh
+-git describe --tags > hobl_version.txt
++git describe --tags --always > hobl_version.txt
+diff --git a/profile_templates/default.ini b/profile_templates/default.ini
+index 3bae6e3..4e0fb29 100644
+--- a/profile_templates/default.ini
++++ b/profile_templates/default.ini
+@@ -34,6 +34,10 @@ dut_wifi_password=
+ platform=Windows
+ ; Architecture of Device Under Test, valid values are: x64 or arm64.  [DUT_ARCHITECTURE] will attempt to determine the architecture by querying the DUT.  If you want to override this, specify the architecture here.
+ dut_architecture=[DUT_ARCHITECTURE]
++; Hardware platform of the DUT (used to select SOC power formula in reporting).
++; Valid values: Pantherlake/LunarLake surface | HP chiharu | Cadmus Romulus | Cadmus Denali | Heracles | Purwa
++; Leave blank if unknown; soc_power will be omitted from the calculated metrics.
++dut_type=
+ ; List any tools that should be run with each power scenario, in a space-separated list.  Available tools are in the "tools" directory.  These are the minimally required ones:
+ tools=power_light run_report
+ ; List any tools that should be run with each prep scenario, in a space-separated list.  Available tools are in the "tools" directory.  These are the minimally required ones:
+@@ -60,6 +64,11 @@ pre_run_delay=0
+ ; Delay in seconds to wait after each scenario completes
+ post_run_delay=0
+ 
++; Set to 1 to extract results and upload ETL files to Fungates after each PASS run.
++fungates_upload_enabled=1
++; Full path to CSEUploader.exe. Leave blank to use the bundled uploader.
++fungates_cse_uploader_path=
++
+ [display]
+ ; Specify the display brightness slider setting.  For HOBL compliant testing, specify a value that corresponds to 150 nits.
+ brightness=65
+diff --git a/scenarios/windows/enterprise_collab/enterprise_collab.py b/scenarios/windows/enterprise_collab/enterprise_collab.py
+index 07a51d3..5bf491d 100644
+--- a/scenarios/windows/enterprise_collab/enterprise_collab.py
++++ b/scenarios/windows/enterprise_collab/enterprise_collab.py
+@@ -21,8 +21,9 @@ class EnterpriseCollab(core.app_scenario.Scenario):
+     module = __module__.split('.')[-1]
+ 
+     if Params.get(module, "perf_run") == "1":
+-        logging.info("Adding perf_utc tool for parsing perf metrics")
+-        Params.setParam("global", "tools", "+perf_utc")
++        logging.info("Adding stress_utc tool for parsing perf metrics")
++        Params.setOverride("global", "tools", "+stress_utc")
++        Params.setOverride("stress_utc", "provider", "perf_utc.wprp")
+ 
+     actions = None
+ 
+diff --git a/scenarios/windows/perf_stress/default_params.py b/scenarios/windows/perf_stress/default_params.py
+index bf86461..b1b63a7 100644
+--- a/scenarios/windows/perf_stress/default_params.py
++++ b/scenarios/windows/perf_stress/default_params.py
+@@ -20,7 +20,7 @@ def run():
+     Params.setDefault('perf_stress', 'provider', 'perf_utc.wprp', desc='WPRP file to use for perf_utc tracing.', valOptions=['@\\providers'])
+     Params.setDefault('perf_stress', 'bg_heavy_capture', '0', desc='1 = launch collect_5min_traces.ps1 in the background on the DUT alongside the core trace. Uses a named WPR instance (perfStressHeavy). Saves rolling ETLs to C:\hobl_bin\perf_stress_heavy\<RunName>\WPR_<timestamp>.etl. WARNING: dual-session WPR perturbs metrics - debug use only.', valOptions=['0', '1'])
+     Params.setDefault('perf_stress', 'bg_heavy_capture_interval', '5', desc='Rolling ETL segment length in minutes for bg_heavy_capture (default 5). A 15-20 min run at 5 min should produce ~3 segments; shorten if wpr -stop flush eats into the next interval.', valOptions=['3', '4', '5', '6'])
+-    Params.setDefault('perf_stress', 'bg_edge_tabs', '1', desc='1 = open background Edge tabs to increase memory pressure and CPU stress.', valOptions=['0', '1'])
++    Params.setDefault('perf_stress', 'bg_edge_tabs', '0', desc='1 = open 30 background Edge tabs (Setup) as the web load and SKIP the replay web workload (web_setup/web_run_12/web_check/web_close_tabs) so the bg tabs survive the whole run (web_setup's _web_replay_start would otherwise kill all browsers). 0 (default) = no bg tabs; run the normal replay web workload. Mutually exclusive with the replay web phase.', valOptions=['0', '1'])
+     Params.setDefault('perf_stress', 'bg_edge_tab_loops', '6', desc='Iterations of the web_bg_tabs site loop. Each iteration opens 5 background Edge tabs. Default 6 = 30 background tabs', valOptions=['1', '2', '3', '4', '5', '6', '8', '10'])
+     Params.setParam(None, 'web_replay_run', '1')
+     Params.setParam(None, 'phase_reporting', '1')
+@@ -35,16 +35,15 @@ def run_user_only():
+     import_run_user_only('scenarios\\windows\\_library\\misc\\recording_phase_end')
+     import_run_user_only('scenarios\\windows\\_library\\misc\\start_app_launch')
+     import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_close')
+-    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_excel_open')
+-    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_excel_run')
++    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_excel_close')
+     import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_kill')
+-    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_outlook_open')
+-    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_outlook_run')
+-    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_powerpoint_open')
+-    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_powerpoint_run')
++    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_onenote_close')
++    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_open')
++    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_outlook_close')
++    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_powerpoint_close')
++    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_run_no_onenote')
+     import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_setup')
+-    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_word_open')
+-    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_word_run')
++    import_run_user_only('scenarios\\windows\\_library\\productivity\\prod_word_close')
+     import_run_user_only('scenarios\\windows\\_library\\web\\web_bg_tabs')
+     import_run_user_only('scenarios\\windows\\_library\\web\\web_check')
+     import_run_user_only('scenarios\\windows\\_library\\web\\web_close_tabs')
+diff --git a/tools/auto_recharge.py b/tools/auto_recharge.py
+index 0a4d633..da2d063 100644
+--- a/tools/auto_recharge.py
++++ b/tools/auto_recharge.py
+@@ -9,33 +9,31 @@ from core.app_scenario import Scenario
+ import logging
+ import time
+ import subprocess
++import threading
+ 
+ class Tool(Scenario):
+     '''
+     Pause run and recharge device when battery drops below [charge_threshold], then resume.
++
++    Pass charge_on_call and charge_off_call as auto_recharge parameters. If the command
++    points to a .ps1 script it will be wrapped with powershell.exe automatically, e.g.:
++      auto_recharge:charge_on_call=C:\pdu_controller\apc_pdu_controller.ps1 on 6 -PduIp 10.150.18.38 -Community hobl
++      auto_recharge:charge_off_call=C:\pdu_controller\apc_pdu_controller.ps1 off 6 -PduIp 10.150.18.38 -Community hobl
+     '''
+     module = __module__.split('.')[-1]
+     # Set default parameters
+     Params.setDefault(module, 'charge_threshold', '40')  # Percent battery level (40%)
+     Params.setDefault(module, 'resume_threshold', '95')  # Percent battery level (95%)
+-    Params.setDefault('charge_on', 'charge_on_call', '')
+-    Params.setDefault('charge_off', 'charge_off_call', '')
+-    Params.setDefault(module, 'post_charge_delay', '1800', desc="How many seconds to wait after reaching the resume_threshold before disconnecting charger.")  # Adding time here can help sensure the device is maximally charged.
++    Params.setDefault(module, 'charge_on_call', '')
++    Params.setDefault(module, 'charge_off_call', '')
+ 
+     # Get parameters
+     charge_threshold = Params.get(module, 'charge_threshold')
+     resume_threshold = Params.get(module, 'resume_threshold')
+-    post_charge_delay = Params.get(module, 'post_charge_delay')
+-
+-    charge_on_call = Params.get('global', 'charge_on_call')
+-    charge_off_call = Params.get('global', 'charge_off_call')
+-
+-    if charge_on_call == '' or charge_on_call is None:
+-        charge_on_call = Params.get('charge_on', 'charge_on_call')
+-    if charge_off_call == '' or charge_off_call is None:
+-        charge_off_call = Params.get('charge_off', 'charge_off_call')
+ 
+     already_started = False
++    _monitor_stop = None  # threading.Event to stop background monitor
++    _charge_event = None  # threading.Event: set=OK to proceed, clear=charging in progress
+ 
+     def testBeginEarlyCallback(self, scenario):
+         self.initCallback(scenario)
+@@ -47,21 +45,23 @@ class Tool(Scenario):
+         MAX_COUNT = 10
+         count = 0
+ 
++        logging.info(f"auto_recharge thresholds: charge_threshold={self.charge_threshold}%, resume_threshold={self.resume_threshold}%")
+         batt_level = self.getBattLevel()
+         logging.info("Battery level: " + batt_level)
+-        
++
+         if int(batt_level) <= int(self.charge_threshold):
+             logging.info("Charging...")
+             # Start charging and wait until resume_threshold reached
+             self.chargeOn()
+-        
++
+             old_batt_level = -1
+             # TODO: handle errors
+             while True:
++                # Wait before polling so the device has time to actually charge
++                time.sleep(300)  # sleep 5 minutes
+                 try:
+                     batt_level = self.getBattLevel()
+                 except:
+-                    time.sleep(300)
+                     continue
+                 logging.info("Battery level: " + batt_level)
+                 if int(batt_level) >= int(self.resume_threshold):
+@@ -80,21 +80,82 @@ class Tool(Scenario):
+                         logging.info(f"Disengaging charger since seeing same battery level for {MAX_COUNT} times.")
+                         self.chargeOff()
+                         break
+-                    time.sleep(300) # sleep 5 minutes
+                     old_batt_level = batt_level
+-            try:
+-                delay = int(self.post_charge_delay)
+-            except:
+-                logging.error(f"Invalid post_charge_delay setting: {self.post_charge_delay}.  Make sure it's an integer.")
+-            else:
+-                logging.info(f"Delaying for {delay} seconds to let device quiesce.")
+-                time.sleep(delay)
++
++        # Start background thread that polls battery every 60s during the scenario
++        self._charge_event = threading.Event()
++        self._charge_event.set()  # Initially not charging
++        self._monitor_stop = threading.Event()
++        monitor_thread = threading.Thread(
++            target=self._battery_monitor_loop,
++            args=(self._monitor_stop,),
++            daemon=True
++        )
++        monitor_thread.start()
++        logging.info("auto_recharge: background battery monitor started (polling every 60s).")
+ 
+     def testBeginCallback(self):
+-        pass
++        # Block scenario start if a charge cycle is in progress
++        if self._charge_event is not None and not self._charge_event.is_set():
++            logging.info("auto_recharge: battery charging in progress — pausing scenario until resume_threshold is reached...")
++            self._charge_event.wait()
++            logging.info("auto_recharge: charging complete, resuming scenario.")
+ 
+     def testEndCallback(self):
+-        pass
++        if self._monitor_stop is not None:
++            self._monitor_stop.set()
++            logging.info("auto_recharge: background battery monitor stopped.")
++
++    def _battery_monitor_loop(self, stop_event, poll_interval=60):
++        """Background thread: polls battery every poll_interval seconds.
++        When battery <= charge_threshold: calls chargeOn, clears _charge_event to block
++        scenario iterations, polls every 5 min until resume_threshold, then calls
++        chargeOff and sets _charge_event to unblock the scenario.
++        """
++        MAX_COUNT = 10
++        logging.info(f"auto_recharge monitor: polling every {poll_interval}s.")
++        while not stop_event.is_set():
++            stop_event.wait(poll_interval)
++            if stop_event.is_set():
++                break
++            try:
++                batt_level = self.getBattLevel()
++            except Exception as e:
++                logging.warning(f"auto_recharge monitor: getBattLevel failed: {e}")
++                continue
++            logging.info(f"auto_recharge monitor: Battery level: {batt_level}%")
++            if int(batt_level) <= int(self.charge_threshold):
++                logging.info(f"auto_recharge monitor: Battery {batt_level}% <= threshold {self.charge_threshold}%, starting charge.")
++                self._charge_event.clear()  # Pause scenario at next testBeginCallback
++                self.chargeOn()
++                count = 0
++                old_batt_level = -1
++                while not stop_event.is_set():
++                    stop_event.wait(300)  # poll every 5 minutes while charging
++                    if stop_event.is_set():
++                        break
++                    try:
++                        batt_level = self.getBattLevel()
++                    except Exception as e:
++                        logging.warning(f"auto_recharge monitor: getBattLevel failed during charge: {e}")
++                        continue
++                    logging.info(f"auto_recharge monitor: Battery level during charge: {batt_level}%")
++                    if int(batt_level) >= int(self.resume_threshold):
++                        logging.info(f"auto_recharge monitor: Battery {batt_level}% >= resume_threshold {self.resume_threshold}%, stopping charge.")
++                        self.chargeOff()
++                        self._charge_event.set()  # Resume scenario
++                        break
++                    if batt_level == old_batt_level:
++                        count += 1
++                        logging.info(f"auto_recharge monitor: Same battery level for {count} polls.")
++                    else:
++                        count = 0
++                    if count == MAX_COUNT:
++                        logging.info(f"auto_recharge monitor: Battery stuck at {batt_level}% for {MAX_COUNT} polls, stopping charge.")
++                        self.chargeOff()
++                        self._charge_event.set()  # Resume scenario
++                        break
++                    old_batt_level = batt_level
+ 
+     def dataReadyCallback(self):
+         pass
+@@ -115,14 +176,61 @@ class Tool(Scenario):
+ 
+     def chargeOn(self):
+         logging.info("Attempting to turn on charger...")
+-        self._host_call(self.charge_on_call)
+-        if Params.get('global', 'local_execution') == '1':
+-            self._host_call('utilities\\MsgPrompt.exe -WaitForAC')
++        call = Params.get(self.module, 'charge_on_call') or ''
++        logging.info(f"auto_recharge: charge_on_call resolved to: {repr(call)}")
++        if call:
++            self._host_call(self._wrap_ps1(call))
++            if Params.get('global', 'local_execution') == '1':
++                self._host_call('utilities\\MsgPrompt.exe -WaitForAC')
++            else:
++                self._wait_for_power_line_status(target='AC')
++        else:
++            logging.warning("No charge_on_call specified.")
+         logging.info("Charger on.")
+ 
+     def chargeOff(self):
+         logging.info("Attempting to turn off charger...")
+-        self._host_call(self.charge_off_call)
+-        if Params.get('global', 'local_execution') == '1':
+-            self._host_call('utilities\\MsgPrompt.exe -WaitForDC')
++        call = Params.get(self.module, 'charge_off_call') or ''
++        logging.info(f"auto_recharge: charge_off_call resolved to: {repr(call)}")
++        if call:
++            self._host_call(self._wrap_ps1(call))
++            if Params.get('global', 'local_execution') == '1':
++                self._host_call('utilities\\MsgPrompt.exe -WaitForDC')
++            else:
++                self._wait_for_power_line_status(target='DC')
++        else:
++            logging.warning("No charge_off_call specified.")
+         logging.info("Charger off.")
++
++    def _wrap_ps1(self, call):
++        '''If the call targets a .ps1 script, prepend powershell.exe so that
++        cmd.exe (used by _host_call via shell=True) can execute it.
++        Example input:  C:\\pdu_controller\\script.ps1 off 7 -PduIp 10.0.0.1
++        Example output: powershell.exe -ExecutionPolicy Bypass -File "C:\\pdu_controller\\script.ps1" off 7 -PduIp 10.0.0.1
++        '''
++        stripped = call.strip().strip('"')
++        first_token = stripped.split()[0] if stripped else ''
++        if first_token.lower().endswith('.ps1'):
++            rest = stripped[len(first_token):].lstrip()
++            args_suffix = f' {rest}' if rest else ''
++            return f'powershell.exe -ExecutionPolicy Bypass -File "{first_token}"{args_suffix}'
++        return call
++
++    def _wait_for_power_line_status(self, target, poll_interval=10, max_wait=120):
++        '''Poll Windows PowerLineStatus until it matches target ('AC' or 'DC').
++        This confirms the OS has detected the charger state change before
++        continuing — avoids reading stale battery levels right after a PDU switch.
++        '''
++        ps_cmd = ("Add-Type -Assembly System.Windows.Forms; "
++                  "[System.Windows.Forms.SystemInformation]::PowerStatus.PowerLineStatus.ToString()")
++        logging.info(f"Waiting for PowerLineStatus={target} (max {max_wait}s)...")
++        elapsed = 0
++        while elapsed < max_wait:
++            status = self._call(["powershell.exe", ps_cmd]).strip()
++            logging.info(f"PowerLineStatus: {status}")
++            if status == target:
++                logging.info(f"PowerLineStatus confirmed: {target}")
++                return
++            time.sleep(poll_interval)
++            elapsed += poll_interval
++        logging.warning(f"PowerLineStatus did not reach {target} within {max_wait}s, continuing anyway.")
+diff --git a/tools/powercfg.py b/tools/powercfg.py
+index bbf917e..c1cdc9d 100644
+--- a/tools/powercfg.py
++++ b/tools/powercfg.py
+@@ -104,4 +104,29 @@ class Tool(Scenario):
+                 writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator="\n")
+                 writer.writerow(row1)
+                 writer.writerow(row2)
++
++            # Parse battery report XML for capacity stats (design capacity, full charge capacity, cycle count).
++            if self.battery_report == '1':
++                battery_report_path = os.path.join(self.result_dir, 'battery-report.xml')
++                try:
++                    bat_root = ET.parse(battery_report_path).getroot()
++                    bat_ns_prefix = bat_root.tag.split('{')[1].split('}')[0]
++                    bat_ns = {'b': bat_ns_prefix}
++
++                    batteries = bat_root.findall('.//b:Battery', bat_ns)
++                    fcc_csv = os.path.join(self.result_dir, "battery_fcc.csv")
++                    logging.info(fcc_csv)
++                    with open(fcc_csv, 'w') as csvfile:
++                        writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator="\n")
++                        multi = len(batteries) > 1
++                        for idx, battery in enumerate(batteries):
++                            design = battery.findtext('b:DesignCapacity', default='', namespaces=bat_ns)
++                            fcc = battery.findtext('b:FullChargeCapacity', default='', namespaces=bat_ns)
++                            cycles = battery.findtext('b:CycleCount', default='', namespaces=bat_ns)
++                            suffix = ('_' + str(idx)) if multi else ''
++                            writer.writerow(['design_capacity_mwh' + suffix, design])
++                            writer.writerow(['full_charge_capacity_mwh' + suffix, fcc])
++                            writer.writerow(['cycle_count' + suffix, cycles])
++                except Exception as e:
++                    logging.info(" ERROR - Failed to parse battery-report.xml: " + str(e))
+         pass
+diff --git a/utilities/open_source/config_check.ps1 b/utilities/open_source/config_check.ps1
+index 112266e..8fd74d7 100644
+--- a/utilities/open_source/config_check.ps1
++++ b/utilities/open_source/config_check.ps1
+@@ -1120,6 +1120,9 @@ else {
+     Write-KeyVal "Product" $Win32_ComputerSystem.Model
+     Write-KeyVal "Product Mfg" $Win32_ComputerSystem.Manufacturer
+ 
++    # DUT Type (hardware platform; populated from profile via OverrideString to select SOC power formula)
++    Write-KeyVal "DUT Type" ""
++
+     # Get Wi-Fi vs LTE
+     GetLTEStatus -shortVersion
+ 
+@@ -1287,6 +1290,15 @@ else {
+     $memsize = (($capacity / 1MB) / 1kB)
+     Write-KeyVal "Memory Size (GB)" $memsize
+ 
++    # Usable RAM (GB) - memory visible to the OS, reflects any bcdedit removememory
++    # limit (e.g. 'bcdedit /set {current} removememory <MB>') and hardware-reserved memory.
++    # Rounded UP to the nearest whole GB (e.g. 7.61 -> 8) to report the nominal size.
++    $usableKB = (Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue).TotalVisibleMemorySize
++    if ($usableKB) {
++        $usableGB = [Math]::Ceiling($usableKB / 1MB)
++        Write-KeyVal "Usable RAM (GB)" $usableGB
++    }
++
+     $drive = ""
+     Get-WmiObject -Class win32_diskdrive | % { if ($_.DeviceID -like "*PHYSICALDRIVE0") { $drive = $_ } }
+     if ($drive -eq "") {

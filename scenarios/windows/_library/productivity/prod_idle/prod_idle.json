@@ -1,116 +1,116 @@
 [
     {
-        "id": "V4K4CK",
-        "type": "Information",
-        "description": "Idle time with web and productivity apps open",
-        "enabled": true,
         "author": "jewilder",
         "capture_device": "Surface Laptop 7 15in, light theme, 150% scaling",
+        "children": [],
         "create_date": "2025-03-09",
-        "children": []
+        "description": "Idle time with web and productivity apps open",
+        "enabled": true,
+        "id": "V4K4CK",
+        "type": "Information"
     },
     {
-        "id": "V4KER3",
-        "type": "Set Default",
+        "children": [],
+        "delay": "0.0",
         "description": "Idle time between each app switch, - 3s",
         "enabled": true,
-        "delay": "0.0",
-        "value": "111",
+        "id": "V4KER3",
         "name": "[idle_time]",
+        "type": "Set Default",
         "val_options": "",
-        "children": []
+        "value": "111"
     },
     {
-        "id": "V4KC30",
-        "type": "Comment",
+        "children": [],
+        "delay": "0.0",
         "description": "Each switch has inherent 3s delay",
         "enabled": true,
-        "delay": "0.0",
-        "children": []
+        "id": "V4KC30",
+        "type": "Comment"
     },
     {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
         "id": "V4K98M",
-        "type": "Include",
-        "description": "",
-        "enabled": true,
-        "delay": "0",
-        "include_path": "..\\prod_outlook_switchto",
-        "children": []
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_outlook_switchto",
+        "type": "Include"
     },
     {
+        "children": [],
+        "delay": "[idle_time]",
+        "description": "",
+        "enabled": true,
         "id": "V4KHPE",
-        "type": "Delay",
-        "description": "",
-        "enabled": true,
-        "delay": "[idle_time]",
-        "children": []
+        "type": "Delay"
     },
     {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
         "id": "V4K9HW",
-        "type": "Include",
-        "description": "",
-        "enabled": true,
-        "delay": "0",
-        "include_path": "..\\prod_excel_switchto",
-        "children": []
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_excel_switchto",
+        "type": "Include"
     },
     {
+        "children": [],
+        "delay": "[idle_time]",
+        "description": "",
+        "enabled": true,
         "id": "V4KJ0J",
-        "type": "Delay",
-        "description": "",
-        "enabled": true,
-        "delay": "[idle_time]",
-        "children": []
+        "type": "Delay"
     },
     {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
         "id": "V4K9MK",
-        "type": "Include",
-        "description": "",
-        "enabled": true,
-        "delay": "0",
-        "include_path": "..\\prod_word_switchto",
-        "children": []
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_word_switchto",
+        "type": "Include"
     },
     {
+        "children": [],
+        "delay": "[idle_time]",
+        "description": "",
+        "enabled": true,
         "id": "V4KJ53",
-        "type": "Delay",
-        "description": "",
-        "enabled": true,
-        "delay": "[idle_time]",
-        "children": []
+        "type": "Delay"
     },
     {
+        "children": [],
+        "delay": "0",
+        "description": "",
+        "enabled": true,
         "id": "V4K9T0",
-        "type": "Include",
-        "description": "",
-        "enabled": true,
-        "delay": "0",
-        "include_path": "..\\prod_powerpoint_switchto",
-        "children": []
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_powerpoint_switchto",
+        "type": "Include"
     },
     {
+        "children": [],
+        "delay": "[idle_time]",
+        "description": "",
+        "enabled": true,
         "id": "V4KJ7E",
-        "type": "Delay",
-        "description": "",
-        "enabled": true,
-        "delay": "[idle_time]",
-        "children": []
+        "type": "Delay"
     },
     {
-        "id": "V4K9X9",
-        "type": "Include",
-        "description": "",
-        "enabled": true,
+        "children": [],
         "delay": "0",
-        "include_path": "..\\prod_onenote_switchto",
-        "children": []
-    },
-    {
-        "id": "V4KJ9F",
-        "type": "Delay",
         "description": "",
         "enabled": true,
+        "id": "V4K9X9",
+        "include_path": "scenarios\\windows\\_library\\productivity\\prod_onenote_switchto",
+        "type": "Include"
+    },
+    {
+        "children": [],
         "delay": "[idle_time]",
-        "children": []
+        "description": "",
+        "enabled": true,
+        "id": "V4KJ9F",
+        "type": "Delay"
     }
 ]

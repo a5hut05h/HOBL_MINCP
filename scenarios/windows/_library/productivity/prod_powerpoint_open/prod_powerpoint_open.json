@@ -56,6 +56,16 @@
         "typing_delay": "1000"
     },
     {
+        "children": [],
+        "delay": "2",
+        "description": "Select filename",
+        "enabled": true,
+        "id": "UH9EL8",
+        "text": "\ue009a",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
         "children": [
             {
                 "children": [],

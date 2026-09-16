@@ -9,8 +9,15 @@ def run(scenario):
     
     onedrivetestdir = os.path.join(scenario.userprofile, "OneDrive", "onedrivetest")
     logging.info(f"Removing directory {onedrivetestdir}")
-    
-    scenario._remote_make_dir(onedrivetestdir,delete=True)
+
+    scenario._call(
+        ["cmd.exe", f'/C if exist "{onedrivetestdir}" rmdir /S /Q "{onedrivetestdir}"'],
+        timeout=300,
+    )
+    scenario._call(
+        ["cmd.exe", f'/C if not exist "{onedrivetestdir}" mkdir "{onedrivetestdir}"'],
+        timeout=60,
+    )
     
     target_path = "scenarios\\windows\\enterprise_collab\\resources\\large"
 

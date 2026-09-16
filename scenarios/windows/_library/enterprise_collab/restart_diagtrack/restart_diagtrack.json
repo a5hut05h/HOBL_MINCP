@@ -11,7 +11,7 @@
     },
     {
         "children": [],
-        "command": "cmd /c net stop DiagTrack && net start DiagTrack",
+        "command": "net stop DiagTrack >nul 2>&1 & net start DiagTrack",
         "delay": "2",
         "description": "restart diagtrack",
         "enabled": true,

@@ -1138,12 +1138,16 @@ else {
     # TODO: access from database
     Write-KeyVal "Hardware Version" ""
 
+    # DUT Type
+    # Filled in by automation
+    Write-KeyVal "DUT Type" ""
+
     # Product
     if (!$Win32_ComputerSystem) { $global:Win32_ComputerSystem = @(Get-WmiObject Win32_ComputerSystem) }
     # TODO: we need to lookup product name from database/list for unreleased products
     Write-KeyVal "Product" $Win32_ComputerSystem.Model
     Write-KeyVal "Product Mfg" $Win32_ComputerSystem.Manufacturer
-
+    
     # Get Wi-Fi vs LTE
     GetLTEStatus -shortVersion
 
@@ -1310,6 +1314,15 @@ else {
     get-ciminstance -class "cim_physicalmemory" | % { $capacity += $_.Capacity }
     $memsize = (($capacity / 1MB) / 1kB)
     Write-KeyVal "Memory Size (GB)" $memsize
+
+    # Usable RAM (GB) - memory visible to the OS, reflects any bcdedit removememory
+    # limit (e.g. 'bcdedit /set {current} removememory <MB>') and hardware-reserved memory.
+    # Rounded UP to the nearest whole GB (e.g. 7.61 -> 8) to report the nominal size.
+    $usableKB = (Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue).TotalVisibleMemorySize
+    if ($usableKB) {
+        $usableGB = [Math]::Ceiling($usableKB / 1MB)
+        Write-KeyVal "Usable RAM (GB)" $usableGB
+    }
 
     $drive = ""
     Get-WmiObject -Class win32_diskdrive | % { if ($_.DeviceID -like "*PHYSICALDRIVE0") { $drive = $_ } }
@@ -1651,7 +1664,15 @@ else {
     }
 
     # Power Plan
-    $val = ((Get-WmiObject -Class win32_powerplan -Namespace 'root/cimv2/power' | where { $_.IsActive -eq $true }).ElementName)
+    $val = "Not Supported"
+    try {
+        $activePowerPlan = Get-WmiObject -Class win32_powerplan -Namespace 'root/cimv2/power' -ErrorAction Stop |
+            Where-Object { $_.IsActive -eq $true }
+        if ($activePowerPlan.ElementName) {
+            $val = $activePowerPlan.ElementName
+        }
+    }
+    catch { }
     Write-keyVal "Power Plan" $val
 
     # Power Mode Overlay (Effective)

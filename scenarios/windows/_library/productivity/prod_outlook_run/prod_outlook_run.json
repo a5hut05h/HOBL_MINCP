@@ -184,10 +184,10 @@
             {
                 "children": [],
                 "delay": "6",
-                "description": "ALT-np",
+                "description": "ALT-np2p",
                 "enabled": true,
                 "id": "UPVYCM",
-                "text": "\ue00a\ue00anp",
+                "text": "\ue00a\ue00anp2p",
                 "type": "Type",
                 "typing_delay": "400"
             }

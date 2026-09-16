@@ -62,7 +62,7 @@
             {
                 "name": "[web_site_address]",
                 "val_options": "",
-                "value": "www.amazon.com"
+                "value": "https://www.amazon.com/"
             },
             {
                 "name": "[new_tab]",

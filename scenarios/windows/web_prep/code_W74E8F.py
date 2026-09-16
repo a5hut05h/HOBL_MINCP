@@ -30,6 +30,7 @@ def run(scenario):
     scenario._call(["powershell.exe", 'Set-PolicyFileEntry -Path "$env:windir\\system32\\GroupPolicy\\Machine\\registry.pol" -Key SOFTWARE\\Policies\\Microsoft\\Edge -ValueName HideRestoreDialogEnabled -Data 1 -Type DWord'])
     scenario._call(["powershell.exe", 'Set-PolicyFileEntry -Path "$env:windir\\system32\\GroupPolicy\\Machine\\registry.pol" -Key SOFTWARE\\Policies\\Microsoft\\Edge -ValueName EdgeWorkspacesEnabled -Data 0 -Type DWord'])
     scenario._call(["powershell.exe", 'Set-PolicyFileEntry -Path "$env:windir\\system32\\GroupPolicy\\Machine\\registry.pol" -Key SOFTWARE\\Policies\\Microsoft\\Edge -ValueName DefaultGeolocationSetting -Data 2 -Type DWord'])
+    scenario._call(["cmd.exe", '/C reg add "HKLM\\Software\\Policies\\Microsoft\\Edge\\LocalNetworkAccessAllowedForUrls" /v 1 /t REG_SZ /d * /f'])
     scenario._call(["powershell.exe", 'Set-PolicyFileEntry -Path "$env:windir\\system32\\GroupPolicy\\Machine\\registry.pol" -Key SOFTWARE\\Policies\\Microsoft\\EdgeUpdate -ValueName AutoUpdateCheckPeriodMinutes -Data 0 -Type DWord'])
     # This one prevents even manual updates, so commenting out
     # scenario._call(["powershell.exe", 'Set-PolicyFileEntry -Path "$env:windir\\system32\\GroupPolicy\\Machine\\registry.pol" -Key SOFTWARE\\Policies\\Microsoft\\EdgeUpdate -ValueName InstallDefault -Data 0 -Type DWord'])
