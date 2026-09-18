@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+import time
 import importlib
 import sys
 import os
@@ -87,7 +88,7 @@ params.setDefault('global', 'callback_test_end', '', desc="Shell command to call
 params.setDefault('global', 'callback_data_ready', '', desc="Shell command to call when data has been copied back from the DUT.")
 params.setDefault('global', 'callback_test_fail', '', desc="Shell command to call when a test fails, to reset any instruments.")
 params.setDefault('global', 'collection_enabled', '1', desc="Enable data collection from the test scenarip (1) or not (0).", valOptions=["1", "0"])
-params.setDefault('global', 'post_run_delay', '60', desc="Seconds to pause to let the system quiesce after a scenario.")
+params.setDefault('global', 'post_run_delay', '0', desc="Seconds to pause to let the system quiesce after a scenario.")
 params.setDefault('global', 'pre_run_delay', '0', desc="Seconds to pause to let the system quiesce before a scenario.")
 # params.setDefault('global', 'power_after', '0') # deprecated
 params.setDefault('global', 'module_name', '', desc="Override the name of a scenario, if needed.")
@@ -117,6 +118,7 @@ params.setDefault('global', 'goal_limit', '30') # Goal_limit is a percentage (30
 params.setDefault('global', 'warn_limit', '20') # Warn_limit is a percentage (20%)
 # params.setDefault('global', 'enable_vbs', '')
 params.setDefault('global', 'hobl_external', '', desc="External HOBL directories for specifying extra scenarios/tools/utilities", multiple=True)
+params.setDefault('global', 'cursor_movement_enable', '0', desc="Enable moving the cursor in a realistic manner between click points.", valOptions=["0", "1"])
 
 params.setDefault('global', 'web_replay_run', '0')
 params.setDefault('global', 'web_replay_check_enable', '1')
@@ -147,6 +149,8 @@ params.setDefault('global', 'prep_status_enable', '1', desc="Check prep status b
 params.setDefault('global', 'prep_run_only', '0', desc="Run prep only for scenarios that have both a prep and test component.", valOptions=["1", "0"])
 params.setDefault('global', 'result_dir_complete', '', desc="Completed file path for storing test results (already including study type, study variables, and run type).")
 
+# Set default net_prep to handle insertion of net_prep in prep scenario
+params.setDefault("net_prep", 'connection', 'Wi-Fi')  # Wi-Fi, Cellular, or Ethernet
 
 # Command line arguments
 core.arguments.Arguments()
@@ -294,9 +298,9 @@ class StreamHandlerWrapper(logging.StreamHandler):
 
 def open_log(log=None):
     if log:
-        logging.basicConfig(filename=log, filemode='w', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(module)s:%(lineno)d  %(message)s')
+        logging.basicConfig(filename=log, filemode='w', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(module)s:%(lineno)d  %(message)s', force=True)
     else:
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(module)s:%(lineno)d  %(message)s')
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(module)s:%(lineno)d  %(message)s', force=True)
         return
     global root
     root = logging.getLogger()
@@ -376,7 +380,7 @@ def set_run_dir(module):
             suffix = int(max_suffix) + 1
         test_name = module + "_{:03d}".format(suffix)
         run_dir = os.path.join(result_dir, test_name)
-    time.sleep(1)
+    # time.sleep(1)
     if not os.path.exists(run_dir):
         os.makedirs(run_dir)
     
@@ -540,20 +544,25 @@ class TextTestResult(unittest.TextTestResult):
         )
 
 def _add_python_embed_firewall():
+    # Check if the firewall rule already exists with cmd.  This may seem redundant with the firewall_add.ps1,
+    # but shaves a couple seconds off the execution of every scenario.
+    rule = f"python_embed ({pp_dir})"
+    firewall_check_cmd = f"netsh advfirewall firewall show rule name=\"{rule}\""
+    check_result = host_call(f"{firewall_check_cmd}")
+    print(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())} - Firewall check result: {rule} - {check_result}")
+    if "No rules match" not in check_result:
+        return
+
     firewall_add_cmd = ".\\setup_src\\src_host\\firewall_add.ps1"
 
-    def call(cmd):
-        p = subprocess.Popen(cmd, shell = True, cwd = ".")
-        p.communicate()
-
     if params.get('global', 'dut_ip') == "127.0.0.1":
-        call(f"pwsh.exe -Command unblock-file -path {firewall_add_cmd}")
-        call(f"pwsh.exe -Command Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
-        call(f"pwsh.exe -File {firewall_add_cmd}")
+        host_call(f"pwsh.exe -Command unblock-file -path {firewall_add_cmd}")
+        host_call(f"pwsh.exe -Command Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
+        host_call(f"pwsh.exe -File {firewall_add_cmd}")
     else:
-        call(f"powershell.exe -Command unblock-file -path {firewall_add_cmd}")
-        call(f"powershell.exe -Command Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
-        call(f"powershell.exe -File {firewall_add_cmd}")
+        host_call(f"powershell.exe -Command unblock-file -path {firewall_add_cmd}")
+        host_call(f"powershell.exe -Command Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser")
+        host_call(f"powershell.exe -File {firewall_add_cmd}")
 
 
 
@@ -617,6 +626,7 @@ if __name__ == '__main__':
 
     _add_python_embed_firewall()
 
+
     temp_dir = os.getenv('LOCALAPPDATA') + "\\HOBL"
 
     # if -k <scenario> was specified on the command line, call the kill() method of
@@ -659,6 +669,12 @@ if __name__ == '__main__':
             logging.debug("Killing server with PID: " + str(appium_pid))
             subprocess.call(["powershell.exe", "kill -Id " + str(appium_pid)])
         
+        # Kill HOBLStatusWindow.exe on DUT if it is running
+        if params.get('global', 'platform').lower() == 'windows':
+            try:
+                rpc.call_rpc(dut_ip, 8000, "RunWithResultAndExitCode", ["cmd.exe", "/c taskkill /IM HOBLStatusWindow.exe /T /F > null 2>&1"], timeout = 10, log=False)
+            except:
+                pass
         if dashboard_url != '':
             while True:
                 try:
@@ -757,6 +773,7 @@ if __name__ == '__main__':
                                 break
                             logging.debug("Posting Result Dir, status=" + status_code)
                             time.sleep(5)
+
 
                     try:
                         fo = open("hobl_version.txt", "r")
@@ -952,10 +969,16 @@ if __name__ == '__main__':
 
     # Checking if local execution and if running from dashboard if so then we want to relaunch the web ui to help notify user that scenario ran. 
     try:
-        if dashboard_url != ''and params.get('global', 'dut_ip') == "127.0.0.1":
+        active_ui = (Params.get('global', 'check_ui') == '1') or dashboard_url != ''
+        if active_ui and params.get('global', 'dut_ip') == "127.0.0.1" and params.getCalculated('hide_ui').lower() == "true":
             subprocess.call(f'start /MAX "" "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" --app="http://localhost:80/plan/Scenarios?PlanID={dashboard_plan_id}" --start-maximized', shell=True)
     except:
         pass
+
+    # Kill HOBLStatusWindow.exe on DUT if it is running
+    if params.get('global', 'platform').lower() == 'windows' and params.get('global', 'preserve_status_window') != "1":
+        rpc.call_rpc(dut_ip, 8000, "RunWithResultAndExitCode", ["cmd.exe", "/c taskkill /IM HOBLStatusWindow.exe /T /F > null 2>&1"], timeout = 5, log=False)
+
     local_execution_reboot_flag = Params.getCalculated("local_execution_reboot")
 
     if suite_success:

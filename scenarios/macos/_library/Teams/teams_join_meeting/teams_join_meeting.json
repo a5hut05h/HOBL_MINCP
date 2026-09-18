@@ -131,7 +131,7 @@
     },
     {
         "children": [],
-        "delay": "0.0",
+        "delay": "6.0",
         "description": "Join Meeting",
         "enabled": true,
         "file_name": [
@@ -747,7 +747,7 @@
         "enabled": true,
         "exception_on": "No match",
         "file_name": [
-            "image_16XC1EF.png"
+            "image_1UUVRHP.png"
         ],
         "id": "16XC1EF",
         "match_threshold": "",

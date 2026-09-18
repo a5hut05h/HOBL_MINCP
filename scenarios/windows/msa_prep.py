@@ -30,15 +30,17 @@ class msaPrep(core.app_scenario.Scenario):
     local_execution = (Params.get('global', 'local_execution'))
 
     is_prep = True
-
+    hide_ui = False
 
     def runTest(self):
         # If MSA account is not specified, skip this prep
         if self.msa_account == "" or self.dut_password == "":
             logging.info("MSA account or password not specified, skipping msa_prep.")
+            self._status_window("MSA account or password not specified, skipping account setup.")
             self.createPrepStatusControlFile()
             return
-        
+
+        self._status_window(f"Setting up MSA account:\n[color=white]{self.msa_account}[/color]")
         # Delete entries created for Local Account
         self._call(["cmd.exe", '/C reg delete "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" /v DefaultUserName /f > null 2>&1'], expected_exit_code="")
         self._call(["cmd.exe", '/C reg delete "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" /v AutoAdminlogon /f > null 2>&1'], expected_exit_code="")

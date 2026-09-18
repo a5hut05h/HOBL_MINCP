@@ -248,6 +248,8 @@ class Params(object):
                         key_list.append(key)
             for key in key_list:
                 val = Params.get(section, key, log=False)
+                if 'password' in key.lower():
+                    continue
                 logging.debug("Resolved - " + str(section) + " : " + str(key) + " = " + str(val))
 
     @classmethod
@@ -656,7 +658,7 @@ def reg_read(sub_key):
     if sub_key.islower():
         sub_key = "_" + sub_key
     try:
-        aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+        aReg = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
         aKey = winreg.OpenKey(aReg, key, 0, winreg.KEY_READ)
         val = winreg.QueryValueEx(aKey, sub_key)[0]
         return val
@@ -669,7 +671,7 @@ def reg_write(sub_key, val):
     if sub_key.islower():
         sub_key = "_" + sub_key
     try:   
-        aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+        aReg = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
         aKey = winreg.CreateKeyEx(aReg, key, 0, winreg.KEY_WRITE)
         winreg.SetValueEx(aKey, sub_key, 0, winreg.REG_SZ, val)
     except Exception as e:                                          
@@ -682,7 +684,7 @@ def reg_clean(sub_key):
     if sub_key.islower():
         sub_key = "_" + sub_key
     try:
-        aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+        aReg = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
         aKey = winreg.OpenKey(aReg, key, 0, winreg.KEY_WRITE)
         winreg.DeleteValue(aKey, sub_key)
         return True

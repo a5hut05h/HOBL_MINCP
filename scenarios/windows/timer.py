@@ -15,8 +15,6 @@ class Timer(core.app_scenario.Scenario):
     module = __module__.split('.')[-1]
     Params.setDefault(module, 'duration', '1')  # Seconds
 
-    # Params.setOverride("global", "collection_enabled", "0")
-
     def runTest(self):
         self.duration = Params.get(self.module, 'duration')
         logging.info("Delaying for " + self.duration + " seconds")

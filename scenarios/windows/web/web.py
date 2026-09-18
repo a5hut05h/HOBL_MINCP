@@ -20,6 +20,8 @@ class Web(core.app_scenario.Scenario):
     actions = None
 
     def setUp(self):
+        if Params.get('global', 'dut_ip') == "127.0.0.1":
+            self._status_window("Setting up Web scenario.\nUI will close while the scenario is running.")
         # Load actions JSON.
         actions_json = os.path.join(os.path.dirname(__file__), "web.json")
         self.actions = self.load_action_json(actions_json)
@@ -31,6 +33,8 @@ class Web(core.app_scenario.Scenario):
 
         # Call base class setUp() to dump config, call tool callbacks, and start measurment
         core.app_scenario.Scenario.setUp(self)
+        if Params.get('global', 'dut_ip') == "127.0.0.1":
+            self._call(["cmd.exe", '/c taskkill /IM HOBLStatusWindow.exe /T /F > null 2>&1'], expected_exit_code="")
 
 
     def runTest(self):

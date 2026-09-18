@@ -58,7 +58,7 @@ class HostServer(socketserver.BaseRequestHandler):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='This server listens for incomming callbacks and triggers Power Measurements and Tracing accordingly.')
     parser.add_argument('-host', nargs='?', default='localhost', help="The host IP for the server to listen on. Defaults to localhost.")
-    parser.add_argument('-port', nargs='?', default=9999, help="The port number for the server to listen on. Defaults to 9999.")
+    parser.add_argument('-port', nargs='?', default=4771, help="The port number for the server to listen on. Defaults to 9999.")
 
     args = parser.parse_args()
     host = args.host

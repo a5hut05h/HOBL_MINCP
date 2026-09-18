@@ -17,7 +17,7 @@ class Widgets:
             self.app = QtWidgets.QApplication([])
 
 
-    def _call_widget(self, path, data):
+    def _call_widget(self, path, data, break_callback=None):
         data["planId"] = self.dashboard_plan_id
 
         url = urlunparse(
@@ -31,16 +31,33 @@ class Widgets:
                 response = requests.post(
                     url,
                     data,
-                    timeout=10
+                    timeout=2
                 )
 
                 if response.status_code == 200:
                     break
+
             except Exception as e:
                 pass
 
+            if break_callback is not None:
+                result = break_callback()
+                if result:
+                    # Send request with "dismiss" title to dismiss widget
+                    try:
+                        response = requests.post(
+                            url,
+                            {"title": "dismiss", "text": "", "planId": self.dashboard_plan_id},
+                            timeout=10
+                        )
+                    except Exception as e:
+                        pass
+                    break
+            else:
+                pass
 
-    def about(self, title, text):
+
+    def about(self, title, text, break_callback=None):
         if self.dashboard_url == "":
             input(f"{text} Press Enter to continue...")
             # QtWidgets.QMessageBox.about(None, title, text)
@@ -50,5 +67,7 @@ class Widgets:
                 {
                     "title": title,
                     "text": text
-                }
+                },
+                break_callback=break_callback
             )
+    

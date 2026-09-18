@@ -37,12 +37,13 @@ class ProcessIdleTasks(core.app_scenario.Scenario):
     # Params.setOverride("global", "collection_enabled", "0")
     Params.setOverride("global", "prep_tools", "")
     is_prep = True
-
+    hide_ui = False
 
     def runTest(self):
         if self.dut_ip == "127.0.0.1":
             self.loops = 1
-        
+
+        self._status_window("Processing idle tasks to quiesce the device.\nThis may take up to two hours.\nDevice will reboot when finished.")
         #logging.info("Setup")
         self._upload("utilities\\open_source\\process_idle_tasks.ps1", self.dut_exec_path)
         #logging.info("Initial Thread timeout - " + str(self.timeout / 60) + " min.")

@@ -3,7 +3,7 @@ if ($ARGS[0] -eq $null) {return("Params .ini not supplied, please supply a param
 .\hobl.cmd -p $ARGS[0] -s config_check
 .\hobl.cmd -p $ARGS[0] -s charge_off global:run_type=Misc global:post_run_delay=900
 
-.\hobl.cmd -p $ARGS[0] -s idle_desktop global:tools="+power_heavy" global:run_type=ETL
+.\hobl.cmd -p $ARGS[0] -s idle_desktop global:tools="+power_heavy" global:run_type=ETL pre_run_delay=60
 .\hobl.cmd -p $ARGS[0] -s cs_floor global:tools="+power_heavy powercfg" global:run_type=ETL
 .\hobl.cmd -p $ARGS[0] -s abl_active global:tools="+power_heavy" global:run_type=ETL
 .\hobl.cmd -p $ARGS[0] -s abl_standby global:tools="+power_heavy powercfg" global:run_type=ETL

@@ -168,7 +168,7 @@ class Tab(QtWidgets.QWidget):
                 y_frac = max(0, dut_y / self.main_win.dut_screen_height)
                 action = self.actionModel.appendAction(self.working_dir, type=self.action_type, x="{:.3f}".format(x_frac), y="{:.3f}".format(y_frac), delay=str(self.settings.get("default_delay")), direction=dir)
                 if self.main_win.connected:
-                    result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "Scroll", dut_x, dut_y, 720, dir, self.main_win.current_display, "0", "0", 0, 0, 0, 0, 0, 0)
+                    result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "Scroll", dut_x, dut_y, 720, dir, self.main_win.current_display, False, "0", "0", 0, 0, 0, 0, 0, 0)
             # else squash events
 
         elif self.mode_select or self.mode_record:
@@ -203,7 +203,7 @@ class Tab(QtWidgets.QWidget):
                 dir = "up"
             dut_x, dut_y = self.image_to_dut_coords(self.selection_x, self.selection_y)
             if self.main_win.connected:
-                result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "Scroll", dut_x, dut_y, 120, dir, self.main_win.current_display, "0", "0", 0, 0, 0, 0, 0, 0)
+                result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "Scroll", dut_x, dut_y, 120, dir, self.main_win.current_display, False, "0", "0", 0, 0, 0, 0, 0, 0)
 
     @pyqtSlot(QtGui.QMouseEvent)
     def update_mouse_move(self, event):
@@ -226,7 +226,7 @@ class Tab(QtWidgets.QWidget):
         else:
             dut_x, dut_y = self.image_to_dut_coords_e(event)
             if self.main_win.connected:
-                result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "MoveTo", dut_x, dut_y, self.main_win.current_display)
+                result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "MoveTo", dut_x, dut_y, self.main_win.current_display, False)
 
     @pyqtSlot(QtGui.QMouseEvent)
     def update_mouse_lpress(self, event):
@@ -262,7 +262,7 @@ class Tab(QtWidgets.QWidget):
                     pass
                 if self.mode_record:
                     if self.main_win.connected:
-                        result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "TapDown", dut_x, dut_y, primary, self.main_win.current_display)
+                        result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "TapDown", dut_x, dut_y, primary, self.main_win.current_display, False)
             if self.action_type == "AddImage":
                 action = self.pending_dialog.action
                 new_name = "image_" + self.actionModel.get_id() + ".png"
@@ -297,7 +297,7 @@ class Tab(QtWidgets.QWidget):
         else: # Pass click through to DUT
             dut_x, dut_y = self.image_to_dut_coords_e(event)
             if self.main_win.connected:
-                result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "TapDown", dut_x, dut_y, primary, self.main_win.current_display)
+                result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "TapDown", dut_x, dut_y, primary, self.main_win.current_display, False)
 
     @pyqtSlot(QtGui.QMouseEvent)
     def update_mouse_lrelease(self, event):
@@ -307,14 +307,14 @@ class Tab(QtWidgets.QWidget):
             return
         dut_x, dut_y = self.image_to_dut_coords_e(event)
         if self.main_win.connected:
-            result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "TapUp", dut_x, dut_y, True, self.main_win.current_display)
+            result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "TapUp", dut_x, dut_y, True, self.main_win.current_display, False)
 
     @pyqtSlot(QtGui.QMouseEvent)
     def update_mouse_rrelease(self, event):
         # print (event.position())
         dut_x, dut_y = self.image_to_dut_coords_e(event)
         if self.main_win.connected:
-            result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "TapUp", dut_x, dut_y, False, self.main_win.current_display)
+            result = rpc.plugin_call(self.dut_ip, 8000, "InputInject", "TapUp", dut_x, dut_y, False, self.main_win.current_display, False)
 
     def image_to_dut_coords_e(self, event):
         return self.image_to_dut_coords(event.position().x(), event.position().y())
@@ -1124,7 +1124,14 @@ class Tab(QtWidgets.QWidget):
         filepath = os.path.join(self.working_dir, name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
-        dut_dpi = int(96 * self.main_win.dutPixelRatio)
+
+        if self.capture_mode == "image":
+            dpi_value = int(self.main_win.dpiEdit.text())
+            dpi = (dpi_value, dpi_value)
+        else:
+            dut_dpi = int(96 * self.main_win.dutPixelRatio)
+            dpi = (dut_dpi, dut_dpi)
+            print(f"Saving template with dpi {dut_dpi}")
 
         if thumbnail:
             max_width = 500
@@ -1135,8 +1142,8 @@ class Tab(QtWidgets.QWidget):
             if r > 1.0:
                 r = 1.0
             image = image.resize((int(image.width*r), int(image.height*r)))
-        print(f"Saving template with dpi {dut_dpi}")
-        image.save(filepath, dpi=(dut_dpi, dut_dpi))
+
+        image.save(filepath, dpi=dpi)
         return filepath
 
 
@@ -1309,16 +1316,54 @@ class Tab(QtWidgets.QWidget):
 
     def open_image(self):
         image_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Select image')
-        if image_path:
-            self.capture_mode = "image"
-            img = QtGui.QPixmap(image_path).toImage()
-            img.setDevicePixelRatio(self.screen().devicePixelRatio())
+        if not image_path:
+            return
+        # Read DPI from the file directly; Image.fromqimage() loses PNG dpi metadata.
+        try:
+            with Image.open(image_path) as pil_img:
+                image_dpi = pil_img.info.get('dpi')
+        except:
+            print(f"Failed to read DPI from {image_path}")
+            image_dpi = None
+        if not image_dpi:
+            prompt = (
+                f"No DPI metadata found in image:\n{os.path.basename(image_path)}\n\n"
+                "Enter a DPI value (96-192).\n\n"
+                "This should match the Windows display scaling of the DUT\n"
+                "that produced the image:\n"
+                "    96  = 100%\n"
+                "    120 = 125%\n"
+                "    144 = 150%\n"
+                "    168 = 175%\n"
+                "    192 = 200%"
+            )
+            # Loop until we get a valid integer in range; cancelling aborts the image load.
+            while True:
+                text, ok = QtWidgets.QInputDialog.getText(
+                    self, "Set DPI", prompt, QtWidgets.QLineEdit.EchoMode.Normal, ""
+                )
+                if not ok:
+                    return
+                try:
+                    dpi_value = int(text)
+                except ValueError:
+                    dpi_value = None
+                if dpi_value is not None and 96 <= dpi_value <= 192:
+                    break
+            image_dpi = (dpi_value, dpi_value)
 
-            self.labelImage.setImage(img)
-            self.last_capture_pil = Image.fromqimage(img)
+        self.capture_mode = "image"
+        img = QtGui.QPixmap(image_path).toImage()
+        img.setDevicePixelRatio(self.screen().devicePixelRatio())
+        self.labelImage.setImage(img)
+        self.last_capture_pil = Image.fromqimage(img)
+        print(f"Opened image DPI: {image_dpi}")
+        self.main_win.dpiEdit.setText(str(round(image_dpi[0])))
+        self.main_win.update_dpi_controls()
 
     def remote_connect(self):
         self.capture_mode = "remote"
+        self.main_win.update_dpi_controls()
 
     ###
     ### Action item list

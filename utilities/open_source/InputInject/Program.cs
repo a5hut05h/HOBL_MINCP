@@ -103,19 +103,19 @@ namespace InputInject
             return (interop.GetScreenInfo());
         }
 
-        public void MoveTo(Int64 x, Int64 y, Int64 screenIndex = 0)
+        public void MoveTo(Int64 x, Int64 y, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            interop.MoveTo(x, y, screenIndex);
+            interop.MoveTo(x, y, screenIndex, moveCursor);
         }
 
-        public void MoveBy(Int64 x, Int64 y)
+        public void MoveBy(Int64 x, Int64 y, bool moveCursor = false)
         {
-            interop.MoveBy(x, y);
+            interop.MoveBy(x, y, moveCursor);
         }
 
-        public void Tap(Int64 x, Int64 y, Int64 delay, bool primary, Int64 screenIndex = 0, string traceId = "", Int64 traceX = 0, Int64 traceY = 0, Int64 traceW = 10, Int64 traceH = 10, Int64 traceMs = 1000, Int64 traceFramerate = 60)
+        public void Tap(Int64 x, Int64 y, Int64 delay, bool primary, Int64 screenIndex = 0, bool moveCursor = false, string traceId = "", Int64 traceX = 0, Int64 traceY = 0, Int64 traceW = 10, Int64 traceH = 10, Int64 traceMs = 1000, Int64 traceFramerate = 60)
         {
-            interop.Tap(x, y, delay, primary, screenIndex);
+            interop.Tap(x, y, delay, primary, screenIndex, moveCursor);
 
             // Record screen if traceId is provided
             if (!string.IsNullOrEmpty(traceId))
@@ -125,14 +125,14 @@ namespace InputInject
 
         }
 
-        public void TapDown(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0)
+        public void TapDown(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            interop.TapDown(x, y, primary, screenIndex);
+            interop.TapDown(x, y, primary, screenIndex, moveCursor);
         }
 
-        public void TapUp(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0)
+        public void TapUp(Int64 x, Int64 y, bool primary, Int64 screenIndex = 0, bool moveCursor = false)
         {
-            interop.TapUp(x, y, primary, screenIndex);
+            interop.TapUp(x, y, primary, screenIndex, moveCursor);
         }
 
         // public void Path(List<Int64> x_list, List<Int64> y_list, List<Int64> delay_list, bool primary, Int64 screenIndex = 0)
@@ -145,7 +145,7 @@ namespace InputInject
             int x = x_list != null && x_list.Count > 0 ? (int)x_list[0] : throw new InvalidOperationException("item.x is null or empty");
             int y = y_list != null && y_list.Count > 0 ? (int)y_list[0] : throw new InvalidOperationException("item.y is null or empty");
             int delay = delay_list != null && delay_list.Count > 0 ? (int)delay_list[0] : throw new InvalidOperationException("item.delay is null or empty");
-            MoveTo(x, y, screenIndex);
+            MoveTo(x, y, screenIndex, moveCursor: false);
             TouchDown();
             Thread.Sleep(delay);
             for (int i = 1; i < x_list.Count; i++)
@@ -153,15 +153,15 @@ namespace InputInject
                 x = (int)x_list[i];
                 y = (int)y_list[i];
                 delay = (int)delay_list[i];
-                MoveTo(x, y, screenIndex);
+                MoveTo(x, y, screenIndex, moveCursor: false);
                 Thread.Sleep(delay);
             }
             TouchUp();
         }
 
-        public void Scroll(Int64 x, Int64 y, Int64 delay, string direction, Int64 screenIndex = 0, string traceId = "", Int64 traceX = 0, Int64 traceY = 0, Int64 traceW = 10, Int64 traceH = 10, Int64 traceMs = 1000, Int64 traceFramerate = 60)
+        public void Scroll(Int64 x, Int64 y, Int64 delay, string direction, Int64 screenIndex = 0, bool moveCursor = false, string traceId = "", Int64 traceX = 0, Int64 traceY = 0, Int64 traceW = 10, Int64 traceH = 10, Int64 traceMs = 1000, Int64 traceFramerate = 60)
         {
-            interop.Scroll(x, y, delay, direction, screenIndex);
+            interop.Scroll(x, y, delay, direction, screenIndex, moveCursor);
             
             // Record screen if traceId is provided
             if (!string.IsNullOrEmpty(traceId))

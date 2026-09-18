@@ -15,8 +15,10 @@ import core.call_rpc as rpc
 import json
 import time
 
-
 class WaitForDut(core.app_scenario.Scenario):
+
+    is_prep = True
+    hide_ui = False
 
     module = __module__.split('.')[-1]
     # Override parameters

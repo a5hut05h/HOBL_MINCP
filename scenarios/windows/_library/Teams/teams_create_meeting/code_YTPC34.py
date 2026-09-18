@@ -32,7 +32,7 @@ def run(scenario):
     # logging.info("bots_test_server: " + bots_test_server)
     # logging.info("==========================================")
 
-    max_duration = 43200
+    max_duration = 64800
 
     # Validation of test params
     if access_key == "-1" and number_of_bots > 0:
@@ -99,7 +99,7 @@ def run(scenario):
         attempts = 1
         while attempts < 10:
             logging.info("Attempting to start meeting. Attempt #" + str(attempts))
-            logging.debug("Request String: " + request_string)
+            logging.debug("Request String: " + request_string.replace("code=", "[REDACTED]"))
             logging.debug("Bot Data: " + bot_data)
             # break
             # Send the request to the server

@@ -327,6 +327,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#net_prep_wifi" class="md-nav__link">
+    net_prep_wifi
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#perf_stress" class="md-nav__link">
     perf_stress
   </a>
@@ -603,6 +610,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#net_prep_wifi" class="md-nav__link">
+    net_prep_wifi
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#perf_stress" class="md-nav__link">
     perf_stress
   </a>
@@ -822,6 +836,11 @@ Local camera and mic are on, other 9 participants are bots sending video and aud
 <p><code>background_onedrive_copy</code> -  <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
 <p><code>simple_office_launch</code> -  <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>1, 0</code></p>
 <p><code>perf_run</code> -  <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
+<h2 id="net_prep_wifi">net_prep_wifi</h2>
+<p>Set device routing table to prefer Wi-Fi connection between DUT and HOBL Host, to ensure that prep scenarios do not run over cellular.</p>
+<p><u>Parameters:</u></p>
+<p><code>net_prep_enabled</code> -  <strong>Default:</strong> <code>1</code> </p>
+<p><code>connection</code> -  <strong>Default:</strong> <code>Wi-Fi</code> </p>
 <h2 id="perf_stress">perf_stress</h2>
 <p>Install pyenv + Python + numpy/psutil on DUT for percentile_stress.py</p>
 <p><u>Parameters:</u></p>
@@ -876,7 +895,7 @@ Local camera and mic are on, other 9 participants are bots sending video and aud
 <p><code>sleep_mode</code> -  <strong>Default:</strong> `` </p>
 <p><code>connection</code> - Connected or Disconnected from the network during standby <strong>Default:</strong> <code>Connected</code>  <strong>Options:</strong> <code>Disconnected, Connected</code></p>
 <h2 id="system_prep">system_prep</h2>
-<p>Preforms various tasks that prepare a device for testing.</p>
+<p>Performs various tasks that prepare a device for testing.</p>
 <p><u>Parameters:</u></p>
 <p><code>hibernate_enabled</code> - Enables or disables hibernation on the device <strong>Default:</strong> <code>1</code>  <strong>Options:</strong> <code>0, 1</code></p>
 <p><code>telemetry_enabled</code> - Enables or disables the gathering of optional diagnostic data in the OS <strong>Default:</strong> <code>0</code>  <strong>Options:</strong> <code>0, 1</code></p>
