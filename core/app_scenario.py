@@ -684,6 +684,11 @@ class Scenario(unittest.TestCase):
                         rpc.call_rpc(self.dut_ip, self.rpc_port,
                                      "GetVersion", [])
 
+                    # Load InputInject plugin since device may have rebooted or scneario forced is_alive to 0.
+                    if self.platform.lower() == 'macos':
+                        result = rpc.plugin_load(self.dut_ip, self.rpc_port, "InputInject", "InputInject.Application", "/Users/Shared/hobl_bin/InputInject/InputInject.dll")
+                    else:
+                        result = rpc.plugin_load(self.dut_ip, self.rpc_port, "InputInject", "InputInject.Application", "C:\\hobl_bin\\InputInject\\InputInject.dll")
                     self._screenshot(name="failedscreen.png")
                     logging.debug(
                         "Copying data from DUT due to test exception.")
@@ -1759,9 +1764,9 @@ class Scenario(unittest.TestCase):
                         if self.platform.lower() == "windows":
                             # Check if file exists and is the same
                             dest_file = os.path.basename(source)
-                            result = self._call(["cmd.exe", f'/c forfiles /P "{dest}" /M "{dest_file}" /C "cmd /c echo @fdate @ftime"'], expected_exit_code="")
+                            result = self._call(["cmd.exe", f'/c forfiles /P "{dest}" /M "{dest_file}" /C "cmd /c echo @fdate @ftime"'], expected_exit_code="", log_output=False)
 
-                            logging.debug("RESULT: " + result)
+                            # logging.debug("RESULT: " + result)
                             if "not found" in result or "not exist" in result:
                                 logging.info("Dest file doesn't exist, uploading: " + source)
                                 rpc.upload(self.dut_ip, self.rpc_port, source, dest)
