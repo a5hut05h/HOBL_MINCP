@@ -1,11 +1,11 @@
-# HOBL Parameters
+# Parameters
 
 This is a description of the parameters that can be set for HOBL runs, either in a profile or overriden on the command line.
 
 
 The format consists of "sections", which refer to a particular scenario or tool, except "global" which has parameters that pertain to all.  The parameters below each section pertain to that section.  Parameters are specified on the command line as `<section>:<key>=<value>`.   Ex:
     `global:dut_ip=127.0.0.1`  
-Values can contain spaces, but not commas or semilcolons.
+Values can contain spaces, but not commas or semi-colons.
 
 ## global
 `msa_account` - Microsoft account associated with Device Under Test (DUT).  Example vlaue: "tester@outlook.com"

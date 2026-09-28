@@ -1,4 +1,4 @@
-# HOBL Scenarios
+# Scenarios
 
 ## cinebench
 
