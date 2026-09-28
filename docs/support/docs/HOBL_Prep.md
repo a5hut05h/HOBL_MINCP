@@ -1,4 +1,4 @@
-# HOBL Prep
+# Prep Details
   
 The goal of HOBL is to test a device in the same way that a typical customer would use it, and therefore attempts to minimze any changes from the default setup of the device.  However, some changes need to be made in order to facilitate reliable automation.  Below is the list of scenarios and tools that make such changes to the system, and the changes they make.
 

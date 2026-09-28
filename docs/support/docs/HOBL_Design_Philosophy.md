@@ -4,51 +4,45 @@
 
 ### Representativeness
 
-* HOBL's main purpose is for computer system validation and tuning.  
-* There are subtle but critical differences between synthetic benchmarks and how users really use devices.
-* These differences can result in wrong tuning choices and missed bugs.
-* In order to bring impact to real users, HOBL aims to interact with devices the way real users do.
-* And craft test scenarios based on telemetry and user research.
-* For example, in the "web" scenario, these aspects are based on telmetry and user research studies of the typical user:
-  * Which websites to visit.
-  * How many tabs to open.
-  * How much time to spend on each site.
-  * Scrolling behavior.
-  * New Tab Page visits.
-  * Typing rate.
-  * Browser caching behavior.
-  * And so on...
+HOBL's main purpose is for computer system validation and tuning.  There are subtle but critical differences between synthetic benchmarks and how users really use devices.  These differences can result in wrong tuning choices and missed bugs.  In order to bring impact to real users, HOBL aims to interact with devices the way real users do, and craft test scenarios based on telemetry and user research.  For example, in the "web" scenario, these aspects are based on telmetry and user research studies of the typical user:
+
+  - Which websites to visit
+  - How many tabs to open
+  - How much time to spend on each site
+  - Scrolling behavior
+  - New Tab Page visits
+  - Typing rate
+  - Browser caching behavior
+  - And so on...
 
 ### Usability
 
-* Ease of setup/use is critical to support hundreds of users across many organizations.
+Ease of setup/use is critical so that users can focus on studies rather than infrastructure.  Usability features in HOBL include:
+
 * Stand-alone UI app or centralized lab website.
-* Manage stations, create test plans, execute jobs, monitor status, analyze results, Remote to device, etc.
-* Simple DUT remote access capability directly from UI.
-* HOBL UI website can be accessed from corp/internet networks.
+* Ability to manage stations, create test plans, execute jobs, monitor status, analyze results, Remote to device, etc.
+* HOBL UI website can be accessed from corp/internet networks, no need for users to be in the lab.
 * Remote to DUT directly within HOBL UI.
-* Self-contained Teams testing with Teams Bots (limited to certain orgs).
-* Streaming video and recordings - RTSP or USB cams, screen casts from DUT.
-* Interface DAQs, power strips, other equipment.
+* Support for streaming video and recordings - RTSP or USB cams, screen casts from DUT.
 
 ### Extensibility
 
 * Can control or be controlled by other automation.
 * Plug-and-play tools:
-  * Add a tool by dropping it in the “tools” folder.
-  * Callback architecture allows actions at specific phases of test flow.
-  * Interface custom DAQs, thermal chambers, chargers, and other equipment.
+    * Add a tool by dropping it in the “tools” folder.
+    * Callback architecture allows actions at specific phases of test flow.
+    * Interface custom DAQs, thermal chambers, chargers, and other equipment.
 * Scenario Maker app:
-  * Quickly and easily create tests by recording actions.
-  * Democratizes test creation, relieving bottlenecks.
+    * Quickly and easily create tests by recording actions.
+    * Democratizes test creation, relieving bottlenecks.
 
 ### Scalability
 
-* Ability to run locally on a device:
+Ability to run locally on a device:
 
   * valuable for devs to reproduce issues.
 
-* Ability run on a centralized server controlling hundreds of devices:
+Ability run on a centralized server controlling hundreds of devices:
 
   * Maximizes electrical and physical capacity for DUTs.
   * External equipment not required.
@@ -62,11 +56,13 @@
 
 ### Controllability
 
-* To measure nuances in power and performance:
-  * All variables need to be controlled tightly.
-  * Tests need to do the exact same thing, with same timing, every time.  In HOBL all action timing is with reference to the beginning of the scenario, so that we don't get accumulation of error from various delays.
+To measure nuances in power and performance:
 
-* Web Replay technology:
+  * All variables need to be controlled tightly.
+  * Tests need to do the exact same thing, with same timing, every time.  In HOBL all action timing is with reference to the beginning of the scenario, so that timing errors don't accumulate over time.
+
+Web Replay technology:
+
   * Recorded web sites eliminates variability of live web pages.
   * Same content and timing, every time.
   * Prevents getting bot-detected by web sites.
@@ -84,10 +80,13 @@ To handle different themes and colors, we convert images to black-and-white outl
 
 ## Why Python?
 
-* No compiling.  This results in:
+No compiling.  This results in:
+
   * Faster fixes and feature development
-  * Incorporating fixes without disturbing currently running test.  These is crucial for large deployments and long-running studies managed by a centralized host.
-* Powerful, yet easy to read
+  * Incorporating fixes without disturbing currently running test.  These is crucial for large deployments and long-running studies managed by a entralized host.
+
+Powerful, yet easy to read
+
   * Novice users can apply emergency fixes and work-arounds.
   * External teams can easily develop their own tools and scenarios.
 

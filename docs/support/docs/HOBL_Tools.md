@@ -1,4 +1,4 @@
-# HOBL Tools
+# Tools
 
 ## audio_volume
 
@@ -409,9 +409,23 @@ Collect and parse a lightweight power trace.  Does not have a significant impact
 
 `storage` -  **Default:** `` 
 
+`camera` -  **Default:** `` 
+
+`audio` -  **Default:** `` 
+
+`display_light` -  **Default:** `` 
+
+`display_logic` -  **Default:** `` 
+
 `sam` -  **Default:** `` 
 
+`touch` -  **Default:** `` 
+
+`trackpad` -  **Default:** `` 
+
 `blade` -  **Default:** `` 
+
+`keyboard` -  **Default:** `` 
 
 `retimers` -  **Default:** `` 
 

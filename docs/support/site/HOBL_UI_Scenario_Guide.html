@@ -9,17 +9,17 @@
       
       
       
-        <link rel="prev" href="HOBL_Contributing.html">
+        <link rel="prev" href="HOBL_ScenarioMaker.html">
       
       
-        <link rel="next" href="HOBL_UI_Scenario_Guide.html">
+        <link rel="next" href="HOBL_Command_Scenario_Guide.html">
       
       <link rel="icon" href="assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.1.15">
     
     
       
-        <title>Scenario Maker - Docs</title>
+        <title>Developing UI-based Scenarios - Docs</title>
       
     
     
@@ -63,7 +63,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#scenario-maker" class="md-skip">
+        <a href="#developing-ui-based-scenarios" class="md-skip">
           Skip to content
         </a>
       
@@ -98,7 +98,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Scenario Maker
+              Developing UI-based Scenarios
             
           </span>
         </div>
@@ -352,6 +352,20 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="HOBL_ScenarioMaker.html" class="md-nav__link">
+        Scenario Maker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
     
   
   
@@ -363,24 +377,10 @@
         
       
       
-      <a href="HOBL_ScenarioMaker.html" class="md-nav__link md-nav__link--active">
-        Scenario Maker
-      </a>
-      
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="HOBL_UI_Scenario_Guide.html" class="md-nav__link">
+      <a href="HOBL_UI_Scenario_Guide.html" class="md-nav__link md-nav__link--active">
         Developing UI-based Scenarios
       </a>
+      
     </li>
   
 
@@ -534,12 +534,18 @@
                   
 
 
-<h1 id="scenario-maker">Scenario Maker</h1>
+<h1 id="developing-ui-based-scenarios">Developing UI-based Scenarios</h1>
+<p>This guide covers developing and maintain scenarios that interact with GUI-based applications.  The primary tool for this is Scenario Maker.  See the <a href="HOBL_ScenarioMaker.html">Scenario Maker documentation</a> for general use of Scenario Maker.</p>
+<p>For best results, follow these guidelines:</p>
 <ul>
-<li>Scenario Maker is an application that facilitates the creation of new test scenarios (or editing existing oens).</li>
-<li>Run Scenario Maker by executing hobl\ScenarioMaker\ScenarioMaker.cmd.</li>
-<li>It starts with a remote connection to a DUT (specify IP address in Settings), then allows you to compose a sequence of actions for the scenario using the menu.</li>
-<li>Record mode records you interacting with the DUT as a user would, and generates the appropriate action sequence for the test quickly and easily.  Caution, though, as these won't be optimized for power consumption.  To minimize power consumption, only take new screen captures when what you want to capture wasn't in a previous capture, and only capture as much of the screen as necessary.  Smaller screen region captures are faster and use less power.</li>
+<li>For the capture device, 150% Windows Scaling factor is recommended, with fairly high screen resolution (doesn't have to be 4K, though).</li>
+<li>Minimize capture size to minimze power imapct, but be sure to include enough to cover different screen layouts.</li>
+<li>Minimize capture frequency to minimze power impact.  Re-use where possible.</li>
+<li>For button click templates, capture text without the surrounding box because the box spacing relative to the text can change.</li>
+<li>Don't capture elements that can change on different systems, like volume slider.</li>
+<li>Avoid code blocks.  They may be necessary, but consider it a red flag.  Maybe what you're trying to accomplish is something we should bake into the infrastructure, so talk to us about it.</li>
+<li>If you're not sure the best way to do something, ask.</li>
+<li>Do not use Check Until in a measured scenario.  This should be used for non-measured preps only.</li>
 </ul>
 
 
