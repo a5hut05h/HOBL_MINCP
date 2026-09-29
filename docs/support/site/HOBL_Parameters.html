@@ -383,7 +383,7 @@
   
     <li class="md-nav__item">
       <a href="HOBL_Command_Scenario_Guide.html" class="md-nav__link">
-        Developing Command-bsaed Scenarios
+        Developing Command-based Scenarios
       </a>
     </li>
   
@@ -693,17 +693,17 @@
 
 
 <h1 id="parameters">Parameters</h1>
-<p>This is a description of the parameters that can be set for HOBL runs, either in a profile or overriden on the command line.</p>
+<p>This is a description of the parameters that can be set for HOBL runs, either in a profile or overridden on the command line.</p>
 <p>The format consists of "sections", which refer to a particular scenario or tool, except "global" which has parameters that pertain to all.  The parameters below each section pertain to that section.  Parameters are specified on the command line as <code>&lt;section&gt;:&lt;key&gt;=&lt;value&gt;</code>.   Ex:
     <code>global:dut_ip=127.0.0.1</code><br />
 Values can contain spaces, but not commas or semi-colons.</p>
 <h2 id="global">global</h2>
-<p><code>msa_account</code> - Microsoft account associated with Device Under Test (DUT).  Example vlaue: "tester@outlook.com"</p>
+<p><code>msa_account</code> - Microsoft account associated with Device Under Test (DUT).  Example value: "tester@outlook.com"</p>
 <p><code>dut_name</code> - Name of DUT, as reported by "hostname" command.  The name of the DUT will be changed to the name you put here.  Make sure names do not include '-' or spaces.  If you want to keep the current DUT host name, this can be omitted.</p>
 <p><code>dut_ip</code> - IP address of the DUT.  Can be a name or refer directly to the dut_name parameter with "[dut_name]" if local network supports DNS sufficiently.</p>
 <p><code>dut_architecture</code> - Architecture of DUT, valid values are: x64 (default) or arm64.</p>
 <p><code>dut_password</code> - Password associated with the MSA Account.  This is only used by dut_setup to configure auto-logon.</p>
-<p><code>result_dir</code> - The directory to write results.  Typically, this should be changed for each study with a path that includes the name of the study.  To prevent the need to manually change this dir, variables can be specified in square brackets in the path.  Any global paramter can be
+<p><code>result_dir</code> - The directory to write results.  Typically, this should be changed for each study with a path that includes the name of the study.  To prevent the need to manually change this dir, variables can be specified in square brackets in the path.  Any global parameter can be
 a path variable, as well as the following special ones: [OS_BUILD], [LKG].  Example value:  "c:\hobl_results\[dut_name]\[study_type]\[LKG]".</p>
 <p><code>dut_wifi_name</code> - Wireless LAN name (SSID) to be used by DUT.  Dut_setup uses this to create the Wi-Fi profile and establish initial connection.
 dut_wifi_name: </p>
@@ -739,7 +739,7 @@ dut_wifi_name: </p>
 <p><code>study_type</code> - Type of study to be put on the Config sheet.  Typically set to "[study_type]" to leverage the global parameter.</p>
 <p><code>product</code> - Name of product or program to be put on Config sheet.</p>
 <p><code>template</code> - The Excel template used to roll up the data.  Leave blank to use the standard HOBL template.  For Rundowns, "docs\basic_study_report_template.xlsx" should be used.</p>
-<p><code>goals</code> - Path to CSV file of subystem power goals.</p>
+<p><code>goals</code> - Path to CSV file of subsystem power goals.</p>
 <p><code>trend</code> - Path to top level of studies to generate trend data.</p>
 <p><code>adders</code> - Path to CSV file of keyboard/touch/trackpad adders.</p>
 <p><code>name</code> - Optionally specify a more detailed base name for the study report.</p>

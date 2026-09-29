@@ -135,7 +135,7 @@ DUT.
 
    ```powershell
    git clone https://github.com/<your-account>/HOBL.git
-   Set-Location HOBL
+   cd hobl
    git remote add upstream https://github.com/microsoft/HOBL.git
    ```
 
@@ -205,7 +205,7 @@ handling.
 
 ## Scenario contribution requirements
 
-The detailed requirements and examples for various types of worloads can be found here: 
+The detailed requirements and examples for various types of workloads can be found here: 
 - [UI-based scenarios](HOBL_UI_Scenario_Guide.md)
 - [Command-based developer or benchmark scenarios](HOBL_Command_Scenario_Guide.md)
 
@@ -234,7 +234,7 @@ The following rules are especially important:
 	- It should also kill and clean up everything in the "kill" routine for the case when the user explicitly stops the scenario, or there is a failure of some sort.
 	- Kill routine needs to have every action wrapped in try so that if one fails others can continue.  Kill routine itself must never get an exception.
 1. Accommodate all ways of measurement.
-	- Short run, targetting around 5 min, for DAQ measurements and heavy ETL tracing so that resulting files are not too unwieldy.  40 min max.
+	- Short run, targeting around 5 min, for DAQ measurements and heavy ETL tracing so that resulting files are not too unwieldy.  40 min max.
 	- Ability to loop to support rundown measurements.  (Note this is different than scenario iterations.)
 1. Reserve power-impacting changes to the annual HOBL release at the beginning of each calendar year.
 	- To minimize users having to re-baseline.
