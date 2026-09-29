@@ -10,7 +10,7 @@ For help debugging a failed test scenario, please submit the details at [HOBL Su
 - the `image_matching` folder if it exists
 - a screen recording from the "screen_record" tool, if applicable
 
-For bugs and feature requests that may impact others, please use use GitHub Issues for public visibiliy and tracking. Please search the existing issues before filing new issues to avoid duplicates.  For new issues, file your bug or feature request as a new Issue.  Be sure to not include any credentials or confidential information.
+For bugs and feature requests that may impact others, please use use GitHub Issues for public visibility and tracking. Please search the existing issues before filing new issues to avoid duplicates.  For new issues, file your bug or feature request as a new Issue.  Be sure to not include any credentials or confidential information.
 
 ## Microsoft Support Policy  
 
