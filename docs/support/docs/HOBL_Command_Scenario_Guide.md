@@ -1,4 +1,4 @@
-# Developing Command-bsaed Scenarios
+# Developing Command-based Scenarios
 
 This guide covers conventions, patterns, and requirements for modifying or creating developer scenarios in the HOBL codebase. 
 

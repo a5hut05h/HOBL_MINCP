@@ -448,7 +448,7 @@ Switch to specified power mode (best power efficiency, recommended/balanced, bet
 
 ## random_fail
 
-Randomly fail a test, for devolpment/debug purposes.
+Randomly fail a test, for development/debug purposes.
 
 ## run_report
 
