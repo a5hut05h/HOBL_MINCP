@@ -589,7 +589,7 @@ class ProductivityPrep(core.app_scenario.Scenario):
                 logging.info("Account is added window is present")
                 open_windows += 1
                 self.desktop.find_element_by_name("Done").click()
-                time.sleep(10) # Wait for outlook to fully launch
+                time.sleep(20) # Wait for outlook to fully launch
 
             # Check for copilot popup
             try:
@@ -709,13 +709,18 @@ class ProductivityPrep(core.app_scenario.Scenario):
             except:
                 pass
 
-            # See if Copilot popup appears
+            # Check for copilot popup
             try:
                 logging.info("Checking for Copilot popup")
                 self.desktop.find_element_by_xpath('//*[contains(@Name, "Copilot included")]')
-                self.desktop.find_element_by_name('Close').click()
-                logging.info("Clicked 'Close' on Copilot popup.")
-                time.sleep(3)
+                try:
+                    self.desktop.find_element_by_name('Got it').click()
+                    logging.info("Clicked 'Got it' on Copilot popup.")
+                    time.sleep(3)
+                except:
+                    self.desktop.find_element_by_name('Close').click()
+                    logging.info("Clicked 'Close' on Copilot popup.")
+                    time.sleep(3)
             except:
                 pass
             
@@ -1041,6 +1046,20 @@ class ProductivityPrep(core.app_scenario.Scenario):
         # Launch Word and open long doc
         self.word_driver = self.launchWord(self.desktop)
         time.sleep(3)
+        # Check for copilot popup
+        try:
+            logging.info("Checking for Copilot popup")
+            self.desktop.find_element_by_xpath('//*[contains(@Name, "Copilot included")]')
+            try:
+                self.desktop.find_element_by_name('Got it').click()
+                logging.info("Clicked 'Got it' on Copilot popup.")
+                time.sleep(3)
+            except:
+                self.desktop.find_element_by_name('Close').click()
+                logging.info("Clicked 'Close' on Copilot popup.")
+                time.sleep(3)
+        except:
+            pass
         self.recoverUnsavedDocuments(self.word_driver)
         time.sleep(3)
         self.word_driver = self.launchWord(self.desktop)
@@ -1086,6 +1105,21 @@ class ProductivityPrep(core.app_scenario.Scenario):
         self.excel_driver = self.launchExcel(self.desktop)
         time.sleep(8)
 
+        # Check for copilot popup
+        try:
+            logging.info("Checking for Copilot popup")
+            self.desktop.find_element_by_xpath('//*[contains(@Name, "Copilot included")]')
+            try:
+                self.desktop.find_element_by_name('Got it').click()
+                logging.info("Clicked 'Got it' on Copilot popup.")
+                time.sleep(3)
+            except:
+                self.desktop.find_element_by_name('Close').click()
+                logging.info("Clicked 'Close' on Copilot popup.")
+                time.sleep(3)
+        except:
+            pass
+
         try:
             logging.info("Checking for Privacy Settings Applied")
             win = self.desktop.find_element_by_name('Privacy Settings Applied')
@@ -1097,7 +1131,7 @@ class ProductivityPrep(core.app_scenario.Scenario):
         self.recoverUnsavedDocuments(self.excel_driver)
         time.sleep(3)
         self.excel_driver = self.launchExcel(self.desktop)
-
+        
         try:
             # Open Excel doc
             try:
@@ -1149,9 +1183,38 @@ class ProductivityPrep(core.app_scenario.Scenario):
         # Launch PowerPoint
         self.ppt_driver = self.launchPowerPoint(self.desktop)
         time.sleep(3)
+        # Check for copilot popup
+        try:
+            logging.info("Checking for Copilot popup")
+            self.desktop.find_element_by_xpath('//*[contains(@Name, "Copilot included")]')
+            try:
+                self.desktop.find_element_by_name('Got it').click()
+                logging.info("Clicked 'Got it' on Copilot popup.")
+                time.sleep(3)
+            except:
+                self.desktop.find_element_by_name('Close').click()
+                logging.info("Clicked 'Close' on Copilot popup.")
+                time.sleep(3)
+        except:
+            pass
         self.recoverUnsavedDocuments(self.ppt_driver)
         time.sleep(3)
         self.ppt_driver = self.launchPowerPoint(self.desktop)
+
+        # # Check for copilot popup
+        # try:
+        #     logging.info("Checking for Copilot popup")
+        #     self.desktop.find_element_by_xpath('//*[contains(@Name, "Copilot included")]')
+        #     try:
+        #         self.desktop.find_element_by_name('Got it').click()
+        #         logging.info("Clicked 'Got it' on Copilot popup.")
+        #         time.sleep(3)
+        #     except:
+        #         self.desktop.find_element_by_name('Close').click()
+        #         logging.info("Clicked 'Close' on Copilot popup.")
+        #         time.sleep(3)
+        # except:
+        #     pass
 
         try:
             # Open PowerPoint doc
@@ -1227,6 +1290,9 @@ class ProductivityPrep(core.app_scenario.Scenario):
                 except:
                     pass
                 self.word_driver.find_element_by_name("Ribbon").find_element_by_name("Close").click()
+                time.sleep(2)
+                #insert key stroke "n" to close the document without saving
+                ActionChains(self.word_driver).send_keys("n").perform()
         except:
             logging.error("Unable to close Word.")
             pass
@@ -1371,6 +1437,21 @@ class ProductivityPrep(core.app_scenario.Scenario):
         time.sleep(1)
         app_driver.find_element_by_xpath('//*[contains(@Name, "Blank")]').click()
         time.sleep(1)
+        # Check for copilot popup
+        try:
+            logging.info("Checking for Copilot popup")
+            WebDriverWait(self.desktop, 10).until(EC.presence_of_element_located((By.XPATH,'//*[contains(@Name, "Copilot included")]')))
+
+            try:
+                self.desktop.find_element_by_name('Got it').click()
+                logging.info("Clicked 'Got it' on Copilot popup.")
+                time.sleep(3)
+            except:
+                self.desktop.find_element_by_name('Close').click()
+                logging.info("Clicked 'Close' on Copilot popup.")
+                time.sleep(3)
+        except:
+            pass
         app_driver.find_element_by_name("File Tab").click()
         time.sleep(1)
         app_driver.find_element_by_name("Info").click()
