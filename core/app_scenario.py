@@ -523,8 +523,9 @@ class Scenario(unittest.TestCase):
                 logging.warning(f"Failed to read hobl_version.txt: {e}")
 
             override_dict = {}
-            override_dict["Hardware Version"] = Params.get('global', 'hardware_version', log = False)
-            # override_dict["Accessories"] = Params.get('global', 'accessories', log = False)
+            override_dict["Hardware Version"] = Params.get('global', 'hardware_version', log = False).upper()
+            override_dict["Screen Size (in)"] = Params.get('global', 'screen_size', log = False)
+            override_dict["Accessories"] = Params.get('global', 'accessories', log = False)
             override_dict['HOBL Version'] = hobl_ver.strip()
             override_dict['Study Type'] = Params.get('global', 'study_type', log = False)
             override_dict['Product'] = Params.get('global', 'product', log = False)
