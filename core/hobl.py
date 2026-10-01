@@ -300,7 +300,6 @@ class StreamHandlerWrapper(logging.StreamHandler):
         if record.levelno == logging.ERROR and not getattr(record, "is_summary", False):
             if record.message not in type(self).error_list:
                 type(self).error_list.append(record.message)
-                print("Found error message: " + record.message)
 
 
 def open_log(log=None):
@@ -334,9 +333,11 @@ def open_log(log=None):
 def close_log():
     global root
     if StreamHandlerWrapper.error_list:
+        logging.error("##################################################################", extra={"is_summary": True})
         logging.error("Log error summary:", extra={"is_summary": True})
         for error_message in list(StreamHandlerWrapper.error_list):
             logging.error("  " + error_message, extra={"is_summary": True})
+        logging.error("##################################################################", extra={"is_summary": True})
     handlers = root.handlers[:]
     for handler in handlers:
         handler.close()
