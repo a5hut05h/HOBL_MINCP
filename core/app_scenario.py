@@ -281,11 +281,8 @@ class Scenario(unittest.TestCase):
                 if dut_version != host_version:
                     logging.warning(f"DUT Setup version {dut_version} does not match expected version {host_version}. It is recommended to run the dut_setup scenario to update the DUT to the right version.")
 
-            # Load InputInject plugin to SimpleRemote
-            if self.platform.lower() == 'macos':
-                result = rpc.plugin_load(self.dut_ip, self.rpc_port, "InputInject", "InputInject.Application", "/Users/Shared/hobl_bin/InputInject/InputInject.dll")
-            else:
-                result = rpc.plugin_load(self.dut_ip, self.rpc_port, "InputInject", "InputInject.Application", "C:\\hobl_bin\\InputInject\\InputInject.dll")
+            # Load plugins to SimpleRemote
+            self.load_plugins()
 
             if Params.get('global', 'local_execution') == '0':
                 # Create and/or delete contents of hobl_data
@@ -376,6 +373,13 @@ class Scenario(unittest.TestCase):
         self.trigger_script = Params.get('global', 'trigger_script')
         self.rundown_mode = Params.get('global', 'rundown_mode')
         self.poll_rate = "360" # 6 minutes, gives us battery life hours in 0.1 increments.
+
+    def load_plugins(self):
+        if self.platform.lower() == 'macos':
+            rpc.plugin_load(self.dut_ip, self.rpc_port, "InputInject", "InputInject.Application", "/Users/Shared/hobl_bin/InputInject/InputInject.dll")
+        else:
+            rpc.plugin_load(self.dut_ip, self.rpc_port, "InputInject", "InputInject.Application", "C:\\hobl_bin\\InputInject\\InputInject.dll")
+            rpc.plugin_load(self.dut_ip, self.rpc_port, "PowerManager", "PowerManager.Application", "C:\\hobl_bin\\PowerManager\\PowerManager.dll")
 
     def _getDutSetupVersionOfDut(self):
         if self.platform.lower() == 'windows':
@@ -520,8 +524,9 @@ class Scenario(unittest.TestCase):
                 logging.warning(f"Failed to read hobl_version.txt: {e}")
 
             override_dict = {}
-            override_dict["Hardware Version"] = Params.get('global', 'hardware_version', log = False)
-            # override_dict["Accessories"] = Params.get('global', 'accessories', log = False)
+            override_dict["Hardware Version"] = Params.get('global', 'hardware_version', log = False).upper()
+            override_dict["Screen Size (in)"] = Params.get('global', 'screen_size', log = False)
+            override_dict["Accessories"] = Params.get('global', 'accessories', log = False)
             override_dict['HOBL Version'] = hobl_ver.strip()
             override_dict['Study Type'] = Params.get('global', 'study_type', log = False)
             override_dict['Product'] = Params.get('global', 'product', log = False)
@@ -685,6 +690,8 @@ class Scenario(unittest.TestCase):
                         rpc.call_rpc(self.dut_ip, self.rpc_port,
                                      "GetVersion", [])
 
+                    # Load plugins since device may have rebooted or scenario forced is_alive to 0
+                    self.load_plugins()
                     self._screenshot(name="failedscreen.png")
                     if self.dashboard_url:
                         hobl_url = self.dashboard_url.split('/')[0] + "//" + self.dashboard_url.split('/')[2] + '/'
@@ -1173,6 +1180,15 @@ class Scenario(unittest.TestCase):
         # exit_code = p.returncode
         logging.info("Battery level: " + str(int(out)))
         return (int(out))
+
+    def power_manager_call(self, method, *args, **kwargs):
+        out = json.loads(rpc.plugin_call(self.dut_ip, self.rpc_port, "PowerManager", method, *args, **kwargs))
+
+        if "result" in out:
+            return out["result"]
+
+        if "error" in out:
+            raise Exception(f"PowerManager call {method} failed")
 
     def tearDown(self, callback_test_end=None, callback_data_ready=None):
         logging.info("Entered teardown")
@@ -4233,7 +4249,8 @@ class Scenario(unittest.TestCase):
             title = yt_entry["title"]
             dur = yt_entry["end"] - yt_entry["start"]
 
-            logging.debug(f"Checking YouTube playback log entry '{title}'.  Comparing expected duration {youtube_duration}s with actual duration {dur:.2f}s")
+            logging.debug(f"Checking YouTube playback log entry '{title}'. Comparing expected duration {youtube_duration}s with actual duration {dur:.2f}s")
+
             if not youtube_duration - 15 <= dur <= youtube_duration + 15:
                 err_str = f"Unexpected YouTube {title} playback duration {dur}"
                 logging.error(err_str)
