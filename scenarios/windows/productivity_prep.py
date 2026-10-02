@@ -1201,21 +1201,6 @@ class ProductivityPrep(core.app_scenario.Scenario):
         time.sleep(3)
         self.ppt_driver = self.launchPowerPoint(self.desktop)
 
-        # # Check for copilot popup
-        # try:
-        #     logging.info("Checking for Copilot popup")
-        #     self.desktop.find_element_by_xpath('//*[contains(@Name, "Copilot included")]')
-        #     try:
-        #         self.desktop.find_element_by_name('Got it').click()
-        #         logging.info("Clicked 'Got it' on Copilot popup.")
-        #         time.sleep(3)
-        #     except:
-        #         self.desktop.find_element_by_name('Close').click()
-        #         logging.info("Clicked 'Close' on Copilot popup.")
-        #         time.sleep(3)
-        # except:
-        #     pass
-
         try:
             # Open PowerPoint doc
             try:
