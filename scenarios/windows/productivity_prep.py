@@ -1290,9 +1290,6 @@ class ProductivityPrep(core.app_scenario.Scenario):
                 except:
                     pass
                 self.word_driver.find_element_by_name("Ribbon").find_element_by_name("Close").click()
-                time.sleep(2)
-                #insert key stroke "n" to close the document without saving
-                ActionChains(self.word_driver).send_keys("n").perform()
         except:
             logging.error("Unable to close Word.")
             pass
