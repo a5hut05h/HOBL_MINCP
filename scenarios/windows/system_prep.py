@@ -48,7 +48,10 @@ class SystemPrep(core.app_scenario.Scenario):
             self._status_window("Preparing device for automated testing.")
 
         if self.callback_calibrate:
-            self._callback(self.callback_calibrate)
+            output = self._host_call(self.callback_calibrate)
+            if "CALLBACK_TIMEOUT" in output:
+                logging.error("CALLBACK_TIMEOUT for " + self.callback_calibrate)
+                self.fail()           
 
         self._upload("utilities\\open_source\\system_prep.ps1", self.dut_exec_path)
         #logging.info("Initial Thread timeout - " + str(self.timeout / 60) + " min.")
