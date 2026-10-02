@@ -55,6 +55,7 @@ def main():
     share_password = Params.get('global', 'remote_share_password')
 
     if share_path != '':
+        call(["cmd.exe", f"/C net use /del z:"])
         call(["cmd.exe", f"/C net use z: {share_path} {share_password} /user:{share_username}"])
 
     call(["cmd.exe", "/C taskkill /F /T /IM remote.exe"], "RunWithResultAndExitCode")
