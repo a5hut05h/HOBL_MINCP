@@ -275,6 +275,7 @@ dashboard_scenario_id = params.get('global', 'dashboard_scenario_id')
 
 class StreamHandlerWrapper(logging.StreamHandler):
     is_error_seen = False
+    error_list = []
 
     def emit(self, record):
         super().emit(record)
@@ -296,6 +297,11 @@ class StreamHandlerWrapper(logging.StreamHandler):
                 )
 
             type(self).is_error_seen = True
+
+        # Skip records tagged as the end-of-run summary so they don't re-enter error_list.
+        if record.levelno == logging.ERROR and not getattr(record, "is_summary", False):
+            if record.message not in type(self).error_list:
+                type(self).error_list.append(record.message)
 
 
 def open_log(log=None):
@@ -328,6 +334,12 @@ def open_log(log=None):
 
 def close_log():
     global root
+    if StreamHandlerWrapper.error_list:
+        logging.error("##################################################################", extra={"is_summary": True})
+        logging.error("Log error summary:", extra={"is_summary": True})
+        for error_message in list(StreamHandlerWrapper.error_list):
+            logging.error("  " + error_message, extra={"is_summary": True})
+        logging.error("##################################################################", extra={"is_summary": True})
     handlers = root.handlers[:]
     for handler in handlers:
         handler.close()
