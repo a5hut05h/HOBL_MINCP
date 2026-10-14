@@ -40,11 +40,18 @@ class SystemPrep(core.app_scenario.Scenario):
         self.dut_architecture = Params.get('global', 'dut_architecture')
         self.final_reboot = Params.get(self.module, 'final_reboot')
         self.bpm_pcc_blm_disable = Params.get(self.module, 'bpm_pcc_blm_disable') == '1'
+        self.callback_calibrate = Params.get("global", 'callback_calibrate')
 
         if self.final_reboot == "1":
             self._status_window("Preparing device for automated testing.\nDevice will reboot when finished.")
         else:
             self._status_window("Preparing device for automated testing.")
+
+        if self.callback_calibrate:
+            output = self._host_call(self.callback_calibrate)
+            if "CALLBACK_TIMEOUT" in output:
+                logging.error("CALLBACK_TIMEOUT for " + self.callback_calibrate)
+                self.fail()           
 
         self._upload("utilities\\open_source\\system_prep.ps1", self.dut_exec_path)
         #logging.info("Initial Thread timeout - " + str(self.timeout / 60) + " min.")
