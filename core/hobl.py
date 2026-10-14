@@ -55,8 +55,9 @@ if "-d" not in sys.argv and "-dv" not in sys.argv:
 params = Params
 
 # Set default global parameters
-params.setDefault('global', 'hardware_version', '', desc="Optional information to pass to reporting.")
-params.setDefault('global', 'screen_size', '', desc="Optional information to pass to reporting.", valOptions=["10", "11", "12", "13", "14", "15", "16", "17"])
+params.setDefault('global', 'hardware_version', '', desc="Optional information to pass to reporting.  Will be converted to upper case.")
+params.setDefault('global', 'hardware_type', '', desc="Optional information to pass to reporting.")
+params.setDefault('global', 'screen_size', '', desc="Approximate screen size in inches, measured diagonally.Optional information to pass to reporting.", valOptions=["10", "11", "12", "13", "14", "15", "16", "17"])
 params.setDefault('global', 'accessories', '', desc="Optional information to pass to reporting.")
 params.setDefault('global', 'result_dir', 'c:\\hobl_results', desc="Base file path for storing test results.")
 params.setDefault('global', 'goals', '', desc="Path to a CSV file that has goals for each scenario to compare results with.")

@@ -525,6 +525,7 @@ class Scenario(unittest.TestCase):
 
             override_dict = {}
             override_dict["Hardware Version"] = Params.get('global', 'hardware_version', log = False).upper()
+            override_dict["Hardware Type"] = Params.get('global', 'hardware_type', log = False)
             override_dict["Screen Size (in)"] = Params.get('global', 'screen_size', log = False)
             override_dict["Accessories"] = Params.get('global', 'accessories', log = False)
             override_dict['HOBL Version'] = hobl_ver.strip()
