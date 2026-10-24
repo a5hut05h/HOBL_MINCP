@@ -65,7 +65,7 @@ def run(scenario):
                 scenario._sleep_by(period)
                 continue
             if len(result) == 0:
-                logging.warning("Participant list is empty")
+                logging.debug("Participant list is empty")
                 for bot in scenario.bot_names:
                     result = get_participant_list(scenario, scenario.bot_uris[scenario.bot_names.index(bot)])
                     if len(result) > 0:
@@ -77,14 +77,18 @@ def run(scenario):
             
             # get the missing bots
             missing = [bot for bot in scenario.bot_names if bot not in result]
-            logging.warning(f"Bots missing from meeting: {missing}")
+            logging.debug(f"Bots missing from meeting: {missing}")
 
             logging.debug(f"Number of participants in meeting: {len(result)}")
 
             if len(result) >= (len(scenario.bot_names) + 1):  # +1 for the DUT
-                logging.warning("Correct or more participants than expected. Unable to determine missing bot, possible bot misconfiguration.")
-                logging.warning(f"Expected bots: {scenario.bot_names}, Actual participants: {result}")
-                logging.warning("Skipping re-addition of missing bots.")
+                logging.info("Correct or more participants than expected. Unable to determine missing bot, possible bot misconfiguration.")
+                logging.info(f"Expected bots: {scenario.bot_names}, Actual participants: {result}")
+                logging.info("Skipping re-addition of missing bots.")
+                # Reset Sleep timer
+                scenario._sleep_to_now()
+                # sleep for period
+                scenario._sleep_by(period)
                 continue
 
             # Re-Add the missing bots
@@ -125,6 +129,7 @@ def get_participant_list(scenario, uri):
 
             # Good Status return
             if r.status_code == 200:
+                logging.info(f"Participant list: {r.content}")
                 return json.loads(r.content)
 
             elif r.status_code == 401:
