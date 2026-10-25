@@ -234,7 +234,9 @@ def add_bot(scenario):
             logging.info(f"Updated bot URI for {bot_name}: {new_uris[j]}")
 
     scenario.bot_names = json.dumps(bot_names)
+    Params.setParam("teams", "bot_names", scenario.bot_names)
     scenario.bot_uris = json.dumps(bot_uris)
+    Params.setParam("teams", "bot_uris", scenario.bot_uris)
 
 
 def check_bot(scenario):
