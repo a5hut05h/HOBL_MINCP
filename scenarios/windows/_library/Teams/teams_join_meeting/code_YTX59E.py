@@ -22,7 +22,7 @@ def run(scenario):
     scenario.bot_uris = Params.get("teams", "bot_uris")
     scenario.bot_names = Params.get("teams", "bot_names")
     scenario.meeting_url = Params.get("teams", "meeting_url")
-    scenario.meeting_time = Params.get("teams", "meeting_time")
+    # Don't retrieve meeting_time from Params, as it is modified within the scenario object in the create meeting code.
 
     if scenario.bots_send_video == "1":
         logging.info("Checking if main bot is sending video.")
