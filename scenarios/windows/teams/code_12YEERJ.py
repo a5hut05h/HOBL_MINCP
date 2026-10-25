@@ -13,13 +13,13 @@ def run(scenario):
     scenario.bots_send_video = Params.get("teams", 'bots_send_video')
     scenario.bots_send_audio = Params.get("teams", 'bots_send_audio')
     scenario.bots_share_screen = Params.get("teams", 'bots_share_screen')
-    scenario.meeting_time = Params.get("teams", 'meeting_time')
     scenario.meeting_url = Params.get("teams", 'meeting_url')
     scenario.access_key = Params.get("teams", 'access_key')
     scenario.bots_test_server = Params.get("teams", 'bots_test_server')
     scenario.join_meeting_uri = Params.get("teams", 'join_meeting_uri')
     scenario.bots_force_subscribe_resolution = Params.get("teams", 'bots_force_subscribe_resolution')
     scenario.bot_index = int(Params.get("teams", 'bot_index'))
+    # Don't retrieve meeting_time from Params, as it is modified within the scenario object in the create meeting code.
     
     scenario.bot_uris = Params.get("teams", "bot_uris")
     # decode the JSON string to a Python object
@@ -77,7 +77,7 @@ def run(scenario):
             
             # get the missing bots
             missing = [bot for bot in scenario.bot_names if bot not in result]
-            logging.debug(f"Bots missing from meeting: {missing}")
+            logging.error(f"Bots missing from meeting: {missing}")
 
             logging.debug(f"Number of participants in meeting: {len(result)}")
 
