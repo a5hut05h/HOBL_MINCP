@@ -13,7 +13,7 @@ from . import default_params
 #   Same app setup as idle_apps, but all windows are minimized before measurement starts
 #   and there are no foreground switches between apps during the workload.
 
-class IdleAppsDesktop(core.app_scenario.Scenario):
+class IdleAppsMin(core.app_scenario.Scenario):
     # Set default parameters:
     default_params.run()
 
@@ -21,7 +21,7 @@ class IdleAppsDesktop(core.app_scenario.Scenario):
 
     def setUp(self):
         # Load actions JSON.
-        actions_json = os.path.join(os.path.dirname(__file__), "idle_apps_desktop.json")
+        actions_json = os.path.join(os.path.dirname(__file__), "idle_apps_min.json")
         self.actions = self.load_action_json(actions_json)
 
         # Execute Setup actions, if they exist

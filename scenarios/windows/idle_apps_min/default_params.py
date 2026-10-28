@@ -11,7 +11,7 @@ import_run_user_only = partial(utilities.open_source.modules.import_run_user_onl
 def run():
     Params.setCalculated('scenario_section', __package__.split('.')[-1])
     run_user_only()
-    Params.setDefault('idle_apps_desktop', 'duration', '900', desc='Idle time in seconds with all apps minimized. Default is 900 seconds.', valOptions=[])
+    Params.setDefault('idle_apps_min', 'duration', '900', desc='Idle time in seconds with all apps minimized. Default is 900 seconds.', valOptions=[])
     Params.setParam(None, 'web_replay_run', '1')
     return
 
