@@ -36,18 +36,6 @@
         "delay": "0.0",
         "description": "",
         "enabled": true,
-        "id": "1N9VK08",
-        "multiple": true,
-        "name": "[minwin_workloads]",
-        "type": "Set User Default",
-        "val_options": "live_captions,copilot_query,semantic_search,click_todo,studioeffect_blur,productivity,snipping_tool,file_explorer",
-        "value": ""
-    },
-    {
-        "children": [],
-        "delay": "0.0",
-        "description": "",
-        "enabled": true,
         "id": "19K7X90",
         "name": "[web_replay_run]",
         "type": "Set",
@@ -123,7 +111,7 @@
                         "id": "19V8920",
                         "name": "[teams:number_of_bots]",
                         "type": "Set",
-                        "value": "9"
+                        "value": "4"
                     },
                     {
                         "children": [],
@@ -180,31 +168,13 @@
                 "type": "End If"
             },
             {
-                "children": [
-                    {
-                        "children": [],
-                        "delay": "0",
-                        "description": "",
-                        "enabled": true,
-                        "id": "1N9WNHN",
-                        "include_path": "scenarios\\windows\\_library\\productivity\\prod_setup",
-                        "type": "Include"
-                    }
-                ],
-                "description": "",
-                "enabled": true,
-                "eval_method": "in",
-                "id": "1N9WMX0",
-                "left_term": "productivity",
-                "right_term": "[minwin_workloads]",
-                "type": "If"
-            },
-            {
                 "children": [],
+                "delay": "0",
                 "description": "",
                 "enabled": true,
-                "id": "1N9WMX1",
-                "type": "End If"
+                "id": "1N9WNHN",
+                "include_path": "scenarios\\windows\\_library\\productivity\\prod_setup",
+                "type": "Include"
             }
         ],
         "description": "",
@@ -386,13 +356,31 @@
             {
                 "children": [
                     {
-                        "children": [],
-                        "delay": "0",
+                        "children": [
+                            {
+                                "children": [],
+                                "delay": "0",
+                                "description": "",
+                                "enabled": true,
+                                "id": "1X53MK1",
+                                "include_path": "scenarios\\windows\\_library\\Teams\\teams_collect_logs",
+                                "type": "Include"
+                            }
+                        ],
                         "description": "",
                         "enabled": true,
-                        "id": "19K8C22",
-                        "include_path": "scenarios\\windows\\_library\\Teams\\teams_teardown",
-                        "type": "Include"
+                        "eval_method": "==",
+                        "id": "1X53LYN",
+                        "left_term": "[teams:collect_MSTeams_Logs]",
+                        "right_term": "1",
+                        "type": "If"
+                    },
+                    {
+                        "children": [],
+                        "description": "",
+                        "enabled": true,
+                        "id": "1X53LYP",
+                        "type": "End If"
                     }
                 ],
                 "description": "",
