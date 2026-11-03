@@ -48,7 +48,8 @@ def extract_run(run_dir: Path) -> dict | None:
     # Parse all data sources
     device_config = parse_config(run_dir)
     power = parse_power_light(run_dir)
-    power_calc = calculate_power_metrics(power, dut_type=device_config.get("dut_type"))
+    power_calc = calculate_power_metrics(power, dut_type=device_config.get("dut_type"),
+                                         device_name=device_config.get("device_name"))
     record_time = calculate_record_time_min(run_dir)
     if record_time is not None:
         power_calc.append({"name": "record_time", "value": round(record_time, 6), "unit": "min"})
