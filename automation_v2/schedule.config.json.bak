@@ -23,34 +23,27 @@
                 },
     "jobs":  [
                  {
-                     "name":  "Cadmus25_hobl_1",
+                     "name":  "LEN-WCL-FUN-IDL-01_teams",
                      "enabled":  true,
-                     "profile":  "Cadmus25",
-                     "testplan":  "testplans/hobl_1.ps1",
-                     "runsPerDay":  3
+                     "profile":  "LEN-WCL-FUN-IDL-01",
+                     "testplan":  "testplans/teams.ps1",
+                     "runsPerDay":  2
                  },
                  {
-                     "name":  "Heracles_hobl",
+                     "name":  "ITL-PTL-PUE-IDL-02_teams_desktop",
                      "enabled":  true,
-                     "profile":  "Heracles",
-                     "testplan":  "testplans/hobl.ps1",
+                     "profile":  "ITL-PTL-PUE-IDL-02",
+                     "testplan":  "testplans/teams_desktop.ps1",
                      "runsPerDay":  1
-                 },
-                 {
-                     "name":  "Pantherlake07_hobl_1",
-                     "enabled":  true,
-                     "profile":  "Pantherlake07",
-                     "testplan":  "testplans/hobl_1.ps1",
-                     "runsPerDay":  3
                  }
              ],
     "email":  {
                   "enabled":  true,
-                  "to":  "y"
+                  "to":  "n"
               },
     "schedule":  {
                      "frequency":  "Daily",
-                     "time":  "10:45",
+                     "time":  "08:21",
                      "dayOfWeek":  "Thursday",
                      "dayOfMonth":  2
                  }

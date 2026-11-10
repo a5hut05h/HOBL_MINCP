@@ -23,21 +23,21 @@
                 },
     "jobs":  [
                  {
-                     "name":  "GPT-LEN-IDL-01_mincp_only",
+                     "name":  "QC-LAM-PURWA-IDL-03_hobl_win_gate_prep",
                      "enabled":  true,
-                     "profile":  "GPT-LEN-IDL-01",
-                     "testplan":  "testplans/mincp_only.ps1",
+                     "profile":  "QC-LAM-PURWA-IDL-03",
+                     "testplan":  "testplans/hobl_win_gate_prep.ps1",
                      "runsPerDay":  1
                  }
              ],
-    "schedule":  {
-                     "frequency":  "Daily",
-                     "time":  "16:34",
-                     "dayOfWeek":  "Thursday",
-                     "dayOfMonth":  2
-                 },
     "email":  {
                   "enabled":  true,
-                  "to":  "y"
-              }
+                  "to":  "n"
+              },
+    "schedule":  {
+                     "frequency":  "Daily",
+                     "time":  "11:20",
+                     "dayOfWeek":  "Thursday",
+                     "dayOfMonth":  2
+                 }
 }

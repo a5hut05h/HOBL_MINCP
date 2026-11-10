@@ -1,0 +1,38 @@
+{
+    "schemaVersion":  1,
+    "hoblwebBaseUrl":  "http://localhost",
+    "runtimeRoot":  "C:\\hobl_results\\automation_v3",
+    "overlap":  "skip",
+    "submit":  {
+                   "timeoutSec":  30,
+                   "maxAttempts":  5,
+                   "backoffSec":  [
+                                      5,
+                                      15,
+                                      60,
+                                      180,
+                                      600
+                                  ]
+               },
+    "monitor":  {
+                    "enabled":  true,
+                    "intervalSec":  45,
+                    "maxHours":  24
+                },
+    "report":  {
+                   "enabled":  true,
+                   "frequency":  "Daily"
+               },
+    "email":  {
+                  "enabled":  true,
+                  "to":  "wssi-fun-idc@microsoft.com",
+                  "taskName":  "HOBL Automation V3 - Report Email",
+                  "coordinatorTaskName":  "HOBL Automation V3 - Coordinator",
+                  "checkTime":  "18:58",
+                  "sendDate":  "2026-11-07",
+                  "sendTime":  "18:58"
+              },
+    "jobs":  [
+
+             ]
+}

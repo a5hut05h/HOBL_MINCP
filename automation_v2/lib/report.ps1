@@ -492,6 +492,24 @@ function ConvertTo-HoblHtmlText {
     return [System.Net.WebUtility]::HtmlEncode("$Text")
 }
 
+function ConvertTo-HoblStatusHtml {
+    param(
+        [Parameter(Mandatory)] $Row,
+        [Parameter(Mandatory)] [string] $Bucket
+    )
+    $status = ConvertTo-HoblHtmlText ([string]$Row.status)
+    $pill = "<span class=""pill $Bucket"">$status</span>"
+    if ($Bucket -ne 'Failed') { return $pill }
+
+    $job = if ($Row.job) { [string]$Row.job } else { [string]$Row.profile }
+    $recordedAt = ConvertTo-HoblDate ([string]$Row.recordedAt)
+    $recorded = if ($recordedAt) { $recordedAt.ToString('yyyy-MM-dd HH:mm:ss') } else { [string]$Row.recordedAt }
+    $detail = '[{0}] PlanID={1} row={2} status={3}; ScenarioID={4}; recorded={5}' -f `
+        $job, $Row.planId, $Row.scenario, $Row.status, $Row.scenarioId, $recorded
+    $detailHtml = ConvertTo-HoblHtmlText $detail
+    return "$pill<details class=""failure-detail""><summary>Details</summary><code>$detailHtml</code></details>"
+}
+
 # Read the period's ledger, optionally backfill from HOBLweb, then (re)write the
 # period HTML report. Returns the HTML path.
 function Write-HoblReportHtml {
@@ -539,8 +557,9 @@ function Write-HoblReportHtml {
     $counts = [ordered]@{ Passed = 0; Failed = 0; Terminated = 0; Other = 0 }
     # Per-DUT and per-scenario aggregation (also prep-excluded) for the
     # summary tables.
-    $byDut  = @{}
-    $byScen = @{}
+    $byDut         = @{}
+    $byScen        = @{}
+    $byDutScenario = @{}
     foreach ($r in $rows) {
         if ($r.isPrep) { continue }
         $bucket = Get-HoblStatusBucket -Status ([string]$r.status)
@@ -553,6 +572,12 @@ function Write-HoblReportHtml {
         $scn = [string]$r.scenario
         if (-not $byScen.ContainsKey($scn)) { $byScen[$scn] = [ordered]@{ Passed=0; Failed=0; Terminated=0; Other=0 } }
         $byScen[$scn][$bucket]++
+
+        if (-not $byDutScenario.ContainsKey($dut)) { $byDutScenario[$dut] = @{} }
+        if (-not $byDutScenario[$dut].ContainsKey($scn)) {
+            $byDutScenario[$dut][$scn] = [ordered]@{ Passed=0; Failed=0 }
+        }
+        if ($bucket -in @('Passed','Failed')) { $byDutScenario[$dut][$scn][$bucket]++ }
     }
     $totalWork = $counts.Passed + $counts.Failed + $counts.Terminated + $counts.Other
 
@@ -564,9 +589,12 @@ function Write-HoblReportHtml {
     $passRateText = if ($null -ne $passRate) { "$passRate%" } else { '&mdash;' }
     $rateClass    = if ($null -eq $passRate) { 'na' } elseif ($passRate -ge 90) { 'good' } elseif ($passRate -ge 70) { 'warn' } else { 'bad' }
 
-    # Sort: newest plan first, then run order within the plan.
+    # Group iterations by DUT and scenario, then show them in cycle/run order.
     $sorted = $rows | Sort-Object `
-        @{ Expression = { [int]$_.planId }; Descending = $true }, `
+        @{ Expression = { [string]$_.profile }; Descending = $false }, `
+        @{ Expression = { [string]$_.scenario }; Descending = $false }, `
+        @{ Expression = { [int]$_.cycle }; Descending = $false }, `
+        @{ Expression = { [int]$_.planId }; Descending = $false }, `
         @{ Expression = { [int]$_.scenarioId }; Descending = $false }
 
     # Rows needing attention: failed or terminated (prep excluded).
@@ -597,6 +625,7 @@ function Write-HoblReportHtml {
   body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: var(--ink); margin: 0; padding: 28px; background: #f6f8fa; }
   h1 { font-size: 22px; margin: 0 0 2px; }
   h2 { font-size: 15px; margin: 26px 0 10px; }
+  h3.dut-heading { font-size: 13px; margin: 18px 0 7px; }
   .sub { color: var(--other); font-size: 13px; margin-bottom: 20px; }
   .cards { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 8px; }
   .card { flex: 1 1 130px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; border-left-width: 6px; }
@@ -622,6 +651,10 @@ function Write-HoblReportHtml {
   .pill.Failed { background: #ffebe9; color: var(--fail); }
   .pill.Terminated { background: #fff1e5; color: var(--term); }
   .pill.Other { background: #eaeef2; color: var(--other); }
+  .failure-detail { display: inline-block; margin-left: 7px; vertical-align: middle; }
+  .failure-detail summary { color: #0969da; cursor: pointer; font-size: 11px; }
+  .failure-detail[open] { display: block; margin: 7px 0 0; }
+  .failure-detail code { display: block; color: var(--other); font-size: 11px; font-weight: 400; white-space: nowrap; }
   .mono { font-variant-numeric: tabular-nums; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   @media (max-width: 820px) { .grid2 { grid-template-columns: 1fr; } }
@@ -658,30 +691,6 @@ function Write-HoblReportHtml {
     if ($sorted.Count -eq 0) {
         [void]$sb.AppendLine('<div class="empty">No scenario results recorded for this period yet.</div>')
     } else {
-        # ---- Needs attention ----
-        [void]$sb.AppendLine('<h2>Needs attention</h2>')
-        if ($problems.Count -eq 0) {
-            [void]$sb.AppendLine('<div class="ok-banner">No failures or terminations recorded this period.</div>')
-        } else {
-            [void]$sb.AppendLine('<table><thead><tr>')
-            foreach ($h in @('Scenario','DUT / Profile','PlanID','Cycle','Started','Status')) { [void]$sb.AppendLine("<th>$h</th>") }
-            [void]$sb.AppendLine('</tr></thead><tbody>')
-            foreach ($r in $problems) {
-                $bucket = Get-HoblStatusBucket -Status ([string]$r.status)
-                $scen   = ConvertTo-HoblHtmlText ([string]$r.scenario)
-                $prof   = ConvertTo-HoblHtmlText ([string]$r.profile)
-                $planId = ConvertTo-HoblHtmlText ([string]$r.planId)
-                $cycle  = if ([int]$r.cycleTotal -gt 0) { "$([int]$r.cycle)/$([int]$r.cycleTotal)" } else { '' }
-                $st     = ConvertTo-HoblDate ([string]$r.startTime)
-                $started = if ($st) { $st.ToString('MM-dd HH:mm:ss') } else { '' }
-                $statusText = ConvertTo-HoblHtmlText ([string]$r.status)
-                [void]$sb.AppendLine('<tr>')
-                [void]$sb.AppendLine("<td>$scen</td><td>$prof</td><td class=""mono"">$planId</td><td class=""mono"">$cycle</td><td class=""mono"">$started</td><td><span class=""pill $bucket"">$statusText</span></td>")
-                [void]$sb.AppendLine('</tr>')
-            }
-            [void]$sb.AppendLine('</tbody></table>')
-        }
-
         # ---- By DUT / By scenario summaries ----
         [void]$sb.AppendLine('<div class="grid2">')
 
@@ -714,6 +723,20 @@ function Write-HoblReportHtml {
         [void]$sb.AppendLine('</tbody></table></div>')
         [void]$sb.AppendLine('</div>')
 
+        # ---- Iteration counts by DUT and scenario ----
+        [void]$sb.AppendLine('<h2>Iterations by DUT and scenario</h2>')
+        foreach ($dutName in @($byDutScenario.Keys | Sort-Object)) {
+            $dutText = ConvertTo-HoblHtmlText ([string]$dutName)
+            [void]$sb.AppendLine("<h3 class=""dut-heading"">$dutText</h3>")
+            [void]$sb.AppendLine('<table><thead><tr><th>Scenario</th><th>Passed</th><th>Failed</th></tr></thead><tbody>')
+            foreach ($scenarioName in @($byDutScenario[$dutName].Keys | Sort-Object)) {
+                $scenarioText = ConvertTo-HoblHtmlText ([string]$scenarioName)
+                $iterationCounts = $byDutScenario[$dutName][$scenarioName]
+                [void]$sb.AppendLine("<tr><td>$scenarioText</td><td class=""mono"">$($iterationCounts.Passed)</td><td class=""mono"">$($iterationCounts.Failed)</td></tr>")
+            }
+            [void]$sb.AppendLine('</tbody></table>')
+        }
+
         # ---- All scenarios (filterable + sortable) ----
         [void]$sb.AppendLine('<h2>All scenarios</h2>')
 
@@ -732,7 +755,7 @@ function Write-HoblReportHtml {
         [void]$sb.AppendLine('</div>')
 
         [void]$sb.AppendLine('<table id="main" class="sortable"><thead><tr>')
-        [void]$sb.AppendLine('<th data-type="text">Scenario</th><th data-type="text">DUT / Profile</th><th data-type="num">PlanID</th><th data-type="num">Cycle</th><th data-type="num">Started</th><th data-type="text">Status</th>')
+        [void]$sb.AppendLine('<th data-type="text">DUT / Profile</th><th data-type="text">Scenario</th><th data-type="num">PlanID</th><th data-type="num">Cycle</th><th data-type="num">Started</th><th data-type="text">Status</th>')
         [void]$sb.AppendLine('</tr></thead><tbody>')
         foreach ($r in $sorted) {
             $isPrep = [bool]$r.isPrep
@@ -745,19 +768,43 @@ function Write-HoblReportHtml {
             $st     = ConvertTo-HoblDate ([string]$r.startTime)
             $started   = if ($st) { $st.ToString('MM-dd HH:mm:ss') } else { '' }
             $startSort = if ($st) { $st.ToString('yyyyMMddHHmmss') } else { '0' }
-            $statusText = ConvertTo-HoblHtmlText ([string]$r.status)
+            $statusHtml = ConvertTo-HoblStatusHtml -Row $r -Bucket $bucket
             $rowClass   = if ($isPrep) { 'prep' } else { '' }
             $prepAttr   = if ($isPrep) { '1' } else { '0' }
             [void]$sb.AppendLine("<tr class=""$rowClass"" data-status=""$bucket"" data-dut=""$prof"" data-scenario=""$scen"" data-prep=""$prepAttr"">")
-            [void]$sb.AppendLine("<td>$scen</td>")
             [void]$sb.AppendLine("<td>$prof</td>")
+            [void]$sb.AppendLine("<td>$scen</td>")
             [void]$sb.AppendLine("<td class=""mono"">$planId</td>")
             [void]$sb.AppendLine("<td class=""mono"" data-sort=""$cycleN"">$cycle</td>")
             [void]$sb.AppendLine("<td class=""mono"" data-sort=""$startSort"">$started</td>")
-            [void]$sb.AppendLine("<td><span class=""pill $bucket"">$statusText</span></td>")
+            [void]$sb.AppendLine("<td>$statusHtml</td>")
             [void]$sb.AppendLine('</tr>')
         }
         [void]$sb.AppendLine('</tbody></table>')
+
+        # ---- Needs attention ----
+        [void]$sb.AppendLine('<h2>Needs attention</h2>')
+        if ($problems.Count -eq 0) {
+            [void]$sb.AppendLine('<div class="ok-banner">No failures or terminations recorded this period.</div>')
+        } else {
+            [void]$sb.AppendLine('<table><thead><tr>')
+            foreach ($h in @('Scenario','DUT / Profile','PlanID','Cycle','Started','Status')) { [void]$sb.AppendLine("<th>$h</th>") }
+            [void]$sb.AppendLine('</tr></thead><tbody>')
+            foreach ($r in $problems) {
+                $bucket = Get-HoblStatusBucket -Status ([string]$r.status)
+                $scen   = ConvertTo-HoblHtmlText ([string]$r.scenario)
+                $prof   = ConvertTo-HoblHtmlText ([string]$r.profile)
+                $planId = ConvertTo-HoblHtmlText ([string]$r.planId)
+                $cycle  = if ([int]$r.cycleTotal -gt 0) { "$([int]$r.cycle)/$([int]$r.cycleTotal)" } else { '' }
+                $st     = ConvertTo-HoblDate ([string]$r.startTime)
+                $started = if ($st) { $st.ToString('MM-dd HH:mm:ss') } else { '' }
+                $statusHtml = ConvertTo-HoblStatusHtml -Row $r -Bucket $bucket
+                [void]$sb.AppendLine('<tr>')
+                [void]$sb.AppendLine("<td>$scen</td><td>$prof</td><td class=""mono"">$planId</td><td class=""mono"">$cycle</td><td class=""mono"">$started</td><td>$statusHtml</td>")
+                [void]$sb.AppendLine('</tr>')
+            }
+            [void]$sb.AppendLine('</tbody></table>')
+        }
     }
 
     [void]$sb.AppendLine('<div class="foot">Prep rows are greyed and excluded from all counts. Click a column header to sort. Times are local to the host that generated this report.</div>')

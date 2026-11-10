@@ -80,7 +80,8 @@ foreach ($etl in $etlFiles) {
     # Convert each metadata property to a CSEUploader argument
     $meta.PSObject.Properties | ForEach-Object {
         if ($_.Name -notin @('workload','timestamp','MetricsSummary') -and $_.Name -notlike '*internal*') {
-            $arg += "/$($_.Name):`"$($_.Value)`" "
+            $value = if ($_.Name -in @('Iteration', 'IterationNumber')) { "1" } else { $_.Value }
+            $arg += "/$($_.Name):`"$value`" "
         }
     }
     $arg += "/ResultPath:`"$testDir`""
