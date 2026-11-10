@@ -1,6 +1,6 @@
 if ($ARGS[0] -eq $null) {return("Params .ini not supplied, please supply a params .ini parameter.")}
 .\hobl.cmd -p $ARGS[0] -s winbuilds_install global:run_type=Prep global:post_run_delay=0
-.\hobl.cmd -p $ARGS[0] -s teams_install global:attempts=2 global:run_type=Prep global:post_run_delay=0
+#.\hobl.cmd -p $ARGS[0] -s teams_install global:attempts=2 global:run_type=Prep global:post_run_delay=0
 .\hobl.cmd -p $ARGS[0] -s msa_prep global:attempts=2 global:run_type=Prep global:post_run_delay=0
 .\hobl.cmd -p $ARGS[0] -s system_prep global:run_type=Prep global:post_run_delay=0 daily_prep:run_idle_tasks=0
 .\hobl.cmd -p $ARGS[0] -s store_prep global:attempts=3 global:run_type=Prep global:post_run_delay=0
@@ -17,4 +17,4 @@ if ($ARGS[0] -eq $null) {return("Params .ini not supplied, please supply a param
 .\hobl.cmd -p $ARGS[0] -s cs_floor_prep global:attempts=2 global:run_type=Prep global:post_run_delay=0
 .\hobl.cmd -p $ARGS[0] -s config_check global:attempts=2 global:post_run_delay=0
 .\hobl.cmd -p $ARGS[0] -s version_report global:attempts=2 global:run_type=Prep global:post_run_delay=0
-.\hobl.cmd -p $ARGS[0] -s run_plans_if_preps_passed run_plans_if_preps_passed:plans_to_launch=hobl_win_gate.json run_plans_if_preps_passed:"abl_active cs_floor teams" global:run_type=Misc
+#.\hobl.cmd -p $ARGS[0] -s run_plans_if_preps_passed run_plans_if_preps_passed:plans_to_launch=hobl_win_gate.json run_plans_if_preps_passed:"abl_active cs_floor teams" global:run_type=Misc
