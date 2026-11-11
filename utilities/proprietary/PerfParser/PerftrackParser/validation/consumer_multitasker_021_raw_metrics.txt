@@ -1,0 +1,31 @@
+ScenarioInstanceID,Scenario Start Time,Scenario Name,PT_ID,Corresponding Input Inject Event,DurationMs,DurationSource
+236e500e-93cd-43ba-abed-4cee26f8b930,2026-07-28T06:40:56.9626818+05:30,Edge Startup Stable _Shell Click __ First Render NonEmptyPaint2_,PT_8998,BrowserLaunch,1840,ScenarioDurationMs
+PT_9412-2026-07-28T06:41:20.1822583+05:30,2026-07-28T06:41:20.1822583+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Reddit,362,Manifest:Duration
+PT_9471-2026-07-28T06:43:16.7245640+05:30,2026-07-28T06:43:16.7245640+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Instagram,45.482,Manifest:Duration
+PT_9412-2026-07-28T06:43:23.6576325+05:30,2026-07-28T06:43:23.6576325+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Instagram,163,Manifest:Duration
+PT_9471-2026-07-28T06:45:21.5770335+05:30,2026-07-28T06:45:21.5770335+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Amazon_got,35.942,Manifest:Duration
+PT_9412-2026-07-28T06:45:28.8790813+05:30,2026-07-28T06:45:28.8790813+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Amazon_got,523,Manifest:Duration
+PT_9471-2026-07-28T06:46:47.1274867+05:30,2026-07-28T06:46:47.1274867+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Amazon_vacuum,33.63,Manifest:Duration
+PT_9412-2026-07-28T06:46:52.8287991+05:30,2026-07-28T06:46:52.8287991+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Amazon_vacuum,163,Manifest:Duration
+f62264d6-682b-40e1-80bb-20debba5ce59,2026-07-28T06:48:13.9922016+05:30,Office_PPT_Boot v2,PT_8807,PowerPointLaunch,739,ScenarioDurationMs
+f36369f7-120a-452d-a4cd-2622c6535ad7,2026-07-28T06:50:21.7483201+05:30,Office_XL_Boot v2,PT_8806,ExcelLaunch,661,ScenarioDurationMs
+PT_9412-2026-07-28T06:53:10.4898480+05:30,2026-07-28T06:53:10.4898480+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Google_images_apollo,141,Manifest:Duration
+PT_9471-2026-07-28T06:54:10.4023827+05:30,2026-07-28T06:54:10.4023827+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Google_images_london,43.505,Manifest:Duration
+PT_9412-2026-07-28T06:54:17.1408559+05:30,2026-07-28T06:54:17.1408559+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Google_images_london,136,Manifest:Duration
+PT_9412-2026-07-28T06:55:21.4310856+05:30,2026-07-28T06:55:21.4310856+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Youtube_tos,506,Manifest:Duration
+3180ae97-59bf-4b5b-877d-9bf6cf6d0db6,2026-07-28T06:57:17.4323153+05:30,Office_Word_Boot v2,PT_8805,WordLaunch,815,ScenarioDurationMs
+PT_9471-2026-07-28T06:59:49.3050606+05:30,2026-07-28T06:59:49.3050606+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Wikipedia,39.626,Manifest:Duration
+PT_9412-2026-07-28T06:59:56.2680831+05:30,2026-07-28T06:59:56.2680831+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Wikipedia,378,Manifest:Duration
+PT_9412-2026-07-28T07:00:43.1380800+05:30,2026-07-28T07:00:43.1380800+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Youtube_nasa,390,Manifest:Duration
+80094bb3-f4f9-42f1-9655-dd09a27c3ee3,2026-07-28T07:02:46.2986586+05:30,_FE Xaml Home_ File Explorer Launch to XAML Home,PT_9475,FileExplorerLaunch,739,ScenarioDurationMs
+PT_9471-2026-07-28T07:02:54.6733165+05:30,2026-07-28T07:02:54.6733165+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Google_search_belgium,37.343,Manifest:Duration
+PT_9412-2026-07-28T07:03:00.2895309+05:30,2026-07-28T07:03:00.2895309+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Google_search_belgium,92,Manifest:Duration
+PT_9471-2026-07-28T07:04:00.1914327+05:30,2026-07-28T07:04:00.1914327+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,The_verge,29.861,Manifest:Duration
+PT_9412-2026-07-28T07:04:07.5212891+05:30,2026-07-28T07:04:07.5212891+05:30,Edge Navigation To First Paint _Stable_,PT_9412,The_verge,316,Manifest:Duration
+PT_9412-2026-07-28T07:06:09.3560871+05:30,2026-07-28T07:06:09.3560871+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Google_search_super_bowl,222,Manifest:Duration
+2f8c38cf-1aa4-4e5a-8803-db7cf49c5560,2026-07-28T07:07:09.0602838+05:30,_TIP_ Start Launch,PT_9197,StartLaunch,48,Manifest:durationMs
+cd03e3be-e9fb-458f-a6bf-4723b29bdd20,2026-07-28T07:07:09.0418502+05:30,_TIP_ Search Full Activation,PT_9232,StartLaunch,26,Manifest:durationMs
+2f4c278f-0801-4c46-a70a-c42a90d7e150,2026-07-28T07:07:21.4586217+05:30,Snipping Tool Overlay Launch Performance,PT_9971,SnippingToolLaunch,443,ScenarioDurationMs
+7ec38bf5-f8fe-4e82-acf3-439dd070f839,2026-07-28T07:07:30.2594461+05:30,Office_Outlook_Boot v2,PT_8804,OutlookLaunch,2680,ScenarioDurationMs
+PT_6352-2026-07-28T07:07:42.1782343+05:30,2026-07-28T07:07:42.1782343+05:30,InputProcessDelay_PC,PT_6352,OutlookLaunch,109,Manifest:TimeSinceOldestInputMs
+PT_9412-2026-07-28T07:09:03.1478547+05:30,2026-07-28T07:09:03.1478547+05:30,Edge Navigation To First Paint _Stable_,PT_9412,WordLaunch,137,Manifest:Duration

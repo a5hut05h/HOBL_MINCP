@@ -1,0 +1,19 @@
+PT_ID,Metric Name,Duration
+8807,Office_PPT_Boot v2,627
+2647,File Picker launch _Desktop_,204
+8784,Office_PPT_FileOpen v3,1118
+8806,Office_XL_Boot v2,789
+9093,Edge Office SDX WebView Activation,372
+2647,File Picker launch _Desktop_,211
+8786,Office_XL_FileOpen v2,508
+8805,Office_Word_Boot v2,919
+2647,File Picker launch _Desktop_,201
+9244,File Explorer Folder Navigation Performance,67
+1809,Open Start Menu,52
+2266,Shell_Cortana_Start_SearchBox_Shown_PC_V2,52
+9475,_FE Xaml Home_ File Explorer Launch to XAML Home,5806
+9437,Navigation to XAML Home,683
+2430,Type_to_Search _TopResultRender_,534
+2647,File Picker launch _Desktop_,217
+9335,First tab launch in File Explorer,22153
+8804,Office_Outlook_Boot v2,1393

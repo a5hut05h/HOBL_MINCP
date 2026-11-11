@@ -1,0 +1,26 @@
+Scenario,Metric,Duration
+BrowserLaunch,Edge Startup Stable _Shell Click __ First Render ,3672
+BrowserLaunch,Edge Navigation To First Paint _Stable_,357
+BrowserLaunch,Edge MSN Tab Anylayout NewTab _Stable_,71
+BrowserLaunch,Edge Navigation To First Paint _Stable_,0
+Amazon_got,Edge Navigation To First Paint _Stable_,1491
+Amazon_got,Edge MSN Tab Anylayout NewTab _Stable_,53
+Amazon_vacuum,Edge Navigation To First Paint _Stable_,460
+PowerPointLaunch,Office_PPT_Boot v2,1376
+PowerPointLaunch,Office_XL_Boot v2,801
+Google_images_apollo,Edge Navigation To First Paint _Stable_,483
+Google_images_apollo,Edge MSN Tab Anylayout NewTab _Stable_,125
+Google_images_london,Edge Navigation To First Paint _Stable_,326
+Youtube_tos,Edge Navigation To First Paint _Stable_,676
+WordLaunch,Office_Word_Boot v2,1040
+WordLaunch,Edge MSN Tab Anylayout NewTab _Stable_,70
+WordLaunch,Edge Navigation To First Paint _Stable_,715
+WordLaunch,Edge Navigation To First Paint _Stable_,0
+Google_search_belgium,Edge Navigation To First Paint _Stable_,186
+Google_search_belgium,Edge MSN Tab Anylayout NewTab _Stable_,60
+The_verge,Edge Navigation To First Paint _Stable_,339
+Google_search_super_bowl,Edge Navigation To First Paint _Stable_,222
+SnippingToolLaunch,Snipping Tool Overlay Launch Performance,516
+StartMenuLaunch,Office_Outlook_Boot v2,1898
+ExcelLaunch,_FE Xaml Home_ File Explorer Launch to XAML Home,1370
+ExcelLaunch,Edge Navigation To First Paint _Stable_,141

@@ -1,0 +1,26 @@
+ScenarioInstanceID,Scenario Start Time,Scenario Name,PT_ID,Corresponding Input Inject Event,DurationMs,DurationSource
+ffd75e15-4763-485f-bd5d-e00f963a2493,2026-07-07T13:43:29.1697156+05:30,Edge Startup Stable _Shell Click __ First Render NonEmptyPaint2_,PT_8998,BrowserLaunch,2385,ScenarioDurationMs
+PT_9412-2026-07-07T13:43:52.6002810+05:30,2026-07-07T13:43:52.6002810+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Reddit,545,Manifest:Duration
+PT_9471-2026-07-07T13:45:48.1277376+05:30,2026-07-07T13:45:48.1277376+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Instagram,53.83,Manifest:Duration
+PT_9412-2026-07-07T13:45:54.1361777+05:30,2026-07-07T13:45:54.1361777+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Instagram,397,Manifest:Duration
+PT_9471-2026-07-07T13:47:52.9613100+05:30,2026-07-07T13:47:52.9613100+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Amazon_got,59.712,Manifest:Duration
+PT_9412-2026-07-07T13:48:00.1799053+05:30,2026-07-07T13:48:00.1799053+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Amazon_got,1704,Manifest:Duration
+PT_9471-2026-07-07T13:49:19.4762032+05:30,2026-07-07T13:49:19.4762032+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Amazon_vacuum,43.512,Manifest:Duration
+PT_9412-2026-07-07T13:49:24.5724929+05:30,2026-07-07T13:49:24.5724929+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Amazon_vacuum,97,Manifest:Duration
+PT_9412-2026-07-07T13:50:48.3810959+05:30,2026-07-07T13:50:48.3810959+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Google_images_apollo,669,Manifest:Duration
+PT_9471-2026-07-07T13:51:47.8901078+05:30,2026-07-07T13:51:47.8901078+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Google_images_london,64.389,Manifest:Duration
+PT_9412-2026-07-07T13:51:55.1545211+05:30,2026-07-07T13:51:55.1545211+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Google_images_london,270,Manifest:Duration
+PT_9412-2026-07-07T13:52:59.7614594+05:30,2026-07-07T13:52:59.7614594+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Youtube_tos,1458,Manifest:Duration
+PT_9471-2026-07-07T13:54:53.7234672+05:30,2026-07-07T13:54:53.7234672+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Wikipedia,96.154,Manifest:Duration
+PT_9412-2026-07-07T13:54:59.9366589+05:30,2026-07-07T13:54:59.9366589+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Wikipedia,789,Manifest:Duration
+PT_9412-2026-07-07T13:55:49.0462246+05:30,2026-07-07T13:55:49.0462246+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Youtube_nasa,943,Manifest:Duration
+PT_9471-2026-07-07T13:57:50.5870480+05:30,2026-07-07T13:57:50.5870480+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,Google_search_belgium,71.989,Manifest:Duration
+PT_9412-2026-07-07T13:57:55.5193891+05:30,2026-07-07T13:57:55.5193891+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Google_search_belgium,133,Manifest:Duration
+PT_9471-2026-07-07T13:58:55.0735131+05:30,2026-07-07T13:58:55.0735131+05:30,Edge MSN Tab Anylayout NewTab _Stable_,PT_9471,The_verge,57.293,Manifest:Duration
+PT_9412-2026-07-07T13:59:02.3763825+05:30,2026-07-07T13:59:02.3763825+05:30,Edge Navigation To First Paint _Stable_,PT_9412,The_verge,1280,Manifest:Duration
+PT_9412-2026-07-07T14:01:04.4078766+05:30,2026-07-07T14:01:04.4078766+05:30,Edge Navigation To First Paint _Stable_,PT_9412,Google_search_super_bowl,311,Manifest:Duration
+0ce678f3-7ccc-4d0e-99f6-5acbd31ac29f,2026-07-07T14:02:07.9376328+05:30,Office_Outlook_Boot v2,PT_8804,OutlookLaunch,3153,ScenarioDurationMs
+4d07f815-34d4-4c09-a22a-b8d5316779fe,2026-07-07T14:02:20.2752646+05:30,Office_XL_Boot v2,PT_8806,ExcelLaunch,1197,ScenarioDurationMs
+d2805752-5b12-42e2-9003-7a8c5cc3db18,2026-07-07T14:02:57.9632551+05:30,Office_Word_Boot v2,PT_8805,WordLaunch,982,ScenarioDurationMs
+05c1a413-e5c2-4fc2-b0c6-d2250dddd622,2026-07-07T14:03:35.7128933+05:30,Office_PPT_Boot v2,PT_8807,PowerPointLaunch,874,ScenarioDurationMs
+PT_9412-2026-07-07T14:05:06.0866360+05:30,2026-07-07T14:05:06.0866360+05:30,Edge Navigation To First Paint _Stable_,PT_9412,PowerPointLaunch,144,Manifest:Duration

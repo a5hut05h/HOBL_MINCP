@@ -1,0 +1,16 @@
+PT ID,Metric Name,Count,Duration
+PT_8807_Office_PPT_Boot v2_537c70,Office_PPT_Boot v2,1,627.0
+PT_2647_File Picker launch _Desktop__8d0176,File Picker launch _Desktop_,4,208.2
+PT_8784_Office_PPT_FileOpen v3_09543f,Office_PPT_FileOpen v3,1,1118.0
+PT_8806_Office_XL_Boot v2_ec0e46,Office_XL_Boot v2,1,789.0
+PT_9093_Edge Office SDX WebView Activation_a86b3e,Edge Office SDX WebView Activation,1,372.0
+PT_8786_Office_XL_FileOpen v2_7fbaf3,Office_XL_FileOpen v2,1,508.0
+PT_8805_Office_Word_Boot v2_83ab25,Office_Word_Boot v2,1,919.0
+PT_9244_File Explorer Folder Navigation Performance_574841,File Explorer Folder Navigation Performance,1,67.0
+PT_1809_Open Start Menu_9a700f,Open Start Menu,1,52.0
+PT_2266_Shell_Cortana_Start_SearchBox_Shown_PC_V2_a36fac,Shell_Cortana_Start_SearchBox_Shown_PC_V2,1,52.0
+PT_9475__FE Xaml Home_ File Explorer Launch to XAML Home_ed85c8,_FE Xaml Home_ File Explorer Launch to XAML Home,1,5806.0
+PT_9437_Navigation to XAML Home_15b4f9,Navigation to XAML Home,1,683.0
+PT_2430_Type_to_Search _TopResultRender__4afb5e,Type_to_Search _TopResultRender_,1,534.0
+PT_9335_First tab launch in File Explorer_cc3e18,First tab launch in File Explorer,1,22153.0
+PT_8804_Office_Outlook_Boot v2_b82120,Office_Outlook_Boot v2,1,1393.0
