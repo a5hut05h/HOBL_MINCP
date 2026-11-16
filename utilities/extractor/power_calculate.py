@@ -351,13 +351,135 @@ def _return_wifi_power(rails: dict, dut_type: Optional[str]) -> Optional[float]:
     logger.warning("Unknown dut_type %r; wifi_power not computed", dut_type)
     return None
 
-def calculate_power_metrics(power_metrics: list[dict], dut_type: Optional[str] = None) -> list[dict]:
+# ---------------------------------------------------------------------------
+# Platform corrections (kept in step with HOBL_Viewer's power_calculations.py)
+# ---------------------------------------------------------------------------
+# Rail names are matched on a normalised key (lowercase alphanumerics, trailing
+# "w" dropped), so capitalisation, punctuation and a unit suffix do not matter.
+
+_DISPLAY_BACKLIGHT_KEYS = ("pmemidisplaybklt", "pmemibkltin", "pmemidisplaybacklight")
+_DISPLAY_PANEL_KEYS = ("pmemidisplaypanel3p3v", "pmemi3p3vpanelin", "pmemidisplaypanel")
+_VSYS_CORE_KEYS = ("vsyscore", "pmemivsyscore")
+_VSYS_ROP_KEYS = ("vsysrop", "pmemivsysrop")
+_MINOS_SYSTEM_KEYS = ("pmemisystem", "pmemisys")
+_MINOS_SOC_RAIL_KEYS = (
+    ("pmicmt6363", "pmemipmicmt6363"),
+    ("pmicmt6373", "pmemipmicmt6373"),
+    ("cpup", "pmemicpup"),
+    ("cpue", "pmemicpue"),
+    ("gpum", "pmemigpum", "pmemigpumisc"),
+    ("gpuc", "pmemigpuc", "pmemigpucompute"),
+    ("core", "pmemicore", "pmemicpucore"),
+    ("dla", "dlanpu", "pmemidla", "pmemidlanpu", "pmeminpu"),
+)
+_MINOS_GROUPED_RAILS = (
+    ("memory_power", "pmemimemory"),
+    ("cpu_power", "pmemicpu"),
+    ("npu_power", "pmeminpu"),
+    ("gpu_power", "pmemigpu"),
+    ("storage_power", "pmemistorage"),
+    ("wifi_bt_power", "pmemiwifi"),
+    ("camera_power", "pmemicamera"),
+    ("keyboard_trackpad_power", "pmemikeyboard"),
+    ("sam_power", "pmemisam"),
+    ("touch_power", "pmemitouch"),
+)
+# Everything a Purwa ROP residual subtracts from system power. touch_power is
+# left out: outside Minos it is computed from the same trackpad rails as
+# keyboard_trackpad_power, so including both would subtract the trackpad twice.
+_PURWA_ROP_COMPONENTS = (
+    "soc_power", "npu_power", "memory_power", "storage_power", "wifi_bt_power",
+    "display_power", "audio_power", "camera_power", "sam_power",
+    "keyboard_trackpad_power",
+)
+
+
+def _metric_key(name: str) -> str:
+    key = re.sub(r"[^a-z0-9]", "", (name or "").lower())
+    return key[:-1] if key.endswith("w") else key
+
+
+def _platform_family(*identifiers: Optional[str]) -> Optional[str]:
+    """Pick the corrected-formula family from the device name or DUT type."""
+    keys = [_metric_key(str(value)) for value in identifiers if value]
+    if any("heracles" in k or "hesrot" in k or "herrot" in k for k in keys):
+        return "heracles"
+    if any("minos" in k or "diomin" in k for k in keys):
+        return "minos"
+    if any("purwa" in k for k in keys):
+        return "purwa"
+    return None
+
+
+def _first_rail(rails_by_key: dict, aliases) -> Optional[float]:
+    return next((rails_by_key[k] for k in aliases if k in rails_by_key), None)
+
+
+def _sum_rail_groups(rails_by_key: dict, *alias_groups) -> Optional[float]:
+    """Sum one rail per alias group; None unless every group is present."""
+    values = [_first_rail(rails_by_key, aliases) for aliases in alias_groups]
+    if any(value is None for value in values):
+        return None
+    return sum(values)
+
+
+def _sum_rail_prefix(rails_by_key: dict, prefix: str) -> Optional[float]:
+    values = [v for k, v in rails_by_key.items() if k.startswith(prefix)]
+    return sum(values) if values else None
+
+
+def _apply_platform_formulas(calcs: dict, rails: dict, family: Optional[str]) -> None:
+    """Overwrite `calcs` (name -> value or None) with the family's formulas.
+
+    A formula only replaces a value when all of its inputs are present, so a run
+    missing a rail keeps whatever the generic formulas produced.
+    """
+    if family is None:
+        return
+    rk = {_metric_key(name): value for name, value in rails.items()}
+
+    def put(name, value):
+        if value is not None:
+            calcs[name] = value
+
+    display = _sum_rail_groups(rk, _DISPLAY_BACKLIGHT_KEYS, _DISPLAY_PANEL_KEYS)
+
+    if family == "heracles":
+        put("memory_power", _sum_rail_prefix(rk, "pmemimemory"))
+        put("display_power", display)
+        core = _first_rail(rk, _VSYS_CORE_KEYS)
+        rop = _first_rail(rk, _VSYS_ROP_KEYS)
+        if core is not None and calcs.get("memory_power") is not None:
+            calcs["soc_power"] = core * 0.94 - calcs["memory_power"]
+        if core is not None and rop is not None:
+            calcs["system_power"] = core + rop
+
+    elif family == "minos":
+        put("system_power", _first_rail(rk, _MINOS_SYSTEM_KEYS))
+        soc = _sum_rail_groups(rk, *_MINOS_SOC_RAIL_KEYS)
+        put("soc_power", None if soc is None else 0.85 * soc)
+        put("display_power", _sum_rail_groups(rk, ("pmemidisplaypanel",), ("pmemidisplaybacklight",)))
+        for name, prefix in _MINOS_GROUPED_RAILS:
+            put(name, _sum_rail_prefix(rk, prefix))
+
+    elif family == "purwa":
+        put("display_power", display)
+        total = calcs.get("system_power")
+        parts = [calcs.get(name) for name in _PURWA_ROP_COMPONENTS]
+        if total is not None and all(part is not None for part in parts):
+            calcs["rop_power"] = total - sum(parts)
+
+
+def calculate_power_metrics(power_metrics: list[dict], dut_type: Optional[str] = None,
+                            device_name: Optional[str] = None) -> list[dict]:
     """Calculate aggregate power metrics from raw pm_emi_* rails.
 
     Formulas follow the "Real world consistency workloads" dashboard spec.
     Metrics whose source rails are not present in this run are omitted.
     `dut_type` selects the platform-specific formulas; if blank/unknown, those
-    metrics are omitted.
+    metrics are omitted. Heracles, Minos and Purwa runs (recognised from
+    `device_name` or `dut_type`) then get the corrected formulas HOBL_Viewer
+    applies, see _apply_platform_formulas.
 
     Returns list of {"name": str, "value": float, "unit": "W"}.
     """
@@ -376,6 +498,14 @@ def calculate_power_metrics(power_metrics: list[dict], dut_type: Optional[str] =
     # such as pm_emi_cpu_cluster_0.
     rails = {name: sum(values) / len(values) for name, values in rail_samples.items()}
     dut_type = _resolve_dut_type(rails, dut_type)
+    family = _platform_family(device_name, dut_type)
+    # A Heracles or Purwa unit always gets that platform's generic formulas, even
+    # when its DUT Type is blank, misspelled or names another platform.
+    if family in ("heracles", "purwa") and (dut_type or "").strip().lower() != family:
+        if dut_type:
+            logger.warning("DUT type %r conflicts with %s device %r; using %s formulas",
+                           dut_type, family, device_name, family)
+        dut_type = family
 
     def get(name):
         return rails.get(name)
@@ -409,8 +539,11 @@ def calculate_power_metrics(power_metrics: list[dict], dut_type: Optional[str] =
         ("multimedia_power",        sum_present("pm_emi_multimedia", "pm_emi_mm")),
     ]
 
+    calcs = dict(definitions)
+    _apply_platform_formulas(calcs, rails, family)
+
     result = []
-    for name, value in definitions:
+    for name, value in calcs.items():
         if value is not None:
             result.append({"name": name, "value": round(value, 6), "unit": "W"})
 
@@ -463,6 +596,9 @@ def calculate_battery_life_hr(run_dir: Path, system_power_w: Optional[float]) ->
 
     if design_wh is None:
         logger.warning("Battery Total Designed Capacity (Wh) row not found in %s", config_path)
+        return None
+    if design_wh <= 0:
+        logger.warning("Non-positive battery capacity %s Wh; battery_life not computed", design_wh)
         return None
 
     battery_life_hr = design_wh / system_power_w
