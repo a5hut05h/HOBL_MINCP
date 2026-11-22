@@ -21,6 +21,16 @@
     },
     {
         "children": [],
+        "description": "",
+        "enabled": true,
+        "eval_method": "==",
+        "id": "1Y6YXTY",
+        "left_term": "",
+        "right_term": "",
+        "type": "If"
+    },
+    {
+        "children": [],
         "delay": "2",
         "description": "Range (C2:C400001)",
         "enabled": true,
@@ -28,6 +38,20 @@
         "text": "C2:C400001\ue007",
         "type": "Type",
         "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "1Y6YY19",
+        "type": "Else"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "1Y6YXU0",
+        "type": "End If"
     },
     {
         "children": [],

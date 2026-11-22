@@ -98,6 +98,33 @@
     },
     {
         "children": [],
+        "description": "",
+        "enabled": true,
+        "eval_method": "==",
+        "id": "1Y8A69P",
+        "left_term": "",
+        "right_term": "",
+        "type": "If"
+    },
+    {
+        "children": [],
+        "description": "",
+        "enabled": true,
+        "id": "1Y8A69R",
+        "type": "End If"
+    },
+    {
+        "children": [],
+        "delay": "2",
+        "description": "",
+        "enabled": true,
+        "id": "1Y71RA9",
+        "text": "\ue009ab",
+        "type": "Type",
+        "typing_delay": "[typing_delay]"
+    },
+    {
+        "children": [],
         "delay": "0",
         "description": "",
         "enabled": true,
