@@ -1,5 +1,6 @@
 using Microsoft.Windows.EventTracing;
 using Microsoft.Windows.EventTracing.Events;
+using Microsoft.VisualBasic.FileIO;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -30,6 +31,8 @@ namespace PerfParser
         }
 
         private sealed record InputInjectInfo(TraceTimestamp Timestamp, string EventName, bool IsTransactionEnd);
+
+        private sealed record PtMapping(string DisplayName, bool DropInputInject);
 
         // A transaction. [StartMs, EndMs] is the declared interval, from a start tag to its
         // transactionend. RetentionEndMs is where PT retention resets — the next start tag —
@@ -1082,7 +1085,8 @@ namespace PerfParser
             List<PerfTrackEventInfo> allPerfEvents,
             List<ScenarioStartInfo> scenarioStarts,
             List<InputInjectInfo> inputInjectEvents,
-            HashSet<string> interestedPtIds)
+            HashSet<string> interestedPtIds,
+            IReadOnlyDictionary<string, PtMapping> ptMappings)
         {
             Dictionary<string, ScenarioStartInfo> scenarioByInstance = scenarioStarts
                 .ToDictionary(s => s.ScenarioInstanceId, StringComparer.OrdinalIgnoreCase);
@@ -1130,7 +1134,7 @@ namespace PerfParser
             List<PtRow> selectedRows = SelectBestPtRows(correlatedPts);
             List<PtRow> windowedRows = KeepFirstPerTransactionWindow(selectedRows, transactionWindows);
             List<PtRow> nonOverlappingRows = RemoveOverlappingRows(windowedRows);
-            List<OutputRow> outputRows = AssignCsvRowNames(nonOverlappingRows);
+            List<OutputRow> outputRows = AssignCsvRowNames(nonOverlappingRows, ptMappings);
 
             drops.Report(
                 allPerfEvents.Count,
@@ -1349,17 +1353,95 @@ namespace PerfParser
             return result;
         }
 
-        // Requirement: the first row for a key keeps the bare key; every later row with the same
-        // key gets an incrementing _1, _2 ... suffix.
-        private static List<OutputRow> AssignCsvRowNames(IEnumerable<PtRow> rows)
+        private static Dictionary<string, PtMapping> LoadPtMappings(string path)
+        {
+            Dictionary<string, PtMapping> mappings = new(StringComparer.OrdinalIgnoreCase);
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"[WARN] PT mapping file not found: {path}. Using scenario names.");
+                return mappings;
+            }
+
+            using TextFieldParser csv = new(path);
+            csv.SetDelimiters(",");
+            csv.HasFieldsEnclosedInQuotes = true;
+            string[]? header = csv.ReadFields();
+            if (header == null)
+            {
+                throw new InvalidDataException($"PT mapping file has no header: {path}");
+            }
+
+            int idColumn = Array.FindIndex(header, h => h.Equals("PT_ID", StringComparison.OrdinalIgnoreCase));
+            int nameColumn = Array.FindIndex(header, h => h.Equals("Display_Name", StringComparison.OrdinalIgnoreCase));
+            int dropInputInjectColumn = Array.FindIndex(header, h => h.Equals("Drop_InputInject", StringComparison.OrdinalIgnoreCase));
+            if (idColumn < 0 || nameColumn < 0)
+            {
+                throw new InvalidDataException($"PT mapping file must have PT_ID and Display_Name columns: {path}");
+            }
+
+            while (!csv.EndOfData)
+            {
+                long lineNumber = csv.LineNumber;
+                string[]? fields = csv.ReadFields();
+                if (fields == null || fields.Length != header.Length)
+                {
+                    throw new InvalidDataException($"Invalid PT mapping row at {path}:{lineNumber}.");
+                }
+
+                string id = fields[idColumn].Trim();
+                if (id.StartsWith("PT_", StringComparison.OrdinalIgnoreCase))
+                {
+                    id = id[3..];
+                }
+
+                string name = fields[nameColumn].Trim();
+                if (!int.TryParse(id, NumberStyles.None, CultureInfo.InvariantCulture, out int numericId)
+                    || numericId <= 0 || string.IsNullOrWhiteSpace(name))
+                {
+                    throw new InvalidDataException($"Invalid PT_ID or Display_Name at {path}:{lineNumber}.");
+                }
+
+                bool dropInputInject = false;
+                if (dropInputInjectColumn >= 0
+                    && !string.IsNullOrWhiteSpace(fields[dropInputInjectColumn])
+                    && !bool.TryParse(fields[dropInputInjectColumn].Trim(), out dropInputInject))
+                {
+                    throw new InvalidDataException(
+                        $"Invalid Drop_InputInject at {path}:{lineNumber}. Expected true or false.");
+                }
+
+                string ptId = $"PT_{numericId}";
+                if (!mappings.TryAdd(ptId, new PtMapping(name, dropInputInject)))
+                {
+                    throw new InvalidDataException($"Duplicate PT_ID '{ptId}' at {path}:{lineNumber}.");
+                }
+            }
+
+            return mappings;
+        }
+
+        // The first row keeps the bare key; repeats get an incrementing _1, _2 ... suffix.
+        private static List<OutputRow> AssignCsvRowNames(
+            IEnumerable<PtRow> rows,
+            IReadOnlyDictionary<string, PtMapping> ptMappings)
         {
             Dictionary<string, int> occurrencesByKey = new(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> warnedPtIds = new(StringComparer.OrdinalIgnoreCase);
 
             return rows
                 .OrderBy(row => row.IntervalStartMs)
                 .Select(row =>
                 {
-                    string key = BuildCsvRowKey(row);
+                    if (!ptMappings.TryGetValue(row.PtId, out PtMapping? mapping))
+                    {
+                        if (warnedPtIds.Add(row.PtId))
+                        {
+                            Console.Error.WriteLine(
+                                $"[WARN] No Display_Name mapping for {row.PtId}. Using scenario name '{row.ManifestScenarioName}'.");
+                        }
+                    }
+
+                    string key = BuildCsvRowKey(row, mapping?.DisplayName, mapping?.DropInputInject ?? false);
                     int occurrence = occurrencesByKey.GetValueOrDefault(key);
                     occurrencesByKey[key] = occurrence + 1;
 
@@ -1376,11 +1458,12 @@ namespace PerfParser
                 .ToList();
         }
 
-        private static string BuildCsvRowKey(PtRow row)
+        private static string BuildCsvRowKey(PtRow row, string? displayName = null, bool dropInputInject = false)
         {
-            return string.IsNullOrWhiteSpace(row.InputInjectEvent)
-                ? $"Perftrack_{row.ManifestScenarioName}"
-                : $"Perftrack_{row.InputInjectEvent}_{row.ManifestScenarioName}";
+            string name = displayName ?? row.ManifestScenarioName;
+            return dropInputInject || string.IsNullOrWhiteSpace(row.InputInjectEvent)
+                ? $"Perftrack_{name}"
+                : $"Perftrack_{row.InputInjectEvent}_{name}";
         }
 
         private static void WriteSummaryCsv(string path, List<OutputRow> rows)
@@ -1433,7 +1516,7 @@ namespace PerfParser
 
         private static int Main(string[] args)
         {
-            const string usage = "Usage: PerfParser <etlPath> <xmlManifestPath> [summaryCsvPath] [--raw-metrics [rawMetricsTxtPath]] [--verbose]";
+            const string usage = "Usage: PerfParser <etlPath> <xmlManifestPath> [summaryCsvPath] [--pt-mappings path] [--raw-metrics [rawMetricsTxtPath]] [--verbose]";
 
             // The raw metrics txt is opt-in via --raw-metrics, per user request, rather than
             // always being written alongside the summary CSV. Positional args are collected
@@ -1441,9 +1524,30 @@ namespace PerfParser
             List<string> positional = new();
             bool writeRawMetrics = false;
             string? rawMetricsArgPath = null;
+            string parserDirectory = AppContext.BaseDirectory;
+            // Single-file packages extract assemblies, but the mapping stays beside the executable.
+            if (Environment.ProcessPath is string processPath
+                && !Path.GetFileNameWithoutExtension(processPath).Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+            {
+                parserDirectory = Path.GetDirectoryName(processPath) ?? parserDirectory;
+            }
+            string ptMappingsPath = Path.Combine(parserDirectory, "PT_Mappings.csv");
 
             for (int i = 0; i < args.Length; i++)
             {
+                if (args[i].Equals("--pt-mappings", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (i + 1 >= args.Length || args[i + 1].StartsWith("--", StringComparison.Ordinal))
+                    {
+                        Console.Error.WriteLine("[ERROR] --pt-mappings requires a path.");
+                        Console.Error.WriteLine(usage);
+                        return 1;
+                    }
+
+                    ptMappingsPath = args[++i];
+                    continue;
+                }
+
                 if (args[i].Equals("--raw-metrics", StringComparison.OrdinalIgnoreCase))
                 {
                     writeRawMetrics = true;
@@ -1476,6 +1580,7 @@ namespace PerfParser
 
             try
             {
+                Dictionary<string, PtMapping> ptMappings = LoadPtMappings(ptMappingsPath);
                 List<PerftrackScenario> scenarios = ScenarioManifestHandler.LoadScenarios(xmlManifestPath);
                 ManifestIndex manifestIndex = BuildManifestIndex(scenarios);
 
@@ -1485,7 +1590,8 @@ namespace PerfParser
                     traceData.PerfTrackEvents,
                     traceData.ScenarioStarts,
                     traceData.InputInjectEvents,
-                    manifestIndex.InterestedPtIds);
+                    manifestIndex.InterestedPtIds,
+                    ptMappings);
 
                 WriteSummaryCsv(summaryCsvPath, outputRows);
                 Console.WriteLine($"Summary CSV written: {summaryCsvPath} ({outputRows.Count} rows)");

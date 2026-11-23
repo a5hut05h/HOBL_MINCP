@@ -43,10 +43,13 @@ Separate executables are required because
 architecture-specific `NativeOutputRedirector.dll` binaries. An AnyCPU package
 would not guarantee that the matching native dependency is loaded.
 
+`PT_Mappings.csv` is copied beside the parser in build and publish outputs.
+Deploy it alongside each executable (it is not embedded in the single-file package).
+
 ## Run
 
 ```powershell
-dotnet bin\Release\net8.0\PerfParser.dll <trace.etl> <manifest.xml> [summary.csv] [--raw-metrics [path]] [--verbose]
+dotnet bin\Release\net8.0\PerfParser.dll <trace.etl> <manifest.xml> [summary.csv] [--pt-mappings path] [--raw-metrics [path]] [--verbose]
 ```
 
 Example:
@@ -68,18 +71,43 @@ name. Any PerfTrack event whose `PT_ID` is absent from the manifest is dropped.
 The summary CSV has no header row. Each line is:
 
 ```
-Perftrack_<InputInjectEventName>_<PTScenarioName>,<DurationMs>
+Perftrack_<InputInjectEventName>_<Display_Name>,<DurationMs>
 ```
+
+`Display_Name` is looked up by `PT_ID` in `PT_Mappings.csv` beside the parser.
+Use `--pt-mappings <path>` to select a different mapping file. The CSV must have
+`PT_ID,Display_Name` columns; IDs can be numeric or prefixed with `PT_`.
+The optional `Drop_InputInject` column accepts `true` or `false` (case-insensitive).
+When `true`, the summary key is `Perftrack_<Display_Name>` regardless of the
+InputInject label. `false`, an empty cell, or an omitted column retains the label.
+For example:
+
+```csv
+PT_ID,Display_Name,Drop_InputInject
+8805,Word_Boot,true
+9412,Edge_PageLoad,false
+```
+
+These produce keys such as `Perftrack_Word_Boot` and
+`Perftrack_Instagram_Edge_PageLoad`. Repeated keys still receive numeric suffixes,
+including when dropping labels combines occurrences from different InputInject
+events. Raw metrics always preserve the original InputInject label.
+
+If the file or an emitted PT ID is missing, the parser falls back to the
+manifest's scenario name and writes a warning to stderr (once per missing PT ID).
+Invalid rows, missing columns, and duplicate IDs are errors. Names are used
+verbatim, including spelling in the mapping file, with CSV quoting as needed.
+Raw metrics retain the original scenario names. When there is no InputInject
+tag, the key is `Perftrack_<Display_Name>`.
 
 The first field is unique. When the same key occurs more than once the first
 occurrence is written bare and later ones gain a `_1`, `_2`, ... suffix.
 
 ## Diagnostics
 
-By default the parser writes nothing to stderr on a successful run. Automation
-that treats any stderr output as a failure therefore stays quiet. Only three
-things reach stderr: a usage error, a warning that no rows were produced, and an
-unhandled exception.
+With complete mappings the parser writes nothing to stderr on a successful run.
+Usage errors, mapping fallback warnings, warnings that no rows were produced,
+and unhandled exceptions always reach stderr.
 
 Pass `--verbose` to explain why individual rows were dropped:
 
@@ -102,7 +130,10 @@ change did not alter results:
 
 The script regenerates every output into a temporary directory and compares it
 against the committed expectations, reporting any drift. It exits non-zero on
-mismatch.
+mismatch. It also checks custom and legacy mappings, per-metric InputInject
+label removal, CSV escaping, duplicate-name suffixes,
+missing-file and missing-ID fallback warnings, invalid mappings, and unchanged
+raw metrics.
 
 ## Processing stages
 
@@ -118,7 +149,7 @@ mismatch.
 6. Drop overlapping events. Overlap is scoped per `PT_ID`, so a repeated
    emission of the same scenario is discarded while a genuinely nested
    sub-scenario is preserved.
-7. Assign unique output keys and write the CSV.
+7. Resolve mapped display names, assign unique output keys and write the CSV.
 
 ## Repository layout
 
@@ -127,9 +158,10 @@ mismatch.
 | `PerfParser.cs` | Trace parsing, correlation, filtering and output |
 | `ScenarioManifestHandler.cs` | Manifest and SCXML parsing |
 | `publish.ps1` | Builds framework-dependent `win-x64` and `win-arm64` packages |
-| `test\*.xml` | Scenario manifests |
+| `PT_Mappings.csv` | PT ID to summary display-name mappings |
+| `test\ConsumerMultitaskerPTs.xml` | Scenario manifest used by validation |
 | `validation\` | Traces and their expected outputs |
 
-`test\` also retains earlier test traces and reference outputs. The validation
-script uses the traces and expected outputs under `validation\`. Build and
+The validation script uses the manifest under `test\` and the traces and
+expected outputs under `validation\`. Build and
 publish outputs are ignored by version control.

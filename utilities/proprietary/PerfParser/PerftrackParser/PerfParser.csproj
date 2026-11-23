@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.EventTracing.Processing.All" Version="1.12.10" />
+    <None Update="PT_Mappings.csv" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
   </ItemGroup>
 
   <!-- Exclude the original reference-only EC_PerfParser project so its files/sub-project
